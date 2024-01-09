@@ -1,0 +1,30 @@
+{
+	"name": "Privacy Sandbox Dev",
+	"build": {
+		"dockerfile": "Dockerfile.devcontainer",
+		"context": ".."
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {
+			"version": "latest",
+			"enableNonRootDocker": "true",
+			"moby": "true"
+		},
+		"ghcr.io/devcontainers/features/common-utils:2": {},
+		"ghcr.io/devcontainers/features/node:1": {}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"eamodio.gitlens",
+				"GitHub.copilot",
+				"ms-python.black-formatter",
+				"ms-python.python",
+				"ms-vscode.cpptools-extension-pack"
+			]
+		},
+		"settings": {
+			"editor.defaultFormatter": "ms-python.black-formatter"
+		}
+	}
+}

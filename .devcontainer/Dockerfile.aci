@@ -1,0 +1,38 @@
+# Used for ACI based development
+# Does incremental builds of the latest version of code from the base image
+# Sets up SSH, UVM security context dir and then runs an SSH server
+
+FROM privacysandbox.azurecr.io/base:latest
+
+ARG CCF_REV="main"
+ARG KMS_REV="main"
+ARG BIDDING_AUCTION_SERVERS_REV="azure-support"
+ARG DATA_PLANE_SHARED_LIBRARIES_REV="azure-support"
+
+RUN LINES_TO_COMMENT=$(grep -n "Cannot verify virtual attestation report if node is SEV-SNP" CCF/include/ccf/pal/attestation.h | cut -f1 -d:) && \
+    sed -i "$((LINES_TO_COMMENT - 3)),$((LINES_TO_COMMENT + 1))s/\/\///" CCF/include/ccf/pal/attestation.h
+RUN (cd CCF && git fetch && git checkout $CCF_REV)
+RUN LINES_TO_COMMENT=$(grep -n "Cannot verify virtual attestation report if node is SEV-SNP" CCF/include/ccf/pal/attestation.h | cut -f1 -d:) && \
+    sed -i "$((LINES_TO_COMMENT - 3)),$((LINES_TO_COMMENT + 1))s/^/\/\//" CCF/include/ccf/pal/attestation.h
+
+RUN (cd Protected-Audiences && git fetch && git checkout $KMS_REV)
+RUN (cd bidding-auction-servers && git fetch && git checkout $BIDDING_AUCTION_SERVERS_REV)
+RUN (cd bidding-auction-servers/data-plane-shared-libraries && git fetch && git checkout $DATA_PLANE_SHARED_LIBRARIES_REV)
+
+COPY scripts/ ./scripts
+
+RUN make kms-build
+RUN make ba-build
+RUN make test-build
+
+# Dev in Confidential ACI
+ARG PUBLIC_KEY
+RUN apt install -y openssh-server
+RUN mkdir -p /root/.ssh && \
+    touch /root/.ssh/authorized_keys
+RUN echo $PUBLIC_KEY >> /root/.ssh/authorized_keys
+RUN sudo chmod 700 /root/.ssh && \
+    sudo chmod 600 /root/.ssh/authorized_keys
+RUN echo "StrictHostKeyChecking no" >> /root/.ssh/config
+
+CMD service ssh start && echo "export UVM_SECURITY_CONTEXT_DIR=$UVM_SECURITY_CONTEXT_DIR" >> /root/.bashrc && tail -f /dev/null
