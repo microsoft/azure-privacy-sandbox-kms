@@ -68,6 +68,6 @@ source .venv_ccf_sandbox/bin/activate
 make propose-add-key-release-policy
 
 # Generate a new key item
-curl ${KMS_URL}/app/refresh -X POST --cacert $service_cert --cert $signing_cert --key $signing_key -H "Content-Type: application/json" -i  -w '\n'
+curl ${network_url}/app/refresh -X POST --cacert $service_cert --cert $signing_cert --key $signing_key -H "Content-Type: application/json" -i  -w '\n'
 
 export WORKSPACE=$TMP_WORKSPACE

@@ -2,7 +2,7 @@ SHELL := /bin/bash
 CCF_NAME := "acceu-bingads-500dev10"
 PYTHON_VENV := .venv_ccf_sandbox
 CCF_WORKSPACE ?= .
-WORKSPACE := ${CCF_WORKSPACE}/workspace
+WORKSPACE ?= ${CCF_WORKSPACE}/workspace
 KMS_URL ?= https://127.0.0.1:8000
 KEYS_DIR ?= ${CCF_WORKSPACE}/workspace/sandbox_common
 
@@ -19,7 +19,7 @@ help: ## 💬 This help message :)
 	@grep -E '[a-zA-Z_-]+:.*?## .*$$' $(firstword $(MAKEFILE_LIST)) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-22s\033[0m %s\n", $$1, $$2}'
 
 build: ## 🔨 Build the Application
-	@echo -e "\e[34m$@\e[0m" || true; \
+	@echo -e "\e[34m$@\e[0m" || true; 
 	./scripts/set_python_env.sh
 	npm run build
 
@@ -30,7 +30,9 @@ start-host: build  ## 🏃 Start the CCF network using Sandbox.sh
 
 setup: ## Setup policies and generate a key
 	@echo -e "\e[34m$@\e[0m" || true
-	@./scripts/kms_create_key.sh --network-url "${KMS_URL}"  --certificate_dir "${KEYS_DIR}"
+	WORKSPACE=${CCF_WORKSPACE}/workspace; \
+	export WORKSPACE; \
+	./scripts/kms_create_key.sh --network-url "${KMS_URL}"  --certificate_dir "${KEYS_DIR}"
 		
 demo: build ## 🎬 Demo the KMS Application in the Sandbox
 	@echo -e "\e[34m$@\e[0m" || true
