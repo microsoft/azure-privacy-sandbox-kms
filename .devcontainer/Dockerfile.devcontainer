@@ -1,60 +1,22 @@
 # Base container image which is built nightly
 # Used as a starting point to make building other containers fast
 
-ARG BASE_IMAGE=ubuntu:20.04
+ARG BASE_IMAGE=5.0.0-dev10-virtual
 
 # ignore this hadolint error as BASE_IMAGE contains an image tag
 # hadolint ignore=DL3006
-FROM ${BASE_IMAGE} as libprofiler-builder
-ENV CC=clang \
-    CXX=clang
-ADD https://github.com/gperftools/gperftools/releases/download/gperftools-2.13/gperftools-2.13.tar.gz /build/gperftools.tar.gz
-ADD https://apt.llvm.org/llvm.sh /build/llvm.sh
-COPY .devcontainer/compile_libprofiler /scripts/
-RUN /scripts/compile_libprofiler
-
-FROM docker/buildx-bin:v0.10 AS buildx-bin
-
-# ignore this hadolint error as BASE_IMAGE contains an image tag
-# hadolint ignore=DL3006
-FROM ${BASE_IMAGE}
-ARG LOCALE=en_US.UTF-8
-ARG TARGETARCH
-COPY .devcontainer/install_apps .devcontainer/install_golang_apps .devcontainer/install_go.sh .devcontainer/generate_system_bazelrc .devcontainer/.bazelversion /scripts/
-COPY .devcontainer/get_workspace_mount /usr/local/bin
-COPY .devcontainer/gitconfig /etc
-COPY --from=buildx-bin /buildx /usr/libexec/docker/cli-plugins/docker-buildx
-COPY --from=libprofiler-builder /usr/lib/libprofiler.so.* /usr/lib/x86_64-linux-gnu/
-RUN \
-    ln -rs /usr/lib/x86_64-linux-gnu/libprofiler.so.0.* /usr/lib/x86_64-linux-gnu/libprofiler.so.0 && \
-    ln -rs /usr/lib/x86_64-linux-gnu/libprofiler.so.0.* /usr/lib/x86_64-linux-gnu/libprofiler.so
-
-ENV BUILD_ARCH="${TARGETARCH}" \
-    WORKSPACE=/src/workspace \
-    CC=clang \
-    TZ=Etc/UTC \
-    LANG=${LOCALE} \
-    LANGUAGE=${LOCALE} \
-    LC_ALL=${LOCALE} \
-    LC_CTYPE=${LOCALE}
-
-RUN \
-    chmod 644 /etc/gitconfig && \
-    /scripts/install_apps --locale ${LOCALE} && \
-    /scripts/generate_system_bazelrc --user-root-name ubuntu && \
-    /scripts/install_golang_apps && \
-    rm -rf /scripts
-
-ENV PATH="/opt/bin:${PATH}:/usr/local/go/bin" \
-    PYTHON_LIB_PATH="/usr/lib/python3.9"
+FROM mcr.microsoft.com/ccf/app/dev:${BASE_IMAGE} as builder
 
 # Custom Deps
-RUN apt-get update && apt-get install -y \
-    openssh-client \
-    make \
-    libuv1 \
-    jq \
-    lsof \
-    sudo
+#RUN apt-get update && apt-get install -y \
+#    openssh-client \
+#    make \
+#    libuv1 \
+#    jq \
+#    lsof \
+#    sudo
+WORKDIR /APP
+COPY requirements.txt .
+#RUN pip install -U -r ./requirements.txt
 
-ENV NO_CBUILD=1
+#FROM builder
