@@ -335,9 +335,6 @@ export const key = (request: ccfapp.Request<ISnpAttestation>) => {
     };
   }
 
-  // proto experiment
-  //const proto = new TinkKeyProto([keyItem]);
-
   // Get wrapping key
   try {
     const [wrapId, wrapKid] = wrapKeyIdMap.latestItem();
@@ -531,7 +528,7 @@ export const listpubkeys = () => {
 };
 
 // Get latest public key
-export const pubkey = (request: ccfapp.Request<ISnpAttestation>) => {
+export const pubkey = (request: ccfapp.Request<void>) => {
   let id: number, keyItem: IKeyItem;
   try {
     const query = queryParams(request);

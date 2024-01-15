@@ -6,7 +6,7 @@ services:
     container_name: ccf-kms
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: .devcontainer/Dockerfile.devcontainer
     command: /opt/ccf_virtual/bin/sandbox.sh -v --js-app-bundle ./dist/ -n local://0.0.0.0:8000 -n local://0.0.0.0:8001
     #command: tail -f /dev/null
     volumes:

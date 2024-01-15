@@ -17,7 +17,10 @@ RUN apt-get update && apt-get install -y \
     lsof \
     sudo \
     tar \
-    default-jre
+    default-jre 
+
+RUN apt-get -y autoremove \
+ && apt-get -y clean
 
 # Setup tinkey
 ENV TINKEY_VERSION=tinkey-1.10.1
@@ -27,7 +30,9 @@ RUN cp tinkey /usr/bin/
 RUN cp tinkey_deploy.jar /usr/bin/
 RUN rm tinkey tinkey_deploy.jar tinkey.bat $TINKEY_VERSION.tar.gz
 
-WORKDIR /APP
+WORKDIR /app
 COPY requirements.txt .
 RUN pip install -U -r ./requirements.txt
 
+# Add app
+COPY ./dist ./dist
