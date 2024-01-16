@@ -18,9 +18,14 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Build Docker image
-        run: docker build --target "ci" -f .devcontainer/Dockerfile.devcontainer -t kms-ci .
-  
+      - name: Build DevContainer
+        uses: devcontainers/ci@v0.3
+        env:
+          TARGET: "ci"
+        with:
+          runCmd: |
+              make demo
+            
       - name: Run commands in Docker container
         run: |
           docker run --name kms-ci -d kms-ci
