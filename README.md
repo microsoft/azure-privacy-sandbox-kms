@@ -23,6 +23,8 @@ This version of KMS can only be used for testing and not for production.
 
 E.g. we dump keys in logs to facilitate testing and the solution has not gone through the necessary security evaluation, needed for production.
 
+Because of integration testing we have not yet fully secured the endpoints. This is work to be done before production.
+
 # Guidance
 
 See [TypeScript Application](https://microsoft.github.io/CCF/main/build_apps/js_app_ts.html#typescript-application), [ccf-app-samples
