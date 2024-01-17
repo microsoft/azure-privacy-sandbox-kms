@@ -22,6 +22,7 @@ jobs:
       - name: Build DevContainer
         uses: devcontainers/ci@v0.3
         with:
-          devcontainer: .devcontainer/Dockerfile.ci
+          push: never
+          dockerfile: .devcontainer/Dockerfile.ci
           runCmd: |
               make demo
