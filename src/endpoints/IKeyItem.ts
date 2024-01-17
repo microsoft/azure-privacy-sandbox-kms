@@ -1,7 +1,10 @@
-import { CryptoKeyPair, JsonWebKeyEdDSAPrivate } from "@microsoft/ccf-app/global";
+import {
+  CryptoKeyPair,
+  JsonWebKeyEdDSAPrivate,
+} from "@microsoft/ccf-app/global";
 
 // Define the interface for storing keys
-export interface IKeyItem extends JsonWebKeyEdDSAPrivate{
+export interface IKeyItem extends JsonWebKeyEdDSAPrivate {
   timestamp?: number;
   receipt?: string;
   id?: number;

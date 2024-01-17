@@ -1,3 +1,3 @@
 export interface IPolicy {
-    type: string;
+  type: string;
 }

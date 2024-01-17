@@ -17,14 +17,14 @@ export class KeyGeneration {
     const keys = ccfcrypto.generateEddsaKeyPair(keyType);
     const jwk: IKeyItem = ccfcrypto.eddsaPemToJwk(
       keys.privateKey,
-      KeyGeneration.calculateKid(keys.publicKey)
+      KeyGeneration.calculateKid(keys.publicKey),
     );
     // jwk.d is private key, jwk.x is public key
 
     // We will get an untrusted timestamp from the host. Is this a threat?
     jwk.timestamp = Date.now();
     jwk.id = id;
-    
+
     console.log(`JWK: `, jwk);
     return jwk;
   };

@@ -7,7 +7,11 @@ export class KeyStore {
 
   // Create an instance of the class KeyStore
   constructor(public nameOfMap: string) {
-    this._store = ccfapp.typedKv(nameOfMap, ccfapp.string, ccfapp.json<IKeyItem | IWrapKey>());
+    this._store = ccfapp.typedKv(
+      nameOfMap,
+      ccfapp.string,
+      ccfapp.json<IKeyItem | IWrapKey>(),
+    );
   }
 
   // Get the store
@@ -29,19 +33,24 @@ export class KeyStore {
       const buf = new Uint8Array(ccf.strToBuf(id));
       const len = 8;
       let identifier = 0;
-      for (let inx = 0; inx < len ; inx ++ ) {
+      for (let inx = 0; inx < len; inx++) {
         identifier >>= 8;
         identifier += buf[inx];
       }
 
       console.log(`Calculated version: ${identifier}`);
       return identifier;
-    }
-    
+    };
+
     const version = this.store.getVersionOfPreviousWrite(id);
-    
+
     console.log(`version for id ${id}: ${JSON.stringify(version)}`);
-    const states = ccf.historical.getStateRange(calcVersion(id), version, version, 1800);
+    const states = ccf.historical.getStateRange(
+      calcVersion(id),
+      version,
+      version,
+      1800,
+    );
     if (states !== null) {
       const ret = JSON.stringify(states[0].receipt);
       console.log(`Receipt: ${ret}`);

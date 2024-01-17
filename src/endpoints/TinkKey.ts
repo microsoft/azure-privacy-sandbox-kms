@@ -31,8 +31,8 @@ export interface ITinkKey {
   outputPrefixType: TinkKeyPrefixType;
 }
 export interface ITinkPublicKey {
-    id: string;
-    key: string;
+  id: string;
+  key: string;
 }
 
 export interface ITinkKeySet {
@@ -102,7 +102,7 @@ export class TinkKey {
 
     const tinkKeySet: ITinkKeySet = {
       primaryKeyId,
-        key: [],
+      key: [],
     };
     for (let inx = 0; inx < this.keyItem.length; inx++) {
       const key: ITinkKey = {

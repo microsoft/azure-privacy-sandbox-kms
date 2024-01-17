@@ -1,6 +1,6 @@
 // Use the CCF polyfill to mock-up all key-value map functionality for unit-test
 import "@microsoft/ccf-app/polyfill.js";
-import {describe, expect, test} from '@jest/globals';
+import { describe, expect, test } from "@jest/globals";
 import { IKeyReleasePolicyProps } from "../../../src";
 
 describe("Test Key Release Policy properties", () => {
