@@ -21,7 +21,16 @@ RUN apt-get update && apt-get install -y \
     default-jre 
 
 RUN apt-get -y autoremove \
- && apt-get -y clean
+    && apt-get -y clean
+
+# Install NPM
+ENV NVM_DIR /root/.nvm
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash \
+    && . $NVM_DIR/nvm.sh \
+    && nvm install node \
+    && nvm use node
+RUN . $NVM_DIR/nvm.sh \
+    && npm install -g npm@latest
 
 # Setup tinkey
 ENV TINKEY_VERSION=tinkey-1.10.1
