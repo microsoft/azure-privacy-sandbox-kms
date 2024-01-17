@@ -1,5 +1,5 @@
 {
-	"name": "Privacy Sandbox Dev",
+	"name": "KMS Dev",
 	"build": {
 		"dockerfile": "Dockerfile.devcontainer",
 		"context": ".."
