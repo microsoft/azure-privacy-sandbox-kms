@@ -22,6 +22,6 @@ jobs:
         uses: devcontainers/ci@v0.3
         with:
           push: never
-          configFile: .devcontainer/devcontainer-ci.json
+          configFile: .github/devcontainer.json
           runCmd: |
               make demo
