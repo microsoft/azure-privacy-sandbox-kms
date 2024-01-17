@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   ccf-kms:
@@ -26,7 +26,6 @@ networks:
       driver: default
       config:
         - subnet: ${DOCKER_SUBNET}
-
 #volumes:
 #  debug:
 #  pgdata-audit:

@@ -3,7 +3,7 @@ import { IAttestationReport } from "./ISnpAttestationReport";
 
 export class SnpAttestationClaims {
   constructor(public report: SnpAttestationResult) {}
-  
+
   private hex(buf: ArrayBuffer) {
     return Array.from(new Uint8Array(buf))
       .map((n) => n.toString(16).padStart(2, "0"))
@@ -64,29 +64,29 @@ export class SnpAttestationClaims {
     val = this.report?.attestation?.host_data;
     if (val !== undefined) {
       reportClaims["x-ms-sevsnpvm-hostdata"] = this.hex(val);
-    }    
+    }
     val = this.report?.attestation?.id_key_digest;
     if (val !== undefined) {
       reportClaims["x-ms-sevsnpvm-idkeydigest"] = this.hex(val);
-    }    
+    }
     val = this.report?.attestation?.author_key_digest;
     if (val !== undefined) {
       reportClaims["x-ms-sevsnpvm-authorkeydigest"] = this.hex(val);
-    }    
+    }
     val = this.report?.attestation?.report_id;
     if (val !== undefined) {
       reportClaims["x-ms-sevsnpvm-reportid"] = this.hex(val);
     }
-     // report_id_ma
-     // reported_tcb
-     // chip_id
-     // committed_tcb
-     // current_minor
-     // current_build
-     // committed_minor
-     // committed_major
-     // launch_tcb
-     val = this.report?.attestation?.signature?.r;
+    // report_id_ma
+    // reported_tcb
+    // chip_id
+    // committed_tcb
+    // current_minor
+    // current_build
+    // committed_minor
+    // committed_major
+    // launch_tcb
+    val = this.report?.attestation?.signature?.r;
     if (val !== undefined) {
       reportClaims["signature-r"] = this.hex(val);
     }

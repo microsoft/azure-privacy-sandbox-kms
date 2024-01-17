@@ -5,8 +5,9 @@
       "args": {
         "service": "some service",
         "type": "remove",
-        "claims": {          
-          "x-ms-ver": ["2","3"]        }
+        "claims": {
+          "x-ms-ver": ["2", "3"]
+        }
       }
     }
   ]

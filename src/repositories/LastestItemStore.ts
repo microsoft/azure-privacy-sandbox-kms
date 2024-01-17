@@ -34,7 +34,7 @@ export class LastestItemStore<K extends number, T> {
     // Add claim digest using public key
     if (claims) {
       const claims_digest = ccf.crypto.digest("SHA-256", ccf.strToBuf(claims));
-      ccf.rpc.setClaimsDigest(claims_digest);  
+      ccf.rpc.setClaimsDigest(claims_digest);
     }
 
     this.store.set(id, item);

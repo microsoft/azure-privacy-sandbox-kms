@@ -3,17 +3,17 @@ import { ccf } from "@microsoft/ccf-app/global";
 import { KeyGeneration } from "./KeyGeneration";
 import { Base64 } from "js-base64";
 import { IKeyItem, IWrapKey } from "./IKeyItem";
-import * as tink from "./proto/gen/tink_pb"
-import * as hpke from "./proto/gen/hpke_pb"
+import * as tink from "./proto/gen/tink_pb";
+import * as hpke from "./proto/gen/hpke_pb";
 
 // Used by tink_pb and hpke_pb
 export class TextEncoder {
   encode(input: string): Uint8Array {
-    return new Uint8Array(ccf.strToBuf(input))
+    return new Uint8Array(ccf.strToBuf(input));
   }
 
   encodeInto(input: string, output: Uint8Array) {
-    throw new Error('Not implemented');
+    throw new Error("Not implemented");
   }
 }
 
@@ -62,7 +62,7 @@ export type IKeyDataElement = {
   publicKeySignature: string;
   keyEncryptionKeyUri: string;
   keyMaterial: string; // Based on the code it should be compatible with tink library, and should be able to be handled by JsonKeysetReader::New(). Json Keyset.
-}
+};
 
 export type IKeyData = IKeyDataElement[];
 
@@ -74,23 +74,23 @@ export type EncryptionKey = {
   publicKeyMaterial: string;
   creationTime: string;
   expirationTime: string;
-  keyData: IKeyData;  
+  keyData: IKeyData;
 };
 
 export type IWrapped = {
-  keys: EncryptionKey[]
-}
+  keys: EncryptionKey[];
+};
 
 export type IWrappedJwt = {
   wrapperKid: string;
   wrappedKeyId: number;
   // Base64-encoded encypted key
-  wrappedKeyContents: string;  
+  wrappedKeyContents: string;
 };
 
 export const WrapAlgorithms: string[] = [WRAPALGONAME];
-const keyEncryptionKeyUriPrefix =  "azu-kms://";
-   
+const keyEncryptionKeyUriPrefix = "azu-kms://";
+
 export class KeyWrapper {
   private static WRAPALGO = {
     aesKeySize: 256,
@@ -106,26 +106,30 @@ export class KeyWrapper {
   };
 
   // Wrap the payload
-  public static wrapKey = (id: number, wrapperKey: IWrapKey, payload: IKeyItem):IWrapped => {
-    let tinkHpkeKey = new hpke.HpkePrivateKey()
-    tinkHpkeKey.privateKey = Base64.toUint8Array(payload.d)
+  public static wrapKey = (
+    id: number,
+    wrapperKey: IWrapKey,
+    payload: IKeyItem,
+  ): IWrapped => {
+    let tinkHpkeKey = new hpke.HpkePrivateKey();
+    tinkHpkeKey.privateKey = Base64.toUint8Array(payload.d);
     // TODO: check if we need to set tinkHpkeKey.publicKey. Based on tink.proto, it's optional though.
     // From the tink code, you can see currently version=0 is the only option
-    tinkHpkeKey.version = 0
-    let keyset = new tink.Keyset()
+    tinkHpkeKey.version = 0;
+    let keyset = new tink.Keyset();
     // TODO: Check if it is okey as a tink key ID
     // primaryKeyId should match with key[0].keyId when size(key) is 1.
-    const keyId = 0
-    keyset.primaryKeyId = keyId
-    keyset.key = [new tink.Keyset_Key()]
-    keyset.key[0].keyId = keyId
-    keyset.key[0].status = tink.KeyStatusType.ENABLED
-    keyset.key[0].outputPrefixType = tink.OutputPrefixType.TINK
-    let keyData = new tink.KeyData()
-    keyData.keyMaterialType = tink.KeyData_KeyMaterialType.ASYMMETRIC_PRIVATE
-    keyData.typeUrl = "type.googleapis.com/google.crypto.tink.HpkePrivateKey"
-    keyData.value = tinkHpkeKey.toBinary()
-    keyset.key[0].keyData = keyData
+    const keyId = 0;
+    keyset.primaryKeyId = keyId;
+    keyset.key = [new tink.Keyset_Key()];
+    keyset.key[0].keyId = keyId;
+    keyset.key[0].status = tink.KeyStatusType.ENABLED;
+    keyset.key[0].outputPrefixType = tink.OutputPrefixType.TINK;
+    let keyData = new tink.KeyData();
+    keyData.keyMaterialType = tink.KeyData_KeyMaterialType.ASYMMETRIC_PRIVATE;
+    keyData.typeUrl = "type.googleapis.com/google.crypto.tink.HpkePrivateKey";
+    keyData.value = tinkHpkeKey.toBinary();
+    keyset.key[0].keyData = keyData;
     const bufPayload = keyset.toBinary().buffer;
 
     console.log(`Encryption wrapper public key: `, wrapperKey.publicKey);
@@ -145,9 +149,9 @@ export class KeyWrapper {
       name: `encryptionKeys/${payload.id}`,
       encryptionKeyType: "SINGLE_PARTY_HYBRID_KEY", // Should be correct
       publicKeysetHandle: `TBD`, // Haven't found any usage
-      publicKeyMaterial: "testtest",  // Haven't found any usage
+      publicKeyMaterial: "testtest", // Haven't found any usage
       creationTime: `${Date.now()}`, // These value needs to be reasonable, otherwise B&A will delete keys from its cache. https://github.com/privacysandbox/data-plane-shared-libraries/blob/042c6f93558638376ac3f6ab479aed7f0342da67/src/cpp/encryption/key_fetcher/src/private_key_fetcher.cc#L168
-      expirationTime: `${Date.now() + 265*24*60*60*1000}`, // Add one year for now
+      expirationTime: `${Date.now() + 365 * 24 * 60 * 60 * 1000}`, // Add one year for now, needs to be fixed by policy TODO
       keyData: [
         {
           publicKeySignature: "",
@@ -171,29 +175,33 @@ export class KeyWrapper {
             //   ],
             // },
           }),
-        }
+        },
       ],
     };
     console.log(`Encryption public key: `, encryptionKey);
-    const ret: IWrapped = {keys: [encryptionKey]}
+    const ret: IWrapped = { keys: [encryptionKey] };
     return ret;
   };
 
   // Unwrap the payload
   public static unwrapKey = (
     wrapperKey: IWrapKey,
-    wrapped: string
+    wrapped: string,
   ): Uint8Array => {
     const bufPayload = Base64.toUint8Array(wrapped).buffer;
     const bufKey = ccf.strToBuf(wrapperKey.privateKey);
     const algo = KeyWrapper.WRAPALGO;
     const unwrapped = ccfcrypto.unwrapKey(bufPayload, bufKey, algo);
     const uint8array = new Uint8Array(unwrapped);
-    return uint8array
+    return uint8array;
   };
 
   // Wrap the JWT payload. Only for debugging purpose.
-  public static wrapKeyJwt = (id: number, wrapperKey: IWrapKey, payload: IKeyItem):IWrappedJwt => {
+  public static wrapKeyJwt = (
+    id: number,
+    wrapperKey: IWrapKey,
+    payload: IKeyItem,
+  ): IWrappedJwt => {
     const bufPayload = ccf.strToBuf(JSON.stringify(payload));
 
     console.log(`Encryption public key: `, wrapperKey.publicKey);
@@ -212,7 +220,7 @@ export class KeyWrapper {
 
   public static unwrapKeyJwt = (
     wrapperKey: IWrapKey,
-    wrapped: string
+    wrapped: string,
   ): string => {
     const bufPayload = Base64.toUint8Array(wrapped).buffer;
     const bufKey = ccf.strToBuf(wrapperKey.privateKey);

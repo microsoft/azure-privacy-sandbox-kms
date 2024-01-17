@@ -143,10 +143,10 @@ const validateAttestation = (attestation: ISnpAttestation): IValidatePolicy => {
         evidence,
         endorsements,
         uvm_endorsements,
-        endorsed_tcb
+        endorsed_tcb,
       );
     console.log(
-      `Attestation validation report: ${JSON.stringify(attestationReport)}`
+      `Attestation validation report: ${JSON.stringify(attestationReport)}`,
     );
 
     const claimsProvider = new SnpAttestationClaims(attestationReport);
@@ -157,10 +157,10 @@ const validateAttestation = (attestation: ISnpAttestation): IValidatePolicy => {
     const keyReleasePolicy = getKeyReleasePolicy();
     console.log(
       `Key release policy: ${JSON.stringify(
-        keyReleasePolicy
+        keyReleasePolicy,
       )}, keys: ${Object.keys(keyReleasePolicy)}, keys: ${
         Object.keys(keyReleasePolicy).length
-      }`
+      }`,
     );
 
     if (Object.keys(keyReleasePolicy).length === 0) {
@@ -180,7 +180,7 @@ const validateAttestation = (attestation: ISnpAttestation): IValidatePolicy => {
       const policyValue = keyReleasePolicy[key];
       const isUndefined = typeof attestationValue === "undefined";
       console.log(
-        `Checking key ${key}, typeof attestationValue: ${typeof attestationValue}, isUndefined: ${isUndefined}, attestation value: ${attestationValue}, policyValue: ${policyValue}`
+        `Checking key ${key}, typeof attestationValue: ${typeof attestationValue}, isUndefined: ${isUndefined}, attestation value: ${attestationValue}, policyValue: ${policyValue}`,
       );
       if (isUndefined) {
         console.log(`Policy claim ${key} is missing from attestation`);
@@ -228,8 +228,8 @@ const getKeyReleasePolicy = (): IKeyReleasePolicyProps => {
   });
   console.log(
     `Resulting key release policy: ${JSON.stringify(
-      result
-    )}, keys: ${Object.keys(result)}, keys: ${Object.keys(result).length}`
+      result,
+    )}, keys: ${Object.keys(result)}, keys: ${Object.keys(result).length}`,
   );
   return result;
 };
@@ -339,7 +339,7 @@ export const key = (request: ccfapp.Request<ISnpAttestation>) => {
   try {
     const [wrapId, wrapKid] = wrapKeyIdMap.latestItem();
     const wrapKey = wrapKeysMap.store.get(wrapKid) as IWrapKey;
-    let ret : IWrapped | IWrappedJwt;
+    let ret: IWrapped | IWrappedJwt;
     if (fmt == "tink") {
       ret = KeyWrapper.wrapKey(wrapId, wrapKey, keyItem);
     } else {
@@ -359,7 +359,7 @@ export const key = (request: ccfapp.Request<ISnpAttestation>) => {
           message,
         },
         inner: exception,
-        stack: exception.stack
+        stack: exception.stack,
       },
     };
   }
@@ -367,7 +367,7 @@ export const key = (request: ccfapp.Request<ISnpAttestation>) => {
 
 interface IUnwrapRequest {
   wrapped: string;
-  kid: string; 
+  kid: string;
   attestation: ISnpAttestation;
 }
 
@@ -386,7 +386,7 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
   // Validate input
   if (!body || !wrapKid || !attestation) {
     const message = `The body is not a unwrap key request: ${JSON.stringify(
-      body
+      body,
     )}`;
     console.error(message);
     return {
@@ -437,7 +437,7 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
       statusCode: 400,
       body: {
         error: {
-          message
+          message,
         },
       },
     };
@@ -457,7 +457,7 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
 
   // Get UnWrapping key
   try {
-    let unwrapped: Uint8Array | string
+    let unwrapped: Uint8Array | string;
 
     if (fmt == "tink") {
       unwrapped = KeyWrapper.unwrapKey(wrapKey, body.wrapped);
@@ -475,7 +475,7 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
       body: {
         error: {
           message,
-          exception
+          exception,
         },
         inner: exception,
       },
@@ -634,11 +634,11 @@ export const refresh = () => {
     // Get HPKE key pair id
     const id = hpkeKeyIdMap.size + 1;
 
-    // Generate HPKE key pair with a six digit id    
+    // Generate HPKE key pair with a six digit id
     const keyItem = KeyGeneration.generateKeyItem(100000 + id);
 
     // Store HPKE key pair kid
-    keyItem.kid = `${keyItem.kid!}_${id}`  
+    keyItem.kid = `${keyItem.kid!}_${id}`;
     hpkeKeyIdMap.storeItem(id, keyItem.kid);
 
     // Store HPKE key pair

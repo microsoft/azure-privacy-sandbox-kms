@@ -26,7 +26,7 @@ export class Validator {
 
     if (result.status !== props.expectedStatus) {
       throw new Error(
-        `🛑 [TEST FAILURE]: ${props.member.name} - ${props.testMessage}: ${props.expectedStatus} expected, but got ${result.status}.`
+        `🛑 [TEST FAILURE]: ${props.member.name} - ${props.testMessage}: ${props.expectedStatus} expected, but got ${result.status}.`,
       );
     }
 
@@ -37,7 +37,7 @@ export class Validator {
 export default class Api {
   public static async refresh(
     props: DemoProps,
-    member: DemoMemberProps
+    member: DemoMemberProps,
   ): Promise<IKeyItem> {
     console.log(`📝 ${member.name} Refresh key:`);
 
@@ -50,12 +50,12 @@ export default class Api {
 
     if (result.status !== 200) {
       throw new Error(
-        `🛑 [TEST FAILURE]: Unexpected status code: ${result.status}`
+        `🛑 [TEST FAILURE]: Unexpected status code: ${result.status}`,
       );
     }
 
     console.log(
-      `✅ [PASS] [${result.status} : ${result.statusText}] - ${member.name}`
+      `✅ [PASS] [${result.status} : ${result.statusText}] - ${member.name}`,
     );
     console.log(result.data);
 
@@ -64,7 +64,7 @@ export default class Api {
   public static async keyInitial(
     props: DemoProps,
     member: DemoMemberProps,
-    data: string
+    data: string,
   ): Promise<IKeyItem> {
     console.log(`📝 ${member.name} Get initial wrapped private key:`);
 
@@ -77,24 +77,24 @@ export default class Api {
 
     if (result.status !== 202) {
       throw new Error(
-        `🛑 [TEST FAILURE]: Unexpected status code: ${result.status}, ${result.data}`
+        `🛑 [TEST FAILURE]: Unexpected status code: ${result.status}, ${result.data}`,
       );
     }
 
     console.log(
-      `✅ [PASS] [${result.status} : ${result.statusText}] - ${member.name}`
+      `✅ [PASS] [${result.status} : ${result.statusText}] - ${member.name}`,
     );
     console.log(result.data);
 
     return result.data;
   }
-  
+
   public static async key(
     props: DemoProps,
     member: DemoMemberProps,
     data: string,
-    tink: boolean
-  ): Promise<IWrapped|IWrappedJwt> {
+    tink: boolean,
+  ): Promise<IWrapped | IWrappedJwt> {
     console.log(`📝 ${member.name} Get wrapped private key with receipt:`);
     const query = tink ? "?fmt=tink" : "";
     const result: AxiosResponse<any, any> = await axios
@@ -111,37 +111,41 @@ export default class Api {
 
     if (result.status !== 200) {
       throw new Error(
-        `🛑 [TEST FAILURE]: Unexpected status code: ${result.status}`
+        `🛑 [TEST FAILURE]: Unexpected status code: ${result.status}`,
       );
     }
 
     console.log(
-      `✅ [PASS] [${result.status} : ${result.statusText}] - ${member.name}`
+      `✅ [PASS] [${result.status} : ${result.statusText}] - ${member.name}`,
     );
     console.log(result.data);
 
     return result.data;
   }
-  
+
   public static async unwrap(
     props: DemoProps,
     member: DemoMemberProps,
     wrapped: string,
     kid: string,
     attestation: ISnpAttestation,
-    tink: boolean
-  ): Promise<Uint8Array|IKeyItem> {
+    tink: boolean,
+  ): Promise<Uint8Array | IKeyItem> {
     console.log(`📝 ${member.name} Get unwrapped private key with receipt:`);
     const query = tink ? "?fmt=tink" : "";
-    const responseType = tink ? "arraybuffer" : "json"
+    const responseType = tink ? "arraybuffer" : "json";
     const result: AxiosResponse<any, any> = await axios
-      .post(props.unwrapUrl + query, JSON.stringify({wrapped, kid, attestation}) , {
-        headers: {
-          "Content-Type": "application/json",
+      .post(
+        props.unwrapUrl + query,
+        JSON.stringify({ wrapped, kid, attestation }),
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          httpsAgent: member.httpsAgent,
+          responseType: responseType,
         },
-        httpsAgent: member.httpsAgent,
-        responseType: responseType,
-      })
+      )
       .catch((exception: any) => {
         console.log(`key exception: ${exception}`);
         return exception;
@@ -149,20 +153,20 @@ export default class Api {
 
     if (result.status !== 200) {
       throw new Error(
-        `🛑 [TEST FAILURE]: Unexpected status code: ${result.status}`
+        `🛑 [TEST FAILURE]: Unexpected status code: ${result.status}`,
       );
     }
 
     console.log(
-      `✅ [PASS] [${result.status} : ${result.statusText}] - ${member.name}`
+      `✅ [PASS] [${result.status} : ${result.statusText}] - ${member.name}`,
     );
     if (tink) {
-      const res = new Uint8Array(result.data)
+      const res = new Uint8Array(result.data);
       console.log(res);
       return res;
     } else {
       console.log(result.data);
-      return result.data
+      return result.data;
     }
   }
 }

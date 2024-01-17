@@ -5,7 +5,7 @@
       "args": {
         "service": "some service",
         "type": "add",
-        "claims": {          
+        "claims": {
           "x-ms-ver": ["2", "3"],
           "x-ms-sevsnpvm-smt-allowed": true,
           "x-ms-sevsnpvm-is-debuggable": false

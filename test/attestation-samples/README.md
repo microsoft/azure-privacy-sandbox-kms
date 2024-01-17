@@ -1,4 +1,4 @@
-## Fake attestation for testing in non-SNP environment
+# Fake attestation for testing in non-SNP environment
 
 snp.json is made by `//scp/cc/azure/attestation:print_snp_json` in data-plane-shared-libraries.
 You need to re-run it when snp.json is expired.

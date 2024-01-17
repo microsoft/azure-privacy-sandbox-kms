@@ -37,8 +37,8 @@ export class LoadPolicy {
           `Policy load finalized: loading: ${this.loading}, ready: ${
             this.ready
           }, module: ${JSON.stringify(
-            this.loadedModule
-          )}, load error: ${JSON.stringify(this.loadError)}`
+            this.loadedModule,
+          )}, load error: ${JSON.stringify(this.loadError)}`,
         );
       });
   }

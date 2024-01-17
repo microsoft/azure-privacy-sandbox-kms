@@ -53,6 +53,9 @@ deploy: build ## 🚀 Deploy Managed CCF or local
 	@echo -e "\e[34m$@\e[0m" || true
 	@./scripts/deploy.sh --network-url "${KMS_URL}"  --certificate_dir "${KEYS_DIR}"
 
+lint: ## 🔍 Lint the code base (but don't fix)
+	@echo -e "\e[34m$@\e[0m" || true
+	@./scripts/lint.sh --fix
 # Keep this at the bottom.
 clean: ## 🧹 Clean the working folders created during build/demo
 	@rm -rf ${CCF_WORKSPACE}/.venv_ccf_sandbox
