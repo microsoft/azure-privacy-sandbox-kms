@@ -31,8 +31,6 @@ RUN cp tinkey /usr/bin/
 RUN cp tinkey_deploy.jar /usr/bin/
 RUN rm tinkey tinkey_deploy.jar tinkey.bat $TINKEY_VERSION.tar.gz
 
-WORKDIR /app
-
 # Define ci
 FROM base as ci
 RUN pip install -U -r ./requirements.txt
