@@ -172,6 +172,8 @@ class Demo {
       Demo.assertField(member.name, unwrapResponse, "timestamp", numberHigerThanZero);
       Demo.assertField(member.name, unwrapResponse, "crv", "X25519");
       Demo.assertField(member.name, unwrapResponse, "kty", "OKP");
+        // Test ci for failed workflow
+      Demo.assertField(member.name, unwrapResponse, "kty", "xxx");
     }
     
     {
