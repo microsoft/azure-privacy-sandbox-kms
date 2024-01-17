@@ -36,7 +36,7 @@ setup: ## Setup policies and generate a key
 		
 demo: build ## 🎬 Demo the KMS Application in the Sandbox
 	@echo -e "\e[34m$@\e[0m" || true
-	@. ./scripts/test_sandbox.sh --nodeAddress 127.0.0.1:8000 --certificate_dir ${CCF_WORKSPACE}/workspace/sandbox_common --constitution ./governance/constitution/kms_actions.js --interactive
+	@. ./scripts/test_sandbox.sh --nodeAddress 127.0.0.1:8000 --certificate_dir ${CCF_WORKSPACE}/workspace/sandbox_common --constitution ./governance/constitution/kms_actions.js
 
 # Propose a new key release policy
 propose-add-key-release-policy: ## 🚀 Deploy the add claim key release policy to the sandbox or mCCF

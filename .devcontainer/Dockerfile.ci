@@ -1,7 +1,7 @@
 # Base container image which is built nightly
 # Used as a starting point to make building other containers fast
 
-ARG BASE_CCF_IMAGE=5.0.0-dev11-virtual
+ARG BASE_CCF_IMAGE=5.0.0-dev10-virtual
 ARG ENVIRONMENT=ci
 
 # ignore this hadolint error as BASE_IMAGE contains an image tag
