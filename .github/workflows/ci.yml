@@ -18,11 +18,10 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-
       - name: Build DevContainer
         uses: devcontainers/ci@v0.3
         with:
           push: never
-          dockerfile: .devcontainer/Dockerfile.ci
+          configFile: .devcontainer/Dockerfile.ci
           runCmd: |
               make demo
