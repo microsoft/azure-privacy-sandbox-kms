@@ -2,7 +2,7 @@
 # Used as a starting point to make building other containers fast
 
 ARG BASE_CCF_IMAGE=5.0.0-dev11-virtual
-ARG ENVIRONMENT=devcontainer
+ARG ENVIRONMENT=ci
 
 # ignore this hadolint error as BASE_IMAGE contains an image tag
 # hadolint ignore=DL3006
@@ -35,11 +35,4 @@ WORKDIR /app
 
 # Define ci
 FROM base as ci
-RUN pip install -U -r ./requirements.txt
-
-
-# Define a devcontainer stage that includes the dist directory
-FROM base as devcontainer
-COPY ./dist ./dist
-COPY requirements.txt .
 RUN pip install -U -r ./requirements.txt
