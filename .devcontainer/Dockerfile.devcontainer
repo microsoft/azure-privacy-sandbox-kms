@@ -31,15 +31,13 @@ RUN cp tinkey /usr/bin/
 RUN cp tinkey_deploy.jar /usr/bin/
 RUN rm tinkey tinkey_deploy.jar tinkey.bat $TINKEY_VERSION.tar.gz
 
-WORKDIR /app
-
 # Define ci
-FROM base as ci
-RUN pip install -U -r ./requirements.txt
+#FROM base as ci
+#RUN pip install -U -r ./requirements.txt
 
 
 # Define a devcontainer stage that includes the dist directory
-FROM base as devcontainer
-COPY ./dist ./dist
-COPY requirements.txt .
-RUN pip install -U -r ./requirements.txt
+#FROM base as devcontainer
+#COPY ./dist ./dist
+#COPY requirements.txt .
+#RUN pip install -U -r ./requirements.txt

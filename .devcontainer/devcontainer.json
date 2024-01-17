@@ -4,6 +4,7 @@
 		"dockerfile": "Dockerfile.devcontainer",
 		"context": ".."
 	},
+	"postCreateCommand": "cd /workspaces/azure-privacy-sandbox-kms && make build",
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {
 			"version": "latest",
