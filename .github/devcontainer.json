@@ -1,4 +1,5 @@
 {
+
   "name": "KMS Dev",
   "build": {
     "dockerfile": "Dockerfile.ci",
@@ -12,6 +13,5 @@
       "moby": "true",
     },
     "ghcr.io/devcontainers/features/common-utils:2": {},
-    "ghcr.io/devcontainers/features/node:1": {},
   },
 }
