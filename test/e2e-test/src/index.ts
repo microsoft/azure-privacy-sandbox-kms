@@ -354,21 +354,18 @@ class Demo {
   }
 
   private static printTestSectionHeader(title: string) {
-    console.log("
-===============================================");
+    console.log("\n===============================================");
     console.log(`${title}`);
     console.log("===============================================");
   }
 
   private static async addCheckpoint(msg: string) {
     if (interactiveMode == "1") {
-      console.log("
-");
+      console.log("\n");
       await inquirer.prompt([
         {
           name: msg,
-          message: `🎬 ${msg}
- - Press return key to continue...`,
+          message: `🎬 ${msg}\n - Press return key to continue...`,
         },
       ]);
     }
