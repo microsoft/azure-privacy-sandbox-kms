@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import { Base64 } from "js-base64";
 // Does not work in CCF because of the lack of support for promises
 export class LoadPolicy {

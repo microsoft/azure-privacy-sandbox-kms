@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import { IPolicy } from "./IPolicy";
 import { KeyReleasePolicy } from "./KeyReleasePolicy";
 

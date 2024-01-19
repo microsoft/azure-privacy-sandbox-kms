@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import Api, { Validator } from "./api.js";
 import path from "path";
 import {
@@ -351,18 +354,21 @@ class Demo {
   }
 
   private static printTestSectionHeader(title: string) {
-    console.log("\n===============================================");
+    console.log("
+===============================================");
     console.log(`${title}`);
     console.log("===============================================");
   }
 
   private static async addCheckpoint(msg: string) {
     if (interactiveMode == "1") {
-      console.log("\n");
+      console.log("
+");
       await inquirer.prompt([
         {
           name: msg,
-          message: `🎬 ${msg}\n - Press return key to continue...`,
+          message: `🎬 ${msg}
+ - Press return key to continue...`,
         },
       ]);
     }

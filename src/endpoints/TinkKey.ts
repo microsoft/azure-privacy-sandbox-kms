@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import { Base64 } from "js-base64";
 import { IKeyItem } from "./IKeyItem";
 

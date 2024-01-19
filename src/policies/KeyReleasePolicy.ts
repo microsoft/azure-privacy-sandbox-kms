@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import { IKeyReleasePolicy } from "./IKeyReleasePolicy";
 
 export class KeyReleasePolicy implements IKeyReleasePolicy {

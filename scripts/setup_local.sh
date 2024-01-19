@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 set -euo pipefail
 export KMS_URL=https://127.0.0.1:8000/
 export CCF_NAME=""

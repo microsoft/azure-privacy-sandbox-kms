@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 export interface IKeyReleasePolicyProps {
   "x-ms-attestation-type"?: string[];
   "x-ms-compliance-status"?: string[];

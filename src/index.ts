@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 export * from "./endpoints/kms";
 export * from "./endpoints/IKeyItem";
 export * from "./endpoints/KeyGeneration";

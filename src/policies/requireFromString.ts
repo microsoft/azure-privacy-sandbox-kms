@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 export const requireFromString = (code: string, filename: string = ""): any => {
   const module = { exports: {} };
   const context = { module, exports: module.exports };

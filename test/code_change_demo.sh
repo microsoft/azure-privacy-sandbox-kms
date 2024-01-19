@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
 set -euo pipefail
 
 declare certificate_dir="./workspace/mccf_certificates"

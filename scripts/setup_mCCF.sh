@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 set -euo pipefail
 export CCF_NAME="acceu-bingads-500dev10"
 export KMS_URL=https://${CCF_NAME}.confidential-ledger.azure.com
