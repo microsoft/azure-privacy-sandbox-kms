@@ -23,9 +23,6 @@ RUN apt-get update && apt-get install -y \
 # Install Node.js
 RUN curl -fsSL https://deb.nodesource.com/setup_current.x | bash -
 RUN apt-get install -y nodejs
-
-# Install npm
-RUN apt-get install -y npm
 RUN pip install --upgrade pip setuptools
 
 RUN apt-get -y autoremove \
