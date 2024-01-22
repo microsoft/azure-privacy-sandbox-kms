@@ -1,0 +1,29 @@
+ccf
+referencing==0.31.0
+wheel
+paramiko
+loguru
+psutil
+cimetrics>=0.2.1
+openapi-spec-validator
+PyJWT
+docutils
+python-iptables
+py-spy
+GitPython
+docker
+better_exceptions
+pyasn1
+Jinja2
+httpx[http2] == 0.23.*
+locust
+pyOpenSSL
+grpcio-tools == 1.44.0 # Pin to a working version for SNP platform
+JWCrypto == 1.5.*
+pycose
+rich
+# Piccolo dependencies
+fastparquet==2023.*
+prettytable==3.*
+polars
+plotext

@@ -1,0 +1,14 @@
+{
+  "actions": [
+    {
+      "name": "set_key_release_policy",
+      "args": {
+        "service": "some service",
+        "type": "remove",
+        "claims": {
+          "x-ms-ver": ["2", "3"]
+        }
+      }
+    }
+  ]
+}

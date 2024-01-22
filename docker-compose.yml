@@ -1,0 +1,32 @@
+version: "3"
+
+services:
+  ccf-kms:
+    image: ccf-kms
+    container_name: ccf-kms
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile.devcontainer
+    command: /opt/ccf_virtual/bin/sandbox.sh -v --js-app-bundle ./dist/ -n local://0.0.0.0:8000 -n local://0.0.0.0:8001
+    #command: tail -f /dev/null
+    volumes:
+      - ./vol/workspace:/app/workspace
+    ports:
+      - 8000:8000
+      - 8001:8001
+    extra_hosts:
+      host.docker.internal: host-gateway
+    networks:
+      chainnet:
+        ipv4_address: ${CCF1_IP}
+networks:
+  chainnet:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: ${DOCKER_SUBNET}
+#volumes:
+#  debug:
+#  pgdata-audit:
+#  pgdata-build:
