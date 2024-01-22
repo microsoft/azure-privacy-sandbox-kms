@@ -21,6 +21,7 @@ RUN apt-get update && apt-get install -y \
     default-jre \
     nodejs \ 
     npm
+RUN pip install --upgrade pip setuptools
 
 RUN apt-get -y autoremove \
     && apt-get -y clean
