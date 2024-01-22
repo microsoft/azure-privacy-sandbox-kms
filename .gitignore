@@ -1,9 +1,0 @@
-dist
-node_modules
-package-lock.json
-vol
-.venv_ccf_sandbox
-workspace
-.env
-hello/
-ccf-app/

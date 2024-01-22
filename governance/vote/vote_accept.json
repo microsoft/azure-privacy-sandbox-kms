@@ -1,3 +1,0 @@
-{
-  "ballot": "export function vote (proposal, proposerId) { return true }"
-}
