@@ -136,7 +136,7 @@ export class KeyWrapper {
     const bufKey = ccf.strToBuf(wrapperKey.publicKey);
     const algo = KeyWrapper.WRAPALGO;
     const wrapped = ccfcrypto.wrapKey(bufPayload, bufKey, algo);
-    const base64 = Base64.fromUint8Array(new Uint8Array(wrapped));
+    const wrappedB64 = Base64.fromUint8Array(new Uint8Array(wrapped));
     const encryptionKey: EncryptionKey = {
       // The following id will be treated as keyId.
       // We need to figure out the exact format.
@@ -160,7 +160,7 @@ export class KeyWrapper {
           // https://github.com/privacysandbox/data-plane-shared-libraries/blob/042c6f93558638376ac3f6ab479aed7f0342da67/scp/cc/cpio/client_providers/private_key_client_provider/src/private_key_client_utils.cc#L72
           keyEncryptionKeyUri: keyEncryptionKeyUriPrefix + wrapperKey.kid,
           keyMaterial: JSON.stringify({
-            encryptedKeyset: base64, // This should be base64 encoded encrypted proto bytes of tink.
+            encryptedKeyset: wrappedB64, // This should be base64 encoded encrypted proto bytes of tink.
             // // keysetInfo is optional in tink https://github.com/tink-crypto/tink-java/blob/main/proto/tink.proto#L193,
             // // but we are not sure if we can omit it actually.
             // keysetInfo: {
@@ -192,8 +192,7 @@ export class KeyWrapper {
     const bufKey = ccf.strToBuf(wrapperKey.privateKey);
     const algo = KeyWrapper.WRAPALGO;
     const unwrapped = ccfcrypto.unwrapKey(bufPayload, bufKey, algo);
-    const uint8array = new Uint8Array(unwrapped);
-    return uint8array;
+    return new Uint8Array(unwrapped);
   };
 
   // Wrap the JWT payload. Only for debugging purpose.
@@ -208,11 +207,11 @@ export class KeyWrapper {
     const bufKey = ccf.strToBuf(wrapperKey.publicKey);
     const algo = KeyWrapper.WRAPALGO;
     const wrapped = ccfcrypto.wrapKey(bufPayload, bufKey, algo);
-    const base64 = Base64.fromUint8Array(new Uint8Array(wrapped));
+    const wrappedB64 = Base64.fromUint8Array(new Uint8Array(wrapped));
     const wrappedKey: IWrappedJwt = {
       wrapperKid: wrapperKey.kid,
       wrappedKeyId: payload.id,
-      wrappedKeyContents: base64,
+      wrappedKeyContents: wrappedB64,
     };
     console.log(`Wrapped key: `, wrappedKey);
     return wrappedKey;
@@ -226,10 +225,10 @@ export class KeyWrapper {
     const bufKey = ccf.strToBuf(wrapperKey.privateKey);
     const algo = KeyWrapper.WRAPALGO;
     const unwrapped = ccfcrypto.unwrapKey(bufPayload, bufKey, algo);
-    const uint8array = new Uint8Array(unwrapped);
+    const unWrappedInt8array = new Uint8Array(unwrapped);
     let unwrappedKey = "";
-    for (let i = 0; i < uint8array.length; i++) {
-      unwrappedKey += String.fromCharCode(uint8array[i]);
+    for (let i = 0; i < unWrappedInt8array.length; i++) {
+      unwrappedKey += String.fromCharCode(unWrappedInt8array[i]);
     }
     console.log(`Unwrapped payload: `, unwrappedKey);
     return unwrappedKey;

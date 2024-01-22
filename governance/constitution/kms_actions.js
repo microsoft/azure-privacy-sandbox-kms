@@ -6,7 +6,7 @@ actions.set(
       checkType(args.claims, "object");
     },
     function (args) {
-      const Claims = {
+      const CLAIMS = {
         "x-ms-attestation-type": "string",
         "x-ms-compliance-status": "string",
         "x-ms-policy-hash": "string",
@@ -41,7 +41,7 @@ actions.set(
           `Add claims to key release policy: ${JSON.stringify(claims)}`,
         );
         Object.keys(claims).forEach((key) => {
-          if (Claims[key] === undefined) {
+          if (CLAIMS[key] === undefined) {
             throw new Error(`The claim ${key} is not an allowed claim`);
           }
           let item = claims[key];
@@ -88,7 +88,7 @@ actions.set(
           `Remove claims to key release policy: ${JSON.stringify(claims)}`,
         );
         Object.keys(claims).forEach((key) => {
-          if (Claims[key] === undefined) {
+          if (CLAIMS[key] === undefined) {
             throw new Error(`The claim ${key} is not an allowed claim`);
           }
           let item = claims[key];

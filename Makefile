@@ -56,6 +56,7 @@ deploy: build ## 🚀 Deploy Managed CCF or local
 lint: ## 🔍 Lint the code base (but don't fix)
 	@echo -e "\e[34m$@\e[0m" || true
 	@./scripts/lint.sh
+	
 # Keep this at the bottom.
 clean: ## 🧹 Clean the working folders created during build/demo
 	@rm -rf ${CCF_WORKSPACE}/.venv_ccf_sandbox

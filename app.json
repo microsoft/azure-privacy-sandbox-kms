@@ -28,6 +28,18 @@
         "forwarding_required": "sometimes",
         "authn_policies": [],
         "mode": "readonly",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "kid",           
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "fmt",           
+            "required": false
+          }
+        ],
         "openapi": {
           "responses": {
             "200": {
@@ -176,6 +188,18 @@
         "forwarding_required": "sometimes",
         "authn_policies": [],
         "mode": "readonly",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "kid",           
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "fmt",           
+            "required": false
+          }
+        ],
         "openapi": {
           "requestBody": {
             "required": true,
