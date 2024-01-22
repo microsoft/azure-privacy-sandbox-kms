@@ -1,5 +1,4 @@
 {
-
   "name": "KMS Dev",
   "build": {
     "dockerfile": "Dockerfile.ci",

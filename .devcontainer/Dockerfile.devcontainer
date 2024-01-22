@@ -18,7 +18,9 @@ RUN apt-get update && apt-get install -y \
     lsof \
     sudo \
     tar \
-    default-jre 
+    default-jre \
+    nodejs \ 
+    npm
 
 RUN apt-get -y autoremove \
     && apt-get -y clean
