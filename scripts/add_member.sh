@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 set -euo pipefail
 
 # create set_member json proposal file

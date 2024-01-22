@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import { DemoMemberProps, DemoProps } from "./index";
 import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 import { IKeyItem } from "../../../src";

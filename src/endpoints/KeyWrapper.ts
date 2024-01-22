@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import * as ccfcrypto from "@microsoft/ccf-app/crypto";
 import { ccf } from "@microsoft/ccf-app/global";
 import { KeyGeneration } from "./KeyGeneration";

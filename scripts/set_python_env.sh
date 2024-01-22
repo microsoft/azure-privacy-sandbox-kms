@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
 set -ex
 PYTHON_VENV=.venv_ccf_sandbox
 

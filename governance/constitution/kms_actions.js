@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 actions.set(
   "set_key_release_policy",
   new Action(

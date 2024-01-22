@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import { readdirSync, statSync, readFileSync, writeFileSync } from "fs";
 import { join, posix, sep } from "path";
 

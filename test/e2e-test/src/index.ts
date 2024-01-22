@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
 import Api, { Validator } from "./api.js";
 import path from "path";
 import {
