@@ -26,7 +26,7 @@ build: ## 🔨 Build the Application
 # Start hosting the application using `sandbox.sh` and enable custom JWT authentication
 start-host: build  ## 🏃 Start the CCF network using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
-	$(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count 3 --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js -v
+	$(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count 3 --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js -v $(extra_args)
 
 setup: ## Setup policies and generate a key
 	@echo -e "\e[34m$@\e[0m" || true
