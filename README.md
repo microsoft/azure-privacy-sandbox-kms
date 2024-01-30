@@ -99,6 +99,7 @@ make start-host
 ### Add claims
 
 ```
+export WORKSPACE=./workspace
 export CCF_WORKSPACE=.
 export KMS_URL=https://127.0.0.1:8000
 export KEYS_DIR="$CCF_WORKSPACE"/workspace/sandbox_common
@@ -114,6 +115,7 @@ make propose-rm-key-release-policy
 ### Script to setup policies and generate a key
 
 ```
+export WORKSPACE=./workspace
 export CCF_WORKSPACE=.
 export KMS_URL=https://127.0.0.1:8000
 export KEYS_DIR="$CCF_WORKSPACE"/workspace/sandbox_common
