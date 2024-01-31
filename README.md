@@ -81,6 +81,8 @@ Start the demo and e22 tests by running `make demo` in the `kms` path.
 This part of the demo has started the network and deployed the app. The network is running with 3 members and 1 user, and the app is deployed with the constitution defined [here](../governance/constitution/), which means that all members have equal votes on decisions, and a majority of approval votes is required to advance proposals. All members have been activated.
 
 ```bash
+export WORKSPACE=./workspace
+make demo
 ▶️ Starting sandbox...
 💤 Waiting for sandbox . . . (23318)
 📂 Working directory (for certificates): ./workspace/sandbox_common
@@ -91,6 +93,7 @@ Running TypeScript flow...
 ## Start only KMS in sandbox
 
 ```
+export WORKSPACE=./workspace
 make start-host
 ```
 
@@ -129,18 +132,18 @@ make setup
 export CCF_WORKSPACE=.
 export KMS_URL=https://127.0.0.1:8000
 # Generate a new key item
-curl ${KMS_URL}/app/refresh -X POST --cacert ${CCF_WORKSPACE}/workspace/sandbox_common/service_cert.pem --cert ${CCF_WORKSPACE}/workspace/sandbox_common/user0_cert.pem --key ${CCF_WORKSPACE}/workspace/sandbox_common/user0_privk.pem -H "Content-Type: application/json" -i  -w '\n'
+curl ${KMS_URL}/app/refresh -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -i  -w '\n'
 
 # Get the latest public key
-curl ${KMS_URL}/app/pubkey --cacert ${CCF_WORKSPACE}/workspace/sandbox_common/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
+curl ${KMS_URL}/app/pubkey --cacert ${KEYS_DIR}/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
 # Get the latest public key in tink format
-curl ${KMS_URL}/app/pubkey?fmt=tink --cacert ${CCF_WORKSPACE}/workspace/sandbox_common/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
+curl ${KMS_URL}/app/pubkey?fmt=tink --cacert ${KEYS_DIR}/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
 
 # Get list of public keys
-curl ${KMS_URL}/app/listpubkeys --cacert ${CCF_WORKSPACE}/workspace/sandbox_common/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
+curl ${KMS_URL}/app/listpubkeys --cacert ${KEYS_DIR}/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
 
 # Get the latest private key (JWT)
-wrapped_resp=$(curl $KMS_URL/app/key -X POST --cacert ${CCF_WORKSPACE}/workspace/sandbox_common/service_cert.pem --cert ${CCF_WORKSPACE}/workspace/sandbox_common/user0_cert.pem --key ${CCF_WORKSPACE}/workspace/sandbox_common/user0_privk.pem -H "Content-Type: application/json" -d '@test/attestation-samples/snp.json'  | jq)
+wrapped_resp=$(curl $KMS_URL/app/key -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -d '@test/attestation-samples/snp.json'  | jq)
 echo $wrapped_resp
 kid=$(echo $wrapped_resp | jq '.wrapperKid' -r)
 echo $kid
@@ -148,10 +151,10 @@ wrapped=$(echo $wrapped_resp | jq '.wrappedKeyContents' -r)
 echo $wrapped
 
 # Unwrap key with attestation (JWT)
-curl $KMS_URL/app/unwrapKey -X POST --cacert ${CCF_WORKSPACE}/workspace/sandbox_common/service_cert.pem --cert ${CCF_WORKSPACE}/workspace/sandbox_common/user0_cert.pem --key ${CCF_WORKSPACE}/workspace/sandbox_common/user0_privk.pem -H "Content-Type: application/json" -d "{\"wrapped\":\"$wrapped\", \"kid\":\"$kid\", \"attestation\":$(cat test/attestation-samples/snp.json)}" | jq
+curl $KMS_URL/app/unwrapKey -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -d "{\"wrapped\":\"$wrapped\", \"kid\":\"$kid\", \"attestation\":$(cat test/attestation-samples/snp.json)}" | jq
 
 # Get the latest private key (Tink)
-wrapped_resp=$(curl $KMS_URL/app/key?fmt=tink -X POST --cacert ${CCF_WORKSPACE}/workspace/sandbox_common/service_cert.pem --cert ${CCF_WORKSPACE}/workspace/sandbox_common/user0_cert.pem --key ${CCF_WORKSPACE}/workspace/sandbox_common/user0_privk.pem -H "Content-Type: application/json" -d '@test/attestation-samples/snp.json'  | jq)
+wrapped_resp=$(curl $KMS_URL/app/key?fmt=tink -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -d '@test/attestation-samples/snp.json'  | jq)
 echo $wrapped_resp
 key=$(echo $wrapped_resp | jq '.keys[0]')
 # It has a format of "azu-kms://<kid>" like "azu-kms://tGe-cVHzNyim2Z0PzHO4y0ClXCa5J6x-bh7GmGJTr3c".
@@ -163,13 +166,13 @@ wrapped=$(echo $keyMaterial | jq '.encryptedKeyset' -r)
 echo $wrapped
 
 # Unwrap key with attestation (Tink)
-curl $KMS_URL/app/unwrapKey?fmt=tink -X POST --cacert ${CCF_WORKSPACE}/workspace/sandbox_common/service_cert.pem --cert ${CCF_WORKSPACE}/workspace/sandbox_common/user0_cert.pem --key ${CCF_WORKSPACE}/workspace/sandbox_common/user0_privk.pem -H "Content-Type: application/json" -d "{\"wrapped\":\"$wrapped\", \"kid\":\"$kid\", \"attestation\":$(cat test/attestation-samples/snp.json)}" | tinkey convert-keyset --in-format binary
+curl $KMS_URL/app/unwrapKey?fmt=tink -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -d "{\"wrapped\":\"$wrapped\", \"kid\":\"$kid\", \"attestation\":$(cat test/attestation-samples/snp.json)}" | tinkey convert-keyset --in-format binary
 
 # Get key release policy
-curl $KMS_URL/app/key_release_policy --cacert ${CCF_WORKSPACE}/workspace/sandbox_common/service_cert.pem --cert ${CCF_WORKSPACE}/workspace/sandbox_common/user0_cert.pem --key ${CCF_WORKSPACE}/workspace/sandbox_common/user0_privk.pem -H "Content-Type: application/json" | jq
+curl $KMS_URL/app/key_release_policy --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" | jq
 
 # Get receipt
-curl $KMS_URL/receipt?transaction_id=2.20 --cacert ${CCF_WORKSPACE}/workspace/sandbox_common/service_cert.pem --cert ${CCF_WORKSPACE}/workspace/sandbox_common/user0_cert.pem --key ${CCF_WORKSPACE}/workspace/sandbox_common/user0_privk.pem -H "Content-Type: application/json" -i  -w '\n'
+curl $KMS_URL/receipt?transaction_id=2.20 --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -i  -w '\n'
 ```
 
 # Privacy Sandbox
