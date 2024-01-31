@@ -92,6 +92,11 @@ export type IWrappedJwt = {
 };
 
 export const WrapAlgorithms: string[] = [WRAPALGONAME];
+
+// keyEncryptionKeyUri should be in the format of `<10-character length prefix><cloud-specific contents to specify wrapping key>`.
+// https://github.com/privacysandbox/data-plane-shared-libraries/blob/042c6f93558638376ac3f6ab479aed7f0342da67/scp/cc/cpio/client_providers/private_key_client_provider/src/private_key_client_utils.cc#L113
+// This variable defines the prefix.
+// It's "gcp-kms://" for GCP and "aws-kms://" for AWS.
 const keyEncryptionKeyUriPrefix = "azu-kms://";
 
 export class KeyWrapper {
@@ -158,9 +163,6 @@ export class KeyWrapper {
       keyData: [
         {
           publicKeySignature: "",
-          // In GCP and AWS, it is used to as ID of wrapping key, and requires some specific format.
-          // So it should be able to be anything.
-          // https://github.com/privacysandbox/data-plane-shared-libraries/blob/042c6f93558638376ac3f6ab479aed7f0342da67/scp/cc/cpio/client_providers/private_key_client_provider/src/private_key_client_utils.cc#L72
           keyEncryptionKeyUri: keyEncryptionKeyUriPrefix + wrapperKey.kid,
           keyMaterial: JSON.stringify({
             encryptedKeyset: wrappedB64, // This should be base64 encoded encrypted proto bytes of tink.
