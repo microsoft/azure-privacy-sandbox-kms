@@ -81,7 +81,7 @@ Start the demo and e22 tests by running `make demo` in the `kms` path.
 This part of the demo has started the network and deployed the app. The network is running with 3 members and 1 user, and the app is deployed with the constitution defined [here](../governance/constitution/), which means that all members have equal votes on decisions, and a majority of approval votes is required to advance proposals. All members have been activated.
 
 ```bash
-export WORKSPACE=./workspace
+export WORKSPACE=${PWD}/workspace
 make demo
 ▶️ Starting sandbox...
 💤 Waiting for sandbox . . . (23318)
@@ -93,7 +93,7 @@ Running TypeScript flow...
 ## Start only KMS in sandbox
 
 ```
-export WORKSPACE=./workspace
+export WORKSPACE=${PWD}/workspace
 make start-host
 ```
 
@@ -102,10 +102,9 @@ make start-host
 ### Add claims
 
 ```
-export WORKSPACE=./workspace
-export CCF_WORKSPACE=.
+export WORKSPACE=${PWD}/workspace
 export KMS_URL=https://127.0.0.1:8000
-export KEYS_DIR="$CCF_WORKSPACE"/workspace/sandbox_common
+export KEYS_DIR="$WORKSPACE"/sandbox_common
 make propose-add-key-release-policy
 ```
 
@@ -118,19 +117,15 @@ make propose-rm-key-release-policy
 ### Script to setup policies and generate a key
 
 ```
-export WORKSPACE=./workspace
-export CCF_WORKSPACE=.
+export WORKSPACE=${PWD}/workspace
 export KMS_URL=https://127.0.0.1:8000
-export KEYS_DIR="$CCF_WORKSPACE"/workspace/sandbox_common
+export KEYS_DIR="$WORKSPACE"/sandbox_common
 make setup
 ```
 
 ## Manual tests
 
 ```
-# This is the path to CCF sandbox's working directory
-export CCF_WORKSPACE=.
-export KMS_URL=https://127.0.0.1:8000
 # Generate a new key item
 curl ${KMS_URL}/app/refresh -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -i  -w '\n'
 
