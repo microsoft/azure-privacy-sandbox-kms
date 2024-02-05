@@ -21,14 +21,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type {
-  BinaryReadOptions,
-  FieldList,
-  JsonReadOptions,
-  JsonValue,
-  PartialMessage,
-  PlainMessage,
-} from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
 
 /**
@@ -114,17 +107,13 @@ export enum OutputPrefixType {
   CRUNCHY = 4,
 }
 // Retrieve enum metadata with: proto3.getEnumType(OutputPrefixType)
-proto3.util.setEnumType(
-  OutputPrefixType,
-  "google.crypto.tink.OutputPrefixType",
-  [
-    { no: 0, name: "UNKNOWN_PREFIX" },
-    { no: 1, name: "TINK" },
-    { no: 2, name: "LEGACY" },
-    { no: 3, name: "RAW" },
-    { no: 4, name: "CRUNCHY" },
-  ],
-);
+proto3.util.setEnumType(OutputPrefixType, "google.crypto.tink.OutputPrefixType", [
+  { no: 0, name: "UNKNOWN_PREFIX" },
+  { no: 1, name: "TINK" },
+  { no: 2, name: "LEGACY" },
+  { no: 3, name: "RAW" },
+  { no: 4, name: "CRUNCHY" },
+]);
 
 /**
  * @generated from message google.crypto.tink.KeyTemplate
@@ -165,39 +154,22 @@ export class KeyTemplate extends Message<KeyTemplate> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "type_url", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "value", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    {
-      no: 3,
-      name: "output_prefix_type",
-      kind: "enum",
-      T: proto3.getEnumType(OutputPrefixType),
-    },
+    { no: 3, name: "output_prefix_type", kind: "enum", T: proto3.getEnumType(OutputPrefixType) },
   ]);
 
-  static fromBinary(
-    bytes: Uint8Array,
-    options?: Partial<BinaryReadOptions>,
-  ): KeyTemplate {
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): KeyTemplate {
     return new KeyTemplate().fromBinary(bytes, options);
   }
 
-  static fromJson(
-    jsonValue: JsonValue,
-    options?: Partial<JsonReadOptions>,
-  ): KeyTemplate {
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): KeyTemplate {
     return new KeyTemplate().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(
-    jsonString: string,
-    options?: Partial<JsonReadOptions>,
-  ): KeyTemplate {
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): KeyTemplate {
     return new KeyTemplate().fromJsonString(jsonString, options);
   }
 
-  static equals(
-    a: KeyTemplate | PlainMessage<KeyTemplate> | undefined,
-    b: KeyTemplate | PlainMessage<KeyTemplate> | undefined,
-  ): boolean {
+  static equals(a: KeyTemplate | PlainMessage<KeyTemplate> | undefined, b: KeyTemplate | PlainMessage<KeyTemplate> | undefined): boolean {
     return proto3.util.equals(KeyTemplate, a, b);
   }
 }
@@ -247,39 +219,22 @@ export class KeyData extends Message<KeyData> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "type_url", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "value", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
-    {
-      no: 3,
-      name: "key_material_type",
-      kind: "enum",
-      T: proto3.getEnumType(KeyData_KeyMaterialType),
-    },
+    { no: 3, name: "key_material_type", kind: "enum", T: proto3.getEnumType(KeyData_KeyMaterialType) },
   ]);
 
-  static fromBinary(
-    bytes: Uint8Array,
-    options?: Partial<BinaryReadOptions>,
-  ): KeyData {
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): KeyData {
     return new KeyData().fromBinary(bytes, options);
   }
 
-  static fromJson(
-    jsonValue: JsonValue,
-    options?: Partial<JsonReadOptions>,
-  ): KeyData {
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): KeyData {
     return new KeyData().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(
-    jsonString: string,
-    options?: Partial<JsonReadOptions>,
-  ): KeyData {
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): KeyData {
     return new KeyData().fromJsonString(jsonString, options);
   }
 
-  static equals(
-    a: KeyData | PlainMessage<KeyData> | undefined,
-    b: KeyData | PlainMessage<KeyData> | undefined,
-  ): boolean {
+  static equals(a: KeyData | PlainMessage<KeyData> | undefined, b: KeyData | PlainMessage<KeyData> | undefined): boolean {
     return proto3.util.equals(KeyData, a, b);
   }
 }
@@ -316,17 +271,13 @@ export enum KeyData_KeyMaterialType {
   REMOTE = 4,
 }
 // Retrieve enum metadata with: proto3.getEnumType(KeyData_KeyMaterialType)
-proto3.util.setEnumType(
-  KeyData_KeyMaterialType,
-  "google.crypto.tink.KeyData.KeyMaterialType",
-  [
-    { no: 0, name: "UNKNOWN_KEYMATERIAL" },
-    { no: 1, name: "SYMMETRIC" },
-    { no: 2, name: "ASYMMETRIC_PRIVATE" },
-    { no: 3, name: "ASYMMETRIC_PUBLIC" },
-    { no: 4, name: "REMOTE" },
-  ],
-);
+proto3.util.setEnumType(KeyData_KeyMaterialType, "google.crypto.tink.KeyData.KeyMaterialType", [
+  { no: 0, name: "UNKNOWN_KEYMATERIAL" },
+  { no: 1, name: "SYMMETRIC" },
+  { no: 2, name: "ASYMMETRIC_PRIVATE" },
+  { no: 3, name: "ASYMMETRIC_PUBLIC" },
+  { no: 4, name: "REMOTE" },
+]);
 
 /**
  * A Tink user works usually not with single keys, but with keysets,
@@ -361,40 +312,23 @@ export class Keyset extends Message<Keyset> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "google.crypto.tink.Keyset";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    {
-      no: 1,
-      name: "primary_key_id",
-      kind: "scalar",
-      T: 13 /* ScalarType.UINT32 */,
-    },
+    { no: 1, name: "primary_key_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 2, name: "key", kind: "message", T: Keyset_Key, repeated: true },
   ]);
 
-  static fromBinary(
-    bytes: Uint8Array,
-    options?: Partial<BinaryReadOptions>,
-  ): Keyset {
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Keyset {
     return new Keyset().fromBinary(bytes, options);
   }
 
-  static fromJson(
-    jsonValue: JsonValue,
-    options?: Partial<JsonReadOptions>,
-  ): Keyset {
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Keyset {
     return new Keyset().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(
-    jsonString: string,
-    options?: Partial<JsonReadOptions>,
-  ): Keyset {
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Keyset {
     return new Keyset().fromJsonString(jsonString, options);
   }
 
-  static equals(
-    a: Keyset | PlainMessage<Keyset> | undefined,
-    b: Keyset | PlainMessage<Keyset> | undefined,
-  ): boolean {
+  static equals(a: Keyset | PlainMessage<Keyset> | undefined, b: Keyset | PlainMessage<Keyset> | undefined): boolean {
     return proto3.util.equals(Keyset, a, b);
   }
 }
@@ -441,46 +375,24 @@ export class Keyset_Key extends Message<Keyset_Key> {
   static readonly typeName = "google.crypto.tink.Keyset.Key";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "key_data", kind: "message", T: KeyData },
-    {
-      no: 2,
-      name: "status",
-      kind: "enum",
-      T: proto3.getEnumType(KeyStatusType),
-    },
+    { no: 2, name: "status", kind: "enum", T: proto3.getEnumType(KeyStatusType) },
     { no: 3, name: "key_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    {
-      no: 4,
-      name: "output_prefix_type",
-      kind: "enum",
-      T: proto3.getEnumType(OutputPrefixType),
-    },
+    { no: 4, name: "output_prefix_type", kind: "enum", T: proto3.getEnumType(OutputPrefixType) },
   ]);
 
-  static fromBinary(
-    bytes: Uint8Array,
-    options?: Partial<BinaryReadOptions>,
-  ): Keyset_Key {
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Keyset_Key {
     return new Keyset_Key().fromBinary(bytes, options);
   }
 
-  static fromJson(
-    jsonValue: JsonValue,
-    options?: Partial<JsonReadOptions>,
-  ): Keyset_Key {
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Keyset_Key {
     return new Keyset_Key().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(
-    jsonString: string,
-    options?: Partial<JsonReadOptions>,
-  ): Keyset_Key {
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Keyset_Key {
     return new Keyset_Key().fromJsonString(jsonString, options);
   }
 
-  static equals(
-    a: Keyset_Key | PlainMessage<Keyset_Key> | undefined,
-    b: Keyset_Key | PlainMessage<Keyset_Key> | undefined,
-  ): boolean {
+  static equals(a: Keyset_Key | PlainMessage<Keyset_Key> | undefined, b: Keyset_Key | PlainMessage<Keyset_Key> | undefined): boolean {
     return proto3.util.equals(Keyset_Key, a, b);
   }
 }
@@ -516,46 +428,23 @@ export class KeysetInfo extends Message<KeysetInfo> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "google.crypto.tink.KeysetInfo";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    {
-      no: 1,
-      name: "primary_key_id",
-      kind: "scalar",
-      T: 13 /* ScalarType.UINT32 */,
-    },
-    {
-      no: 2,
-      name: "key_info",
-      kind: "message",
-      T: KeysetInfo_KeyInfo,
-      repeated: true,
-    },
+    { no: 1, name: "primary_key_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: "key_info", kind: "message", T: KeysetInfo_KeyInfo, repeated: true },
   ]);
 
-  static fromBinary(
-    bytes: Uint8Array,
-    options?: Partial<BinaryReadOptions>,
-  ): KeysetInfo {
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): KeysetInfo {
     return new KeysetInfo().fromBinary(bytes, options);
   }
 
-  static fromJson(
-    jsonValue: JsonValue,
-    options?: Partial<JsonReadOptions>,
-  ): KeysetInfo {
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): KeysetInfo {
     return new KeysetInfo().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(
-    jsonString: string,
-    options?: Partial<JsonReadOptions>,
-  ): KeysetInfo {
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): KeysetInfo {
     return new KeysetInfo().fromJsonString(jsonString, options);
   }
 
-  static equals(
-    a: KeysetInfo | PlainMessage<KeysetInfo> | undefined,
-    b: KeysetInfo | PlainMessage<KeysetInfo> | undefined,
-  ): boolean {
+  static equals(a: KeysetInfo | PlainMessage<KeysetInfo> | undefined, b: KeysetInfo | PlainMessage<KeysetInfo> | undefined): boolean {
     return proto3.util.equals(KeysetInfo, a, b);
   }
 }
@@ -602,46 +491,24 @@ export class KeysetInfo_KeyInfo extends Message<KeysetInfo_KeyInfo> {
   static readonly typeName = "google.crypto.tink.KeysetInfo.KeyInfo";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "type_url", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    {
-      no: 2,
-      name: "status",
-      kind: "enum",
-      T: proto3.getEnumType(KeyStatusType),
-    },
+    { no: 2, name: "status", kind: "enum", T: proto3.getEnumType(KeyStatusType) },
     { no: 3, name: "key_id", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
-    {
-      no: 4,
-      name: "output_prefix_type",
-      kind: "enum",
-      T: proto3.getEnumType(OutputPrefixType),
-    },
+    { no: 4, name: "output_prefix_type", kind: "enum", T: proto3.getEnumType(OutputPrefixType) },
   ]);
 
-  static fromBinary(
-    bytes: Uint8Array,
-    options?: Partial<BinaryReadOptions>,
-  ): KeysetInfo_KeyInfo {
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): KeysetInfo_KeyInfo {
     return new KeysetInfo_KeyInfo().fromBinary(bytes, options);
   }
 
-  static fromJson(
-    jsonValue: JsonValue,
-    options?: Partial<JsonReadOptions>,
-  ): KeysetInfo_KeyInfo {
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): KeysetInfo_KeyInfo {
     return new KeysetInfo_KeyInfo().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(
-    jsonString: string,
-    options?: Partial<JsonReadOptions>,
-  ): KeysetInfo_KeyInfo {
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): KeysetInfo_KeyInfo {
     return new KeysetInfo_KeyInfo().fromJsonString(jsonString, options);
   }
 
-  static equals(
-    a: KeysetInfo_KeyInfo | PlainMessage<KeysetInfo_KeyInfo> | undefined,
-    b: KeysetInfo_KeyInfo | PlainMessage<KeysetInfo_KeyInfo> | undefined,
-  ): boolean {
+  static equals(a: KeysetInfo_KeyInfo | PlainMessage<KeysetInfo_KeyInfo> | undefined, b: KeysetInfo_KeyInfo | PlainMessage<KeysetInfo_KeyInfo> | undefined): boolean {
     return proto3.util.equals(KeysetInfo_KeyInfo, a, b);
   }
 }
@@ -674,40 +541,24 @@ export class EncryptedKeyset extends Message<EncryptedKeyset> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "google.crypto.tink.EncryptedKeyset";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    {
-      no: 2,
-      name: "encrypted_keyset",
-      kind: "scalar",
-      T: 12 /* ScalarType.BYTES */,
-    },
+    { no: 2, name: "encrypted_keyset", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
     { no: 3, name: "keyset_info", kind: "message", T: KeysetInfo },
   ]);
 
-  static fromBinary(
-    bytes: Uint8Array,
-    options?: Partial<BinaryReadOptions>,
-  ): EncryptedKeyset {
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): EncryptedKeyset {
     return new EncryptedKeyset().fromBinary(bytes, options);
   }
 
-  static fromJson(
-    jsonValue: JsonValue,
-    options?: Partial<JsonReadOptions>,
-  ): EncryptedKeyset {
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): EncryptedKeyset {
     return new EncryptedKeyset().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(
-    jsonString: string,
-    options?: Partial<JsonReadOptions>,
-  ): EncryptedKeyset {
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): EncryptedKeyset {
     return new EncryptedKeyset().fromJsonString(jsonString, options);
   }
 
-  static equals(
-    a: EncryptedKeyset | PlainMessage<EncryptedKeyset> | undefined,
-    b: EncryptedKeyset | PlainMessage<EncryptedKeyset> | undefined,
-  ): boolean {
+  static equals(a: EncryptedKeyset | PlainMessage<EncryptedKeyset> | undefined, b: EncryptedKeyset | PlainMessage<EncryptedKeyset> | undefined): boolean {
     return proto3.util.equals(EncryptedKeyset, a, b);
   }
 }
+
