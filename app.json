@@ -31,12 +31,12 @@
         "parameters": [
           {
             "in": "query",
-            "name": "kid",           
+            "name": "kid",
             "required": false
           },
           {
             "in": "query",
-            "name": "fmt",           
+            "name": "fmt",
             "required": false
           }
         ],
@@ -191,12 +191,12 @@
         "parameters": [
           {
             "in": "query",
-            "name": "kid",           
+            "name": "kid",
             "required": false
           },
           {
             "in": "query",
-            "name": "fmt",           
+            "name": "fmt",
             "required": false
           }
         ],
