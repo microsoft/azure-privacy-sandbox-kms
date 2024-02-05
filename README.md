@@ -169,7 +169,18 @@ curl $KMS_URL/app/key_release_policy --cacert ${KEYS_DIR}/service_cert.pem --cer
 # Get receipt
 curl $KMS_URL/receipt?transaction_id=2.20 --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -i  -w '\n'
 ```
-
+## Access Tokens
+The manual curl test work with certificates. In this section we will use access tokens.
+### Start sample identity provider and kms
+```
+export AadEndpoint=http://localhost:3000/token
+make start-host-idp
+```
+### Test identity provier in seperate terminal
+```
+export AadEndpoint=http://localhost:3000/token
+./scripts/generate_access_token.sh 
+```
 # Privacy Sandbox
 
 ## Signing

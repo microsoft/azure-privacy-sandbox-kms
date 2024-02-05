@@ -25,11 +25,9 @@ set -euo pipefail
 # if a .env exists then source it
 if [ -f aad.env ]; then
   source aad.env
-else
-    echo "No aad.env file found. Run make deploy-ms-idp."
-    exit 1
 fi
 
-curl -X POST https://login.microsoftonline.com/$TenantId/oauth2/v2.0/token \
-	-H "Content-Type: application/x-www-form-urlencoded" \
-	-d "client_id=$ClientApplicationId&client_secret=$ClientSecret&scope=$ApiIdentifierUri/.default&grant_type=client_credentials"
+curl -X POST ${AadEndpoint} \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    -d "client_id=${ClientApplicationId:-}&client_secret=${ClientSecret:-}&scope=${ApiIdentifierUri:-}/.default&grant_type=client_credentials" \
+    -w "\n"

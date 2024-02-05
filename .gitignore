@@ -8,3 +8,4 @@ workspace
 hello/
 ccf-app/
 nohup.out
+aad.env

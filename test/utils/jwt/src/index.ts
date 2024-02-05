@@ -15,6 +15,7 @@ const certificatePath = `${process.env.WORKSPACE}/cert.pem`;
 const kid = "Demo IDP kid";
 const hostPort = 3000;
 const host = `http://localhost:${hostPort}`;
+const expiry = 1000;
 
 const createProposalsFolder = async (): Promise<void> => {
   console.log(`Create proposals path: ${proposalsPath}`);
@@ -60,8 +61,12 @@ app.post("/token", (req: Request, res: Response) => {
     exp: Math.floor(Date.now() / 1000) + 60 * 60, // expires in 1 hour
   };
 
-  const token = jwt.sign(payload, privateKey, { algorithm: "RS256" });
-  res.send({ token });
+  const access_token = jwt.sign(payload, privateKey, { algorithm: "RS256" });
+  res.send({ 
+    token_type: "bearer",
+    expires_in: expiry,
+    ext_expires_in: expiry,
+    access_token });
 });
 
 // Get the public key metadata.
