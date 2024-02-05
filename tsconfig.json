@@ -10,7 +10,7 @@
     "preserveConstEnums": true,
     "sourceMap": false,
     "resolveJsonModule": true,
-    "types": ["@types/node"],
+    "types": ["@types/node"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*"]
 }

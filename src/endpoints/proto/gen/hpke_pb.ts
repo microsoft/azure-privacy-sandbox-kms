@@ -19,7 +19,14 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
+import type {
+  BinaryReadOptions,
+  FieldList,
+  JsonReadOptions,
+  JsonValue,
+  PartialMessage,
+  PlainMessage,
+} from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
 
 /**
@@ -156,19 +163,31 @@ export class HpkeParams extends Message<HpkeParams> {
     { no: 3, name: "aead", kind: "enum", T: proto3.getEnumType(HpkeAead) },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): HpkeParams {
+  static fromBinary(
+    bytes: Uint8Array,
+    options?: Partial<BinaryReadOptions>,
+  ): HpkeParams {
     return new HpkeParams().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): HpkeParams {
+  static fromJson(
+    jsonValue: JsonValue,
+    options?: Partial<JsonReadOptions>,
+  ): HpkeParams {
     return new HpkeParams().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): HpkeParams {
+  static fromJsonString(
+    jsonString: string,
+    options?: Partial<JsonReadOptions>,
+  ): HpkeParams {
     return new HpkeParams().fromJsonString(jsonString, options);
   }
 
-  static equals(a: HpkeParams | PlainMessage<HpkeParams> | undefined, b: HpkeParams | PlainMessage<HpkeParams> | undefined): boolean {
+  static equals(
+    a: HpkeParams | PlainMessage<HpkeParams> | undefined,
+    b: HpkeParams | PlainMessage<HpkeParams> | undefined,
+  ): boolean {
     return proto3.util.equals(HpkeParams, a, b);
   }
 }
@@ -208,19 +227,31 @@ export class HpkePublicKey extends Message<HpkePublicKey> {
     { no: 3, name: "public_key", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): HpkePublicKey {
+  static fromBinary(
+    bytes: Uint8Array,
+    options?: Partial<BinaryReadOptions>,
+  ): HpkePublicKey {
     return new HpkePublicKey().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): HpkePublicKey {
+  static fromJson(
+    jsonValue: JsonValue,
+    options?: Partial<JsonReadOptions>,
+  ): HpkePublicKey {
     return new HpkePublicKey().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): HpkePublicKey {
+  static fromJsonString(
+    jsonString: string,
+    options?: Partial<JsonReadOptions>,
+  ): HpkePublicKey {
     return new HpkePublicKey().fromJsonString(jsonString, options);
   }
 
-  static equals(a: HpkePublicKey | PlainMessage<HpkePublicKey> | undefined, b: HpkePublicKey | PlainMessage<HpkePublicKey> | undefined): boolean {
+  static equals(
+    a: HpkePublicKey | PlainMessage<HpkePublicKey> | undefined,
+    b: HpkePublicKey | PlainMessage<HpkePublicKey> | undefined,
+  ): boolean {
     return proto3.util.equals(HpkePublicKey, a, b);
   }
 }
@@ -257,22 +288,39 @@ export class HpkePrivateKey extends Message<HpkePrivateKey> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "version", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 2, name: "public_key", kind: "message", T: HpkePublicKey },
-    { no: 3, name: "private_key", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    {
+      no: 3,
+      name: "private_key",
+      kind: "scalar",
+      T: 12 /* ScalarType.BYTES */,
+    },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): HpkePrivateKey {
+  static fromBinary(
+    bytes: Uint8Array,
+    options?: Partial<BinaryReadOptions>,
+  ): HpkePrivateKey {
     return new HpkePrivateKey().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): HpkePrivateKey {
+  static fromJson(
+    jsonValue: JsonValue,
+    options?: Partial<JsonReadOptions>,
+  ): HpkePrivateKey {
     return new HpkePrivateKey().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): HpkePrivateKey {
+  static fromJsonString(
+    jsonString: string,
+    options?: Partial<JsonReadOptions>,
+  ): HpkePrivateKey {
     return new HpkePrivateKey().fromJsonString(jsonString, options);
   }
 
-  static equals(a: HpkePrivateKey | PlainMessage<HpkePrivateKey> | undefined, b: HpkePrivateKey | PlainMessage<HpkePrivateKey> | undefined): boolean {
+  static equals(
+    a: HpkePrivateKey | PlainMessage<HpkePrivateKey> | undefined,
+    b: HpkePrivateKey | PlainMessage<HpkePrivateKey> | undefined,
+  ): boolean {
     return proto3.util.equals(HpkePrivateKey, a, b);
   }
 }
@@ -297,20 +345,31 @@ export class HpkeKeyFormat extends Message<HpkeKeyFormat> {
     { no: 1, name: "params", kind: "message", T: HpkeParams },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): HpkeKeyFormat {
+  static fromBinary(
+    bytes: Uint8Array,
+    options?: Partial<BinaryReadOptions>,
+  ): HpkeKeyFormat {
     return new HpkeKeyFormat().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): HpkeKeyFormat {
+  static fromJson(
+    jsonValue: JsonValue,
+    options?: Partial<JsonReadOptions>,
+  ): HpkeKeyFormat {
     return new HpkeKeyFormat().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): HpkeKeyFormat {
+  static fromJsonString(
+    jsonString: string,
+    options?: Partial<JsonReadOptions>,
+  ): HpkeKeyFormat {
     return new HpkeKeyFormat().fromJsonString(jsonString, options);
   }
 
-  static equals(a: HpkeKeyFormat | PlainMessage<HpkeKeyFormat> | undefined, b: HpkeKeyFormat | PlainMessage<HpkeKeyFormat> | undefined): boolean {
+  static equals(
+    a: HpkeKeyFormat | PlainMessage<HpkeKeyFormat> | undefined,
+    b: HpkeKeyFormat | PlainMessage<HpkeKeyFormat> | undefined,
+  ): boolean {
     return proto3.util.equals(HpkeKeyFormat, a, b);
   }
 }
-
