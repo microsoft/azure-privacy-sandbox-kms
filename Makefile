@@ -5,11 +5,12 @@ WORKSPACE ?= ${PWD}/workspace
 KMS_URL ?= https://127.0.0.1:8000
 KEYS_DIR ?= ${WORKSPACE}/sandbox_common
 RUN_BACK ?= false
+CCF_PLATFORM ?= virtual
 
 ifeq ($(INSTALL),local)
     CCFSB=../../CCF/tests/sandbox
 else
-    CCFSB=/opt/ccf_virtual/bin
+    CCFSB=/opt/ccf_${CCF_PLATFORM}/bin
 endif
 
 .PHONY: help
@@ -25,7 +26,7 @@ build: ## 🔨 Build the Application
 
 setup: ## Setup proposals and generate an initial key
 	@echo -e "\e[34m$@\e[0m" || true
-	./scripts/kms_setup.sh --network-url "${KMS_URL}"  --certificate_dir "${KEYS_DIR}"
+	CCF_PLATFORM=${CCF_PLATFORM} ./scripts/kms_setup.sh --network-url "${KMS_URL}"  --certificate_dir "${KEYS_DIR}"
 
 stop-host:  ## 🏃 Stop the host
 	@echo -e "\e[34m$@\e[0m" || true
@@ -59,32 +60,32 @@ start-host-idp: stop-idp start-idp build ## 🏃 Start the CCF network && idp us
 
 demo: build ## 🎬 Demo the KMS Application in the Sandbox
 	@echo -e "\e[34m$@\e[0m" || true
-	@. ./scripts/test_sandbox.sh --nodeAddress 127.0.0.1:8000 --certificate_dir ${WORKSPACE}/sandbox_common --constitution ./governance/constitution/kms_actions.js
+	@. CCF_PLATFORM=${CCF_PLATFORM} ./scripts/test_sandbox.sh --nodeAddress 127.0.0.1:8000 --certificate_dir ${WORKSPACE}/sandbox_common --constitution ./governance/constitution/kms_actions.js
 
 # Propose a new key release policy
 propose-add-key-release-policy: ## 🚀 Deploy the add claim key release policy to the sandbox or mCCF
 	@echo -e "\e[34m$@\e[0m" || true
-	@. ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/policies/key-release-policy-add.json --certificate_dir "${KEYS_DIR}" --member-count 2
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/policies/key-release-policy-add.json --certificate_dir "${KEYS_DIR}" --member-count 2
 
 propose-rm-key-release-policy: ## 🚀 Deploy the remove claim key release policy to the sandbox or mCCF
 	@echo -e "\e[34m$@\e[0m" || true
 	$(call check_defined, KMS_URL)
-	@./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/policies/key-release-policy-remove.json --certificate_dir "${KEYS_DIR}"
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/policies/key-release-policy-remove.json --certificate_dir "${KEYS_DIR}"
 
 # Propose a new idp
 propose-idp: ## 🚀 Propose the sample idp
 	@echo -e "\e[34m$@\e[0m" || true
-	@. ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ${WORKSPACE}/proposals/set_jwt_issuer_test_proposal.json --certificate_dir "${KEYS_DIR}" --member-count 2
+	@. CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ${WORKSPACE}/proposals/set_jwt_issuer_test_proposal.json --certificate_dir "${KEYS_DIR}" --member-count 2
 
 
 # The following are here in case you forget to change directory!
 deploy: build ## 🚀 Deploy Managed CCF or local
 	@echo -e "\e[34m$@\e[0m" || true
-	@./scripts/deploy.sh --network-url "${KMS_URL}"  --certificate_dir "${KEYS_DIR}"
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/deploy.sh --network-url "${KMS_URL}"  --certificate_dir "${KEYS_DIR}"
 
 lint: ## 🔍 Lint the code base (but don't fix)
 	@echo -e "\e[34m$@\e[0m" || true
-	@./scripts/lint.sh
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/lint.sh
 	
 # Keep this at the bottom.
 clean: ## 🧹 Clean the working folders created during build/demo

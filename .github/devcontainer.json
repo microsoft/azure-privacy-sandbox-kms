@@ -2,15 +2,15 @@
   "name": "KMS Dev",
   "build": {
     "dockerfile": "Dockerfile.ci",
-    "context": "..",
+    "context": ".."
   },
   "postCreateCommand": "cd /workspaces/azure-privacy-sandbox-kms && npm i && make build",
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       "version": "latest",
       "enableNonRootDocker": "true",
-      "moby": "true",
+      "moby": "true"
     },
-    "ghcr.io/devcontainers/features/common-utils:2": {},
-  },
+    "ghcr.io/devcontainers/features/common-utils:2": {}
+  }
 }

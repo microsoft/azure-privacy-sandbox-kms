@@ -35,7 +35,7 @@ echo "-- TypeScript, JavaScript, Markdown, YAML and JSON format"
 # Use same format as https://github.com/microsoft/CCF/blob/main/scripts/ci-checks.sh 
 npm install --loglevel=error --no-save prettier 1>/dev/null
 if [ "$MODE" == "fix" ]; then
-    git ls-files | grep -e '\.ts$' -e '\.js$' -e '\.md$' -e '\.yaml$' -e '\.yml$' -e '\.json$' | xargs npx prettier --write
+    git ls-files | grep -e '\.ts$' -e '\.js$' -e '\.md$' -e '\.yaml$' -e '\.yml$' -e '\.json$' | grep -v 'gen/.*' | xargs npx prettier --write
 else
-    git ls-files | grep -e '\.ts$' -e '\.js$' -e '\.md$' -e '\.yaml$' -e '\.yml$' -e '\.json$' | xargs npx prettier --check
+    git ls-files | grep -e '\.ts$' -e '\.js$' -e '\.md$' -e '\.yaml$' -e '\.yml$' -e '\.json$' | grep -v 'gen/.*' | xargs npx prettier --check
 fi
