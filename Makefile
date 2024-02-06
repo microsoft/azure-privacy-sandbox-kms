@@ -60,7 +60,7 @@ start-host-idp: stop-idp start-idp build ## 🏃 Start the CCF network && idp us
 
 demo: build ## 🎬 Demo the KMS Application in the Sandbox
 	@echo -e "\e[34m$@\e[0m" || true
-	@. CCF_PLATFORM=${CCF_PLATFORM} ./scripts/test_sandbox.sh --nodeAddress 127.0.0.1:8000 --certificate_dir ${WORKSPACE}/sandbox_common --constitution ./governance/constitution/kms_actions.js
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/test_sandbox.sh --nodeAddress 127.0.0.1:8000 --certificate_dir ${WORKSPACE}/sandbox_common --constitution ./governance/constitution/kms_actions.js
 
 # Propose a new key release policy
 propose-add-key-release-policy: ## 🚀 Deploy the add claim key release policy to the sandbox or mCCF

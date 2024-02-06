@@ -25,3 +25,5 @@ jobs:
           configFile: .github/devcontainer.json
           runCmd: |
             make demo
+        env:
+          WORKSPACE: ./workspace

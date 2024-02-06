@@ -70,7 +70,7 @@ do
     sleep 1
 done
 
-# DataReconciliation test flow goes through TypeScript application located in ./test/e2e-test
+# KMA test flow goes through TypeScript application located in ./test/e2e-test
 echo "Running TypeScript flow..."
 
 # adding read permission to .pem files so node application can have access
