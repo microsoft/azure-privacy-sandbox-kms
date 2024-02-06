@@ -7,7 +7,7 @@ services:
     build:
       context: .
       dockerfile: .devcontainer/Dockerfile.devcontainer
-    command: /opt/ccf_virtual/bin/sandbox.sh -v --js-app-bundle ./dist/ -n local://0.0.0.0:8000 -n local://0.0.0.0:8001
+    command: /opt/ccf_${CCF_PLATFORM:-"virtual"}/bin/sandbox.sh -v --js-app-bundle ./dist/ -n local://0.0.0.0:8000 -n local://0.0.0.0:8001
     #command: tail -f /dev/null
     volumes:
       - ./vol/workspace:/app/workspace
@@ -26,6 +26,7 @@ networks:
       driver: default
       config:
         - subnet: ${DOCKER_SUBNET}
+
 #volumes:
 #  debug:
 #  pgdata-audit:

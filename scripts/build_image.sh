@@ -4,7 +4,7 @@
 # Licensed under the MIT license.
 set -euo pipefail
 
-ccf_prefix=/opt/ccf_virtual/bin
+ccf_prefix=/opt/ccf_${CCF_PLATFORM:-"virtual"}/bin
 
 if [ $# -eq 0 ]
   then
