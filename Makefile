@@ -4,6 +4,7 @@ PYTHON_VENV := .venv_ccf_sandbox
 WORKSPACE ?= ${PWD}/workspace
 KMS_URL ?= https://127.0.0.1:8000
 KEYS_DIR ?= ${WORKSPACE}/sandbox_common
+RUN_BACK ?= false
 
 ifeq ($(INSTALL),local)
     CCFSB=../../CCF/tests/sandbox
@@ -24,27 +25,37 @@ build: ## 🔨 Build the Application
 
 setup: ## Setup proposals and generate an initial key
 	@echo -e "\e[34m$@\e[0m" || true
-	WORKSPACE=${PWD}/workspace; \
-	export WORKSPACE; \
 	./scripts/kms_setup.sh --network-url "${KMS_URL}"  --certificate_dir "${KEYS_DIR}"
-		
+
+stop-host:  ## 🏃 Stop the host
+	@echo -e "\e[34m$@\e[0m" || true
+	sudo lsof -t -i :8000 | xargs -r sudo kill -9
+
+stop-idp:  ## 🏃 Stop the idp
+	@echo -e "\e[34m$@\e[0m" || true
+	sudo lsof -t -i :3000 | xargs -r sudo kill -9
+	
+stop-all: stop-host stop-idp # Stop all services
+	@echo -e "\e[34m$@\e[0m" || true
+	
 # idp commands to issue JWT
 start-idp:  ## 🏃 Start the idp for testing jwt
 	@echo -e "\e[34m$@\e[0m" || true
 	cd test/utils/jwt && nohup npm run start  &
 
-stop-idp:  ## 🏃 Stop the idp
-	@echo -e "\e[34m$@\e[0m" || true
-	sudo lsof -t -i :3000 | xargs -r sudo kill -9
-
 # Start hosting the application using `sandbox.sh` and enable custom JWT authentication
-start-host: build  ## 🏃 Start the CCF network using Sandbox.sh
+start-host: stop-host build  ## 🏃 Start the CCF network using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
 	$(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count 3 --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js  -v $(extra_args)
 
 start-host-idp: stop-idp start-idp build ## 🏃 Start the CCF network && idp using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
-	$(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count 3 --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js	--jwt-issuer ${WORKSPACE}/proposals/set_jwt_issuer_test_sandbox.json  -v $(extra_args)
+	@echo "Executing: $(COMMAND)"
+	if [ "$(RUN_BACK)" = "true" ]; then \
+		 env -i PATH=${PATH} WORKSPACE=${WORKSPACE} $(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count 3 --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js --jwt-issuer ${WORKSPACE}/proposals/set_jwt_issuer_test_sandbox.json  -v $(extra_args) & \
+	else \
+		 env -i PATH=${PATH} WORKSPACE=${WORKSPACE} $(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count 3 --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js --jwt-issuer ${WORKSPACE}/proposals/set_jwt_issuer_test_sandbox.json  -v $(extra_args); \
+	fi
 
 demo: build ## 🎬 Demo the KMS Application in the Sandbox
 	@echo -e "\e[34m$@\e[0m" || true

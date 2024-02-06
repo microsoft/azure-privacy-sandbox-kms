@@ -48,9 +48,9 @@ do
     shift;
 done
 
-echo $network_url
-echo $certificate_dir
-echo $proposal_file
+echo "network_url:" $network_url
+echo "certificate_dir: " $certificate_dir
+echo "proposal_file:" $proposal_file
 
 # validate parameters
 if [[ -z $network_url ]]; then

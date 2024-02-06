@@ -62,15 +62,9 @@ service_cert="$certificate_dir/service_cert.pem"
 signing_cert="$certificate_dir/member0_cert.pem"
 signing_key="$certificate_dir/member0_privk.pem"
 
-
-TMP_WORKSPACE=$WORKSPACE
-unset WORKSPACE
-
 # Add key release policy
 source .venv_ccf_sandbox/bin/activate
 make propose-add-key-release-policy
 
 # Generate a new key item
 curl ${network_url}/app/refresh -X POST --cacert $service_cert --cert $signing_cert --key $signing_key -H "Content-Type: application/json" -i  -w '\n'
-
-export WORKSPACE=$TMP_WORKSPACE

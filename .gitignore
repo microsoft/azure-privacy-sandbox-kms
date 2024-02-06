@@ -9,3 +9,4 @@ hello/
 ccf-app/
 nohup.out
 aad.env
+*.log

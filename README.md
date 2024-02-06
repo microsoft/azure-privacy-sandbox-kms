@@ -173,7 +173,7 @@ curl $KMS_URL/receipt?transaction_id=2.20 --cacert ${KEYS_DIR}/service_cert.pem 
 The manual curl test work with certificates. In this section we will use access tokens.
 ### Start sample identity provider and kms
 ```
-export AadEndpoint=http://localhost:3000/token
+export WORKSPACE=${PWD}/workspace
 make start-host-idp
 ```
 ### Test identity provier in seperate terminal
