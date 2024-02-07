@@ -4,7 +4,7 @@ PYTHON_VENV := .venv_ccf_sandbox
 WORKSPACE ?= ${PWD}/workspace
 KMS_URL ?= https://127.0.0.1:8000
 KEYS_DIR ?= ${WORKSPACE}/sandbox_common
-RUN_BACK ?= false
+RUN_BACK ?= true
 CCF_PLATFORM ?= virtual
 
 ifeq ($(INSTALL),local)
@@ -49,7 +49,7 @@ start-host: stop-host build  ## 🏃 Start the CCF network using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
 	$(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count 3 --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js  -v $(extra_args)
 
-start-host-idp: stop-idp start-idp build ## 🏃 Start the CCF network && idp using Sandbox.sh
+start-host-idp: stop-host stop-idp start-idp build ## 🏃 Start the CCF network && idp using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
 	@echo "Executing: $(COMMAND)"
 	if [ "$(RUN_BACK)" = "true" ]; then \

@@ -51,9 +51,7 @@ const createProposalsFolder = async (): Promise<void> => {
 
 const app = express();
 let privateKey = fs.readFileSync(privateKeyPath);
-
-// Use POST simular as AAD. No body required.
-app.post("/token", (req: Request, res: Response) => {
+const token = (req: Request, res: Response) => {
   const payload = {
     sub: crypto.randomUUID(),
     name: crypto.randomUUID(),
@@ -67,7 +65,13 @@ app.post("/token", (req: Request, res: Response) => {
     expires_in: expiry,
     ext_expires_in: expiry,
     access_token });
-});
+}
+
+// Use POST simular as AAD. No body required.
+app.post("/token", token);
+
+// Endpoint for managed identities.
+app.get("/metadata/identity/oauth2/token", token);
 
 // Get the public key metadata.
 app.get("/keys", (req: Request, res: Response) => {
