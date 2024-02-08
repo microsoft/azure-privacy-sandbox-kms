@@ -47,15 +47,15 @@ start-idp:  ## 🏃 Start the idp for testing jwt
 # Start hosting the application using `sandbox.sh` and enable custom JWT authentication
 start-host: stop-host build  ## 🏃 Start the CCF network using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
-	$(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count 3 --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js  -v $(extra_args)
+	$(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count 3 --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js  -v --http2
 
 start-host-idp: stop-host stop-idp start-idp build ## 🏃 Start the CCF network && idp using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
 	@echo "Executing: $(COMMAND)"
 	if [ "$(RUN_BACK)" = "true" ]; then \
-		 env -i PATH=${PATH} WORKSPACE=${WORKSPACE} $(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count 3 --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js --jwt-issuer ${WORKSPACE}/proposals/set_jwt_issuer_test_sandbox.json  -v $(extra_args) & \
+		 env -i PATH=${PATH} WORKSPACE=${WORKSPACE} $(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count 3 --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js --jwt-issuer ${WORKSPACE}/proposals/set_jwt_issuer_test_sandbox.json  -v --http2 & \
 	else \
-		 env -i PATH=${PATH} WORKSPACE=${WORKSPACE} $(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count 3 --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js --jwt-issuer ${WORKSPACE}/proposals/set_jwt_issuer_test_sandbox.json  -v $(extra_args); \
+		 env -i PATH=${PATH} WORKSPACE=${WORKSPACE} $(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count 3 --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js --jwt-issuer ${WORKSPACE}/proposals/set_jwt_issuer_test_sandbox.json  -v --http2; \
 	fi
 
 demo: build ## 🎬 Demo the KMS Application in the Sandbox
@@ -75,7 +75,7 @@ propose-rm-key-release-policy: ## 🚀 Deploy the remove claim key release polic
 # Propose a new idp
 propose-idp: ## 🚀 Propose the sample idp
 	@echo -e "\e[34m$@\e[0m" || true
-	@. CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ${WORKSPACE}/proposals/set_jwt_issuer_test_proposal.json --certificate_dir "${KEYS_DIR}" --member-count 2
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ${WORKSPACE}/proposals/set_jwt_issuer_test_proposal.json --certificate_dir "${KEYS_DIR}" --member-count 2
 
 
 # The following are here in case you forget to change directory!

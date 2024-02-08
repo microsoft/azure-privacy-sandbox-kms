@@ -17,9 +17,8 @@ import { SnpAttestationClaims } from "../attestation/SnpAttestationClaims";
 import { KeyGeneration } from "./KeyGeneration";
 import { TinkKey, TinkPublicKey } from "./TinkKey";
 import { IWrapped, IWrappedJwt, KeyWrapper } from "./KeyWrapper";
-//import * as CertUtils from "../authorization/certs/CertUtils";
-//import { AuthenticationService } from "../authorization/AuthenticationService";
-export interface IValidatePolicy {
+import { AuthenticationService } from "../authorization/AuthenticationService";
+export interface IAttestationValidationResult {
   result: boolean;
   errorMessage?: string;
   statusCode: number;
@@ -56,7 +55,7 @@ const queryParams = (request: ccfapp.Request) => {
 };
 
 // Validate the attestation by means of the key release policy
-const validateAttestation = (attestation: ISnpAttestation): IValidatePolicy => {
+const validateAttestation = (attestation: ISnpAttestation): IAttestationValidationResult => {
   console.log(`Start attestation validation`);
   if (!attestation) {
     return {
@@ -643,9 +642,9 @@ export const refresh = (request: ccfapp.Request<void>) => {
     //const isMember = CertUtils.isMember(caller?.id);
     //console.log(`Authorization: isUser-> ${isUser}, isMember-> ${isMember}`);
     // check if caller has a valid identity
-    //const isValidIdentity = new AuthenticationService().isAuthenticated(request);
-    //console.log(`Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`);    
-    //if (isValidIdentity.failure) return isValidIdentity;//ApiResult.AuthFailure();
+    const isValidIdentity = new AuthenticationService().isAuthenticated(request);
+    console.log(`Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`);    
+    if (isValidIdentity.failure) return isValidIdentity;//ApiResult.AuthFailure();
 
     // Get HPKE key pair id
     const id = hpkeKeyIdMap.size + 1;
