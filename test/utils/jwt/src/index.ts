@@ -55,11 +55,12 @@ const token = (req: Request, res: Response) => {
   const payload = {
     sub: crypto.randomUUID(),
     name: crypto.randomUUID(),
+    nbf: Math.floor(Date.now() / 1000),
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(Date.now() / 1000) + 60 * 60, // expires in 1 hour
   };
 
-  const access_token = jwt.sign(payload, privateKey, { algorithm: "RS256" });
+  const access_token = jwt.sign(payload, privateKey, { algorithm: "RS256", keyid: kid });
   res.send({ 
     token_type: "bearer",
     expires_in: expiry,

@@ -17,7 +17,8 @@ import { SnpAttestationClaims } from "../attestation/SnpAttestationClaims";
 import { KeyGeneration } from "./KeyGeneration";
 import { TinkKey, TinkPublicKey } from "./TinkKey";
 import { IWrapped, IWrappedJwt, KeyWrapper } from "./KeyWrapper";
-
+import * as CertUtils from "../authorization/certs/CertUtils";
+import { AuthenticationService } from "../authorization/AuthenticationService";
 export interface IValidatePolicy {
   result: boolean;
   errorMessage?: string;
@@ -630,10 +631,22 @@ export const pubkey = (request: ccfapp.Request<void>) => {
     };
   }
 };
-
+interface Caller {
+  id: string;
+}
 // Generate new key pair and store it on the store
-export const refresh = () => {
+export const refresh = (request: ccfapp.Request<void>) => {
   try {
+    const caller = request.caller as unknown as Caller;
+    console.log(`Authorization: caller-> ${caller?.id}`);
+    const isUser = CertUtils.isUser(caller?.id);
+    const isMember = CertUtils.isMember(caller?.id);
+    console.log(`Authorization: isUser-> ${isUser}, isMember-> ${isMember}`);
+    // check if caller has a valid identity
+    //const isValidIdentity = new AuthenticationService().isAuthenticated(request);
+    //console.log(`Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`);    
+    //if (isValidIdentity.failure) return isValidIdentity;//ApiResult.AuthFailure();
+    
     // Get HPKE key pair id
     const id = hpkeKeyIdMap.size + 1;
 

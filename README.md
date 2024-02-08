@@ -129,6 +129,9 @@ make setup
 # Generate a new key item
 curl ${KMS_URL}/app/refresh -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -i  -w '\n'
 
+# Use JWT token
+curl ${KMS_URL}/app/refresh -X POST --cacert ${KEYS_DIR}/service_cert.pem  -H "Content-Type: application/json" -H "Authorization:$(./scripts/authorization_header.sh)"  -i  -w '\n'
+
 # Get the latest public key
 curl ${KMS_URL}/app/pubkey --cacert ${KEYS_DIR}/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
 # Get the latest public key in tink format
