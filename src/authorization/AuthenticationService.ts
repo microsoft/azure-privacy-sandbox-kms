@@ -70,6 +70,12 @@ export class AuthenticationService implements IAuthenticationService {
         let info = ccf.bufToJsonCompatible(v);
         console.log(`Proposal ID: ${proposalId}: ${JSON.stringify(info)}`);
       });
+      const issuersMap = ccf.kv["public:ccf.gov.jwt.issuers"];
+      issuersMap.forEach((v, k) => {
+        let issuer = ccf.bufToStr(k);
+        let info = ccf.bufToJsonCompatible(v);
+        console.log(`Issuer: ${issuer}: ${JSON.stringify(info)}`);
+      });
 
       return validator.validate(request);
     } catch (ex) {

@@ -66,5 +66,9 @@ signing_key="$certificate_dir/member0_privk.pem"
 source .venv_ccf_sandbox/bin/activate
 make propose-add-key-release-policy
 
+# Add validation policy
+source .venv_ccf_sandbox/bin/activate
+make propose-jwt-validation-policy
+
 # Generate a new key item
 curl ${network_url}/app/refresh -X POST --cacert $service_cert --cert $signing_cert --key $signing_key -H "Content-Type: application/json" -i  -w '\n'

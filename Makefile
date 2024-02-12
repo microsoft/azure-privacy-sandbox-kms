@@ -62,6 +62,11 @@ demo: build ## 🎬 Demo the KMS Application in the Sandbox
 	@echo -e "\e[34m$@\e[0m" || true
 	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/test_sandbox.sh --nodeAddress 127.0.0.1:8000 --certificate_dir ${WORKSPACE}/sandbox_common --constitution ./governance/constitution/kms_actions.js
 
+# Propose the JWT validation policy
+propose-jwt-validation-policy: ## 🚀 Deploy the JWT validation policy
+	@echo -e "\e[34m$@\e[0m" || true
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/jwt/set_jwt_validation_policy_proposal.json --certificate_dir "${KEYS_DIR}" --member-count 2
+
 # Propose a new key release policy
 propose-add-key-release-policy: ## 🚀 Deploy the add claim key release policy to the sandbox or mCCF
 	@echo -e "\e[34m$@\e[0m" || true
