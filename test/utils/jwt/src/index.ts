@@ -9,9 +9,9 @@ import crypto from "crypto";
 import * as Keys from "./keys";
 import * as Proposals from "./proposals";
 
-const proposalsPath = `${process.env.WORKSPACE}/proposals`;
-const privateKeyPath = `${process.env.WORKSPACE}/private.pem`;
-const certificatePath = `${process.env.WORKSPACE}/cert.pem`;
+const proposalsPath = `${process.env.KMS_WORKSPACE}/proposals`;
+const privateKeyPath = `${process.env.KMS_WORKSPACE}/private.pem`;
+const certificatePath = `${process.env.KMS_WORKSPACE}/cert.pem`;
 const kid = "Demo IDP kid";
 const hostPort = 3000;
 const host = `http://localhost:${hostPort}`;

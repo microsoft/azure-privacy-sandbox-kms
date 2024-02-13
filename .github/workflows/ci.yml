@@ -26,4 +26,4 @@ jobs:
           runCmd: |
             make demo ; make test
         env:
-          WORKSPACE: ./workspace
+          KMS_WORKSPACE: ./workspace
