@@ -62,14 +62,7 @@ export class AuthenticationService implements IAuthenticationService {
       const validator = this.validators.get(
         <CcfAuthenticationPolicyEnum>caller.policy,
       );
-      console.log(`Authorization: validator (AuthenticationService)-> ${JSON.stringify(validator)}`);
       
-      const proposalsMap = ccf.kv["public:ccf.gov.proposals_info"];
-      proposalsMap.forEach((v, k) => {
-        let proposalId = ccf.bufToStr(k);
-        let info = ccf.bufToJsonCompatible(v);
-        console.log(`Proposal ID: ${proposalId}: ${JSON.stringify(info)}`);
-      });
       const issuersMap = ccf.kv["public:ccf.gov.jwt.issuers"];
       issuersMap.forEach((v, k) => {
         let issuer = ccf.bufToStr(k);

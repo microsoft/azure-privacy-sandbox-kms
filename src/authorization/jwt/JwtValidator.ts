@@ -2,23 +2,12 @@
 // Licensed under the MIT license.
 
 import * as ccfapp from "@microsoft/ccf-app";
-//import msJwtProvider from "./ms-aad-jwt-provider";
 import { ServiceResult } from "../../utils/ServiceResult";
-import { DemoJwtProvider } from "./DemoJwtProvider";
 import { IValidatorService } from "../IValidationService";
-
-/**
- * JWT Identity Providers
- */
-export enum JwtIdentityProviderEnum {
-  MS_AAD = "https://login.microsoftonline.com/common/v2.0",
-  Demo = "http://Demo-jwt-issuer",
-}
-type identityId = string;
-
-export interface IJwtIdentityProvider {
-  isValidJwtToken(identity: ccfapp.JwtAuthnIdentity): ServiceResult<string>;
-}
+import { JwtIdentityProviderEnum } from "./JwtIdentityProviderEnum";
+import { IJwtIdentityProvider } from "./IJwtIdentityProvider";
+import { DemoJwtProvider } from "./DemoJwtProvider";
+import { MsJwtProvider } from "./MsJwtProvider";
 
 export class JwtValidator implements IValidatorService {
   private readonly identityProviders = new Map<
@@ -27,11 +16,11 @@ export class JwtValidator implements IValidatorService {
   >();
 
   constructor() {
-    //this.identityProviders.set(JwtIdentityProviderEnum.MS_AAD, new JwtProvider());
-    this.identityProviders.set(JwtIdentityProviderEnum.Demo, new DemoJwtProvider());
+    //this.identityProviders.set(JwtIdentityProviderEnum.MS_AAD, new MsJwtProvider("JwtProvider"));
+    this.identityProviders.set(JwtIdentityProviderEnum.Demo, new DemoJwtProvider("DemoJwtProvider"));
   }
 
-  validate(request: ccfapp.Request<any>): ServiceResult<identityId> {
+  validate(request: ccfapp.Request<any>): ServiceResult<string> {
     const jwtCaller = request.caller as unknown as ccfapp.JwtAuthnIdentity;
     console.log(`Authorization: JWT jwtCaller (JwtValidator)-> ${<JwtIdentityProviderEnum>jwtCaller.jwt.keyIssuer}`)
     const provider = this.identityProviders.get(
@@ -44,7 +33,7 @@ export class JwtValidator implements IValidatorService {
       return ServiceResult.Failed({errorMessage: error, errorType: "caller error"}, 400);  
     }
     const isValidJwtToken = provider.isValidJwtToken(jwtCaller);
-    console.log(`Authorization: JWT validation result (JwtValidator)-> ${isValidJwtToken}`)
+    console.log(`Authorization: JWT validation result (JwtValidator) for provider ${provider.name}-> ${JSON.stringify(isValidJwtToken)}`)
     return isValidJwtToken;
   }
 }

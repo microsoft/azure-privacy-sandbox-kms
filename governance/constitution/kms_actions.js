@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
-
+const validationPolicyMapName = "public:ccf.gov.policies.jwt_validation";
 actions.set(
   "set_jwt_validation_policy",
   new Action(
@@ -10,6 +10,9 @@ actions.set(
       checkType(args.validation_policy, "object", "validation_policy");
 
       // Check if issuer exists
+      //if (!ccf.kv[validationPolicyMapName].has(args.issuer))  {
+      //  throw new Error(``);
+      //}
 
       // Check validation policy      
       if (args.validation_policy) {
@@ -22,14 +25,13 @@ actions.set(
     function (args) {
       const validationPolicyMapName = "public:ccf.gov.policies.jwt_validation";
 
+      const keyBuf = ccf.strToBuf(args.issuer);
+
       // Remove existing validation policy
-      ccf.kv[validationPolicyMapName].forEach((key) => {
-        console.log(`Removing validation policy: ${key}`);
-        ccf.kv[validationPolicyMapName].delete(key);
-      });
+      ccf.kv[validationPolicyMapName].delete(keyBuf);
+
       const jsonItems = JSON.stringify(args.validation_policy);
       const jsonItemsBuf = ccf.strToBuf(jsonItems);
-      const keyBuf = ccf.strToBuf(args.issuer);
       console.log(
         `JWT validation policy item. Key: ${args.issuer}, value: ${jsonItems}`,
       );

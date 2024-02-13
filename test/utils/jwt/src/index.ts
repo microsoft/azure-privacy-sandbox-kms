@@ -15,6 +15,7 @@ const certificatePath = `${process.env.WORKSPACE}/cert.pem`;
 const kid = "Demo IDP kid";
 const hostPort = 3000;
 const host = `http://localhost:${hostPort}`;
+const iss = "http://Demo-jwt-issuer";
 const expiry = 1000;
 
 const createProposalsFolder = async (): Promise<void> => {
@@ -53,6 +54,7 @@ const app = express();
 let privateKey = fs.readFileSync(privateKeyPath);
 const token = (req: Request, res: Response) => {
   const payload = {
+    iss: iss,
     sub: crypto.randomUUID(),
     name: crypto.randomUUID(),
     nbf: Math.floor(Date.now() / 1000),

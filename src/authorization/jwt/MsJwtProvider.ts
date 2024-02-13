@@ -1,7 +1,6 @@
 import * as ccfapp from "@microsoft/ccf-app";
-import { IJwtIdentityProvider } from "./JwtValidator";
 import { ServiceResult } from "../../utils/ServiceResult";
-
+import { IJwtIdentityProvider } from "./IJwtIdentityProvider";
 
 /**
  * MS Access Token
@@ -15,6 +14,8 @@ export interface MSAccessToken {
 }
 
 export class MsJwtProvider implements IJwtIdentityProvider {
+  constructor(public name) {}
+  
   /**
    * Check if caller's access token is valid
    * @param {JwtAuthnIdentity} identity JwtAuthnIdentity object

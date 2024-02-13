@@ -5,8 +5,7 @@
             "args": {
                 "issuer": "http://Demo-jwt-issuer",
                 "validation_policy": {
-                    "iss": "bla",
-                    "aud": "blabla"
+                    "iss": "http://Demo-jwt-issuer"
                 }
             }
         }
