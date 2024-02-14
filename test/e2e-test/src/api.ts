@@ -6,6 +6,7 @@ import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 import { IKeyItem } from "../../../src";
 import { IWrapped, IWrappedJwt } from "../../../src/endpoints/KeyWrapper";
 import { ISnpAttestation } from "../../../src/attestation/ISnpAttestation";
+import https from "https";
 
 export interface ValidationProps {
   url: string;
@@ -41,15 +42,25 @@ export default class Api {
   public static async refresh(
     props: DemoProps,
     member: DemoMemberProps,
+    httpsAgent: https.Agent,
+    authorizationHeader?: string
   ): Promise<IKeyItem> {
     console.log(`📝 ${member.name} Refresh key:`);
-
-    const result = await axios.post(props.refreshUrl, "", {
+    const reqProps = authorizationHeader ?
+    {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization" : `${authorizationHeader}`
+      },
+      httpsAgent,
+    } :
+    {
       headers: {
         "Content-Type": "application/json",
       },
-      httpsAgent: member.httpsAgent,
-    });
+      httpsAgent,
+    };
+    const result = await axios.post(props.refreshUrl, "", reqProps);
 
     if (result.status !== 200) {
       throw new Error(
@@ -61,9 +72,9 @@ export default class Api {
       `✅ [PASS] [${result.status} : ${result.statusText}] - ${member.name}`,
     );
     console.log(result.data);
-
     return result.data;
   }
+
   public static async keyInitial(
     props: DemoProps,
     member: DemoMemberProps,

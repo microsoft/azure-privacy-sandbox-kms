@@ -104,6 +104,15 @@ class Demo {
       `make propose-add-key-release-policy >/tmp/make.txt`,
     );
     console.log(output);
+    
+    this.printTestSectionHeader(
+      "🔬 [TEST]: generate access token",
+    );
+    const access_token = await Demo.executeCommand(
+      `./scripts/authorization_header.sh`,
+    );
+    console.log(`Authorization header: ${access_token}`);
+
     process.chdir("../../");
 
     this.printTestSectionHeader("🔬 [TEST]: Key generation Service");
@@ -128,7 +137,7 @@ class Demo {
     // members 0 refresh key
     console.log(`📝 Refresh key...`);
     const member = this.members[0];
-    let response = await Api.refresh(this.demoProps, member);
+    let response = await Api.refresh(this.demoProps, member, this.createHttpsAgent(member.id));
 
     Demo.assertField(member.name, response, "x", notUndefinedString);
     Demo.assertField(
@@ -341,16 +350,22 @@ class Demo {
     };
   }
 
-  private static createHttpsAgent(memberId: string): https.Agent {
+  private static createHttpsAgent(memberId: string, includeClientCerts = true): https.Agent {
+    if (includeClientCerts) {
+      return new https.Agent({
+        cert: fs.readFileSync(
+          `${certificateStorePath}/member${memberId}_cert.pem`,
+        ),
+        key: fs.readFileSync(
+          `${certificateStorePath}/member${memberId}_privk.pem`,
+        ),
+        ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`),
+      });  
+    }
     return new https.Agent({
-      cert: fs.readFileSync(
-        `${certificateStorePath}/member${memberId}_cert.pem`,
-      ),
-      key: fs.readFileSync(
-        `${certificateStorePath}/member${memberId}_privk.pem`,
-      ),
       ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`),
     });
+
   }
 
   private static printTestSectionHeader(title: string) {

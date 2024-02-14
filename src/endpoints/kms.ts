@@ -18,6 +18,7 @@ import { KeyGeneration } from "./KeyGeneration";
 import { TinkKey, TinkPublicKey } from "./TinkKey";
 import { IWrapped, IWrappedJwt, KeyWrapper } from "./KeyWrapper";
 import { AuthenticationService } from "../authorization/AuthenticationService";
+import { ServiceResult } from "../utils/ServiceResult";
 export interface IAttestationValidationResult {
   result: boolean;
   errorMessage?: string;
@@ -629,17 +630,11 @@ export const pubkey = (request: ccfapp.Request<void>) => {
       },
     };
   }
-};
-interface Caller {
-  id: string;
 }
+
 // Generate new key pair and store it on the store
 export const refresh = (request: ccfapp.Request<void>) => {
   try {
-    // check if caller has a valid identity
-    const isValidIdentity = new AuthenticationService().isAuthenticated(request);
-    console.log(`Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`);    
-    if (isValidIdentity.failure) return isValidIdentity;//ApiResult.AuthFailure();
 
     // Get HPKE key pair id
     const id = hpkeKeyIdMap.size + 1;
@@ -676,6 +671,19 @@ export const refresh = (request: ccfapp.Request<void>) => {
     throw new Error(error);
   }
 };
+
+// Hearthbeat endpoint currently used ro test authorization
+export const hearthbeat = (request: ccfapp.Request<void>) => {
+    // check if caller has a valid identity
+    const isValidIdentity = new AuthenticationService().isAuthenticated(request);
+    console.log(`Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`);    
+    if (isValidIdentity.failure) return isValidIdentity;//ApiResult.AuthFailure();
+    
+    return {
+      body: "OK"
+    };   
+};
+
 //#endregion
 
 //#region KMS Policies
