@@ -637,9 +637,9 @@ interface Caller {
 export const refresh = (request: ccfapp.Request<void>) => {
   try {
     // check if caller has a valid identity
-    //const isValidIdentity = new AuthenticationService().isAuthenticated(request);
-    //console.log(`Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`);    
-    //if (isValidIdentity.failure) return isValidIdentity;//ApiResult.AuthFailure();
+    const isValidIdentity = new AuthenticationService().isAuthenticated(request);
+    console.log(`Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`);    
+    if (isValidIdentity.failure) return isValidIdentity;//ApiResult.AuthFailure();
 
     // Get HPKE key pair id
     const id = hpkeKeyIdMap.size + 1;
