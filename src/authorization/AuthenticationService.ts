@@ -58,6 +58,10 @@ export class AuthenticationService implements IAuthenticationService {
   ): ServiceResult<string> {
     try {
       const caller = request.caller as unknown as ccfapp.AuthnIdentityCommon;
+      if (!caller) {
+        // no caller policy
+        return ServiceResult.Succeeded('');
+      }
       console.log(`Authorization: isAuthenticated result (AuthenticationService)-> ${caller.policy},${JSON.stringify(caller)}`)
       const validator = this.validators.get(
         <CcfAuthenticationPolicyEnum>caller.policy,
