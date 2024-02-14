@@ -675,12 +675,12 @@ export const refresh = (request: ccfapp.Request<void>) => {
 // Hearthbeat endpoint currently used ro test authorization
 export const hearthbeat = (request: ccfapp.Request<void>) => {
     // check if caller has a valid identity
-    const isValidIdentity = new AuthenticationService().isAuthenticated(request);
+    const [policy, isValidIdentity] = new AuthenticationService().isAuthenticated(request);
     console.log(`Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`);    
     if (isValidIdentity.failure) return isValidIdentity;//ApiResult.AuthFailure();
     
     return {
-      body: "OK"
+      body: policy
     };   
 };
 

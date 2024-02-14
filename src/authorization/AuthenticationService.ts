@@ -55,12 +55,12 @@ export class AuthenticationService implements IAuthenticationService {
    */
   public isAuthenticated(
     request: ccfapp.Request<any>,
-  ): ServiceResult<string> {
+  ): [string, ServiceResult<string>] {
     try {
       const caller = request.caller as unknown as ccfapp.AuthnIdentityCommon;
       if (!caller) {
         // no caller policy
-        return ServiceResult.Succeeded('');
+        return ["", ServiceResult.Succeeded("")];
       }
       console.log(`Authorization: isAuthenticated result (AuthenticationService)-> ${caller.policy},${JSON.stringify(caller)}`)
       const validator = this.validators.get(
@@ -74,12 +74,12 @@ export class AuthenticationService implements IAuthenticationService {
         console.log(`Issuer: ${issuer}: ${JSON.stringify(info)}`);
       });
 
-      return validator.validate(request);
+      return [caller.policy, validator.validate(request)];
     } catch (ex) {
-      return ServiceResult.Failed({
+      return ["", ServiceResult.Failed({
         errorMessage: `Error: invalid caller identity (AuthenticationService)-> ${ex}`,
         errorType: "AuthenticationError",
-      });
+      })];
     }
   }
 }
