@@ -11,4 +11,4 @@ jwt_token=$(./scripts/generate_access_token.sh | jq -r '.access_token')
 
 # Set the Authorization header content
 auth_header="Bearer $jwt_token"
-echo $auth_header
+echo -n $auth_header

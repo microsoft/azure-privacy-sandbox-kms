@@ -16,7 +16,7 @@ export class JwtValidator implements IValidatorService {
   >();
 
   constructor() {
-    //this.identityProviders.set(JwtIdentityProviderEnum.MS_AAD, new MsJwtProvider("JwtProvider"));
+    this.identityProviders.set(JwtIdentityProviderEnum.MS_AAD, new MsJwtProvider("JwtProvider"));
     this.identityProviders.set(JwtIdentityProviderEnum.Demo, new DemoJwtProvider("DemoJwtProvider"));
   }
 

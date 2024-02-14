@@ -67,6 +67,11 @@ propose-jwt-demo-validation-policy: ## 🚀 Deploy the JWT validation policy
 	@echo -e "\e[34m$@\e[0m" || true
 	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/jwt/set_jwt_demo_validation_policy_proposal.json --certificate_dir "${KEYS_DIR}" --member-count 2
 
+# Propose a new idp
+propose-jwt-ms-validation-policy: ## 🚀 Propose the AAD as idp
+	@echo -e "\e[34m$@\e[0m" || true
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/jwt/set_jwt_ms_validation_policy_proposal.json --certificate_dir "${KEYS_DIR}" --member-count 2
+
 # Propose a new key release policy
 propose-add-key-release-policy: ## 🚀 Deploy the add claim key release policy to the sandbox or mCCF
 	@echo -e "\e[34m$@\e[0m" || true
@@ -76,12 +81,6 @@ propose-rm-key-release-policy: ## 🚀 Deploy the remove claim key release polic
 	@echo -e "\e[34m$@\e[0m" || true
 	$(call check_defined, KMS_URL)
 	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/policies/key-release-policy-remove.json --certificate_dir "${KEYS_DIR}"
-
-# Propose a new idp
-propose-idp: ## 🚀 Propose the sample idp
-	@echo -e "\e[34m$@\e[0m" || true
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ${WORKSPACE}/proposals/set_jwt_issuer_test_proposal.json --certificate_dir "${KEYS_DIR}" --member-count 2
-
 
 # The following are here in case you forget to change directory!
 deploy: build ## 🚀 Deploy Managed CCF or local
