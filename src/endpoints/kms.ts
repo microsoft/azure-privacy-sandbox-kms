@@ -678,9 +678,9 @@ export const hearthbeat = (request: ccfapp.Request<void>) => {
     const [policy, isValidIdentity] = new AuthenticationService().isAuthenticated(request);
     console.log(`Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`);    
     if (isValidIdentity.failure) return isValidIdentity;//ApiResult.AuthFailure();
-    
+    const body = policy;
     return {
-      body: policy
+      body
     };   
 };
 

@@ -36,6 +36,7 @@ export interface DemoProps {
   proposalUrl: string;
   keyUrl: string;
   unwrapUrl: string;
+  hearthbeat: string;
 }
 
 export interface DemoMemberProps {
@@ -52,6 +53,7 @@ class Demo {
     proposalUrl: `${serverUrl}/gov/proposals`,
     keyUrl: `${serverUrl}/app/key`,
     unwrapUrl: `${serverUrl}/app/unwrapKey`,
+    hearthbeat: `${serverUrl}/app/hearthbeat`
   };
 
   private static memberDataMap = new Map([
@@ -134,10 +136,21 @@ class Demo {
       return !Number.isNaN(toTest) && toTest > 0;
     };
 
+    // authorization on hearthbeat
+    const member = this.members[0];
+    console.log(`📝 Heartbeat member certs...`);
+    let response = await Api.hearthbeat(this.demoProps, member, this.createHttpsAgent(member.id));
+    Demo.assertField(member.name, response, "policy", "member_cert");
+    Demo.assertField(member.name, response, "cert", notUndefinedString);
+
+    //console.log(`📝 Heartbeat JWT...`);
+    //response = await Api.hearthbeat(this.demoProps, member, this.createHttpsAgent("", false), access_token);
+    //Demo.assertField(member.name, response, "policy", "jwt");
+    //Demo.assertField(member.name, response, "cert", undefined);
+    
     // members 0 refresh key
     console.log(`📝 Refresh key...`);
-    const member = this.members[0];
-    let response = await Api.refresh(this.demoProps, member, this.createHttpsAgent(member.id));
+    response = await Api.refresh(this.demoProps, member, this.createHttpsAgent(member.id));
 
     Demo.assertField(member.name, response, "x", notUndefinedString);
     Demo.assertField(
@@ -363,7 +376,7 @@ class Demo {
       });  
     }
     return new https.Agent({
-      ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`),
+      ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`)
     });
 
   }

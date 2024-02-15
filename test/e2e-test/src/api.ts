@@ -39,6 +39,59 @@ export class Validator {
 }
 
 export default class Api {
+  public static async hearthbeat(
+    props: DemoProps,
+    member: DemoMemberProps,
+    httpsAgent: https.Agent,
+    authorizationHeader?: string
+  ): Promise<IKeyItem> {
+    console.log(`📝 hearthbeat: ${authorizationHeader}`);
+    const reqProps = authorizationHeader ?
+    {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization" : `${authorizationHeader}`
+      },
+      httpsAgent,
+    } :
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      httpsAgent,
+    };
+    
+    let result;
+    try {
+      result = await axios.get(props.hearthbeat, reqProps);
+    } catch (error) {
+      console.log(`Failure ${props.hearthbeat} with`, reqProps);
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error(`Error: ${error.response.status} ${error.response.statusText}`);
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('Error: No response received from server');
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error:', error.message);
+      }
+    }
+
+    if (!result || result.status !== 200) {
+      throw new Error(
+        `🛑 [TEST FAILURE]: Unexpected status code: ${result?.status}`,
+      );
+    }
+
+    console.log(
+      `✅ [PASS] [${result.status} : ${result.statusText}] - ${member.name}`,
+    );
+    console.log(result.data);
+    return result.data;
+  }
+
   public static async refresh(
     props: DemoProps,
     member: DemoMemberProps,

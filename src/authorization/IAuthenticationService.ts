@@ -10,5 +10,5 @@ export interface IAuthenticationService {
      * @param {string} identityId userId extracted from mTLS certificate
      * @returns {ServiceResult<boolean>}
      */
-    isAuthenticated(request: ccfapp.Request<any>): [string, ServiceResult<string>];
+    isAuthenticated(request: ccfapp.Request<any>): [ccfapp.AuthnIdentityCommon, ServiceResult<string>];
   }

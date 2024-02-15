@@ -26,6 +26,7 @@ export class DemoJwtProvider implements IJwtIdentityProvider {
         errorType,
       });
     }
+
     const policy = JwtValidationPolicyMap.read(issuer);
     const keys = Object.keys(policy);
 

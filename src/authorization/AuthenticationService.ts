@@ -31,21 +31,16 @@ export class AuthenticationService implements IAuthenticationService {
   >();
 
   constructor() {
-    this.validators.set(CcfAuthenticationPolicyEnum.Jwt, new JwtValidator());
+    this.validators.set(
+      CcfAuthenticationPolicyEnum.Jwt, 
+      new JwtValidator()
+    );
     this.validators.set(
       CcfAuthenticationPolicyEnum.User_cert,
       new UserCertValidator(),
     );
     this.validators.set(
-      CcfAuthenticationPolicyEnum.User_signature,
-      new UserCertValidator(),
-    );
-    this.validators.set(
       CcfAuthenticationPolicyEnum.Member_cert,
-      new MemberCertValidator(),
-    );
-    this.validators.set(
-      CcfAuthenticationPolicyEnum.Member_signature,
       new MemberCertValidator(),
     );
   }
@@ -55,28 +50,21 @@ export class AuthenticationService implements IAuthenticationService {
    */
   public isAuthenticated(
     request: ccfapp.Request<any>,
-  ): [string, ServiceResult<string>] {
+  ): [ccfapp.AuthnIdentityCommon, ServiceResult<string>] {
+    let caller: ccfapp.AuthnIdentityCommon;
     try {
       const caller = request.caller as unknown as ccfapp.AuthnIdentityCommon;
       if (!caller) {
         // no caller policy
-        return ["", ServiceResult.Succeeded("")];
+        return [caller, ServiceResult.Succeeded("")];
       }
       console.log(`Authorization: isAuthenticated result (AuthenticationService)-> ${caller.policy},${JSON.stringify(caller)}`)
       const validator = this.validators.get(
         <CcfAuthenticationPolicyEnum>caller.policy,
       );
-      
-      const issuersMap = ccf.kv["public:ccf.gov.jwt.issuers"];
-      issuersMap.forEach((v, k) => {
-        let issuer = ccf.bufToStr(k);
-        let info = ccf.bufToJsonCompatible(v);
-        console.log(`Issuer: ${issuer}: ${JSON.stringify(info)}`);
-      });
-
-      return [caller.policy, validator.validate(request)];
+      return [caller, validator.validate(request)];
     } catch (ex) {
-      return ["", ServiceResult.Failed({
+      return [caller, ServiceResult.Failed({
         errorMessage: `Error: invalid caller identity (AuthenticationService)-> ${ex}`,
         errorType: "AuthenticationError",
       })];
