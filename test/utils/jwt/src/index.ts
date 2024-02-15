@@ -16,6 +16,8 @@ const kid = "Demo IDP kid";
 const hostPort = 3000;
 const host = `http://localhost:${hostPort}`;
 const iss = "http://Demo-jwt-issuer";
+const sub = "c0d8e9a7-6b8e-4e1f-9e4a-3b2c1d0f5a6b";
+const name = "Cool caller";
 const expiry = 1000;
 
 const createProposalsFolder = async (): Promise<void> => {
@@ -54,9 +56,9 @@ const app = express();
 let privateKey = fs.readFileSync(privateKeyPath);
 const token = (req: Request, res: Response) => {
   const payload = {
-    iss: iss,
-    sub: crypto.randomUUID(),
-    name: crypto.randomUUID(),
+    iss,
+    sub,
+    name,
     nbf: Math.floor(Date.now() / 1000),
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(Date.now() / 1000) + 60 * 60, // expires in 1 hour

@@ -5,6 +5,7 @@ import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../../utils/ServiceResult";
 import { JwtValidationPolicyMap } from "./JwtValidationPolicyMap";
 import { IJwtIdentityProvider } from "./IJwtIdentityProvider";
+import { authorizeJwt } from "./MsJwtProvider";
 
 const errorType = "AuthenticationError";
 
@@ -27,20 +28,11 @@ export class DemoJwtProvider implements IJwtIdentityProvider {
       });
     }
 
-    const policy = JwtValidationPolicyMap.read(issuer);
-    const keys = Object.keys(policy);
-
-    for(let inx = 0; inx < keys.length; inx++) {
-      const key = keys[inx];
-      const jwtProp = identity?.jwt?.payload[key];
-      const compliant = (jwtProp === policy[key]);
-      console.log(`DemoJwtProvider.isValidJwtToken: ${key}, expected: ${policy[key]}, found: ${jwtProp}, ${compliant}`);
-      if ( !compliant ) {
-        const errorMessage = `The JWT has no valid ${key}, expected: ${policy[key]}, found: ${jwtProp}`;
-        return ServiceResult.Failed({errorMessage, errorType });
-      }
+    const isAuthorized = authorizeJwt(issuer, identity);
+    if (!isAuthorized.success) {
+      return isAuthorized;
     }
-
+    
     const identityId = identity?.jwt?.payload?.sub;
     console.log(`JWT validation succeeded: ${identityId}`)
     return ServiceResult.Succeeded(identityId);

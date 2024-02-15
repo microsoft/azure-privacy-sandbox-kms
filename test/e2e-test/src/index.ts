@@ -143,7 +143,7 @@ class Demo {
     Demo.assertField(member.name, response, "policy", "member_cert");
     Demo.assertField(member.name, response, "cert", notUndefinedString);
 
-    //console.log(`📝 Heartbeat JWT...`);
+    console.log(`📝 Heartbeat JWT...`);
     //response = await Api.hearthbeat(this.demoProps, member, this.createHttpsAgent("", false), access_token);
     //Demo.assertField(member.name, response, "policy", "jwt");
     //Demo.assertField(member.name, response, "cert", undefined);
@@ -376,7 +376,8 @@ class Demo {
       });  
     }
     return new https.Agent({
-      ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`)
+      ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`),
+      rejectUnauthorized: false
     });
 
   }

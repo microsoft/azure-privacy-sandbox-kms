@@ -60,7 +60,17 @@ export default class Api {
       },
       httpsAgent,
     };
-    
+    /* try to write a curl representation
+    axios.interceptors.request.use((config) => {
+      let data = config.data ? JSON.stringify(config.data) : '';
+      let headers = '';
+      for (let header in config.headers) {
+        headers += `-H '${header}: ${config.headers[header]}' `;
+      }
+      console.log(`curl -X ${config.method?.toUpperCase()} '${config.url}' ${headers} -d '${data}'`);
+      return config;
+    });
+    */
     let result;
     try {
       result = await axios.get(props.hearthbeat, reqProps);

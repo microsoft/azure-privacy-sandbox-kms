@@ -1,6 +1,7 @@
 import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../../utils/ServiceResult";
 import { IJwtIdentityProvider } from "./IJwtIdentityProvider";
+import { JwtValidationPolicyMap } from "./JwtValidationPolicyMap";
 
 /**
  * MS Access Token
@@ -11,6 +12,23 @@ export interface MSAccessToken {
   aud: string;
   appid: string;
   ver: string;
+}
+export const authorizeJwt = (issuer: string, identity: ccfapp.JwtAuthnIdentity): ServiceResult<string> => {
+  const policy = JwtValidationPolicyMap.read(issuer);
+  const keys = Object.keys(policy);
+
+  for(let inx = 0; inx < keys.length; inx++) {
+    const key = keys[inx];
+    const jwtProp = identity?.jwt?.payload[key];
+    const compliant = (jwtProp === policy[key]);
+    console.log(`isValidJwtToken: ${key}, expected: ${policy[key]}, found: ${jwtProp}, ${compliant}`);
+    if ( !compliant ) {
+      const errorMessage = `The JWT has no valid ${key}, expected: ${policy[key]}, found: ${jwtProp}`;
+      return ServiceResult.Failed({errorMessage, errorType: "AuthenticationError" }, 401);
+    }    
+  }
+
+  return ServiceResult.Succeeded('');
 }
 
 export class MsJwtProvider implements IJwtIdentityProvider {
@@ -26,31 +44,19 @@ export class MsJwtProvider implements IJwtIdentityProvider {
   ): ServiceResult<string> {
     const msClaims = identity.jwt.payload as MSAccessToken;
 
-    // check if token has the right version
-    if (msClaims.ver !== "1.0") {
+    const issuer = identity?.jwt?.payload?.iss;
+    if (!issuer) {
       return ServiceResult.Failed({
-        errorMessage: "Error: unsupported access token version, must be 1.0",
-        errorType: "AuthenticationError",
-      });
-    }
-/*
-    // check if token is for this app
-    if (msClaims.appid !== MS_AAD_CONFIG.ClientApplicationId) {
-      return ServiceResult.Failed({
-        errorMessage: "Error: jwt validation failed: appid mismatch",
-        errorType: "AuthenticationError",
-      });
+        errorMessage: "The JWT has no valid iss",
+        errorType: "AuthenticationError"
+      }, 400);
     }
 
-    // check if token audience is for this app
-    if (msClaims.aud !== MS_AAD_CONFIG.ApiIdentifierUri) {
-      return ServiceResult.Failed({
-        errorMessage:
-          "Error: jwt validation failed: aud mismatch (incorrect scope requested?)",
-        errorType: "AuthenticationError",
-      });
+    const isAuthorized = authorizeJwt(issuer, identity);
+    if (!isAuthorized.success) {
+      return isAuthorized;
     }
-  */
+    
     const identityId = identity?.jwt?.payload?.sub;
     return ServiceResult.Succeeded(identityId);
   }
