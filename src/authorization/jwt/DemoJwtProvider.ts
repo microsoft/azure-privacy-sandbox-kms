@@ -32,9 +32,9 @@ export class DemoJwtProvider implements IJwtIdentityProvider {
     if (!isAuthorized.success) {
       return isAuthorized;
     }
-    
+
     const identityId = identity?.jwt?.payload?.sub;
-    console.log(`JWT validation succeeded: ${identityId}`)
+    console.log(`JWT validation succeeded: ${identityId}`);
     return ServiceResult.Succeeded(identityId);
   }
 }

@@ -64,13 +64,17 @@ const token = (req: Request, res: Response) => {
     exp: Math.floor(Date.now() / 1000) + 60 * 60, // expires in 1 hour
   };
 
-  const access_token = jwt.sign(payload, privateKey, { algorithm: "RS256", keyid: kid });
-  res.send({ 
+  const access_token = jwt.sign(payload, privateKey, {
+    algorithm: "RS256",
+    keyid: kid,
+  });
+  res.send({
     token_type: "bearer",
     expires_in: expiry,
     ext_expires_in: expiry,
-    access_token });
-}
+    access_token,
+  });
+};
 
 // Use POST simular as AAD. No body required.
 app.post("/token", token);

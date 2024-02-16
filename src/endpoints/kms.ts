@@ -56,7 +56,9 @@ const queryParams = (request: ccfapp.Request) => {
 };
 
 // Validate the attestation by means of the key release policy
-const validateAttestation = (attestation: ISnpAttestation): IAttestationValidationResult => {
+const validateAttestation = (
+  attestation: ISnpAttestation,
+): IAttestationValidationResult => {
   console.log(`Start attestation validation`);
   if (!attestation) {
     return {
@@ -630,12 +632,11 @@ export const pubkey = (request: ccfapp.Request<void>) => {
       },
     };
   }
-}
+};
 
 // Generate new key pair and store it on the store
 export const refresh = (request: ccfapp.Request<void>) => {
   try {
-
     // Get HPKE key pair id
     const id = hpkeKeyIdMap.size + 1;
 
@@ -674,14 +675,18 @@ export const refresh = (request: ccfapp.Request<void>) => {
 
 // Hearthbeat endpoint currently used ro test authorization
 export const hearthbeat = (request: ccfapp.Request<void>) => {
-    // check if caller has a valid identity
-    const [policy, isValidIdentity] = new AuthenticationService().isAuthenticated(request);
-    console.log(`Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`);    
-    if (isValidIdentity.failure) return isValidIdentity;//ApiResult.AuthFailure();
-    const body = policy;
-    return {
-      body
-    };   
+  // check if caller has a valid identity
+  const [policy, isValidIdentity] = new AuthenticationService().isAuthenticated(
+    request,
+  );
+  console.log(
+    `Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`,
+  );
+  if (isValidIdentity.failure) return isValidIdentity; //ApiResult.AuthFailure();
+  const body = policy;
+  return {
+    body,
+  };
 };
 
 //#endregion

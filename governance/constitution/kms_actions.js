@@ -5,7 +5,9 @@ actions.set(
   "set_jwt_validation_policy",
   new Action(
     function (args) {
-      console.log(`set_jwt_validation_policy, check args: ${JSON.stringify(args)}`);
+      console.log(
+        `set_jwt_validation_policy, check args: ${JSON.stringify(args)}`,
+      );
       checkType(args.issuer, "string", "issuer");
       checkType(args.validation_policy, "object", "validation_policy");
 
@@ -14,12 +16,14 @@ actions.set(
       //  throw new Error(``);
       //}
 
-      // Check validation policy      
+      // Check validation policy
       if (args.validation_policy) {
         Object.keys(args.validation_policy).forEach((key) => {
-          console.log(`validation policy: key ${key} = ${args.validation_policy[key]}`);
+          console.log(
+            `validation policy: key ${key} = ${args.validation_policy[key]}`,
+          );
           checkType(args.validation_policy[key], "string", key);
-        })
+        });
       }
     },
     function (args) {

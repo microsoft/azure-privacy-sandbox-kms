@@ -7,7 +7,6 @@ import { IValidatorService } from "../IValidationService";
 import { ServiceResult } from "../../utils/ServiceResult";
 import { UserMemberAuthnIdentity } from "./UserCertValidator";
 
-
 /**
  * CCF member information
  * https://microsoft.github.io/CCF/main/audit/builtin_maps.html#members-info

@@ -53,7 +53,7 @@ class Demo {
     proposalUrl: `${serverUrl}/gov/proposals`,
     keyUrl: `${serverUrl}/app/key`,
     unwrapUrl: `${serverUrl}/app/unwrapKey`,
-    hearthbeat: `${serverUrl}/app/hearthbeat`
+    hearthbeat: `${serverUrl}/app/hearthbeat`,
   };
 
   private static memberDataMap = new Map([
@@ -106,10 +106,8 @@ class Demo {
       `make propose-add-key-release-policy >/tmp/make.txt`,
     );
     console.log(output);
-    
-    this.printTestSectionHeader(
-      "🔬 [TEST]: generate access token",
-    );
+
+    this.printTestSectionHeader("🔬 [TEST]: generate access token");
     const access_token = await Demo.executeCommand(
       `./scripts/authorization_header.sh`,
     );
@@ -139,7 +137,11 @@ class Demo {
     // authorization on hearthbeat
     const member = this.members[0];
     console.log(`📝 Heartbeat member certs...`);
-    let response = await Api.hearthbeat(this.demoProps, member, this.createHttpsAgent(member.id));
+    let response = await Api.hearthbeat(
+      this.demoProps,
+      member,
+      this.createHttpsAgent(member.id),
+    );
     Demo.assertField(member.name, response, "policy", "member_cert");
     Demo.assertField(member.name, response, "cert", notUndefinedString);
 
@@ -147,10 +149,14 @@ class Demo {
     //response = await Api.hearthbeat(this.demoProps, member, this.createHttpsAgent("", false), access_token);
     //Demo.assertField(member.name, response, "policy", "jwt");
     //Demo.assertField(member.name, response, "cert", undefined);
-    
+
     // members 0 refresh key
     console.log(`📝 Refresh key...`);
-    response = await Api.refresh(this.demoProps, member, this.createHttpsAgent(member.id));
+    response = await Api.refresh(
+      this.demoProps,
+      member,
+      this.createHttpsAgent(member.id),
+    );
 
     Demo.assertField(member.name, response, "x", notUndefinedString);
     Demo.assertField(
@@ -363,7 +369,10 @@ class Demo {
     };
   }
 
-  private static createHttpsAgent(memberId: string, includeClientCerts = true): https.Agent {
+  private static createHttpsAgent(
+    memberId: string,
+    includeClientCerts = true,
+  ): https.Agent {
     if (includeClientCerts) {
       return new https.Agent({
         cert: fs.readFileSync(
@@ -373,13 +382,12 @@ class Demo {
           `${certificateStorePath}/member${memberId}_privk.pem`,
         ),
         ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`),
-      });  
+      });
     }
     return new https.Agent({
       ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`),
-      rejectUnauthorized: false
+      rejectUnauthorized: false,
     });
-
   }
 
   private static printTestSectionHeader(title: string) {

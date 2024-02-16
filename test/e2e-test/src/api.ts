@@ -43,23 +43,23 @@ export default class Api {
     props: DemoProps,
     member: DemoMemberProps,
     httpsAgent: https.Agent,
-    authorizationHeader?: string
+    authorizationHeader?: string,
   ): Promise<IKeyItem> {
     console.log(`📝 hearthbeat: ${authorizationHeader}`);
-    const reqProps = authorizationHeader ?
-    {
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization" : `${authorizationHeader}`
-      },
-      httpsAgent,
-    } :
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      httpsAgent,
-    };
+    const reqProps = authorizationHeader
+      ? {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `${authorizationHeader}`,
+          },
+          httpsAgent,
+        }
+      : {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          httpsAgent,
+        };
     /* try to write a curl representation
     axios.interceptors.request.use((config) => {
       let data = config.data ? JSON.stringify(config.data) : '';
@@ -79,13 +79,15 @@ export default class Api {
       if (error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
-        console.error(`Error: ${error.response.status} ${error.response.statusText}`);
+        console.error(
+          `Error: ${error.response.status} ${error.response.statusText}`,
+        );
       } else if (error.request) {
         // The request was made but no response was received
-        console.error('Error: No response received from server');
+        console.error("Error: No response received from server");
       } else {
         // Something happened in setting up the request that triggered an Error
-        console.error('Error:', error.message);
+        console.error("Error:", error.message);
       }
     }
 
@@ -106,23 +108,23 @@ export default class Api {
     props: DemoProps,
     member: DemoMemberProps,
     httpsAgent: https.Agent,
-    authorizationHeader?: string
+    authorizationHeader?: string,
   ): Promise<IKeyItem> {
     console.log(`📝 ${member.name} Refresh key:`);
-    const reqProps = authorizationHeader ?
-    {
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization" : `${authorizationHeader}`
-      },
-      httpsAgent,
-    } :
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      httpsAgent,
-    };
+    const reqProps = authorizationHeader
+      ? {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `${authorizationHeader}`,
+          },
+          httpsAgent,
+        }
+      : {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          httpsAgent,
+        };
     const result = await axios.post(props.refreshUrl, "", reqProps);
 
     if (result.status !== 200) {

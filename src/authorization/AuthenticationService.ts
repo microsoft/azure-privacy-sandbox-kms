@@ -31,10 +31,7 @@ export class AuthenticationService implements IAuthenticationService {
   >();
 
   constructor() {
-    this.validators.set(
-      CcfAuthenticationPolicyEnum.Jwt, 
-      new JwtValidator()
-    );
+    this.validators.set(CcfAuthenticationPolicyEnum.Jwt, new JwtValidator());
     this.validators.set(
       CcfAuthenticationPolicyEnum.User_cert,
       new UserCertValidator(),
@@ -58,16 +55,21 @@ export class AuthenticationService implements IAuthenticationService {
         // no caller policy
         return [caller, ServiceResult.Succeeded("")];
       }
-      console.log(`Authorization: isAuthenticated result (AuthenticationService)-> ${caller.policy},${JSON.stringify(caller)}`)
+      console.log(
+        `Authorization: isAuthenticated result (AuthenticationService)-> ${caller.policy},${JSON.stringify(caller)}`,
+      );
       const validator = this.validators.get(
         <CcfAuthenticationPolicyEnum>caller.policy,
       );
       return [caller, validator.validate(request)];
     } catch (ex) {
-      return [caller, ServiceResult.Failed({
-        errorMessage: `Error: invalid caller identity (AuthenticationService)-> ${ex}`,
-        errorType: "AuthenticationError",
-      })];
+      return [
+        caller,
+        ServiceResult.Failed({
+          errorMessage: `Error: invalid caller identity (AuthenticationService)-> ${ex}`,
+          errorType: "AuthenticationError",
+        }),
+      ];
     }
   }
 }
