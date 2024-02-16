@@ -81,7 +81,7 @@ Start the demo and e22 tests by running `make demo` in the `kms` path.
 This part of the demo has started the network and deployed the app. The network is running with 3 members and 1 user, and the app is deployed with the constitution defined [here](../governance/constitution/), which means that all members have equal votes on decisions, and a majority of approval votes is required to advance proposals. All members have been activated.
 
 ```bash
-export WORKSPACE=${PWD}/workspace
+export KMS_WORKSPACE=${PWD}/workspace
 make demo
 ▶️ Starting sandbox...
 💤 Waiting for sandbox . . . (23318)
@@ -93,7 +93,7 @@ Running TypeScript flow...
 ## Start only KMS in sandbox
 
 ```
-export WORKSPACE=${PWD}/workspace
+export KMS_WORKSPACE=${PWD}/workspace
 make start-host
 ```
 
@@ -102,9 +102,9 @@ make start-host
 ### Add claims
 
 ```
-export WORKSPACE=${PWD}/workspace
+export KMS_WORKSPACE=${PWD}/workspace
 export KMS_URL=https://127.0.0.1:8000
-export KEYS_DIR="$WORKSPACE"/sandbox_common
+export KEYS_DIR="$KMS_WORKSPACE"/sandbox_common
 make propose-add-key-release-policy
 ```
 
@@ -117,9 +117,9 @@ make propose-rm-key-release-policy
 ### Script to setup policies and generate a key
 
 ```
-export WORKSPACE=${PWD}/workspace
+export KMS_WORKSPACE=${PWD}/workspace
 export KMS_URL=https://127.0.0.1:8000
-export KEYS_DIR="$WORKSPACE"/sandbox_common
+export KEYS_DIR="$KMS_WORKSPACE"/sandbox_common
 make setup
 ```
 
@@ -182,7 +182,7 @@ curl $KMS_URL/receipt?transaction_id=2.20 --cacert ${KEYS_DIR}/service_cert.pem 
 The manual curl test work with certificates. In this section we will use access tokens.
 ### Start sample identity provider and kms
 ```
-export WORKSPACE=${PWD}/workspace
+export KMS_WORKSPACE=${PWD}/workspace
 make start-host-idp
 ```
 ### Test identity provier in seperate terminal
