@@ -44,7 +44,7 @@ start-idp:  ## 🏃 Start the idp for testing jwt
 	@echo -e "\e[34m$@\e[0m" || true
 	mkdir -p ${KMS_WORKSPACE}
 	cd test/utils/jwt && KMS_WORKSPACE=${KMS_WORKSPACE} nohup npm run start  &
-	sleep 60
+	./scripts/wait_idp_ready.sh
 
 # Start hosting the application using `sandbox.sh` and enable custom JWT authentication
 start-host: stop-host build  ## 🏃 Start the CCF network using Sandbox.sh
