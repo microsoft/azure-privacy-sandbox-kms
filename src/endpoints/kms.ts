@@ -17,8 +17,9 @@ import { SnpAttestationClaims } from "../attestation/SnpAttestationClaims";
 import { KeyGeneration } from "./KeyGeneration";
 import { TinkKey, TinkPublicKey } from "./TinkKey";
 import { IWrapped, IWrappedJwt, KeyWrapper } from "./KeyWrapper";
-
-export interface IValidatePolicy {
+import { AuthenticationService } from "../authorization/AuthenticationService";
+import { ServiceResult } from "../utils/ServiceResult";
+export interface IAttestationValidationResult {
   result: boolean;
   errorMessage?: string;
   statusCode: number;
@@ -55,7 +56,9 @@ const queryParams = (request: ccfapp.Request) => {
 };
 
 // Validate the attestation by means of the key release policy
-const validateAttestation = (attestation: ISnpAttestation): IValidatePolicy => {
+const validateAttestation = (
+  attestation: ISnpAttestation,
+): IAttestationValidationResult => {
   console.log(`Start attestation validation`);
   if (!attestation) {
     return {
@@ -632,7 +635,7 @@ export const pubkey = (request: ccfapp.Request<void>) => {
 };
 
 // Generate new key pair and store it on the store
-export const refresh = () => {
+export const refresh = (request: ccfapp.Request<void>) => {
   try {
     // Get HPKE key pair id
     const id = hpkeKeyIdMap.size + 1;
@@ -669,6 +672,23 @@ export const refresh = () => {
     throw new Error(error);
   }
 };
+
+// Hearthbeat endpoint currently used ro test authorization
+export const hearthbeat = (request: ccfapp.Request<void>) => {
+  // check if caller has a valid identity
+  const [policy, isValidIdentity] = new AuthenticationService().isAuthenticated(
+    request,
+  );
+  console.log(
+    `Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`,
+  );
+  if (isValidIdentity.failure) return isValidIdentity; //ApiResult.AuthFailure();
+  const body = policy;
+  return {
+    body,
+  };
+};
+
 //#endregion
 
 //#region KMS Policies

@@ -9,7 +9,7 @@ function usage {
     echo ""
     echo "Submit a ccf proposal and automatically vote with acceptance."
     echo ""
-    echo "usage: ./submit_proposal.sh --network-url string --certificate-dir <workspace/sandbox_common> string --proposal-file string --member-count number"
+    echo "usage: ./kms_setup.sh --network-url string --certificate-dir <workspace/sandbox_common> string --proposal-file string --member-count number"
     echo ""
     echo "  --network-url           string      ccf network url (example: https://test.confidential-ledger.azure.com)"
     echo "  --certificate-dir       string      The directory where the certificates are"
@@ -62,15 +62,17 @@ service_cert="$certificate_dir/service_cert.pem"
 signing_cert="$certificate_dir/member0_cert.pem"
 signing_key="$certificate_dir/member0_privk.pem"
 
-
-TMP_WORKSPACE=$WORKSPACE
-unset WORKSPACE
-
 # Add key release policy
 source .venv_ccf_sandbox/bin/activate
 make propose-add-key-release-policy
 
+# Add demo validation policy
+source .venv_ccf_sandbox/bin/activate
+make propose-jwt-demo-validation-policy
+
+# Add AAD validation policy
+source .venv_ccf_sandbox/bin/activate
+make propose-jwt-ms-validation-policy
+
 # Generate a new key item
 curl ${network_url}/app/refresh -X POST --cacert $service_cert --cert $signing_cert --key $signing_key -H "Content-Type: application/json" -i  -w '\n'
-
-export WORKSPACE=$TMP_WORKSPACE

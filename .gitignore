@@ -7,3 +7,6 @@ workspace
 .env
 hello/
 ccf-app/
+nohup.out
+aad.env
+*.log

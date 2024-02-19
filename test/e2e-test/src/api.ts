@@ -6,6 +6,7 @@ import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 import { IKeyItem } from "../../../src";
 import { IWrapped, IWrappedJwt } from "../../../src/endpoints/KeyWrapper";
 import { ISnpAttestation } from "../../../src/attestation/ISnpAttestation";
+import https from "https";
 
 export interface ValidationProps {
   url: string;
@@ -38,18 +39,93 @@ export class Validator {
 }
 
 export default class Api {
+  public static async hearthbeat(
+    props: DemoProps,
+    member: DemoMemberProps,
+    httpsAgent: https.Agent,
+    authorizationHeader?: string,
+  ): Promise<IKeyItem> {
+    console.log(`📝 hearthbeat: ${authorizationHeader}`);
+    const reqProps = authorizationHeader
+      ? {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `${authorizationHeader}`,
+          },
+          httpsAgent,
+        }
+      : {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          httpsAgent,
+        };
+    /* try to write a curl representation
+    axios.interceptors.request.use((config) => {
+      let data = config.data ? JSON.stringify(config.data) : '';
+      let headers = '';
+      for (let header in config.headers) {
+        headers += `-H '${header}: ${config.headers[header]}' `;
+      }
+      console.log(`curl -X ${config.method?.toUpperCase()} '${config.url}' ${headers} -d '${data}'`);
+      return config;
+    });
+    */
+    let result;
+    try {
+      result = await axios.get(props.hearthbeat, reqProps);
+    } catch (error) {
+      console.log(`Failure ${props.hearthbeat} with`, reqProps);
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error(
+          `Error: ${error.response.status} ${error.response.statusText}`,
+        );
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error("Error: No response received from server");
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error("Error:", error.message);
+      }
+    }
+
+    if (!result || result.status !== 200) {
+      throw new Error(
+        `🛑 [TEST FAILURE]: Unexpected status code: ${result?.status}`,
+      );
+    }
+
+    console.log(
+      `✅ [PASS] [${result.status} : ${result.statusText}] - ${member.name}`,
+    );
+    console.log(result.data);
+    return result.data;
+  }
+
   public static async refresh(
     props: DemoProps,
     member: DemoMemberProps,
+    httpsAgent: https.Agent,
+    authorizationHeader?: string,
   ): Promise<IKeyItem> {
     console.log(`📝 ${member.name} Refresh key:`);
-
-    const result = await axios.post(props.refreshUrl, "", {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      httpsAgent: member.httpsAgent,
-    });
+    const reqProps = authorizationHeader
+      ? {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `${authorizationHeader}`,
+          },
+          httpsAgent,
+        }
+      : {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          httpsAgent,
+        };
+    const result = await axios.post(props.refreshUrl, "", reqProps);
 
     if (result.status !== 200) {
       throw new Error(
@@ -61,9 +137,9 @@ export default class Api {
       `✅ [PASS] [${result.status} : ${result.statusText}] - ${member.name}`,
     );
     console.log(result.data);
-
     return result.data;
   }
+
   public static async keyInitial(
     props: DemoProps,
     member: DemoMemberProps,

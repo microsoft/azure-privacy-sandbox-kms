@@ -48,9 +48,9 @@ do
     shift;
 done
 
-echo $network_url
-echo $certificate_dir
-echo $proposal_file
+echo "network_url:" $network_url
+echo "certificate_dir: " $certificate_dir
+echo "proposal_file:" $proposal_file
 
 # validate parameters
 if [[ -z $network_url ]]; then
@@ -67,7 +67,7 @@ service_cert="$certificate_dir/service_cert.pem"
 signing_cert="$certificate_dir/member0_cert.pem"
 signing_key="$certificate_dir/member0_privk.pem"
 
-# cat $proposal_file
+#cat $proposal_file
 
 proposal0_id=$( (ccf_cose_sign1 --content $proposal_file --signing-cert $signing_cert --signing-key $signing_key --ccf-gov-msg-type proposal --ccf-gov-msg-created_at $(date -Is)  | curl $network_url/gov/proposals -k -H "Content-Type: application/cose" --data-binary @- --cacert $service_cert -w '\n'| jq -r '.proposal_id') ) 
 

@@ -36,6 +36,7 @@ export interface DemoProps {
   proposalUrl: string;
   keyUrl: string;
   unwrapUrl: string;
+  hearthbeat: string;
 }
 
 export interface DemoMemberProps {
@@ -52,6 +53,7 @@ class Demo {
     proposalUrl: `${serverUrl}/gov/proposals`,
     keyUrl: `${serverUrl}/app/key`,
     unwrapUrl: `${serverUrl}/app/unwrapKey`,
+    hearthbeat: `${serverUrl}/app/hearthbeat`,
   };
 
   private static memberDataMap = new Map([
@@ -104,6 +106,13 @@ class Demo {
       `make propose-add-key-release-policy >/tmp/make.txt`,
     );
     console.log(output);
+
+    this.printTestSectionHeader("🔬 [TEST]: generate access token");
+    const access_token = await Demo.executeCommand(
+      `./scripts/authorization_header.sh`,
+    );
+    console.log(`Authorization header: ${access_token}`);
+
     process.chdir("../../");
 
     this.printTestSectionHeader("🔬 [TEST]: Key generation Service");
@@ -125,10 +134,29 @@ class Demo {
       return !Number.isNaN(toTest) && toTest > 0;
     };
 
+    // authorization on hearthbeat
+    const member = this.members[0];
+    console.log(`📝 Heartbeat member certs...`);
+    let response = await Api.hearthbeat(
+      this.demoProps,
+      member,
+      this.createHttpsAgent(member.id),
+    );
+    Demo.assertField(member.name, response, "policy", "member_cert");
+    Demo.assertField(member.name, response, "cert", notUndefinedString);
+
+    console.log(`📝 Heartbeat JWT...`);
+    //response = await Api.hearthbeat(this.demoProps, member, this.createHttpsAgent("", false), access_token);
+    //Demo.assertField(member.name, response, "policy", "jwt");
+    //Demo.assertField(member.name, response, "cert", undefined);
+
     // members 0 refresh key
     console.log(`📝 Refresh key...`);
-    const member = this.members[0];
-    let response = await Api.refresh(this.demoProps, member);
+    response = await Api.refresh(
+      this.demoProps,
+      member,
+      this.createHttpsAgent(member.id),
+    );
 
     Demo.assertField(member.name, response, "x", notUndefinedString);
     Demo.assertField(
@@ -341,15 +369,24 @@ class Demo {
     };
   }
 
-  private static createHttpsAgent(memberId: string): https.Agent {
+  private static createHttpsAgent(
+    memberId: string,
+    includeClientCerts = true,
+  ): https.Agent {
+    if (includeClientCerts) {
+      return new https.Agent({
+        cert: fs.readFileSync(
+          `${certificateStorePath}/member${memberId}_cert.pem`,
+        ),
+        key: fs.readFileSync(
+          `${certificateStorePath}/member${memberId}_privk.pem`,
+        ),
+        ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`),
+      });
+    }
     return new https.Agent({
-      cert: fs.readFileSync(
-        `${certificateStorePath}/member${memberId}_cert.pem`,
-      ),
-      key: fs.readFileSync(
-        `${certificateStorePath}/member${memberId}_privk.pem`,
-      ),
       ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`),
+      rejectUnauthorized: false,
     });
   }
 
