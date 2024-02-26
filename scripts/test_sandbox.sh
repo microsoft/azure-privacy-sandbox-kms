@@ -82,6 +82,7 @@ function finish {
         fi
     fi
     echo "💀 Stopped sandbox process"
+    exit 1
 }
 trap finish EXIT
 

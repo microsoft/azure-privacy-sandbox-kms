@@ -46,6 +46,13 @@ export interface DemoMemberProps {
   httpsAgent: https.Agent;
 }
 
+export enum AuthKinds {
+  NoAuth = 0,
+  JWT,
+  UserCerts,
+  MemberCerts
+}
+
 class Demo {
   //
   private static readonly demoProps: DemoProps = {
@@ -137,29 +144,29 @@ class Demo {
     // authorization on hearthbeat
     const member = this.members[0];
     /*
+    console.log(`📝 Heartbeat JWT...`);
+    let response = await Api.hearthbeat(this.demoProps, member, this.createHttpsAgent("", AuthKinds.JWT), access_token);
+    Demo.assertField(member.name, response, "policy", "jwt");
+    Demo.assertField(member.name, response, "cert", undefined);
+
     console.log(`📝 Heartbeat member certs...`);
-    let response = await Api.hearthbeat(
+    response = await Api.hearthbeat(
       this.demoProps,
       member,
-      this.createHttpsAgent(member.id),
+      this.createHttpsAgent(member.id, AuthKinds. NoAuth),
     );
     Demo.assertField(member.name, response, "policy", "member_cert");
     Demo.assertField(member.name, response, "cert", notUndefinedString);
     */
-
-    console.log(`📝 Heartbeat JWT...`);
-    //response = await Api.hearthbeat(this.demoProps, member, this.createHttpsAgent("", false), access_token);
-    //Demo.assertField(member.name, response, "policy", "jwt");
-    //Demo.assertField(member.name, response, "cert", undefined);
 
     // members 0 refresh key
     console.log(`📝 Refresh key...`);
     let response = await Api.refresh(
       this.demoProps,
       member,
-      this.createHttpsAgent(member.id),
+      this.createHttpsAgent(member.id, AuthKinds.NoAuth),
     );
-    
+
     Demo.assertField(member.name, response, "x", notUndefinedString);
     Demo.assertField(
       member.name,
@@ -367,31 +374,40 @@ class Demo {
       id: memberId,
       name: `Member ${memberId}`,
       data: this.memberDataMap.get(memberId),
-      httpsAgent: this.createHttpsAgent(memberId),
+      httpsAgent: this.createHttpsAgent(memberId, AuthKinds.MemberCerts),
     };
   }
 
   private static createHttpsAgent(
     memberId: string,
-    includeClientCerts = true,
+    authKind: AuthKinds,
   ): https.Agent {
-    if (includeClientCerts) {
-      console.log(`Return http agent with certs for ${certificateStorePath}`)
-      return new https.Agent({
-        cert: fs.readFileSync(
-          `${certificateStorePath}/member${memberId}_cert.pem`,
-        ),
-        key: fs.readFileSync(
-          `${certificateStorePath}/member${memberId}_privk.pem`,
-        ),
-        ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`),
-      });
+    switch (authKind) {
+      case AuthKinds.JWT:
+        console.log(`Return http agent with access token for ${certificateStorePath}`)
+        return new https.Agent({
+          ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`),
+          rejectUnauthorized: true,
+        });
+      case AuthKinds.MemberCerts:
+        console.log(`Return http agent with member certs for ${certificateStorePath}`)
+        return new https.Agent({
+          cert: fs.readFileSync(
+            `${certificateStorePath}/member${memberId}_cert.pem`,
+          ),
+          key: fs.readFileSync(
+            `${certificateStorePath}/member${memberId}_privk.pem`,
+          ),
+          ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`),
+        });
     }
-    console.log(`Return http agent with access token for ${certificateStorePath}`)
+    console.log(`Return http agent with no auth for ${certificateStorePath}`)
     return new https.Agent({
       ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`),
+      
       rejectUnauthorized: false,
     });
+
   }
 
   private static printTestSectionHeader(title: string) {

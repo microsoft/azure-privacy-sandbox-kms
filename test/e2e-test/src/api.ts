@@ -50,7 +50,7 @@ export default class Api {
       ? {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `${authorizationHeader}`,
+          "Authorization": `${authorizationHeader}`,
         },
         httpsAgent,
       }
@@ -62,7 +62,8 @@ export default class Api {
       };
     let result;
     try {
-      result = await axios.get(props.hearthbeat, reqProps);
+      result = await axios.get("https://google.com", reqProps);
+      //result = await axios.get(props.hearthbeat, reqProps);
     } catch (error) {
       console.log(`Failure ${props.hearthbeat} with`, reqProps);
       if (error.response) {
@@ -107,7 +108,7 @@ export default class Api {
       ? {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `${authorizationHeader}`,
+          "Authorization": `${authorizationHeader}`,
         },
         httpsAgent,
       }
@@ -117,7 +118,8 @@ export default class Api {
         },
         httpsAgent,
       };
-    // try to write a curl representation
+
+    /* try to write a curl representation
     axios.interceptors.request.use((config) => {
       let data = config.data ? JSON.stringify(config.data) : '';
       let headers = '';
@@ -127,7 +129,7 @@ export default class Api {
       console.log(`curl -X ${config.method?.toUpperCase()} '${config.url}' ${headers} -d '${data}'`);
       return config;
     });
-
+    */
 
     let result;
     try {
