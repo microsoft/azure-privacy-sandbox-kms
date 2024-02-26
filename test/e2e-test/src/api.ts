@@ -7,6 +7,7 @@ import { IKeyItem } from "../../../src";
 import { IWrapped, IWrappedJwt } from "../../../src/endpoints/KeyWrapper";
 import { ISnpAttestation } from "../../../src/attestation/ISnpAttestation";
 import https from "https";
+import * as http2 from "http2";
 
 export interface ValidationProps {
   url: string;
@@ -62,8 +63,7 @@ export default class Api {
       };
     let result;
     try {
-      result = await axios.get("https://google.com", reqProps);
-      //result = await axios.get(props.hearthbeat, reqProps);
+      result = await axios.get(props.hearthbeat, reqProps);
     } catch (error) {
       console.log(`Failure ${props.hearthbeat} with`, reqProps);
       if (error.response) {
@@ -141,7 +141,7 @@ export default class Api {
         console.error(`Error: ${error.response.status} ${error.response.statusText}`, error.message);
       } else if (error.request) {
         // The request was made but no response was received
-        console.error('Error: No response received from server', error.message);
+        console.error('Error: No response received from server: ', error.message);
       } else {
         // Something happened in setting up the request that triggered an Error
         console.error('Error:', error.message);
@@ -164,28 +164,65 @@ export default class Api {
     props: DemoProps,
     member: DemoMemberProps,
     data: string,
+    httpsAgent: https.Agent,
+    authorizationHeader?: string
   ): Promise<IKeyItem> {
     console.log(`📝 ${member.name} Get initial wrapped private key:`);
-
-    const result = await axios.post(props.keyUrl, data, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      httpsAgent: member.httpsAgent,
+    const https2Agent = new https.Agent({
+      ca: httpsAgent.options.ca
+    });
+    const client = http2.connect("https://127.0.0.1:8000", {
+      ...https2Agent.options,
+      rejectUnauthorized: true
+    } as http2.SecureClientSessionOptions);
+    const req = client.request({
+      ":method": "POST",
+      ":path": "/app/key",
+      "Content-Type": "application/json",
+      "Authorization": authorizationHeader
     });
 
-    if (result.status !== 202) {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    const responsePromise = new Promise((resolve, reject) => {
+      let data = '';
+      let statusCode = 0;
+      req.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      req.on('end', () => {
+        resolve({ statusCode, data });
+      });
+
+      req.on('response', (headers) => {
+        statusCode = headers[':status'] || 0;
+      });
+
+      req.on('error', (error) => {
+        reject(error);
+      });
+    });
+
+    req.end();
+    let response;
+    try {
+      response = await responsePromise;
+      console.log('Status:', response.statusCode);
+      console.log('Response data:', response.data);
+    } catch (error) {
+      console.error('Error:', error.message);
+    }
+
+    if (response.statusCode !== 202) {
       throw new Error(
-        `🛑 [TEST FAILURE]: Unexpected status code: ${result.status}, ${result.data}`,
+        `🛑 [TEST FAILURE]: Unexpected status code: ${response.statusCode}}`,
       );
     }
 
     console.log(
-      `✅ [PASS] [${result.status} : ${result.statusText}] - ${member.name}`,
-    );
-    console.log(result.data);
+      `✅ [PASS] [${response.statusCode} :  ${member.name}`, response.data);
 
-    return result.data;
+    return response.data;
   }
 
   public static async key(

@@ -161,6 +161,7 @@ class Demo {
 
     // members 0 refresh key
     console.log(`📝 Refresh key...`);
+    /*
     let response = await Api.refresh(
       this.demoProps,
       member,
@@ -180,19 +181,22 @@ class Demo {
     Demo.assertField(member.name, response, "d", undefined);
     Demo.assertField(member.name, response, "crv", "X25519");
     Demo.assertField(member.name, response, "kty", "OKP");
+      */
 
-    const _ = await Api.keyInitial(
+    let response = await Api.keyInitial(
       this.demoProps,
       member,
       JSON.stringify(attestation),
+      this.createHttpsAgent(member.id, AuthKinds.JWT),
+      access_token
     ).catch((error) => {
-      console.log(`keyInitial error: ${error?.response?.data?.nessage}`);
+      console.log(`keyInitial error: `, error);
       throw error;
     });
 
     // Wait for receipt to be generated
     await Demo.sleep(5000);
-
+return;
     {
       // Test with JWT
       // Get wrapped key
@@ -401,11 +405,10 @@ class Demo {
           ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`),
         });
     }
-    console.log(`Return http agent with no auth for ${certificateStorePath}`)
+    const ca = fs.readFileSync(`${certificateStorePath}/service_cert.pem`).toString();
+    console.log(`Return http agent with no auth for ${certificateStorePath}`, ca)
     return new https.Agent({
-      ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`),
-      
-      rejectUnauthorized: false,
+      ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`)
     });
 
   }

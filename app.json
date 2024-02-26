@@ -186,7 +186,7 @@
         "js_module": "endpoints/kms.js",
         "js_function": "key",
         "forwarding_required": "sometimes",
-        "authn_policies": ["jwt"],
+        "authn_policies": ["jwt", "member_cert", "user_cert"],
         "mode": "readonly",
         "parameters": [
           {
