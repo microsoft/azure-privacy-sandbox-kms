@@ -48,29 +48,18 @@ export default class Api {
     console.log(`📝 hearthbeat: ${authorizationHeader}`);
     const reqProps = authorizationHeader
       ? {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `${authorizationHeader}`,
-          },
-          httpsAgent,
-        }
-      : {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          httpsAgent,
-        };
-    /* try to write a curl representation
-    axios.interceptors.request.use((config) => {
-      let data = config.data ? JSON.stringify(config.data) : '';
-      let headers = '';
-      for (let header in config.headers) {
-        headers += `-H '${header}: ${config.headers[header]}' `;
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${authorizationHeader}`,
+        },
+        httpsAgent,
       }
-      console.log(`curl -X ${config.method?.toUpperCase()} '${config.url}' ${headers} -d '${data}'`);
-      return config;
-    });
-    */
+      : {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        httpsAgent,
+      };
     let result;
     try {
       result = await axios.get(props.hearthbeat, reqProps);
@@ -110,26 +99,55 @@ export default class Api {
     httpsAgent: https.Agent,
     authorizationHeader?: string,
   ): Promise<IKeyItem> {
+    console.log(`📝 Refresh props:`, props);
+    console.log(`📝 Refresh https agent:`, httpsAgent);
+    console.log(`📝 Refresh authorization header:`, authorizationHeader);
     console.log(`📝 ${member.name} Refresh key:`);
     const reqProps = authorizationHeader
       ? {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `${authorizationHeader}`,
-          },
-          httpsAgent,
-        }
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${authorizationHeader}`,
+        },
+        httpsAgent,
+      }
       : {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          httpsAgent,
-        };
-    const result = await axios.post(props.refreshUrl, "", reqProps);
+        headers: {
+          "Content-Type": "application/json",
+        },
+        httpsAgent,
+      };
+    // try to write a curl representation
+    axios.interceptors.request.use((config) => {
+      let data = config.data ? JSON.stringify(config.data) : '';
+      let headers = '';
+      for (let header in config.headers) {
+        headers += `-H '${header}: ${config.headers[header]}' `;
+      }
+      console.log(`curl -X ${config.method?.toUpperCase()} '${config.url}' ${headers} -d '${data}'`);
+      return config;
+    });
 
-    if (result.status !== 200) {
+
+    let result;
+    try {
+      result = await axios.post(props.refreshUrl, "", reqProps);
+    } catch (error) {
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error(`Error: ${error.response.status} ${error.response.statusText}`, error.message);
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('Error: No response received from server', error.message);
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error:', error.message);
+      }
+    }
+    if (result?.status !== 200) {
       throw new Error(
-        `🛑 [TEST FAILURE]: Unexpected status code: ${result.status}`,
+        `🛑 [TEST FAILURE]: Unexpected status code: ${result?.status}`,
       );
     }
 

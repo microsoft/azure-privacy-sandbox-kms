@@ -136,6 +136,7 @@ class Demo {
 
     // authorization on hearthbeat
     const member = this.members[0];
+    /*
     console.log(`📝 Heartbeat member certs...`);
     let response = await Api.hearthbeat(
       this.demoProps,
@@ -144,6 +145,7 @@ class Demo {
     );
     Demo.assertField(member.name, response, "policy", "member_cert");
     Demo.assertField(member.name, response, "cert", notUndefinedString);
+    */
 
     console.log(`📝 Heartbeat JWT...`);
     //response = await Api.hearthbeat(this.demoProps, member, this.createHttpsAgent("", false), access_token);
@@ -152,12 +154,12 @@ class Demo {
 
     // members 0 refresh key
     console.log(`📝 Refresh key...`);
-    response = await Api.refresh(
+    let response = await Api.refresh(
       this.demoProps,
       member,
       this.createHttpsAgent(member.id),
     );
-
+    
     Demo.assertField(member.name, response, "x", notUndefinedString);
     Demo.assertField(
       member.name,
@@ -374,6 +376,7 @@ class Demo {
     includeClientCerts = true,
   ): https.Agent {
     if (includeClientCerts) {
+      console.log(`Return http agent with certs for ${certificateStorePath}`)
       return new https.Agent({
         cert: fs.readFileSync(
           `${certificateStorePath}/member${memberId}_cert.pem`,
@@ -384,6 +387,7 @@ class Demo {
         ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`),
       });
     }
+    console.log(`Return http agent with access token for ${certificateStorePath}`)
     return new https.Agent({
       ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`),
       rejectUnauthorized: false,

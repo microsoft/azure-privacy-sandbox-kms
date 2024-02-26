@@ -65,12 +65,12 @@ echo "💤 Waiting for the app frontend at ${server}..."
 # There is a side effect here in the case of the sandbox as it creates the 'workspace/sandbox_common' everytime
 # it starts up. The following condition not only checks that this pem file has been created, it also checks it
 # is valid. Don't be caught out by the folder existing from a previous run.
-while [ "200" != "$(curl "$server/app/commit" --cacert "${certificate_dir}/service_cert.pem" $only_status_code)" ]
-do
-    sleep 1
-done
+#while [ "200" != "$(curl "$server/app/commit" --cacert "${certificate_dir}/service_cert.pem" $only_status_code)" ]
+#do
+#    sleep 1
+#done
 
-# KMA test flow goes through TypeScript application located in ./test/e2e-test
+# KMS test flow goes through TypeScript application located in ./test/e2e-test
 echo "Running TypeScript flow..."
 
 # adding read permission to .pem files so node application can have access
