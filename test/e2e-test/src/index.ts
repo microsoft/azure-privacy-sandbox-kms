@@ -167,7 +167,6 @@ class Demo {
     );
 
     Demo.assertField(member.name, response, "x", notUndefinedString);
-    Demo.assertField(member.name, response, "x", undefinedString);
     Demo.assertField(
       member.name,
       response,
