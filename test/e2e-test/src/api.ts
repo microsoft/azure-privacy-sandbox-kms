@@ -183,64 +183,6 @@ export default class Api {
     return JSON.parse(response.data);
   }
 
-  public static async keyInitial(
-    props: DemoProps,
-    member: DemoMemberProps,
-    data: string,
-    expectedStatus: number,
-    httpsAgent: https.Agent,
-    authorizationHeader?: string
-  ): Promise<IKeyItem | undefined> {
-    console.log(`📝 ${member.name} Get initial wrapped private key:`, authorizationHeader);
-    const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
-      ? {
-        ":method": "POST",
-        ":path": `${props.keyPath}`,
-        "Content-Type": "application/json",
-        "Authorization": authorizationHeader
-      }
-      : {
-        ":method": "POST",
-        ":path": `${props.keyPath}`,
-        "Content-Type": "application/json",
-      };
-    const client = http2.connect(props.url, {
-      ...httpsAgent.options,
-      rejectUnauthorized: true
-    } as http2.SecureClientSessionOptions);
-    const req = client.request(reqProps);
-    req.write(data); // Send the request body
-    req.end();
-
-    let response;
-    try {
-      response = await Api.responsePromise(req);
-      console.log('Status:', response.statusCode);
-      console.log('Response data:', response.data);
-    } catch (error) {
-      console.error('Error:', error.message);
-    } finally {
-      // Close the client session when done
-      if (client) {
-        client.close();
-      }
-    }
-
-    if (response.statusCode !== expectedStatus) {
-      throw new Error(
-        `🛑 [TEST FAILURE]: Unexpected status code: ${response.statusCode}}, expected: ${expectedStatus}`,
-      );
-    }
-
-    console.log(
-      `✅ [PASS] [${response.statusCode} :  ${member.name}`, response.data);
-
-    if (response.data) {
-      return JSON.parse(response.data);  
-    }
-    return undefined;
-  }
-
   public static async key(
     props: DemoProps,
     member: DemoMemberProps,
