@@ -18,7 +18,6 @@ import { KeyGeneration } from "./KeyGeneration";
 import { TinkKey, TinkPublicKey } from "./TinkKey";
 import { IWrapped, IWrappedJwt, KeyWrapper } from "./KeyWrapper";
 import { AuthenticationService } from "../authorization/AuthenticationService";
-import { ServiceResult } from "../utils/ServiceResult";
 export interface IAttestationValidationResult {
   result: boolean;
   errorMessage?: string;
@@ -164,8 +163,7 @@ const validateAttestation = (
     console.log(
       `Key release policy: ${JSON.stringify(
         keyReleasePolicy,
-      )}, keys: ${Object.keys(keyReleasePolicy)}, keys: ${
-        Object.keys(keyReleasePolicy).length
+      )}, keys: ${Object.keys(keyReleasePolicy)}, keys: ${Object.keys(keyReleasePolicy).length
       }`,
     );
 
@@ -255,6 +253,15 @@ export const setKeyHeaders = (): { [key: string]: string } => {
 // Get latest private key
 export const key = (request: ccfapp.Request<ISnpAttestation>) => {
   console.log(`Key attestation: ${JSON.stringify(request || {})}`);
+  // check if caller has a valid identity
+  const [policy, isValidIdentity] = new AuthenticationService().isAuthenticated(
+    request,
+  );
+  console.log(
+    `Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`,
+  );
+  if (isValidIdentity.failure) return isValidIdentity;
+
   const query = queryParams(request);
   let kid: string;
   let id: number;
@@ -314,7 +321,7 @@ export const key = (request: ccfapp.Request<ISnpAttestation>) => {
           },
         },
       };
-    }  
+    }
   } catch (exception: any) {
     const message = `Error in validating attestation (${attestation}): ${exception.message}`;
     console.error(message);
@@ -405,6 +412,15 @@ interface IUnwrapRequest {
 
 // Unwrap private key
 export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
+    // check if caller has a valid identity
+    const [policy, isValidIdentity] = new AuthenticationService().isAuthenticated(
+      request,
+    );
+    console.log(
+      `Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`,
+    );
+    if (isValidIdentity.failure) return isValidIdentity; 
+    
   // check payload
   const body = request.body.json();
   console.log(`unwrapKey=> wrapped:`, body);
@@ -708,7 +724,7 @@ export const hearthbeat = (request: ccfapp.Request<void>) => {
   console.log(
     `Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`,
   );
-  if (isValidIdentity.failure) return isValidIdentity; //ApiResult.AuthFailure();
+  if (isValidIdentity.failure) return isValidIdentity;
   const body = policy;
   return {
     body,

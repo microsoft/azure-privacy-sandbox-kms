@@ -187,6 +187,7 @@ export default class Api {
     props: DemoProps,
     member: DemoMemberProps,
     data: string,
+    expectedStatus: number,
     httpsAgent: https.Agent,
     authorizationHeader?: string
   ): Promise<IKeyItem | undefined> {
@@ -225,9 +226,9 @@ export default class Api {
       }
     }
 
-    if (response.statusCode !== 202) {
+    if (response.statusCode !== expectedStatus) {
       throw new Error(
-        `🛑 [TEST FAILURE]: Unexpected status code: ${response.statusCode}}`,
+        `🛑 [TEST FAILURE]: Unexpected status code: ${response.statusCode}}, expected: ${expectedStatus}`,
       );
     }
 
@@ -244,10 +245,11 @@ export default class Api {
     props: DemoProps,
     member: DemoMemberProps,
     data: string,
+    expectedStatus: number,
     tink: boolean,
     httpsAgent: https.Agent,
     authorizationHeader?: string
-  ): Promise<IWrapped | IWrappedJwt> {
+  ): Promise<IWrapped | IWrappedJwt | undefined> {
     console.log(`📝 ${member.name} Get wrapped private key with receipt:`, authorizationHeader);
     const query = tink ? "?fmt=tink" : "";
     const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
@@ -284,7 +286,7 @@ export default class Api {
     }
   }
 
-    if (response.statusCode !== 200) {
+    if (response.statusCode !== expectedStatus) {
       throw new Error(
         `🛑 [TEST FAILURE]: Unexpected status code: ${response.statusCode}`,
       );
@@ -294,7 +296,10 @@ export default class Api {
       `✅ [PASS] [${response.statusCode} : ${member.name}`,
     );
 
-    return JSON.parse(response.data);
+    if (response.data) {
+      return JSON.parse(response.data);  
+    }
+    return undefined;
   }
 
   public static async unwrap(

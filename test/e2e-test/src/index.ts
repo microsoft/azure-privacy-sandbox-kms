@@ -145,7 +145,6 @@ class Demo {
     const member = this.members[0];
     console.log(`📝 Heartbeat JWT...`);
     let response = await Api.hearthbeat(this.demoProps, member, this.createHttpsAgent("", AuthKinds.JWT), access_token);
-    
     Demo.assertField(member.name, response, "policy", "jwt");
     Demo.assertField(member.name, response, "cert", undefined);
     
@@ -181,10 +180,12 @@ class Demo {
     Demo.assertField(member.name, response, "kty", "OKP");
 
     console.log(`📝 Get initial key...`);
-    let keyResponse = await Api.keyInitial(
+    let keyResponse = await Api.key(
       this.demoProps,
       member,
       JSON.stringify(attestation),
+      202,
+      false,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token
     ).catch((error) => {
@@ -200,9 +201,56 @@ class Demo {
         `🛑 [TEST FAILURE]: Initial key response must be undefined`,
       );
     }
+
+    console.log(`📝 Get initial key-Bad request...`);
+    let keyBadResponse = await Api.key(
+      this.demoProps,
+      member,
+      JSON.stringify(''),
+      400,
+      false,
+      this.createHttpsAgent(member.id, AuthKinds.MemberCerts)
+    ).catch((error) => {
+      console.log(`keyInitial error: `, error);
+      throw error;
+    });
+
+    if ((<any>keyBadResponse).error.message === "missing attestation") {
+      console.log(
+        `✅ [PASS] - Missing attestation error found`,
+      );
+    } else {
+      throw new Error(
+        `🛑 [TEST FAILURE]: Initial key response message failed`
+      );
+    }
+  
+    console.log(`📝 Get initial key-No auth...`);
+    keyBadResponse = await Api.key(
+      this.demoProps,
+      member,
+      JSON.stringify(attestation),
+      401,
+      false,
+      this.createHttpsAgent(member.id, AuthKinds.NoAuth)
+    ).catch((error) => {
+      console.log(`keyInitial error: `, error);
+      throw error;
+    });
+
+    if ((<any>keyBadResponse).error.message === "Invalid authentication credentials.") {
+      console.log(
+        `✅ [PASS] - Missing attestation error found`,
+      );
+    } else {
+      throw new Error(
+        `🛑 [TEST FAILURE]: Initial key response message failed`
+      );
+    }
+  
   
     // Wait for receipt to be generated
-    await Demo.sleep(5000);
+    await Demo.sleep(3000);
 
     {
       // Test with JWT
@@ -211,6 +259,7 @@ class Demo {
         this.demoProps,
         member,
         JSON.stringify(attestation),
+        200,
         false,      
         this.createHttpsAgent(member.id, AuthKinds.JWT),
         access_token
@@ -281,6 +330,7 @@ class Demo {
         this.demoProps,
         member,
         JSON.stringify(attestation),
+        200,
         true,
         this.createHttpsAgent(member.id, AuthKinds.JWT),
         access_token
