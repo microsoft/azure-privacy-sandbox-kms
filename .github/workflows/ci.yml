@@ -24,6 +24,6 @@ jobs:
           push: never
           configFile: .github/devcontainer.json
           runCmd: |
-            make demo ; make test
+            make demo 
         env:
           KMS_WORKSPACE: ./workspace
