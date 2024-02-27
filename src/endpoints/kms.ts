@@ -289,23 +289,49 @@ export const key = (request: ccfapp.Request<ISnpAttestation>) => {
     }
   }
 
-  console.log(`Get key with kid ${kid}`);
-
-  const attestation: ISnpAttestation = request.body.json();
-  console.log(`Attestation: ${attestation}`);
-  const validateResult = validateAttestation(attestation);
-  if (!validateResult.result) {
+  if (!request.body) {
     return {
-      statusCode: validateResult.statusCode,
+      statusCode: 400,
       body: {
         error: {
-          message: validateResult.errorMessage,
+          message: "Missing attestation in body",
         },
+      },
+    }
+  }
+  let attestation: ISnpAttestation;
+  let validateResult: IAttestationValidationResult;
+  try {
+    attestation = request.body.json();
+    console.log(`Attestation: ${attestation}`);
+    validateResult = validateAttestation(attestation);
+    if (!validateResult.result) {
+      return {
+        statusCode: validateResult.statusCode,
+        body: {
+          error: {
+            message: validateResult.errorMessage,
+          },
+        },
+      };
+    }  
+  } catch (exception: any) {
+    const message = `Error in validating attestation (${attestation}): ${exception.message}`;
+    console.error(message);
+    return {
+      statusCode: 500,
+      body: {
+        error: {
+          message,
+          exception,
+        },
+        inner: exception,
       },
     };
   }
 
   // Be sure to request item and the receipt
+  console.log(`Get key with kid ${kid}`);
   const keyItem = hpkeKeysMap.store.get(kid) as IKeyItem;
   if (keyItem === undefined) {
     return {

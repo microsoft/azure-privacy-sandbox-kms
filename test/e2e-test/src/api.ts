@@ -23,7 +23,6 @@ export class Validator {
       method: props.method,
       url: props.url,
       data: props.member.data,
-      httpsAgent: props.member.httpsAgent,
       validateStatus: function (status) {
         return status < 500; // Resolve only if the status code is less than 500
       },
@@ -39,59 +38,93 @@ export class Validator {
   }
 }
 
+
 export default class Api {
+  private static responsePromise(request: http2.ClientHttp2Stream, responseType = "json") {
+    return new Promise((resolve, reject) => {
+      let data: string  = '';
+      let chunks: Buffer[] = [];
+      let statusCode = 0;
+      request.on('data', (chunk: string | Buffer) => {
+        if (responseType === "json") {
+          data += chunk;
+        } else {
+          chunks.push(chunk as Buffer)
+        }        
+      });
+
+      request.on('end', () => {
+        if (responseType === "json") {
+          resolve({ statusCode, data });
+        } else {
+          let data = Buffer.concat(chunks);          
+          resolve({ statusCode, data });
+        }
+      });
+
+      request.on('response', (headers) => {
+        statusCode = headers[':status'] || 0;
+      });
+
+      request.on('error', (error) => {
+        reject(error);
+      });
+    });
+  }
+
+
   public static async hearthbeat(
     props: DemoProps,
     member: DemoMemberProps,
     httpsAgent: https.Agent,
     authorizationHeader?: string,
   ): Promise<IKeyItem> {
-    console.log(`📝 hearthbeat: ${authorizationHeader}`);
-    const reqProps = authorizationHeader
+    console.log(`📝 hearthbeat authorization header: ${authorizationHeader}`);
+    
+    const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
       ? {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `${authorizationHeader}`,
-        },
-        httpsAgent,
+        ":method": "GET",
+        ":path": `${props.hearthbeatPath}`,
+        "Content-Type": "application/json",
+        "Authorization": authorizationHeader
       }
       : {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        httpsAgent,
+        ":method": "GET",
+        ":path": `${props.hearthbeatPath}`,
+        "Content-Type": "application/json",
       };
-    let result;
+      
+      const client = http2.connect(props.url, {
+      ...httpsAgent.options,
+      rejectUnauthorized: true
+    } as http2.SecureClientSessionOptions);
+    const req = client.request(reqProps);
+    req.end();
+    
+    let response;
     try {
-      result = await axios.get(props.hearthbeat, reqProps);
+      response = await Api.responsePromise(req);
+      console.log('Status:', response.statusCode);
+      console.log('Response data:', response.data);
     } catch (error) {
-      console.log(`Failure ${props.hearthbeat} with`, reqProps);
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.error(
-          `Error: ${error.response.status} ${error.response.statusText}`,
-        );
-      } else if (error.request) {
-        // The request was made but no response was received
-        console.error("Error: No response received from server");
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.error("Error:", error.message);
+      console.error('Error:', error.message);
+    } finally {
+      // Close the client session when done
+      if (client) {
+        client.close();
       }
     }
 
-    if (!result || result.status !== 200) {
+    if (!response || response.statusCode !== 200) {
       throw new Error(
-        `🛑 [TEST FAILURE]: Unexpected status code: ${result?.status}`,
+        `🛑 [TEST FAILURE]: Unexpected status code: ${response.statusCode}`,
       );
     }
 
     console.log(
-      `✅ [PASS] [${result.status} : ${result.statusText}] - ${member.name}`,
+      `✅ [PASS] [${response.statusCode} : ${member.name}`,
     );
-    console.log(result.data);
-    return result.data;
+    return JSON.parse(response.data);
   }
 
   public static async refresh(
@@ -104,60 +137,50 @@ export default class Api {
     console.log(`📝 Refresh https agent:`, httpsAgent);
     console.log(`📝 Refresh authorization header:`, authorizationHeader);
     console.log(`📝 ${member.name} Refresh key:`);
-    const reqProps = authorizationHeader
+    const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
       ? {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `${authorizationHeader}`,
-        },
-        httpsAgent,
+        ":method": "POST",
+        ":path": `${props.refreshPath}`,
+        "Content-Type": "application/json",
+        "Authorization": authorizationHeader
       }
       : {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        httpsAgent,
+        ":method": "POST",
+        ":path": `${props.refreshPath}`,
+        "Content-Type": "application/json",
       };
+    const client = http2.connect(props.url, {
+      ...httpsAgent.options,
+      rejectUnauthorized: true
+    } as http2.SecureClientSessionOptions);
+    const req = client.request(reqProps);
 
-    /* try to write a curl representation
-    axios.interceptors.request.use((config) => {
-      let data = config.data ? JSON.stringify(config.data) : '';
-      let headers = '';
-      for (let header in config.headers) {
-        headers += `-H '${header}: ${config.headers[header]}' `;
-      }
-      console.log(`curl -X ${config.method?.toUpperCase()} '${config.url}' ${headers} -d '${data}'`);
-      return config;
-    });
-    */
+    req.end();
 
-    let result;
+    let response;
     try {
-      result = await axios.post(props.refreshUrl, "", reqProps);
+      response = await Api.responsePromise(req);
+      console.log('Status:', response.statusCode);
+      console.log('Response data:', response.data);
     } catch (error) {
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.error(`Error: ${error.response.status} ${error.response.statusText}`, error.message);
-      } else if (error.request) {
-        // The request was made but no response was received
-        console.error('Error: No response received from server: ', error.message);
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.error('Error:', error.message);
+      console.error('Error:', error.message);
+    } finally {
+      // Close the client session when done
+      if (client) {
+        client.close();
       }
     }
-    if (result?.status !== 200) {
+
+    if (response.statusCode !== 200) {
       throw new Error(
-        `🛑 [TEST FAILURE]: Unexpected status code: ${result?.status}`,
+        `🛑 [TEST FAILURE]: Unexpected status code: ${response.statusCode}`,
       );
     }
 
     console.log(
-      `✅ [PASS] [${result.status} : ${result.statusText}] - ${member.name}`,
+      `✅ [PASS] [${response.statusCode} : ${member.name}`,
     );
-    console.log(result.data);
-    return result.data;
+    return JSON.parse(response.data);
   }
 
   public static async keyInitial(
@@ -166,51 +189,40 @@ export default class Api {
     data: string,
     httpsAgent: https.Agent,
     authorizationHeader?: string
-  ): Promise<IKeyItem> {
-    console.log(`📝 ${member.name} Get initial wrapped private key:`);
-    const https2Agent = new https.Agent({
-      ca: httpsAgent.options.ca
-    });
-    const client = http2.connect("https://127.0.0.1:8000", {
-      ...https2Agent.options,
+  ): Promise<IKeyItem | undefined> {
+    console.log(`📝 ${member.name} Get initial wrapped private key:`, authorizationHeader);
+    const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
+      ? {
+        ":method": "POST",
+        ":path": `${props.keyPath}`,
+        "Content-Type": "application/json",
+        "Authorization": authorizationHeader
+      }
+      : {
+        ":method": "POST",
+        ":path": `${props.keyPath}`,
+        "Content-Type": "application/json",
+      };
+    const client = http2.connect(props.url, {
+      ...httpsAgent.options,
       rejectUnauthorized: true
     } as http2.SecureClientSessionOptions);
-    const req = client.request({
-      ":method": "POST",
-      ":path": "/app/key",
-      "Content-Type": "application/json",
-      "Authorization": authorizationHeader
-    });
-
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-    const responsePromise = new Promise((resolve, reject) => {
-      let data = '';
-      let statusCode = 0;
-      req.on('data', (chunk) => {
-        data += chunk;
-      });
-
-      req.on('end', () => {
-        resolve({ statusCode, data });
-      });
-
-      req.on('response', (headers) => {
-        statusCode = headers[':status'] || 0;
-      });
-
-      req.on('error', (error) => {
-        reject(error);
-      });
-    });
-
+    const req = client.request(reqProps);
+    req.write(data); // Send the request body
     req.end();
+
     let response;
     try {
-      response = await responsePromise;
+      response = await Api.responsePromise(req);
       console.log('Status:', response.statusCode);
       console.log('Response data:', response.data);
     } catch (error) {
       console.error('Error:', error.message);
+    } finally {
+      // Close the client session when done
+      if (client) {
+        client.close();
+      }
     }
 
     if (response.statusCode !== 202) {
@@ -222,7 +234,10 @@ export default class Api {
     console.log(
       `✅ [PASS] [${response.statusCode} :  ${member.name}`, response.data);
 
-    return response.data;
+    if (response.data) {
+      return JSON.parse(response.data);  
+    }
+    return undefined;
   }
 
   public static async key(
@@ -230,33 +245,56 @@ export default class Api {
     member: DemoMemberProps,
     data: string,
     tink: boolean,
+    httpsAgent: https.Agent,
+    authorizationHeader?: string
   ): Promise<IWrapped | IWrappedJwt> {
-    console.log(`📝 ${member.name} Get wrapped private key with receipt:`);
+    console.log(`📝 ${member.name} Get wrapped private key with receipt:`, authorizationHeader);
     const query = tink ? "?fmt=tink" : "";
-    const result: AxiosResponse<any, any> = await axios
-      .post(props.keyUrl + query, data, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        httpsAgent: member.httpsAgent,
-      })
-      .catch((exception: any) => {
-        console.log(`key exception: ${exception.errorMessage}`);
-        return exception;
-      });
+    const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
+    ? {
+      ":method": "POST",
+      ":path": `${props.keyPath}${query}`,
+      "Content-Type": "application/json",
+      "Authorization": authorizationHeader
+    }
+    : {
+      ":method": "POST",
+      ":path": `${props.keyPath}${query}`,
+      "Content-Type": "application/json",
+    };
+  const client = http2.connect(props.url, {
+    ...httpsAgent.options,
+    rejectUnauthorized: true
+  } as http2.SecureClientSessionOptions);
+  const req = client.request(reqProps);
+  req.write(data); // Send the request body
+  req.end();
 
-    if (result.status !== 200) {
+  let response;
+  try {
+    response = await Api.responsePromise(req);
+    console.log('Status:', response.statusCode);
+    console.log('Response data:', response.data);
+  } catch (error) {
+    console.error('Error:', error.message);
+  } finally {
+    // Close the client session when done
+    if (client) {
+      client.close();
+    }
+  }
+
+    if (response.statusCode !== 200) {
       throw new Error(
-        `🛑 [TEST FAILURE]: Unexpected status code: ${result.status}`,
+        `🛑 [TEST FAILURE]: Unexpected status code: ${response.statusCode}`,
       );
     }
 
     console.log(
-      `✅ [PASS] [${result.status} : ${result.statusText}] - ${member.name}`,
+      `✅ [PASS] [${response.statusCode} : ${member.name}`,
     );
-    console.log(result.data);
 
-    return result.data;
+    return JSON.parse(response.data);
   }
 
   public static async unwrap(
@@ -266,43 +304,61 @@ export default class Api {
     kid: string,
     attestation: ISnpAttestation,
     tink: boolean,
+    httpsAgent: https.Agent,
+    authorizationHeader?: string
   ): Promise<Uint8Array | IKeyItem> {
-    console.log(`📝 ${member.name} Get unwrapped private key with receipt:`);
+    console.log(`📝 ${member.name} Get unwrapped private key with receipt, think: ${tink}:`);
     const query = tink ? "?fmt=tink" : "";
     const responseType = tink ? "arraybuffer" : "json";
-    const result: AxiosResponse<any, any> = await axios
-      .post(
-        props.unwrapUrl + query,
-        JSON.stringify({ wrapped, kid, attestation }),
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          httpsAgent: member.httpsAgent,
-          responseType: responseType,
-        },
-      )
-      .catch((exception: any) => {
-        console.log(`key exception: ${exception}`);
-        return exception;
-      });
+    const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
+    ? {
+      ":method": "POST",
+      ":path": `${props.unwrapPath}${query}`,
+      "Content-Type": "application/json",
+      "Authorization": authorizationHeader
+    }
+    : {
+      ":method": "POST",
+      ":path": `${props.unwrapPath}${query}`,
+      "Content-Type": "application/json",
+    };
+  const client = http2.connect(props.url, {
+    ...httpsAgent.options,
+    rejectUnauthorized: true
+  } as http2.SecureClientSessionOptions);
+  const req = client.request(reqProps);
+  req.write(JSON.stringify({ wrapped, kid, attestation })); // Send the request body
+  req.end();
 
-    if (result.status !== 200) {
+  let response;
+  try {
+    response = await Api.responsePromise(req, responseType);
+    console.log('Status:', response.statusCode);
+    console.log('Response data:', response.data);
+  } catch (error) {
+    console.error('Error:', error.message);
+  } finally {
+    // Close the client session when done
+    if (client) {
+      client.close();
+    }
+  }
+
+    if (response.statusCode !== 200) {
       throw new Error(
-        `🛑 [TEST FAILURE]: Unexpected status code: ${result.status}`,
+        `🛑 [TEST FAILURE]: Unexpected status code: ${response.statusCode}`,
       );
     }
 
     console.log(
-      `✅ [PASS] [${result.status} : ${result.statusText}] - ${member.name}`,
+      `✅ [PASS] [${response.statusCode} : ${member.name}`,
     );
     if (tink) {
-      const res = new Uint8Array(result.data);
+      const res = new Uint8Array(response.data);
       console.log(res);
       return res;
     } else {
-      console.log(result.data);
-      return result.data;
+      return JSON.parse(response.data);
     }
   }
 }

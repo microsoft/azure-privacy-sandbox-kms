@@ -73,16 +73,25 @@ echo "💤 Waiting for sandbox in ${app_dir} . . .)"
 echo "▶️ sandbox is running"
 
 function finish {
-    if [ $interactive -eq 1 ]; then
-        echo "🤔 Do you want to stop the sandbox? (Y/n)"
-        read -r proceed
-        if [ "$proceed" == "n" ]; then
-            echo "👍 Sandbox will continue to run."
-            exit 0
-        fi
+  # Get the exit status of the last command
+  local exit_status=$?
+
+  if [ $interactive -eq 1 ]; then
+    echo "🤔 Do you want to stop the sandbox? (Y/n)"
+    read -r proceed
+    if [ "$proceed" == "n" ]; then
+      echo "👍 Sandbox will continue to run."
+      exit 0
     fi
+  fi
+
+  if [ $exit_status -ne 0 ]; then
+    echo "💀 Stopped sandbox process due to an error"
+  else
     echo "💀 Stopped sandbox process"
-    exit 1
+  fi
+
+  exit $exit_status
 }
 trap finish EXIT
 
@@ -100,3 +109,10 @@ fi
 
 # call testScript command
 ${testScript}
+
+# Check if ${testScript} failed
+if [ $? -ne 0 ]; then
+  echo "${testScript} failed"
+  exit 1
+fi
+exit 0

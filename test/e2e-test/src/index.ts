@@ -32,18 +32,18 @@ const certificateStorePath = process.env.CERTS_FOLDER!;
 const interactiveMode = process.env.INTERACTIVE_MODE!;
 
 export interface DemoProps {
-  refreshUrl: string;
-  proposalUrl: string;
-  keyUrl: string;
-  unwrapUrl: string;
-  hearthbeat: string;
+  url: string,
+  refreshPath: string;
+  proposalPath: string;
+  keyPath: string;
+  unwrapPath: string;
+  hearthbeatPath: string;
 }
 
 export interface DemoMemberProps {
   id: string;
   name: string;
   data: unknown;
-  httpsAgent: https.Agent;
 }
 
 export enum AuthKinds {
@@ -56,11 +56,12 @@ export enum AuthKinds {
 class Demo {
   //
   private static readonly demoProps: DemoProps = {
-    refreshUrl: `${serverUrl}/app/refresh`,
-    proposalUrl: `${serverUrl}/gov/proposals`,
-    keyUrl: `${serverUrl}/app/key`,
-    unwrapUrl: `${serverUrl}/app/unwrapKey`,
-    hearthbeat: `${serverUrl}/app/hearthbeat`,
+    url: `${serverUrl}`,
+    refreshPath: `/app/refresh`,
+    proposalPath: `/gov/proposals`,
+    keyPath: `/app/key`,
+    unwrapPath: `/app/unwrapKey`,
+    hearthbeatPath: `/app/hearthbeat`,
   };
 
   private static memberDataMap = new Map([
@@ -107,19 +108,18 @@ class Demo {
     }
 
     this.printTestSectionHeader(
-      "🔬 [TEST]: Propose and vote key release policy",
+      "🔬 [TEST]: Setup kms",
     );
     const output = await Demo.executeCommand(
-      `make propose-add-key-release-policy >/tmp/make.txt`,
+      `make setup >/tmp/make.txt`,
     );
-    console.log(output);
 
     this.printTestSectionHeader("🔬 [TEST]: generate access token");
     const access_token = await Demo.executeCommand(
       `./scripts/authorization_header.sh`,
     );
     console.log(`Authorization header: ${access_token}`);
-
+    
     process.chdir("../../");
 
     this.printTestSectionHeader("🔬 [TEST]: Key generation Service");
@@ -140,29 +140,27 @@ class Demo {
       const toTest = parseInt(key as string);
       return !Number.isNaN(toTest) && toTest > 0;
     };
-
+    
     // authorization on hearthbeat
     const member = this.members[0];
-    /*
     console.log(`📝 Heartbeat JWT...`);
     let response = await Api.hearthbeat(this.demoProps, member, this.createHttpsAgent("", AuthKinds.JWT), access_token);
+    
     Demo.assertField(member.name, response, "policy", "jwt");
     Demo.assertField(member.name, response, "cert", undefined);
-
+    
     console.log(`📝 Heartbeat member certs...`);
     response = await Api.hearthbeat(
       this.demoProps,
       member,
-      this.createHttpsAgent(member.id, AuthKinds. NoAuth),
+      this.createHttpsAgent(member.id, AuthKinds. MemberCerts),
     );
     Demo.assertField(member.name, response, "policy", "member_cert");
     Demo.assertField(member.name, response, "cert", notUndefinedString);
-    */
-
+      
     // members 0 refresh key
     console.log(`📝 Refresh key...`);
-    /*
-    let response = await Api.refresh(
+    response = await Api.refresh(
       this.demoProps,
       member,
       this.createHttpsAgent(member.id, AuthKinds.NoAuth),
@@ -181,9 +179,9 @@ class Demo {
     Demo.assertField(member.name, response, "d", undefined);
     Demo.assertField(member.name, response, "crv", "X25519");
     Demo.assertField(member.name, response, "kty", "OKP");
-      */
 
-    let response = await Api.keyInitial(
+    console.log(`📝 Get initial key...`);
+    let keyResponse = await Api.keyInitial(
       this.demoProps,
       member,
       JSON.stringify(attestation),
@@ -193,18 +191,29 @@ class Demo {
       console.log(`keyInitial error: `, error);
       throw error;
     });
-
+    if (!keyResponse) {
+      console.log(
+        `✅ [PASS] - Initial key response must be undefined`,
+      );
+    } else {
+      throw new Error(
+        `🛑 [TEST FAILURE]: Initial key response must be undefined`,
+      );
+    }
+  
     // Wait for receipt to be generated
     await Demo.sleep(5000);
-return;
+
     {
       // Test with JWT
-      // Get wrapped key
+      console.log(`📝 Get wrapped key with JWT...`);
       const wrapResponse = (await Api.key(
         this.demoProps,
         member,
         JSON.stringify(attestation),
-        false,
+        false,      
+        this.createHttpsAgent(member.id, AuthKinds.JWT),
+        access_token
       )) as IWrappedJwt;
       Demo.assertField(member.name, wrapResponse, "d", undefinedString);
       Demo.assertField(member.name, wrapResponse, "x", undefinedString);
@@ -227,6 +236,7 @@ return;
         notUndefinedString,
       );
 
+      console.log(`📝 Get unwrapped key with JWT...`);
       const unwrapResponse = (await Api.unwrap(
         this.demoProps,
         member,
@@ -234,6 +244,8 @@ return;
         wrapResponse.wrapperKid,
         attestation,
         false,
+        this.createHttpsAgent(member.id, AuthKinds.JWT),
+        access_token
       )) as IKeyItem;
       console.log("JWT unwrapResponse: ", unwrapResponse);
       Demo.assertField(member.name, unwrapResponse, "d", notUndefinedString);
@@ -261,7 +273,7 @@ return;
       Demo.assertField(member.name, unwrapResponse, "crv", "X25519");
       Demo.assertField(member.name, unwrapResponse, "kty", "OKP");
     }
-
+    
     {
       // Test with Tink
       // Get wrapped key
@@ -270,6 +282,8 @@ return;
         member,
         JSON.stringify(attestation),
         true,
+        this.createHttpsAgent(member.id, AuthKinds.JWT),
+        access_token
       )) as IWrapped;
       Demo.assertField(member.name, wrapResponse, "d", undefinedString);
       Demo.assertField(member.name, wrapResponse, "x", undefinedString);
@@ -310,6 +324,8 @@ return;
         kid as string,
         attestation,
         true,
+        this.createHttpsAgent(member.id, AuthKinds.JWT),
+        access_token
       )) as Uint8Array;
       Demo.assert(
         "unwrapResponse instanceof Uint8Array",
@@ -377,8 +393,7 @@ return;
     return {
       id: memberId,
       name: `Member ${memberId}`,
-      data: this.memberDataMap.get(memberId),
-      httpsAgent: this.createHttpsAgent(memberId, AuthKinds.MemberCerts),
+      data: this.memberDataMap.get(memberId)
     };
   }
 
@@ -433,3 +448,4 @@ return;
 }
 
 Demo.start();
+console.log("Demo.start() finished");
