@@ -163,7 +163,8 @@ const validateAttestation = (
     console.log(
       `Key release policy: ${JSON.stringify(
         keyReleasePolicy,
-      )}, keys: ${Object.keys(keyReleasePolicy)}, keys: ${Object.keys(keyReleasePolicy).length
+      )}, keys: ${Object.keys(keyReleasePolicy)}, keys: ${
+        Object.keys(keyReleasePolicy).length
       }`,
     );
 
@@ -304,7 +305,7 @@ export const key = (request: ccfapp.Request<ISnpAttestation>) => {
           message: "Missing attestation in body",
         },
       },
-    }
+    };
   }
   let attestation: ISnpAttestation;
   let validateResult: IAttestationValidationResult;
@@ -412,15 +413,15 @@ interface IUnwrapRequest {
 
 // Unwrap private key
 export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
-    // check if caller has a valid identity
-    const [policy, isValidIdentity] = new AuthenticationService().isAuthenticated(
-      request,
-    );
-    console.log(
-      `Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`,
-    );
-    if (isValidIdentity.failure) return isValidIdentity; 
-    
+  // check if caller has a valid identity
+  const [policy, isValidIdentity] = new AuthenticationService().isAuthenticated(
+    request,
+  );
+  console.log(
+    `Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`,
+  );
+  if (isValidIdentity.failure) return isValidIdentity;
+
   // check payload
   const body = request.body.json();
   console.log(`unwrapKey=> wrapped:`, body);

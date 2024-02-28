@@ -32,7 +32,7 @@ const certificateStorePath = process.env.CERTS_FOLDER!;
 const interactiveMode = process.env.INTERACTIVE_MODE!;
 
 export interface DemoProps {
-  url: string,
+  url: string;
   refreshPath: string;
   proposalPath: string;
   keyPath: string;
@@ -50,7 +50,7 @@ export enum AuthKinds {
   NoAuth = 0,
   JWT,
   UserCerts,
-  MemberCerts
+  MemberCerts,
 }
 
 class Demo {
@@ -107,19 +107,15 @@ class Demo {
       this.members.push(member);
     }
 
-    this.printTestSectionHeader(
-      "🔬 [TEST]: Setup kms",
-    );
-    const output = await Demo.executeCommand(
-      `make setup >/tmp/make.txt`,
-    );
+    this.printTestSectionHeader("🔬 [TEST]: Setup kms");
+    const output = await Demo.executeCommand(`make setup >/tmp/make.txt`);
 
     this.printTestSectionHeader("🔬 [TEST]: generate access token");
     const access_token = await Demo.executeCommand(
       `./scripts/authorization_header.sh`,
     );
     console.log(`Authorization header: ${access_token}`);
-    
+
     process.chdir("../../");
 
     this.printTestSectionHeader("🔬 [TEST]: Key generation Service");
@@ -140,23 +136,28 @@ class Demo {
       const toTest = parseInt(key as string);
       return !Number.isNaN(toTest) && toTest > 0;
     };
-    
+
     // authorization on hearthbeat
     const member = this.members[0];
     console.log(`📝 Heartbeat JWT...`);
-    let response = await Api.hearthbeat(this.demoProps, member, this.createHttpsAgent("", AuthKinds.JWT), access_token);
+    let response = await Api.hearthbeat(
+      this.demoProps,
+      member,
+      this.createHttpsAgent("", AuthKinds.JWT),
+      access_token,
+    );
     Demo.assertField(member.name, response, "policy", "jwt");
     Demo.assertField(member.name, response, "cert", undefined);
-    
+
     console.log(`📝 Heartbeat member certs...`);
     response = await Api.hearthbeat(
       this.demoProps,
       member,
-      this.createHttpsAgent(member.id, AuthKinds. MemberCerts),
+      this.createHttpsAgent(member.id, AuthKinds.MemberCerts),
     );
     Demo.assertField(member.name, response, "policy", "member_cert");
     Demo.assertField(member.name, response, "cert", notUndefinedString);
-      
+
     // members 0 refresh key
     console.log(`📝 Refresh key...`);
     response = await Api.refresh(
@@ -187,15 +188,13 @@ class Demo {
       202,
       false,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
-      access_token
+      access_token,
     ).catch((error) => {
       console.log(`keyInitial error: `, error);
       throw error;
     });
     if (!keyResponse) {
-      console.log(
-        `✅ [PASS] - Initial key response must be undefined`,
-      );
+      console.log(`✅ [PASS] - Initial key response must be undefined`);
     } else {
       throw new Error(
         `🛑 [TEST FAILURE]: Initial key response must be undefined`,
@@ -206,25 +205,21 @@ class Demo {
     let keyBadResponse = await Api.key(
       this.demoProps,
       member,
-      JSON.stringify(''),
+      JSON.stringify(""),
       400,
       false,
-      this.createHttpsAgent(member.id, AuthKinds.MemberCerts)
+      this.createHttpsAgent(member.id, AuthKinds.MemberCerts),
     ).catch((error) => {
       console.log(`keyInitial error: `, error);
       throw error;
     });
 
     if ((<any>keyBadResponse).error.message === "missing attestation") {
-      console.log(
-        `✅ [PASS] - Missing attestation error found`,
-      );
+      console.log(`✅ [PASS] - Missing attestation error found`);
     } else {
-      throw new Error(
-        `🛑 [TEST FAILURE]: Initial key response message failed`
-      );
+      throw new Error(`🛑 [TEST FAILURE]: Initial key response message failed`);
     }
-  
+
     console.log(`📝 Get initial key-No auth...`);
     keyBadResponse = await Api.key(
       this.demoProps,
@@ -232,23 +227,21 @@ class Demo {
       JSON.stringify(attestation),
       401,
       false,
-      this.createHttpsAgent(member.id, AuthKinds.NoAuth)
+      this.createHttpsAgent(member.id, AuthKinds.NoAuth),
     ).catch((error) => {
       console.log(`keyInitial error: `, error);
       throw error;
     });
 
-    if ((<any>keyBadResponse).error.message === "Invalid authentication credentials.") {
-      console.log(
-        `✅ [PASS] - Missing attestation error found`,
-      );
+    if (
+      (<any>keyBadResponse).error.message ===
+      "Invalid authentication credentials."
+    ) {
+      console.log(`✅ [PASS] - Missing attestation error found`);
     } else {
-      throw new Error(
-        `🛑 [TEST FAILURE]: Initial key response message failed`
-      );
+      throw new Error(`🛑 [TEST FAILURE]: Initial key response message failed`);
     }
-  
-  
+
     // Wait for receipt to be generated
     await Demo.sleep(3000);
 
@@ -260,9 +253,9 @@ class Demo {
         member,
         JSON.stringify(attestation),
         200,
-        false,      
+        false,
         this.createHttpsAgent(member.id, AuthKinds.JWT),
-        access_token
+        access_token,
       )) as IWrappedJwt;
       Demo.assertField(member.name, wrapResponse, "d", undefinedString);
       Demo.assertField(member.name, wrapResponse, "x", undefinedString);
@@ -294,7 +287,7 @@ class Demo {
         attestation,
         false,
         this.createHttpsAgent(member.id, AuthKinds.JWT),
-        access_token
+        access_token,
       )) as IKeyItem;
       console.log("JWT unwrapResponse: ", unwrapResponse);
       Demo.assertField(member.name, unwrapResponse, "d", notUndefinedString);
@@ -322,7 +315,7 @@ class Demo {
       Demo.assertField(member.name, unwrapResponse, "crv", "X25519");
       Demo.assertField(member.name, unwrapResponse, "kty", "OKP");
     }
-    
+
     {
       // Test with Tink
       // Get wrapped key
@@ -333,7 +326,7 @@ class Demo {
         200,
         true,
         this.createHttpsAgent(member.id, AuthKinds.JWT),
-        access_token
+        access_token,
       )) as IWrapped;
       Demo.assertField(member.name, wrapResponse, "d", undefinedString);
       Demo.assertField(member.name, wrapResponse, "x", undefinedString);
@@ -375,7 +368,7 @@ class Demo {
         attestation,
         true,
         this.createHttpsAgent(member.id, AuthKinds.JWT),
-        access_token
+        access_token,
       )) as Uint8Array;
       Demo.assert(
         "unwrapResponse instanceof Uint8Array",
@@ -443,7 +436,7 @@ class Demo {
     return {
       id: memberId,
       name: `Member ${memberId}`,
-      data: this.memberDataMap.get(memberId)
+      data: this.memberDataMap.get(memberId),
     };
   }
 
@@ -453,13 +446,17 @@ class Demo {
   ): https.Agent {
     switch (authKind) {
       case AuthKinds.JWT:
-        console.log(`Return http agent with access token for ${certificateStorePath}`)
+        console.log(
+          `Return http agent with access token for ${certificateStorePath}`,
+        );
         return new https.Agent({
           ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`),
           rejectUnauthorized: true,
         });
       case AuthKinds.MemberCerts:
-        console.log(`Return http agent with member certs for ${certificateStorePath}`)
+        console.log(
+          `Return http agent with member certs for ${certificateStorePath}`,
+        );
         return new https.Agent({
           cert: fs.readFileSync(
             `${certificateStorePath}/member${memberId}_cert.pem`,
@@ -470,12 +467,16 @@ class Demo {
           ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`),
         });
     }
-    const ca = fs.readFileSync(`${certificateStorePath}/service_cert.pem`).toString();
-    console.log(`Return http agent with no auth for ${certificateStorePath}`, ca)
+    const ca = fs
+      .readFileSync(`${certificateStorePath}/service_cert.pem`)
+      .toString();
+    console.log(
+      `Return http agent with no auth for ${certificateStorePath}`,
+      ca,
+    );
     return new https.Agent({
-      ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`)
+      ca: fs.readFileSync(`${certificateStorePath}/service_cert.pem`),
     });
-
   }
 
   private static printTestSectionHeader(title: string) {
