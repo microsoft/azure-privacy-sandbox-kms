@@ -18,7 +18,6 @@ import { KeyGeneration } from "./KeyGeneration";
 import { TinkKey, TinkPublicKey } from "./TinkKey";
 import { IWrapped, IWrappedJwt, KeyWrapper } from "./KeyWrapper";
 import { AuthenticationService } from "../authorization/AuthenticationService";
-import { ServiceResult } from "../utils/ServiceResult";
 export interface IAttestationValidationResult {
   result: boolean;
   errorMessage?: string;
@@ -255,6 +254,15 @@ export const setKeyHeaders = (): { [key: string]: string } => {
 // Get latest private key
 export const key = (request: ccfapp.Request<ISnpAttestation>) => {
   console.log(`Key attestation: ${JSON.stringify(request || {})}`);
+  // check if caller has a valid identity
+  const [policy, isValidIdentity] = new AuthenticationService().isAuthenticated(
+    request,
+  );
+  console.log(
+    `Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`,
+  );
+  if (isValidIdentity.failure) return isValidIdentity;
+
   const query = queryParams(request);
   let kid: string;
   let id: number;
@@ -289,23 +297,49 @@ export const key = (request: ccfapp.Request<ISnpAttestation>) => {
     }
   }
 
-  console.log(`Get key with kid ${kid}`);
-
-  const attestation: ISnpAttestation = request.body.json();
-  console.log(`Attestation: ${attestation}`);
-  const validateResult = validateAttestation(attestation);
-  if (!validateResult.result) {
+  if (!request.body) {
     return {
-      statusCode: validateResult.statusCode,
+      statusCode: 400,
       body: {
         error: {
-          message: validateResult.errorMessage,
+          message: "Missing attestation in body",
         },
+      },
+    };
+  }
+  let attestation: ISnpAttestation;
+  let validateResult: IAttestationValidationResult;
+  try {
+    attestation = request.body.json();
+    console.log(`Attestation: ${attestation}`);
+    validateResult = validateAttestation(attestation);
+    if (!validateResult.result) {
+      return {
+        statusCode: validateResult.statusCode,
+        body: {
+          error: {
+            message: validateResult.errorMessage,
+          },
+        },
+      };
+    }
+  } catch (exception: any) {
+    const message = `Error in validating attestation (${attestation}): ${exception.message}`;
+    console.error(message);
+    return {
+      statusCode: 500,
+      body: {
+        error: {
+          message,
+          exception,
+        },
+        inner: exception,
       },
     };
   }
 
   // Be sure to request item and the receipt
+  console.log(`Get key with kid ${kid}`);
   const keyItem = hpkeKeysMap.store.get(kid) as IKeyItem;
   if (keyItem === undefined) {
     return {
@@ -379,6 +413,15 @@ interface IUnwrapRequest {
 
 // Unwrap private key
 export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
+  // check if caller has a valid identity
+  const [policy, isValidIdentity] = new AuthenticationService().isAuthenticated(
+    request,
+  );
+  console.log(
+    `Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`,
+  );
+  if (isValidIdentity.failure) return isValidIdentity;
+
   // check payload
   const body = request.body.json();
   console.log(`unwrapKey=> wrapped:`, body);
@@ -682,7 +725,7 @@ export const hearthbeat = (request: ccfapp.Request<void>) => {
   console.log(
     `Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`,
   );
-  if (isValidIdentity.failure) return isValidIdentity; //ApiResult.AuthFailure();
+  if (isValidIdentity.failure) return isValidIdentity;
   const body = policy;
   return {
     body,

@@ -49,6 +49,8 @@ do
     esac
     shift;
 done
+echo "Node address: $nodeAddress" 
+echo "Certificate dir: $certificate_dir" 
 
 # validate parameters
 if [ -z "$nodeAddress" ]; then
@@ -65,24 +67,31 @@ if [ ! -f "$constitution" ]; then
   exit 1
 fi
 
-echo "▶️ Starting sandbox..."
-/opt/ccf_${CCF_PLATFORM:-"virtual"}/bin/sandbox.sh --js-app-bundle "$app_dir/dist/" --initial-member-count 3 --initial-user-count 2 --constitution "$constitution" > /dev/null 2>&1 &
-sandbox_pid=$!
-echo "💤 Waiting for sandbox . . . (${sandbox_pid})"
-
 source .venv_ccf_sandbox/bin/activate
+echo "💤 Waiting for sandbox in ${app_dir} . . .)"
+./scripts/kms_wait.sh
+echo "▶️ sandbox is running"
 
 function finish {
-    if [ $interactive -eq 1 ]; then
-        echo "🤔 Do you want to stop the sandbox (${sandbox_pid})? (Y/n)"
-        read -r proceed
-        if [ "$proceed" == "n" ]; then
-            echo "👍 Sandbox will continue to run. Please stop this manually when you are done. Its process ID is above."
-            exit 0
-        fi
+  # Get the exit status of the last command
+  local exit_status=$?
+
+  if [ $interactive -eq 1 ]; then
+    echo "🤔 Do you want to stop the sandbox? (Y/n)"
+    read -r proceed
+    if [ "$proceed" == "n" ]; then
+      echo "👍 Sandbox will continue to run."
+      exit 0
     fi
-    kill -9 $sandbox_pid
-    echo "💀 Killed sandbox process ${sandbox_pid}"
+  fi
+
+  if [ $exit_status -ne 0 ]; then
+    echo "💀 Stopped sandbox process due to an error"
+  else
+    echo "💀 Stopped sandbox process"
+  fi
+
+  exit $exit_status
 }
 trap finish EXIT
 
@@ -100,3 +109,10 @@ fi
 
 # call testScript command
 ${testScript}
+
+# Check if ${testScript} failed
+if [ $? -ne 0 ]; then
+  echo "${testScript} failed"
+  exit 1
+fi
+exit 0
