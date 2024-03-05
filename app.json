@@ -207,16 +207,7 @@
               "application/json": {
                 "schema": {
                   "properties": {
-                    "evidence": {
-                      "type": "string"
-                    },
-                    "endorsements": {
-                      "type": "string"
-                    },
-                    "uvm_endorsements": {
-                      "type": "string"
-                    },
-                    "endorsed_tcb": {
+                    "attestation": {
                       "type": "string"
                     }
                   },

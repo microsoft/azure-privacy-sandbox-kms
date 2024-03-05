@@ -24,6 +24,10 @@ export interface IAttestationValidationResult {
   statusCode: number;
 }
 
+export interface IKeyRequest {
+  attestation: ISnpAttestation
+}
+
 //#region KMS Stores
 // Stores
 const hpkeKeysMap = new KeyStore("HpkeKeys");
@@ -252,7 +256,7 @@ export const setKeyHeaders = (): { [key: string]: string } => {
 //#region KMS Key endpoints
 
 // Get latest private key
-export const key = (request: ccfapp.Request<ISnpAttestation>) => {
+export const key = (request: ccfapp.Request<IKeyRequest>) => {
   console.log(`Key attestation: ${JSON.stringify(request || {})}`);
   // check if caller has a valid identity
   const [policy, isValidIdentity] = new AuthenticationService().isAuthenticated(
@@ -307,10 +311,11 @@ export const key = (request: ccfapp.Request<ISnpAttestation>) => {
       },
     };
   }
+
   let attestation: ISnpAttestation;
   let validateResult: IAttestationValidationResult;
   try {
-    attestation = request.body.json();
+    ({ attestation } = request.body.json());
     console.log(`Attestation: ${attestation}`);
     validateResult = validateAttestation(attestation);
     if (!validateResult.result) {
