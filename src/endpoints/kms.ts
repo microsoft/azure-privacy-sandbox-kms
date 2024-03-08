@@ -28,6 +28,7 @@ export interface IAttestationValidationResult {
 
 export interface IKeyRequest {
   attestation: ISnpAttestation;
+  wrappingKey: string;
 }
 
 //#region KMS Stores
@@ -315,10 +316,11 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
   }
 
   let attestation: ISnpAttestation;
+  let wrappingKey: string;
   let validateResult: IAttestationValidationResult;
   try {
-    ({ attestation } = request.body.json());
-    console.log(`Attestation: ${attestation}`);
+    ({ attestation, wrappingKey } = request.body.json());
+    console.log(`Attestation: ${attestation}, wrapping key: ${wrappingKey}`);
     validateResult = validateAttestation(attestation);
     if (!validateResult.result) {
       return {
@@ -326,6 +328,16 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
         body: {
           error: {
             message: validateResult.errorMessage,
+          },
+        },
+      };
+    }
+    if (!wrappingKey) {
+      return {
+        statusCode: 400,
+        body: {
+          error: {
+            message: "Missing wrapping key in body",
           },
         },
       };
