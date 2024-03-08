@@ -91,7 +91,7 @@ deploy: build ## 🚀 Deploy Managed CCF or local
 
 lint: ## 🔍 Lint the code base (but don't fix)
 	@echo -e "\e[34m$@\e[0m" || true
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/lint.sh
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/lint.sh -f
 	
 # Keep this at the bottom.
 clean: ## 🧹 Clean the working folders created during build/demo

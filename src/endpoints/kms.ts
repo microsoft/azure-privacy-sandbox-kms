@@ -3,6 +3,7 @@
 
 import * as ccfapp from "@microsoft/ccf-app";
 import {
+  CryptoKeyPair,
   SnpAttestationResult,
   ccf,
   snp_attestation,
@@ -18,6 +19,7 @@ import { KeyGeneration } from "./KeyGeneration";
 import { TinkKey, TinkPublicKey } from "./TinkKey";
 import { IWrapped, IWrappedJwt, KeyWrapper } from "./KeyWrapper";
 import { AuthenticationService } from "../authorization/AuthenticationService";
+import * as ccfcrypto from "@microsoft/ccf-app/crypto";
 export interface IAttestationValidationResult {
   result: boolean;
   errorMessage?: string;
@@ -25,7 +27,7 @@ export interface IAttestationValidationResult {
 }
 
 export interface IKeyRequest {
-  attestation: ISnpAttestation
+  attestation: ISnpAttestation;
 }
 
 //#region KMS Stores
@@ -681,12 +683,39 @@ export const pubkey = (request: ccfapp.Request<void>) => {
     };
   }
 };
+const hex = (buf: ArrayBuffer) => {
+  return Array.from(new Uint8Array(buf))
+    .map((n) => n.toString(16).padStart(2, "0"))
+    .join("");
+};
 
 // Generate new key pair and store it on the store
 export const refresh = (request: ccfapp.Request<void>) => {
   try {
     // Get HPKE key pair id
     const id = hpkeKeyIdMap.size + 1;
+
+    console.log(`Start Encryption experiment`);
+    //const wKey = ccf.crypto.generateRsaKeyPair(2048);
+    const wKey = {
+      privateKey:
+        "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDzGC3zNiRtjQ+t\ngpwa0mnupWChE9Cxccv+YFagjAQywbUd+EHnzIYuB8l+fl+1z5s9fmbtRyhaUITh\nrOj7TbQK4tHXbWZGtvP9FyVSUk/z/3NVx6fHncKvG+G0lCquYyUYb+SlavgUrIqX\neccneysA3jm6SfFlCY13pX89vuL/mvLWoiIhdPCY+bEBdZHchA9ll1t0xnP81wBg\no19Q85DvF0oKniKXJPRZxg6beQdhKHNGNT5d48lM9qE39vdcDLfal1wMR+a6+Uf9\nrapRcdpb7AyKd9yoTq5nw/CsqCK/kyq378pAbzrHDhINXVdw0gc2xSvP/5jzX392\ngneODMZ7AgMBAAECggEBAKMn7V85TYXBkW4xJTjTVIn5sTsrI3yVFgcq/blPgFnY\nrQjqYMGFAeHPFCu0AeTy7Ax/0/EZOzoypJ0bAlv4sQhFZ/Wg1W5MyMFrUX9JA6SO\nJQjDshZGCi6hFgGvGF5m6LTYFKv5eXvWukYkU8hp4Fj6zd/8VOotWSeeiiIVBiHq\nvG9SkeKS8tS5PrzKtctYWAq/4sGF3MPrpItzph820KgaKI7NBK4NUhqNERKPYSGS\n6Hnrng3XpcoLaav1MKTGgmQhjg/sVAchzxk1cO/VLTlPEeWDwGgcQJVtb4MtcOdp\nTwwmlDvm4TON+IYZ9s8SwRc181hlCivibwFiMMz/14ECgYEA/4PR4y2TToanaooi\nDIKXnGMpLST+zOXDmWjIgfFQq2uSjb/DYb5nylomdniLtx8CFO4+XvHHYHxqkWHI\nrZSN7+QWJY4rkrfJgf9uINVWvJdnHvlp2ai3q1eHjthV8R/VvKz8L6AcW6DWIgKN\n0tiqND5LtoGIX22atdrcqu/jnlsCgYEA845Swkri0udPluwLX1Kl1SD/ZMRu3E9O\nfAfECoI8nbNpojOQsMnrzg3sGFGrvy7E2QZs1VVhMVcBlOXd2hHbXv0ytgwp7I8F\nCpgCpaJ7iVSoD/WpcSYvPJols6rIpIee2UYzoj9p5qSZeyEEW8o13G8mh/mkbnHN\nblDmWqGgMmECgYEA6SbGqW6X4Oqb72p2IUY0w73z/76nRh5OOjjT5UZmXtT82J1n\n0lPk708Nk8Lxcjo4MxMmFIq4bEF7GIfKjyFj1scgskolVm6f0CBcxFcHG3Vn4mqh\n/LuoRQ/MoTqkSS7MYKrUPzzxQ2bingwIj6GmxZ8mhTVzU+h2aIR6IPxejcsCgYBZ\n9fTtnRmBCz1jopZkxDNKsOCEyOWl7Ikx2PB5bTeUjGN1LRTBqCO4PX46UVhdypmd\nC/mBJwM6ZUfJRsqWNMhRorZrdby6iu0yx4kawxRcWm+lTXkjuRXzjYBlh6yK0SlE\nWeDSihfEwIGMcFqayOryHAAgc35f6RsXJzyet1pjoQKBgQCaE1rjJHxhaWQC0o2f\npXo8YFDKy7kMZVULrAdthePNuzV7es2IBzSA6wVWJLPa+zYGFbcEuw5FIfm3KNL9\ngBAkD3SrkKZLn+549flPvuBivWm2HrQGO8X+0XpEnVH0ygjRvDowScBPRscE4kIA\nl2d9/q0nGnVJf7svKGtpLZqj/w==\n-----END PRIVATE KEY-----\n",
+      publicKey:
+        "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA8xgt8zYkbY0PrYKcGtJp\n7qVgoRPQsXHL/mBWoIwEMsG1HfhB58yGLgfJfn5ftc+bPX5m7UcoWlCE4azo+020\nCuLR121mRrbz/RclUlJP8/9zVcenx53CrxvhtJQqrmMlGG/kpWr4FKyKl3nHJ3sr\nAN45uknxZQmNd6V/Pb7i/5ry1qIiIXTwmPmxAXWR3IQPZZdbdMZz/NcAYKNfUPOQ\n7xdKCp4ilyT0WcYOm3kHYShzRjU+XePJTPahN/b3XAy32pdcDEfmuvlH/a2qUXHa\nW+wMinfcqE6uZ8PwrKgiv5Mqt+/KQG86xw4SDV1XcNIHNsUrz/+Y819/doJ3jgzG\newIDAQAB\n-----END PUBLIC KEY-----\n",
+    };
+    console.log(`Test key format: `, wKey);
+    const bufKey = ccf.strToBuf(wKey.publicKey);
+
+    //const bufPayload = Base64.toUint8Array("eKbhL35knJ9XipMausSfxGzf9vx/v38PZq7HaV4q/U8m8pRNDbkz+6kjWboHqYEB0rqtFUgtDtyKt7k57hMf/Rb8w7XZ4obG84r+Nj93NkiyXjGF4YgnVrZUBxUP3ipRYmHJvJY5kcjN1FnHxs7QEOMMiJAYaW3e72CN4DTpnYXXuiPm75PesiXGc/tZKCHZWJoQlWbfdJn37h7HZpXAEYTx9ybKtuaIYnWszRqMzv1PyF7j8KRGZQGUBduePwFVLyd6GHSdN20D4vDLYyWwOlMlvjts76pkyEGDP7r1BDWzq4HICOPreLsVP9oD4dFZQ+eT9uUgBz1diWpIFcnbqg==").buffer;
+    const bufPayload = ccf.strToBuf("12345678901234567890123456789012");
+    const WRAPALGO = {
+      name: "RSA-OAEP",
+    } as ccfcrypto.RsaOaepParams;
+    const wrapped = ccf.crypto.wrapKey(bufPayload, bufKey, WRAPALGO);
+    const uint8Wrapped = new Uint8Array(wrapped);
+    console.log(
+      `Encryption experiment (${wrapped.byteLength}, ${uint8Wrapped.byteLength}): ${hex(wrapped)}`,
+    );
 
     // Generate HPKE key pair with a six digit id
     const keyItem = KeyGeneration.generateKeyItem(100000 + id);

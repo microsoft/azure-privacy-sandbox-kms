@@ -193,7 +193,7 @@ class Demo {
     [statusCode, keyResponse] = await Api.key(
       this.demoProps,
       member,
-      JSON.stringify({attestation}),
+      JSON.stringify({ attestation }),
       false,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token,
@@ -225,7 +225,7 @@ class Demo {
     [statusCode, keyResponse] = await Api.key(
       this.demoProps,
       member,
-      JSON.stringify({attestation}),
+      JSON.stringify({ attestation }),
       false,
       this.createHttpsAgent(member.id, AuthKinds.NoAuth),
     ).catch((error) => {
@@ -245,7 +245,7 @@ class Demo {
       [statusCode, keyResponse] = await Api.key(
         this.demoProps,
         member,
-        JSON.stringify({attestation}),
+        JSON.stringify({ attestation }),
         false,
         this.createHttpsAgent(member.id, AuthKinds.JWT),
         access_token,
@@ -265,7 +265,7 @@ class Demo {
     [statusCode, keyResponse] = (await Api.key(
       this.demoProps,
       member,
-      JSON.stringify({attestation}),
+      JSON.stringify({ attestation }),
       false,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token,
@@ -338,7 +338,7 @@ class Demo {
     [statusCode, wrapResponse] = (await Api.key(
       this.demoProps,
       member,
-      JSON.stringify({attestation}),
+      JSON.stringify({ attestation }),
       true,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token,
