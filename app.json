@@ -209,11 +209,10 @@
                   "properties": {
                     "attestation": {
                       "type": "string"
-                    },                    
+                    },
                     "wrappingKey": {
                       "type": "string"
                     }
-
                   },
                   "type": "object"
                 }
