@@ -28,7 +28,6 @@ export interface IAttestationValidationResult {
 
 export interface IKeyRequest {
   attestation: ISnpAttestation;
-  wrappingKey: string;
 }
 
 //#region KMS Stores
@@ -316,11 +315,10 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
   }
 
   let attestation: ISnpAttestation;
-  let wrappingKey: string;
   let validateResult: IAttestationValidationResult;
   try {
-    ({ attestation, wrappingKey } = request.body.json());
-    console.log(`Attestation: ${attestation}, wrapping key: ${wrappingKey}`);
+    ({ attestation } = request.body.json());
+    console.log(`Attestation: ${attestation}`);
     validateResult = validateAttestation(attestation);
     if (!validateResult.result) {
       return {
@@ -328,16 +326,6 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
         body: {
           error: {
             message: validateResult.errorMessage,
-          },
-        },
-      };
-    }
-    if (!wrappingKey) {
-      return {
-        statusCode: 400,
-        body: {
-          error: {
-            message: "Missing wrapping key in body",
           },
         },
       };
@@ -428,6 +416,7 @@ interface IUnwrapRequest {
   wrapped: string;
   kid: string;
   attestation: ISnpAttestation;
+  wrappingKey: string;
 }
 
 // Unwrap private key
@@ -441,6 +430,7 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
   );
   if (isValidIdentity.failure) return isValidIdentity;
 
+  
   // check payload
   const body = request.body.json();
   console.log(`unwrapKey=> wrapped:`, body);
@@ -450,9 +440,12 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
   console.log(`unwrapKey=> wrapped:`, wrapped);
   const wrapKid: string = body["kid"];
   console.log(`unwrapKey=> wrapKid:`, wrapKid);
+  const wrappingKey: string = body["wrappingKey"];
+  console.log(`unwrapKey=> wrappingKey:`, wrappingKey);
+  const wrappingKeyBuf = ccf.strToBuf(wrappingKey);
 
   // Validate input
-  if (!body || !wrapKid || !attestation) {
+  if (!body || !wrapKid || !attestation || !wrappingKey) {
     const message = `The body is not a unwrap key request: ${JSON.stringify(
       body,
     )}`;
@@ -528,10 +521,14 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
     let unwrapped: Uint8Array | string;
 
     if (fmt == "tink") {
-      unwrapped = KeyWrapper.unwrapKey(wrapKey, body.wrapped);
+      const unwrappedTinkKey = KeyWrapper.unwrapKey(wrapKey, body.wrapped);
+      unwrapped = new Uint8Array(ccf.crypto.wrapKey(unwrappedTinkKey.buffer, wrappingKeyBuf, { name: "RSA-OAEP"}));
+      //unwrapped = unwrappedTinkKey;
     } else {
       // Default is JWT.
-      unwrapped = KeyWrapper.unwrapKeyJwt(wrapKey, body.wrapped);
+      const unwrappedJwtKey = KeyWrapper.unwrapKeyJwt(wrapKey, body.wrapped);
+      unwrapped = ccf.bufToStr(ccf.crypto.wrapKey(ccf.strToBuf(unwrappedJwtKey), wrappingKeyBuf, { name: "RSA-OAEP"}));
+      //unwrapped = unwrappedJwtKey;
     }
     console.log(`key returns (${wrapKid}): ${unwrapped}`);
     return { body: unwrapped };
