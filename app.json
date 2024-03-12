@@ -145,31 +145,16 @@
                   "application/json": {
                     "schema": {
                       "properties": {
-                        "publicKey": {
-                          "type": "string"
-                        },
-                        "privateKey": {
-                          "type": "string"
-                        },
-                        "kid": {
-                          "type": "string"
-                        },
-                        "keyType": {
+                        "wrapped": {
                           "type": "string"
                         },
                         "receipt": {
                           "type": "string"
-                        },
-                        "timeStamp": {
-                          "type": "number"
                         }
                       },
                       "required": [
-                        "publicKey",
-                        "privateKey",
-                        "kid",
-                        "keyType",
-                        "timeStamp"
+                        "wrapped",
+                        "receipt"
                       ],
                       "type": "object"
                     }

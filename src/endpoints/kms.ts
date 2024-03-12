@@ -48,6 +48,28 @@ try {
 }
 
 //#region KMS helpers
+// Check for public PEM key
+const isPemPublicKey = (key: string): boolean => {
+  const beginPatternLiteral = /-----BEGIN PUBLIC KEY-----\\n/;
+  const endPatternLiteral = /\\n-----END PUBLIC KEY-----\\n$/;
+  const beginPatternNewline = /-----BEGIN PUBLIC KEY-----\n/;
+  const endPatternNewline = /\n-----END PUBLIC KEY-----\n$/;
+  const contentPattern = /([\s\S]+)/;
+
+  const isLiteralNewline = beginPatternLiteral.test(key) && endPatternLiteral.test(key);
+  const isNewline = beginPatternNewline.test(key) && endPatternNewline.test(key);
+
+  console.log('BEGIN pattern match (literal newline):', beginPatternLiteral.test(key));
+  console.log('END pattern match (literal newline):', endPatternLiteral.test(key));
+  console.log('BEGIN pattern match (newline):', beginPatternNewline.test(key));
+  console.log('END pattern match (newline):', endPatternNewline.test(key));
+  console.log('CONTENT pattern match:', contentPattern.test(key));
+  console.log('Full pattern match (literal newline):', /-----BEGIN PUBLIC KEY-----\\n([\s\S]+)\\n-----END PUBLIC KEY-----\\n$/.test(key));
+  console.log('Full pattern match (newline):', /-----BEGIN PUBLIC KEY-----\n([\s\S]+)\n-----END PUBLIC KEY-----\n$/.test(key));
+
+  return isLiteralNewline || isNewline;
+}
+
 // Get query parameters
 const queryParams = (request: ccfapp.Request) => {
   const elements = request.query.split("&");
@@ -388,7 +410,7 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
     const wrapKey = wrapKeysMap.store.get(wrapKid) as IWrapKey;
     let ret: IWrapped | IWrappedJwt;
     if (fmt == "tink") {
-      ret = KeyWrapper.wrapKey(wrapId, wrapKey, keyItem);
+      ret = KeyWrapper.wrapKeyTink(wrapId, wrapKey, keyItem);
     } else {
       // Default is JWT.
       ret = KeyWrapper.wrapKeyJwt(wrapId, wrapKey, keyItem);
@@ -441,7 +463,17 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
   const wrapKid: string = body["kid"];
   console.log(`unwrapKey=> wrapKid:`, wrapKid);
   const wrappingKey: string = body["wrappingKey"];
-  console.log(`unwrapKey=> wrappingKey:`, wrappingKey);
+  console.log(`unwrapKey=> wrappingKey: ${wrappingKey}`);
+  if (!isPemPublicKey(wrappingKey)) {
+    return {
+      statusCode: 400,
+      body: {
+        error: {
+          message: `${wrappingKey} not a PEM public key`,
+        }
+      }
+    };
+  }
   const wrappingKeyBuf = ccf.strToBuf(wrappingKey);
 
   // Validate input
@@ -478,6 +510,7 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
 
   let wrapKey: IWrapKey;
   try {
+    console.log(`Retrieve key  with kid ${wrapKid}`);
     wrapKey = wrapKeysMap.store.get(wrapKid) as IWrapKey;
     if (!wrapKey) {
       const message = `Unwrapping Key with kid (${wrapKid}) not found`;
@@ -518,20 +551,22 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
 
   // Get UnWrapping key
   try {
-    let unwrapped: Uint8Array | string;
-
+    let wrapped: Uint8Array | string;
+    let receipt = "";
     if (fmt == "tink") {
-      const unwrappedTinkKey = KeyWrapper.unwrapKey(wrapKey, body.wrapped);
-      unwrapped = new Uint8Array(ccf.crypto.wrapKey(unwrappedTinkKey.buffer, wrappingKeyBuf, { name: "RSA-OAEP"}));
+      console.log(`Retrieve key in tink format`);
+      const unwrappedTinkKey = KeyWrapper.unwrapKeyTink(wrapKey, body.wrapped);
+      wrapped = new Uint8Array(ccf.crypto.wrapKey(unwrappedTinkKey.buffer, wrappingKeyBuf, { name: "RSA-OAEP"}));
       //unwrapped = unwrappedTinkKey;
     } else {
       // Default is JWT.
-      const unwrappedJwtKey = KeyWrapper.unwrapKeyJwt(wrapKey, body.wrapped);
-      unwrapped = ccf.bufToStr(ccf.crypto.wrapKey(ccf.strToBuf(unwrappedJwtKey), wrappingKeyBuf, { name: "RSA-OAEP"}));
-      //unwrapped = unwrappedJwtKey;
+      console.log(`Retrieve key in JWK format (${wrappingKey.length}): ${wrappingKey}`);
+      const [unwrappedJwtKey, lReceipt] = KeyWrapper.unwrapKeyJwt(wrapKey, body.wrapped);
+      receipt = lReceipt;
+      wrapped = Base64.fromUint8Array(new Uint8Array(ccf.crypto.wrapKey(ccf.strToBuf(unwrappedJwtKey), wrappingKeyBuf, { name: "RSA-OAEP"})));
+      console.log(`key returns (${wrapKid}): ${wrapped}`, unwrappedJwtKey);
     }
-    console.log(`key returns (${wrapKid}): ${unwrapped}`);
-    return { body: unwrapped };
+    return { body: { wrapped, receipt } };
   } catch (exception: any) {
     const message = `Error unwrap (${wrapKid}): ${exception.message}`;
     console.error(message);

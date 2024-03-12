@@ -116,6 +116,12 @@ class Demo {
     );
     console.log(`Authorization header: ${access_token}`);
 
+    this.printTestSectionHeader("🔬 [TEST]: set wrapping keys");
+    const public_wrapping_key = fs.readFileSync("test/data-samples/publicWrapKey.pem", "utf-8").replace(/\\n/g, '\n');
+    console.log(`Public wrapping key: `, public_wrapping_key);
+    const private_wrapping_key = fs.readFileSync("test/data-samples/privateWrapKey.pem", "utf-8").replace(/\\n/g, '\n');
+    console.log(`Private wrapping key: `, private_wrapping_key);
+
     process.chdir("../../");
 
     this.printTestSectionHeader("🔬 [TEST]: Key generation Service");
@@ -163,6 +169,7 @@ class Demo {
     Demo.assertField(member.name, response, "policy", "member_cert");
     Demo.assertField(member.name, response, "cert", notUndefinedString);
     //#endregion
+
     //#region refresh
     // members 0 refresh key
     console.log(`📝 Refresh key...`);
@@ -301,23 +308,21 @@ class Demo {
       keyResponse.wrappedKeyContents,
       keyResponse.wrapperKid,
       attestation,
+      private_wrapping_key,
+      public_wrapping_key,
       false,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token,
     )) as [number, IKeyItem];
     console.log("JWT unwrapResponse: ", unwrapResponse);
+    const keyInResponse = unwrapResponse.key;
+    const receipt = {receipt: unwrapResponse.receipt};
     Demo.assert("Status OK", statusCode == 200);
-    Demo.assertField(member.name, unwrapResponse, "d", notUndefinedString);
-    Demo.assertField(member.name, unwrapResponse, "x", notUndefinedString);
+    Demo.assertField(member.name, keyInResponse, "d", notUndefinedString);
+    Demo.assertField(member.name, keyInResponse, "x", notUndefinedString);
     Demo.assertField(
       member.name,
-      unwrapResponse,
-      "receipt",
-      notUndefinedString,
-    );
-    Demo.assertField(
-      member.name,
-      unwrapResponse,
+      keyInResponse,
       "kid",
       (key: string | number | any[]) => {
         return key !== undefined && (key as string).length > 40;
@@ -325,12 +330,18 @@ class Demo {
     );
     Demo.assertField(
       member.name,
-      unwrapResponse,
+      keyInResponse,
       "timestamp",
       numberHigerThanZero,
     );
-    Demo.assertField(member.name, unwrapResponse, "crv", "X25519");
-    Demo.assertField(member.name, unwrapResponse, "kty", "OKP");
+    Demo.assertField(member.name, keyInResponse, "crv", "X25519");
+    Demo.assertField(member.name, keyInResponse, "kty", "OKP");
+    Demo.assertField(
+      member.name,
+      receipt,
+      "receipt",
+      notUndefinedString,
+    );
 
     // Test with Tink
     // Get wrapped key
@@ -380,13 +391,15 @@ class Demo {
       keyMaterial.encryptedKeyset,
       kid as string,
       attestation,
+      private_wrapping_key,
+      public_wrapping_key,
       true,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token,
     )) as [number, Uint8Array];
     Demo.assert("OK statusCode", statusCode == 200);
     Demo.assert(
-      "unwrapResponse instanceof Uint8Array",
+      "unwrapResponse.key instanceof Uint8Array",
       unwrapResponse instanceof Uint8Array,
     );
     let keyset = new tink.Keyset();

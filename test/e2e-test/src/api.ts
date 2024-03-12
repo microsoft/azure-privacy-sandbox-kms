@@ -2,12 +2,16 @@
 // Licensed under the MIT license.
 
 import { DemoMemberProps, DemoProps } from "./index";
-import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
+import axios from "axios";
 import { IKeyItem } from "../../../src";
 import { IWrapped, IWrappedJwt } from "../../../src/endpoints/KeyWrapper";
 import { ISnpAttestation } from "../../../src/attestation/ISnpAttestation";
 import https from "https";
 import * as http2 from "http2";
+import keyutil from 'js-crypto-key-utils';
+import rsa from 'js-crypto-rsa';
+import { JsonWebKey } from "node:crypto";
+import { Base64 } from "js-base64";
 
 export interface ValidationProps {
   url: string;
@@ -17,6 +21,13 @@ export interface ValidationProps {
   testMessage: string;
 }
 
+const convertUint8ArrayToString = (uInt8array: Uint8Array): string => {
+  let stringRepresentation = "";
+  for (let i = 0; i < uInt8array.length; i++) {
+      stringRepresentation += String.fromCharCode(uInt8array[i]);
+  }
+  return stringRepresentation;
+} 
 export class Validator {
   public static async validateRequest(props: ValidationProps) {
     const result = await axios({
@@ -223,10 +234,12 @@ export default class Api {
     wrapped: string,
     kid: string,
     attestation: ISnpAttestation,
+    privateWrapKey: string,
+    publicWrapKey: string,
     tink: boolean,
     httpsAgent: https.Agent,
     authorizationHeader?: string,
-  ): Promise<[number, Uint8Array | IKeyItem]> {
+  ): Promise<[number, Uint8Array | IKeyItem | {[key: string]: any}]> {
     console.log(
       `📝 ${member.name} Get unwrapped private key with receipt, think: ${tink}:`,
     );
@@ -237,7 +250,7 @@ export default class Api {
           ":method": "POST",
           ":path": `${props.unwrapPath}${query}`,
           "Content-Type": "application/json",
-          Authorization: authorizationHeader,
+          Authorization: authorizationHeader,          
         }
       : {
           ":method": "POST",
@@ -249,16 +262,22 @@ export default class Api {
       rejectUnauthorized: true,
     } as http2.SecureClientSessionOptions);
     const req = client.request(reqProps);
-    req.write(JSON.stringify({ wrapped, kid, attestation })); // Send the request body
+    req.write(JSON.stringify({ wrapped, kid, attestation, wrappingKey: publicWrapKey })); // Send the request body
     req.end();
 
+    let wrappedKey: Uint8Array;
     let response;
     try {
       response = await Api.responsePromise(req, responseType);
+      //const dataBuf = Buffer.from(response.data, );
+      //const wrappedKeyBuf = Buffer.from(privateWrapKey);
+      //const privateKey = new keyutil.Key('pem', privateWrapKey);
+      //const wrappedKey = await rsa.decrypt(new Uint8Array(dataBuf), (await privateKey.jwk) as JsonWebKey);
+      //wrappedKey = ccf.crypto.unwrapKey(ccf.strToBuf(response.data), ccf.strToBuf(privateWrapKey), { name: "RSA-OAEP"});
       console.log("Status:", response.statusCode);
-      console.log("Response data:", response.data);
-    } catch (error) {
+      } catch (error) {
       console.error("Error:", error.message);
+      throw new Error(error.message);
     } finally {
       // Close the client session when done
       if (client) {
@@ -269,8 +288,23 @@ export default class Api {
       const res = new Uint8Array(response.data);
       console.log(res);
       return [response.statusCode, res];
+      //const respBuf = new Uint8Array(response.data);
+      //return [response.statusCode, respBuf];
+      //const privateKey = new keyutil.Key('pem', privateWrapKey);
+      //const wrappedKey = await rsa.decrypt(respBuf, (await privateKey.jwk) as JsonWebKey);
+
     } else {
-      return [response.statusCode, JSON.parse(response.data)];
+      const resp = JSON.parse(response.data);
+      const receipt = resp.receipt;
+      console.log(`Wrapped key: `, resp.wrapped);
+      console.log(`Receipt: `, resp.receipt);
+      const respBuf = Base64.toUint8Array(resp.wrapped);
+      const privateKey = new keyutil.Key('pem', privateWrapKey);
+      const wrappedKey = await rsa.decrypt(respBuf, (await privateKey.jwk) as JsonWebKey);
+      let unwrappedKey = convertUint8ArrayToString(wrappedKey);
+      console.log(`Wrapped key decrypted: `, unwrappedKey);
+      
+      return [response.statusCode, {key: JSON.parse(unwrappedKey) , receipt}];
     }
   }
 }

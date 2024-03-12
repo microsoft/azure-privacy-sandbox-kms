@@ -6,6 +6,7 @@ import { ccf } from "@microsoft/ccf-app/global";
 import { KeyGeneration } from "./KeyGeneration";
 import { Base64 } from "js-base64";
 import { IKeyItem, IWrapKey } from "./IKeyItem";
+import { convertUint8ArrayToString } from "../utils/Tooling";
 import * as tink from "./proto/gen/tink_pb";
 import * as hpke from "./proto/gen/hpke_pb";
 
@@ -114,7 +115,7 @@ export class KeyWrapper {
   };
 
   // Wrap the payload
-  public static wrapKey = (
+  public static wrapKeyTink = (
     id: number,
     wrapperKey: IWrapKey,
     payload: IKeyItem,
@@ -188,8 +189,24 @@ export class KeyWrapper {
     return ret;
   };
 
+  // Get key material
+  private static getKeyMaterial( wrapperKey: IWrapKey, wrapped: string): [IKeyItem, string] {
+    const bufPayload = Base64.toUint8Array(wrapped).buffer;
+    const bufKey = ccf.strToBuf(wrapperKey.privateKey);
+    const algo = KeyWrapper.WRAPALGO;
+    const unwrapped = ccfcrypto.unwrapKey(bufPayload, bufKey, algo);
+    const unWrappedInt8array = new Uint8Array(unwrapped);
+
+    let unwrappedKey = convertUint8ArrayToString(unWrappedInt8array);
+    const parsedKey = JSON.parse(unwrappedKey) as IKeyItem;
+    const receipt = parsedKey.receipt;
+    delete parsedKey.receipt;
+    
+    return [parsedKey, receipt];
+  }
+
   // Unwrap the payload
-  public static unwrapKey = (
+  public static unwrapKeyTink = (
     wrapperKey: IWrapKey,
     wrapped: string,
   ): Uint8Array => {
@@ -208,7 +225,7 @@ export class KeyWrapper {
   ): IWrappedJwt => {
     const bufPayload = ccf.strToBuf(JSON.stringify(payload));
 
-    console.log(`Encryption public key: `, wrapperKey.publicKey);
+    console.log(`wrapKeyJwt->Encryption public key: `, wrapperKey.publicKey);
     const bufKey = ccf.strToBuf(wrapperKey.publicKey);
     const algo = KeyWrapper.WRAPALGO;
     const wrapped = ccfcrypto.wrapKey(bufPayload, bufKey, algo);
@@ -225,17 +242,11 @@ export class KeyWrapper {
   public static unwrapKeyJwt = (
     wrapperKey: IWrapKey,
     wrapped: string,
-  ): string => {
-    const bufPayload = Base64.toUint8Array(wrapped).buffer;
-    const bufKey = ccf.strToBuf(wrapperKey.privateKey);
-    const algo = KeyWrapper.WRAPALGO;
-    const unwrapped = ccfcrypto.unwrapKey(bufPayload, bufKey, algo);
-    const unWrappedInt8array = new Uint8Array(unwrapped);
-    let unwrappedKey = "";
-    for (let i = 0; i < unWrappedInt8array.length; i++) {
-      unwrappedKey += String.fromCharCode(unWrappedInt8array[i]);
-    }
-    console.log(`Unwrapped payload: `, unwrappedKey);
-    return unwrappedKey;
+  ): [string, string] => {
+    const [parsedKey, receipt] = this.getKeyMaterial(wrapperKey, wrapped);
+    const unwrappedKey = JSON.stringify(parsedKey);
+    console.log(`Unwrapped JWT payload (${unwrappedKey.length}): `, unwrappedKey);
+    return [ unwrappedKey, receipt];
   };
 }
+
