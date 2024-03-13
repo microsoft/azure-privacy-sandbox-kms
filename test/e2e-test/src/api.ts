@@ -288,6 +288,17 @@ export default class Api {
       const res = new Uint8Array(response.data);
       console.log(res);
       return [response.statusCode, res];
+      
+      const unwrappedKey = convertUint8ArrayToString(new Uint8Array(response.data));
+      console.log(`Unwrapped tink key decrypted: `, unwrappedKey);
+      const resp = JSON.parse(unwrappedKey);
+      const receipt = resp.receipt;
+      console.log(`Wrapped key: `, resp.wrapped);
+      console.log(`Receipt: `, resp.receipt);
+      const respBuf = Base64.toUint8Array(resp.wrapped);
+      const privateKey = new keyutil.Key('pem', privateWrapKey);
+      const wrappedKey = await rsa.decrypt(respBuf, (await privateKey.jwk) as JsonWebKey);
+      return [response.statusCode, {key: JSON.parse(unwrappedKey) , receipt}];
       //const respBuf = new Uint8Array(response.data);
       //return [response.statusCode, respBuf];
       //const privateKey = new keyutil.Key('pem', privateWrapKey);
@@ -302,7 +313,7 @@ export default class Api {
       const privateKey = new keyutil.Key('pem', privateWrapKey);
       const wrappedKey = await rsa.decrypt(respBuf, (await privateKey.jwk) as JsonWebKey);
       let unwrappedKey = convertUint8ArrayToString(wrappedKey);
-      console.log(`Wrapped key decrypted: `, unwrappedKey);
+      console.log(`Unwrapped key decrypted: `, unwrappedKey);
       
       return [response.statusCode, {key: JSON.parse(unwrappedKey) , receipt}];
     }

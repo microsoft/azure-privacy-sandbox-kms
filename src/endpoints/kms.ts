@@ -394,7 +394,7 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
   // Get receipt if available
   if (receipt !== undefined) {
     keyItem.receipt = receipt;
-    console.log(`Receipt: ${receipt}`);
+    console.log(`Key->Receipt: ${receipt}`);
   } else {
     return {
       statusCode: 202,
@@ -416,7 +416,7 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
       ret = KeyWrapper.wrapKeyJwt(wrapId, wrapKey, keyItem);
     }
 
-    console.log(`key returns (${id}): `, ret);
+    console.log(`key api returns (${id}: ${JSON.stringify(ret).length}): `, ret);
     return { body: ret };
   } catch (exception: any) {
     const message = `Error Key (${id}): ${exception.message}`;
@@ -555,8 +555,13 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
     let receipt = "";
     if (fmt == "tink") {
       console.log(`Retrieve key in tink format`);
-      const unwrappedTinkKey = KeyWrapper.unwrapKeyTink(wrapKey, body.wrapped);
-      wrapped = new Uint8Array(ccf.crypto.wrapKey(unwrappedTinkKey.buffer, wrappingKeyBuf, { name: "RSA-OAEP"}));
+      wrapped = KeyWrapper.unwrapKeyTink(wrapKey, body.wrapped);
+      //const [unwrappedTinkKey, lReceipt] = KeyWrapper.unwrapKeyTink(wrapKey, body.wrapped);
+      //receipt = lReceipt;
+      //wrapped = new Uint8Array(ccf.crypto.wrapKey(ccf.strToBuf(unwrappedTinkKey), wrappingKeyBuf, { name: "RSA-OAEP"}));
+      //console.log(`key returns (${wrapKid}): ${wrapped}`, unwrappedTinkKey);
+
+      //wrapped = new Uint8Array(ccf.crypto.wrapKey(unwrappedTinkKey.buffer, wrappingKeyBuf, { name: "RSA-OAEP"}));
       //unwrapped = unwrappedTinkKey;
     } else {
       // Default is JWT.
@@ -682,7 +687,7 @@ export const pubkey = (request: ccfapp.Request<void>) => {
     const receipt = hpkeKeysMap.receipt(kid);
     if (receipt !== undefined) {
       keyItem.receipt = receipt;
-      console.log(`Receipt: ${receipt}`);
+      console.log(`pubkey->Receipt: ${receipt}`);
     } else {
       return {
         statusCode: 202,

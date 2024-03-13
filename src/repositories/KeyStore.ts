@@ -56,7 +56,7 @@ export class KeyStore {
     );
     if (states !== null) {
       const ret = JSON.stringify(states[0].receipt);
-      console.log(`Receipt: ${ret}`);
+      console.log(`Get receipt->Receipt: ${ret}`);
       return ret;
     }
     return undefined;
