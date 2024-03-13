@@ -152,10 +152,7 @@
                           "type": "string"
                         }
                       },
-                      "required": [
-                        "wrapped",
-                        "receipt"
-                      ],
+                      "required": ["wrapped", "receipt"],
                       "type": "object"
                     }
                   }

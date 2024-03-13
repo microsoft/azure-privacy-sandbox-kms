@@ -117,9 +117,13 @@ class Demo {
     console.log(`Authorization header: ${access_token}`);
 
     this.printTestSectionHeader("🔬 [TEST]: set wrapping keys");
-    const public_wrapping_key = fs.readFileSync("test/data-samples/publicWrapKey.pem", "utf-8").replace(/\\n/g, '\n');
+    const public_wrapping_key = fs
+      .readFileSync("test/data-samples/publicWrapKey.pem", "utf-8")
+      .replace(/\\n/g, "\n");
     console.log(`Public wrapping key: `, public_wrapping_key);
-    const private_wrapping_key = fs.readFileSync("test/data-samples/privateWrapKey.pem", "utf-8").replace(/\\n/g, '\n');
+    const private_wrapping_key = fs
+      .readFileSync("test/data-samples/privateWrapKey.pem", "utf-8")
+      .replace(/\\n/g, "\n");
     console.log(`Private wrapping key: `, private_wrapping_key);
 
     process.chdir("../../");
@@ -316,7 +320,7 @@ class Demo {
     )) as [number, IKeyItem];
     console.log("JWT unwrapResponse: ", unwrapResponse);
     const keyInResponse = unwrapResponse.key;
-    const receipt = {receipt: unwrapResponse.receipt};
+    const receipt = { receipt: unwrapResponse.receipt };
     Demo.assert("Status OK", statusCode == 200);
     Demo.assertField(member.name, keyInResponse, "d", notUndefinedString);
     Demo.assertField(member.name, keyInResponse, "x", notUndefinedString);
@@ -336,12 +340,7 @@ class Demo {
     );
     Demo.assertField(member.name, keyInResponse, "crv", "X25519");
     Demo.assertField(member.name, keyInResponse, "kty", "OKP");
-    Demo.assertField(
-      member.name,
-      receipt,
-      "receipt",
-      notUndefinedString,
-    );
+    Demo.assertField(member.name, receipt, "receipt", notUndefinedString);
 
     // Test with Tink
     // Get wrapped key
@@ -402,7 +401,6 @@ class Demo {
       "unwrapResponse.key instanceof Uint8Array",
       unwrapResponse instanceof Uint8Array,
     );
-
 
     let keyset = new tink.Keyset();
     // Should not throw

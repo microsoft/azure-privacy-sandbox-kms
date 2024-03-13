@@ -145,7 +145,10 @@ export class KeyWrapper {
     const bufPayload = keyset.toBinary().buffer;
 
     console.log(`Encryption wrapper public key: `, wrapperKey.publicKey);
-    console.log(`Tink Wrapped payload (${JSON.stringify(keyset).length}): `, keyset);
+    console.log(
+      `Tink Wrapped payload (${JSON.stringify(keyset).length}): `,
+      keyset,
+    );
     const bufKey = ccf.strToBuf(wrapperKey.publicKey);
     const algo = KeyWrapper.WRAPALGO;
     const wrapped = ccfcrypto.wrapKey(bufPayload, bufKey, algo);
@@ -194,7 +197,10 @@ export class KeyWrapper {
   };
 
   // Get key material
-  private static getKeyMaterial( wrapperKey: IWrapKey, wrapped: string): [IKeyItem, string] {
+  private static getKeyMaterial(
+    wrapperKey: IWrapKey,
+    wrapped: string,
+  ): [IKeyItem, string] {
     const bufPayload = Base64.toUint8Array(wrapped).buffer;
     const bufKey = ccf.strToBuf(wrapperKey.privateKey);
     const algo = KeyWrapper.WRAPALGO;
@@ -206,7 +212,7 @@ export class KeyWrapper {
     const parsedKey = JSON.parse(unwrappedKey) as IKeyItem;
     const receipt = parsedKey.receipt;
     delete parsedKey.receipt;
-    
+
     return [parsedKey, receipt];
   }
 
@@ -223,11 +229,17 @@ export class KeyWrapper {
 
     const unWrappedInt8array = new Uint8Array(unwrapped);
     let wrappedString = convertUint8ArrayToString(unWrappedInt8array);
-    console.log(`wrappedString tink payload (${wrappedString.length}): `, wrappedString);
+    console.log(
+      `wrappedString tink payload (${wrappedString.length}): `,
+      wrappedString,
+    );
 
     const [parsedKey, receipt] = this.getKeyMaterial(wrapperKey, wrappedString);
     const unwrappedKey = JSON.stringify(parsedKey);
-    console.log(`Unwrapped tink payload (${unwrappedKey.length}): `, unwrappedKey);
+    console.log(
+      `Unwrapped tink payload (${unwrappedKey.length}): `,
+      unwrappedKey,
+    );
     //return [ unwrappedKey, receipt];
 
     //const bufPayload = Base64.toUint8Array(wrapped).buffer;
@@ -265,8 +277,10 @@ export class KeyWrapper {
   ): [string, string] => {
     const [parsedKey, receipt] = this.getKeyMaterial(wrapperKey, wrapped);
     const unwrappedKey = JSON.stringify(parsedKey);
-    console.log(`Unwrapped JWT payload (${unwrappedKey.length}): `, unwrappedKey);
-    return [ unwrappedKey, receipt];
+    console.log(
+      `Unwrapped JWT payload (${unwrappedKey.length}): `,
+      unwrappedKey,
+    );
+    return [unwrappedKey, receipt];
   };
 }
-

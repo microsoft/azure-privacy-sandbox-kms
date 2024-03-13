@@ -56,19 +56,37 @@ const isPemPublicKey = (key: string): boolean => {
   const endPatternNewline = /\n-----END PUBLIC KEY-----\n$/;
   const contentPattern = /([\s\S]+)/;
 
-  const isLiteralNewline = beginPatternLiteral.test(key) && endPatternLiteral.test(key);
-  const isNewline = beginPatternNewline.test(key) && endPatternNewline.test(key);
+  const isLiteralNewline =
+    beginPatternLiteral.test(key) && endPatternLiteral.test(key);
+  const isNewline =
+    beginPatternNewline.test(key) && endPatternNewline.test(key);
 
-  console.log('BEGIN pattern match (literal newline):', beginPatternLiteral.test(key));
-  console.log('END pattern match (literal newline):', endPatternLiteral.test(key));
-  console.log('BEGIN pattern match (newline):', beginPatternNewline.test(key));
-  console.log('END pattern match (newline):', endPatternNewline.test(key));
-  console.log('CONTENT pattern match:', contentPattern.test(key));
-  console.log('Full pattern match (literal newline):', /-----BEGIN PUBLIC KEY-----\\n([\s\S]+)\\n-----END PUBLIC KEY-----\\n$/.test(key));
-  console.log('Full pattern match (newline):', /-----BEGIN PUBLIC KEY-----\n([\s\S]+)\n-----END PUBLIC KEY-----\n$/.test(key));
+  console.log(
+    "BEGIN pattern match (literal newline):",
+    beginPatternLiteral.test(key),
+  );
+  console.log(
+    "END pattern match (literal newline):",
+    endPatternLiteral.test(key),
+  );
+  console.log("BEGIN pattern match (newline):", beginPatternNewline.test(key));
+  console.log("END pattern match (newline):", endPatternNewline.test(key));
+  console.log("CONTENT pattern match:", contentPattern.test(key));
+  console.log(
+    "Full pattern match (literal newline):",
+    /-----BEGIN PUBLIC KEY-----\\n([\s\S]+)\\n-----END PUBLIC KEY-----\\n$/.test(
+      key,
+    ),
+  );
+  console.log(
+    "Full pattern match (newline):",
+    /-----BEGIN PUBLIC KEY-----\n([\s\S]+)\n-----END PUBLIC KEY-----\n$/.test(
+      key,
+    ),
+  );
 
   return isLiteralNewline || isNewline;
-}
+};
 
 // Get query parameters
 const queryParams = (request: ccfapp.Request) => {
@@ -416,7 +434,10 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
       ret = KeyWrapper.wrapKeyJwt(wrapId, wrapKey, keyItem);
     }
 
-    console.log(`key api returns (${id}: ${JSON.stringify(ret).length}): `, ret);
+    console.log(
+      `key api returns (${id}: ${JSON.stringify(ret).length}): `,
+      ret,
+    );
     return { body: ret };
   } catch (exception: any) {
     const message = `Error Key (${id}): ${exception.message}`;
@@ -452,7 +473,6 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
   );
   if (isValidIdentity.failure) return isValidIdentity;
 
-  
   // check payload
   const body = request.body.json();
   console.log(`unwrapKey=> wrapped:`, body);
@@ -470,8 +490,8 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
       body: {
         error: {
           message: `${wrappingKey} not a PEM public key`,
-        }
-      }
+        },
+      },
     };
   }
   const wrappingKeyBuf = ccf.strToBuf(wrappingKey);
@@ -551,25 +571,35 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
 
   // Get UnWrapping key
   try {
-    let wrapped: Uint8Array | string;
+    let wrapped: string;
     let receipt = "";
     if (fmt == "tink") {
       console.log(`Retrieve key in tink format`);
       const unwrapped = KeyWrapper.unwrapKeyTink(wrapKey, body.wrapped);
-      wrapped = new Uint8Array(ccf.crypto.wrapKey(unwrapped.buffer, wrappingKeyBuf, { name: "RSA-OAEP"}));
-      //const [unwrappedTinkKey, lReceipt] = KeyWrapper.unwrapKeyTink(wrapKey, body.wrapped);
-      //receipt = lReceipt;
-      //wrapped = new Uint8Array(ccf.crypto.wrapKey(ccf.strToBuf(unwrappedTinkKey), wrappingKeyBuf, { name: "RSA-OAEP"}));
-      //console.log(`key returns (${wrapKid}): ${wrapped}`, unwrappedTinkKey);
-
-      //wrapped = new Uint8Array(ccf.crypto.wrapKey(unwrappedTinkKey.buffer, wrappingKeyBuf, { name: "RSA-OAEP"}));
-      //unwrapped = unwrappedTinkKey;
+      wrapped = Base64.fromUint8Array(
+        new Uint8Array(
+          ccf.crypto.wrapKey(unwrapped.buffer, wrappingKeyBuf, {
+            name: "RSA-OAEP",
+          }),
+        ),
+      );
     } else {
       // Default is JWT.
-      console.log(`Retrieve key in JWK format (${wrappingKey.length}): ${wrappingKey}`);
-      const [unwrappedJwtKey, lReceipt] = KeyWrapper.unwrapKeyJwt(wrapKey, body.wrapped);
+      console.log(
+        `Retrieve key in JWK format (${wrappingKey.length}): ${wrappingKey}`,
+      );
+      const [unwrappedJwtKey, lReceipt] = KeyWrapper.unwrapKeyJwt(
+        wrapKey,
+        body.wrapped,
+      );
       receipt = lReceipt;
-      wrapped = Base64.fromUint8Array(new Uint8Array(ccf.crypto.wrapKey(ccf.strToBuf(unwrappedJwtKey), wrappingKeyBuf, { name: "RSA-OAEP"})));
+      wrapped = Base64.fromUint8Array(
+        new Uint8Array(
+          ccf.crypto.wrapKey(ccf.strToBuf(unwrappedJwtKey), wrappingKeyBuf, {
+            name: "RSA-OAEP",
+          }),
+        ),
+      );
       console.log(`key returns (${wrapKid}): ${wrapped}`, unwrappedJwtKey);
     }
     return { body: { wrapped, receipt } };
