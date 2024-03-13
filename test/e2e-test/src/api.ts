@@ -21,7 +21,7 @@ export interface ValidationProps {
   testMessage: string;
 }
 
-const convertUint8ArrayToString = (uInt8array: Uint8Array): string => {
+export const convertUint8ArrayToString = (uInt8array: Uint8Array): string => {
   let stringRepresentation = "";
   for (let i = 0; i < uInt8array.length; i++) {
       stringRepresentation += String.fromCharCode(uInt8array[i]);
@@ -286,9 +286,17 @@ export default class Api {
     }
     if (tink) {
       const res = new Uint8Array(response.data);
-      console.log(res);
-      return [response.statusCode, res];
-      
+      const wrappedKeyString = convertUint8ArrayToString(res);
+      console.log("wrappedKeyString", wrappedKeyString);
+  
+      const unwrappedKeyObject = JSON.parse(wrappedKeyString);
+      const wrappedUint8Array = new Uint8Array(Object.values(unwrappedKeyObject.wrapped));      
+      console.log(wrappedUint8Array);
+      const privateKey = new keyutil.Key('pem', privateWrapKey);
+      const unwrappedKey = await rsa.decrypt(wrappedUint8Array, (await privateKey.jwk) as JsonWebKey);
+      console.log(`Decryption of tink unwrap key passed: size ${unwrappedKey.byteLength}`)
+      return [response.statusCode, unwrappedKey];
+     /* 
       const unwrappedKey = convertUint8ArrayToString(new Uint8Array(response.data));
       console.log(`Unwrapped tink key decrypted: `, unwrappedKey);
       const resp = JSON.parse(unwrappedKey);
@@ -303,7 +311,7 @@ export default class Api {
       //return [response.statusCode, respBuf];
       //const privateKey = new keyutil.Key('pem', privateWrapKey);
       //const wrappedKey = await rsa.decrypt(respBuf, (await privateKey.jwk) as JsonWebKey);
-
+      */
     } else {
       const resp = JSON.parse(response.data);
       const receipt = resp.receipt;

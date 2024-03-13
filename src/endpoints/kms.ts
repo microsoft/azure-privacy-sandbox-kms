@@ -555,7 +555,8 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
     let receipt = "";
     if (fmt == "tink") {
       console.log(`Retrieve key in tink format`);
-      wrapped = KeyWrapper.unwrapKeyTink(wrapKey, body.wrapped);
+      const unwrapped = KeyWrapper.unwrapKeyTink(wrapKey, body.wrapped);
+      wrapped = new Uint8Array(ccf.crypto.wrapKey(unwrapped.buffer, wrappingKeyBuf, { name: "RSA-OAEP"}));
       //const [unwrappedTinkKey, lReceipt] = KeyWrapper.unwrapKeyTink(wrapKey, body.wrapped);
       //receipt = lReceipt;
       //wrapped = new Uint8Array(ccf.crypto.wrapKey(ccf.strToBuf(unwrappedTinkKey), wrappingKeyBuf, { name: "RSA-OAEP"}));

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import Api, { Validator } from "./api.js";
+import Api, { Validator, convertUint8ArrayToString } from "./api.js";
 import path from "path";
 import {
   member0DataPart1,
@@ -402,6 +402,8 @@ class Demo {
       "unwrapResponse.key instanceof Uint8Array",
       unwrapResponse instanceof Uint8Array,
     );
+
+
     let keyset = new tink.Keyset();
     // Should not throw
     keyset.fromBinary(unwrapResponse);
