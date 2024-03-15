@@ -178,13 +178,15 @@ export default class Api {
   public static async key(
     props: DemoProps,
     member: DemoMemberProps,
-    data: string,
+    attestation: ISnpAttestation,
+    privateWrapKey: string,
+    publicWrapKey: string,
     tink: boolean,
     httpsAgent: https.Agent,
     authorizationHeader?: string,
-  ): Promise<[number, IWrapped | IWrappedJwt | undefined]> {
+  ): Promise<[number, IWrapped | {wrapped: string, receipt: string} | undefined]> {
     console.log(
-      `📝 ${member.name} Get wrapped private key with receipt:`,
+      `📝 ${member.name} Get wrapped private key with receipt. tink: ${tink}:`,
       authorizationHeader,
     );
     const query = tink ? "?fmt=tink" : "";
@@ -205,13 +207,19 @@ export default class Api {
       rejectUnauthorized: true,
     } as http2.SecureClientSessionOptions);
     const req = client.request(reqProps);
-    req.write(data); // Send the request body
+    req.write(
+      JSON.stringify({ attestation, wrappingKey: publicWrapKey }),
+    ); 
     req.end();
 
     let response;
     try {
       response = await Api.responsePromise(req);
       console.log("Status:", response.statusCode);
+      if (response.statusCode > 200) {
+        console.log(`Directly return statuscode with response: `, response.data);
+        return [response.statusCode, response.data ? JSON.parse(response.data): undefined]
+      }
       console.log("Response data:", response.data);
     } catch (error) {
       console.error("Error:", error.message);
@@ -221,6 +229,47 @@ export default class Api {
         client.close();
       }
     }
+ 
+    if (tink) {
+      const resp = JSON.parse(response.data);
+      const receipt = resp.receipt;
+      console.log(`Wrapped key: `, resp.wrapped);
+      console.log(`Receipt: `, resp.receipt);
+      const keyMaterial = JSON.parse(resp.wrapped.keys[0].keyData.keyMaterial);
+      // Get base64 key set value
+      const encryptedKeyset = keyMaterial.encryptedKeyset;
+      console.log(`encryptedKeyset: `,encryptedKeyset);
+      const respBuf = Base64.toUint8Array(encryptedKeyset);
+      const privateKey = new keyutil.Key("pem", privateWrapKey);
+      const unwrappedKey = await rsa.decrypt(
+        respBuf,
+        (await privateKey.jwk) as JsonWebKey,
+      );
+      keyMaterial.encryptedKeyset = Base64.fromUint8Array(unwrappedKey);
+      resp.wrapped.keys[0].keyData.keyMaterial = JSON.stringify(keyMaterial);
+      console.log(
+        `unwrap tink result (${unwrappedKey.byteLength}): `,
+        unwrappedKey,
+      );
+      return [response.statusCode, resp.wrapped];
+    } else {
+      const resp = JSON.parse(response.data);
+      console.log(`key returned: `, response.data);
+      const receipt = resp.receipt;
+      console.log(`Wrapped key: `, resp.wrapped);
+      console.log(`Receipt: `, resp.receipt);
+      const respBuf = Base64.toUint8Array(resp.wrapped);
+      const privateKey = new keyutil.Key("pem", privateWrapKey);
+      const wrappedKey = await rsa.decrypt(
+        respBuf,
+        (await privateKey.jwk) as JsonWebKey,
+      );
+      let unwrappedKey = convertUint8ArrayToString(wrappedKey);
+      console.log(`Unwrapped key decrypted: `, unwrappedKey);
+
+      return [response.statusCode, { wrapped: JSON.parse(unwrappedKey), receipt }];
+    }
+
 
     if (response.data) {
       return [response.statusCode, JSON.parse(response.data)];
@@ -232,7 +281,7 @@ export default class Api {
     props: DemoProps,
     member: DemoMemberProps,
     wrapped: string,
-    kid: string,
+    wrappedKid: string,
     attestation: ISnpAttestation,
     privateWrapKey: string,
     publicWrapKey: string,
@@ -263,7 +312,7 @@ export default class Api {
     } as http2.SecureClientSessionOptions);
     const req = client.request(reqProps);
     req.write(
-      JSON.stringify({ wrapped, kid, attestation, wrappingKey: publicWrapKey }),
+      JSON.stringify({ wrapped, wrappedKid, attestation, wrappingKey: publicWrapKey }),
     ); // Send the request body
     req.end();
 
@@ -271,11 +320,6 @@ export default class Api {
     let response;
     try {
       response = await Api.responsePromise(req, responseType);
-      //const dataBuf = Buffer.from(response.data, );
-      //const wrappedKeyBuf = Buffer.from(privateWrapKey);
-      //const privateKey = new keyutil.Key('pem', privateWrapKey);
-      //const wrappedKey = await rsa.decrypt(new Uint8Array(dataBuf), (await privateKey.jwk) as JsonWebKey);
-      //wrappedKey = ccf.crypto.unwrapKey(ccf.strToBuf(response.data), ccf.strToBuf(privateWrapKey), { name: "RSA-OAEP"});
       console.log("Status:", response.statusCode);
     } catch (error) {
       console.error("Error:", error.message);
@@ -302,24 +346,9 @@ export default class Api {
         unwrappedKey,
       );
       return [response.statusCode, unwrappedKey];
-      /* 
-      const unwrappedKey = convertUint8ArrayToString(new Uint8Array(response.data));
-      console.log(`Unwrapped tink key decrypted: `, unwrappedKey);
-      const resp = JSON.parse(unwrappedKey);
-      const receipt = resp.receipt;
-      console.log(`Wrapped key: `, resp.wrapped);
-      console.log(`Receipt: `, resp.receipt);
-      const respBuf = Base64.toUint8Array(resp.wrapped);
-      const privateKey = new keyutil.Key('pem', privateWrapKey);
-      const wrappedKey = await rsa.decrypt(respBuf, (await privateKey.jwk) as JsonWebKey);
-      return [response.statusCode, {key: JSON.parse(unwrappedKey) , receipt}];
-      //const respBuf = new Uint8Array(response.data);
-      //return [response.statusCode, respBuf];
-      //const privateKey = new keyutil.Key('pem', privateWrapKey);
-      //const wrappedKey = await rsa.decrypt(respBuf, (await privateKey.jwk) as JsonWebKey);
-      */
     } else {
       const resp = JSON.parse(response.data);
+      console.log(`unwrapKey returned: `, response.data);
       const receipt = resp.receipt;
       console.log(`Wrapped key: `, resp.wrapped);
       console.log(`Receipt: `, resp.receipt);

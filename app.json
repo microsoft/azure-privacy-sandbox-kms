@@ -116,6 +116,9 @@
                     "kid": {
                       "type": "string"
                     },
+                    "wrappingKey": {
+                      "type": "string"
+                    },
                     "wrapped": {
                       "type": "string"
                     },

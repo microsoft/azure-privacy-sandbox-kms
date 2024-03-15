@@ -147,7 +147,7 @@ curl ${KMS_URL}/app/pubkey?fmt=tink --cacert ${KEYS_DIR}/service_cert.pem  -H "C
 curl ${KMS_URL}/app/listpubkeys --cacert ${KEYS_DIR}/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
 
 # Get the latest private key (JWT)
-wrapped_resp=$(curl $KMS_URL/app/key -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -d "{\"attestation\":$(<test/attestation-samples/snp.json)}"  | jq)
+wrapped_resp=$(curl $KMS_URL/app/key -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -d "{\"attestation\":$(<test/attestation-samples/snp.json), \"wrappingKey\":$(jq -Rs . < test/data-samples/publicWrapKey.pem)}"  | jq)
 echo $wrapped_resp
 kid=$(echo $wrapped_resp | jq '.wrapperKid' -r)
 echo $kid
@@ -155,7 +155,7 @@ wrapped=$(echo $wrapped_resp | jq '.wrappedKeyContents' -r)
 echo $wrapped
 
 # Unwrap key with attestation (JWT)
-curl $KMS_URL/app/unwrapKey -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -d "{\"wrapped\":\"$wrapped\", \"kid\":\"$kid\", \"attestation\":$(cat test/attestation-samples/snp.json)}, \"wrappingKey\":$(cat test/data-samples/publicWrapKey.pem)}" | jq
+curl $KMS_URL/app/unwrapKey -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -d "{\"wrapped\":\"$wrapped\", \"kid\":\"$kid\", \"attestation\":$(cat test/attestation-samples/snp.json), \"wrappingKey\":$(jq -Rs . < test/data-samples/publicWrapKey.pem)}" | jq
 
 # Get the latest private key (Tink)
 wrapped_resp=$(curl $KMS_URL/app/key?fmt=tink -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -d '@test/attestation-samples/snp.json'  | jq)
