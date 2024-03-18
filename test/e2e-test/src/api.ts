@@ -211,7 +211,7 @@ export default class Api {
       number,
       (
         | IWrapped
-        | { wrapped: string; receipt: string; wrappedKeyId: string }
+        | { wrapped: string; receipt: string; wrappedKid: string }
         | undefined
       ),
     ]
@@ -279,7 +279,7 @@ export default class Api {
         jsonKey,
       );
       resp.wrapped = jsonKey;
-      resp.wrappedKeyId = resp.wrappedKeyId;
+      resp.wrappedKid = resp.wrappedKid;
       return [response.statusCode, resp];
     } else {
       const resp = JSON.parse(response.data);
@@ -301,7 +301,7 @@ export default class Api {
         {
           wrapped: JSON.parse(unwrappedKey),
           receipt,
-          wrappedKeyId: resp.wrappedKeyId,
+          wrappedKid: resp.wrappedKid,
         },
       ];
     }
@@ -315,7 +315,7 @@ export default class Api {
   public static async unwrap(
     props: DemoProps,
     member: DemoMemberProps,
-    wrappedKeyId: string,
+    wrappedKid: string,
     attestation: ISnpAttestation,
     privateWrapKey: string,
     publicWrapKey: string,
@@ -346,7 +346,7 @@ export default class Api {
     } as http2.SecureClientSessionOptions);
     const req = client.request(reqProps);
     req.write(
-      JSON.stringify({ wrappedKeyId, attestation, wrappingKey: publicWrapKey }),
+      JSON.stringify({ wrappedKid, attestation, wrappingKey: publicWrapKey }),
     ); // Send the request body
     req.end();
 

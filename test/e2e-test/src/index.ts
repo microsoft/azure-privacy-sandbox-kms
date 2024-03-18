@@ -297,7 +297,7 @@ class Demo {
     Demo.assertField(
       member.name,
       keyResponse,
-      "wrappedKeyId",
+      "wrappedKid",
       notUndefinedString,
     );
     //#endregion
@@ -307,7 +307,7 @@ class Demo {
     [statusCode, unwrapResponse] = (await Api.unwrap(
       this.demoProps,
       member,
-      keyResponse.wrappedKeyId,
+      keyResponse.wrappedKid,
       attestation,
       private_wrapping_key,
       public_wrapping_key,
@@ -370,7 +370,7 @@ class Demo {
       tinkKey.privateKey instanceof Uint8Array,
     );
 
-    const kid = wrapResponse.wrappedKeyId;
+    const kid = wrapResponse.wrappedKid;
     console.log("kid: ", kid);
 
     console.log(`📝 Get private key with tink...`);

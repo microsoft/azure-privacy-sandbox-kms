@@ -269,7 +269,7 @@ export class KeyWrapper {
     const wrappedB64 = Base64.fromUint8Array(new Uint8Array(wrapped));
     const wrappedKey: IWrappedJwt = {
       wrapperKid: wrapperKey.kid,
-      wrappedKeyId: payload.id,
+      wrappedKid: payload.id,
       wrappedKeyContents: wrappedB64,
     };
     console.log(`Wrapped key: `, wrappedKey);

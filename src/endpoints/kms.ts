@@ -10,7 +10,7 @@ import {
 } from "@microsoft/ccf-app/global";
 import { KeyStore } from "../repositories/KeyStore";
 import { LastestItemStore } from "../repositories/LastestItemStore";
-import { IKeyItem, IWrapKey } from "./IKeyItem";
+import { IKeyItem } from "./IKeyItem";
 import { Base64 } from "js-base64";
 import { IKeyReleasePolicyProps } from "../policies/IKeyReleasePolicyProps";
 import { ISnpAttestation } from "../attestation/ISnpAttestation";
@@ -34,9 +34,7 @@ export interface IKeyRequest {
 //#region KMS Stores
 // Stores
 const hpkeKeysMap = new KeyStore("HpkeKeys");
-const wrapKeysMap = new KeyStore("WrapKeys");
 const hpkeKeyIdMap = new LastestItemStore<number, string>("HpkeKeyids");
-const wrapKeyIdMap = new LastestItemStore<number, string>("WrapKeyids");
 const keyReleaseMapName = "public:ccf.gov.policies.key_release";
 const keyReleasePolicyMap = ccf.kv[keyReleaseMapName];
 //#endregion
@@ -278,7 +276,7 @@ export const setKeyHeaders = (): { [key: string]: string } => {
 //#region KMS Key endpoints
 export interface IKeyResponse {
   wrapped: string | IWrapped;
-  wrappedKeyId: string;
+  wrappedKid: string;
   receipt: string;
 }
 // Get latest private key
@@ -436,7 +434,7 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
 
     const response: IKeyResponse = {
       wrapped,
-      wrappedKeyId: kid,
+      wrappedKid: kid,
       receipt,
     };
     console.log(
@@ -462,7 +460,7 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
 
 interface IUnwrapRequest {
   wrapped: string;
-  wrappedKeyId: string;
+  wrappedKid: string;
   attestation: ISnpAttestation;
   wrappingKey: string;
 }
@@ -483,8 +481,8 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
   //console.log(`unwrapKey=> wrapped:`, body);
   const attestation: ISnpAttestation = body["attestation"];
   //console.log(`unwrapKey=> attestation:`, attestation);
-  const wrappedKeyId: string = body["wrappedKeyId"];
-  console.log(`unwrapKey=> wrappedKeyId:`, wrappedKeyId);
+  const wrappedKid: string = body["wrappedKid"];
+  console.log(`unwrapKey=> wrappedKid:`, wrappedKid);
   const wrappingKey: string = body["wrappingKey"];
   console.log(`unwrapKey=> wrappingKey: ${wrappingKey}`);
   if (!isPemPublicKey(wrappingKey)) {
@@ -503,7 +501,7 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
 
   // Gen
   // Validate input
-  if (!body || !wrappedKeyId || !attestation || !wrappingKey) {
+  if (!body || !wrappedKid || !attestation || !wrappingKey) {
     const message = `The body is not a unwrap key request: ${JSON.stringify(
       body,
     )}`;
@@ -535,19 +533,19 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
   }
 
   // Be sure to request item and the receipt
-  console.log(`Get key with kid ${wrappedKeyId}`);
-  const keyItem = hpkeKeysMap.store.get(wrappedKeyId) as IKeyItem;
+  console.log(`Get key with kid ${wrappedKid}`);
+  const keyItem = hpkeKeysMap.store.get(wrappedKid) as IKeyItem;
   if (keyItem === undefined) {
     return {
       statusCode: 404,
       body: {
         error: {
-          message: `kid ${wrappedKeyId} not found in store`,
+          message: `kid ${wrappedKid} not found in store`,
         },
       },
     };
   }
-  const receipt = hpkeKeysMap.receipt(wrappedKeyId);
+  const receipt = hpkeKeysMap.receipt(wrappedKid);
 
   // Get receipt if available
   if (receipt !== undefined) {
@@ -584,7 +582,7 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
       const wrapped = KeyWrapper.wrapKeyTink(wrappingKeyBuf, keyItem);
       const ret = { wrapped, receipt };
       console.log(
-        `key tink returns (${wrappedKeyId}, ${JSON.stringify(wrapped).length}): `,
+        `key tink returns (${wrappedKid}, ${JSON.stringify(wrapped).length}): `,
         ret,
       );
       return { body: ret };
@@ -596,14 +594,14 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
       const wrapped = KeyWrapper.wrapKeyJwt(wrappingKeyBuf, keyItem);
       const ret = { wrapped, receipt };
       console.log(
-        `key JWT returns (${wrappedKeyId}, ${wrapped.length}): `,
+        `key JWT returns (${wrappedKid}, ${wrapped.length}): `,
         ret,
       );
       return { body: ret };
     }
     return { body: "" };
   } catch (exception: any) {
-    const message = `Error unwrap (${wrappedKeyId}): ${exception.message}`;
+    const message = `Error unwrap (${wrappedKid}): ${exception.message}`;
     console.error(message);
     return {
       statusCode: 500,
@@ -784,17 +782,6 @@ export const refresh = (request: ccfapp.Request<void>) => {
     // Store HPKE key pair
     hpkeKeysMap.storeItem(keyItem.kid, keyItem, keyItem.d);
     console.log(`Key item with id ${id} and kid ${keyItem.kid} stored`);
-
-    // Generate Wrapping key pair
-    const wrappingKey = KeyWrapper.generateKey();
-
-    // Store wrap key pair kid
-    const wrapId = wrapKeyIdMap.size + 1;
-    wrapKeyIdMap.storeItem(wrapId, wrappingKey.kid);
-
-    // Store wrap key pair
-    wrapKeysMap.storeItem(wrappingKey.kid, wrappingKey, wrappingKey.publicKey);
-    console.log(`Wrap Key with id ${wrapId} and kid ${keyItem.kid} stored`);
 
     delete keyItem.d;
     const ret = keyItem;
