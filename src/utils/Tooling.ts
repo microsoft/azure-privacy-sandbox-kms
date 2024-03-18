@@ -15,4 +15,4 @@ export const arrayBufferToHex = (buf: ArrayBuffer) => {
   return Array.from(new Uint8Array(buf))
     .map((n) => n.toString(16).padStart(2, "0"))
     .join("");
-}
+};

@@ -112,7 +112,7 @@ export class KeyWrapper {
 
   public static wrapKeyTink = (
     wrappingKey: ArrayBuffer,
-    payload: IKeyItem
+    payload: IKeyItem,
   ): IWrapped => {
     let tinkHpkeKey = new hpke.HpkePrivateKey();
     tinkHpkeKey.privateKey = Base64.toUint8Array(payload.d);
@@ -200,7 +200,11 @@ export class KeyWrapper {
     const unwrappedJwtKey = JSON.stringify(payload);
     const wrapped = Base64.fromUint8Array(
       new Uint8Array(
-        ccf.crypto.wrapKey(ccf.strToBuf(unwrappedJwtKey), wrappingKey, KeyWrapper.WRAPALGO),
+        ccf.crypto.wrapKey(
+          ccf.strToBuf(unwrappedJwtKey),
+          wrappingKey,
+          KeyWrapper.WRAPALGO,
+        ),
       ),
     );
 
@@ -241,14 +245,14 @@ export class KeyWrapper {
     //return new Uint8Array(unwrapped);
   };
 */
-  // Wrap the JWT payload with the public key provided by client. 
+  // Wrap the JWT payload with the public key provided by client.
   public static wrapKeyJwt = (
     wrappingKey: ArrayBuffer,
-    payload: IKeyItem
+    payload: IKeyItem,
   ): IWrappedJwt => {
     const [wrappedKey, _] = this.getEncryptedKeyMaterial(wrappingKey, payload);
-    return wrappedKey
-  }
+    return wrappedKey;
+  };
 
   /*
   public static wrapKeyJwt = (

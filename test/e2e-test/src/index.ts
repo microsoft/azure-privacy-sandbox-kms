@@ -293,10 +293,11 @@ class Demo {
     Demo.assert("Status OK", statusCode == 200);
     Demo.assertField(member.name, keyResponse, "d", undefinedString);
     Demo.assertField(member.name, keyResponse, "x", undefinedString);
+    Demo.assertField(member.name, keyResponse, "wrapped", notUndefinedString);
     Demo.assertField(
       member.name,
       keyResponse,
-      "wrapped",
+      "wrappedKeyId",
       notUndefinedString,
     );
     //#endregion
@@ -306,7 +307,6 @@ class Demo {
     [statusCode, unwrapResponse] = (await Api.unwrap(
       this.demoProps,
       member,
-      keyResponse.wrapped,
       keyResponse.wrappedKeyId,
       attestation,
       private_wrapping_key,
@@ -356,37 +356,27 @@ class Demo {
 
     Demo.assertField(member.name, wrapResponse, "d", undefinedString);
     Demo.assertField(member.name, wrapResponse, "x", undefinedString);
-    Demo.assertField(member.name, wrapResponse.wrapped, "keys", notUndefinedArray);
-    Demo.assert("wrapResponse.wrapped.keys.length == 1", wrapResponse.wrapped.keys.length == 1);
-    const key = wrapResponse.wrapped.keys[0];
-    Demo.assertField(member.name, key, "keyData", notUndefinedArray);
-    console.log("keyData: ", key.keyData);
-    // TODO: check it's in format of 'encryptionKeys/100001'
-    Demo.assertField(member.name, key, "name", notUndefinedString);
-    Demo.assertField(
-      member.name,
-      key,
-      "encryptionKeyType",
-      "SINGLE_PARTY_HYBRID_KEY",
+    Demo.assert(
+      "typeof wrapResponse.wrapped === 'string'",
+      typeof wrapResponse.wrapped === "string",
     );
-    Demo.assertField(member.name, key, "publicKeysetHandle", "TBD");
-    Demo.assertField(member.name, key, "publicKeyMaterial", "testtest");
-    // TODO: improve checking time
-    Demo.assertField(member.name, key, "creationTime", notUndefinedString);
-    Demo.assertField(member.name, key, "expirationTime", notUndefinedString);
 
-    console.log(`📝 Get unwrapped key with tink...`);
-    const keyMaterial: any = JSON.parse(key.keyData[0].keyMaterial);
+    console.log(`Unwrap result: `, wrapResponse.wrapped);
 
-    // This is called 'resource name' as well.
-    // It has a format of "azu-kms://<kid>"
-    const encryptionKeyUri = key.keyData[0].keyEncryptionKeyUri;
-    const kid = encryptionKeyUri.split("/")[2];
+    let tinkHpkeKey = new hpke.HpkePrivateKey();
+    const tinkKey = tinkHpkeKey.fromJsonString(wrapResponse.wrapped as any);
+    Demo.assert(
+      "tinkKey.privateKey instanceof Uint8Array",
+      tinkKey.privateKey instanceof Uint8Array,
+    );
+
+    const kid = wrapResponse.wrappedKeyId;
     console.log("kid: ", kid);
+
+    console.log(`📝 Get private key with tink...`);
     [statusCode, unwrapResponse] = (await Api.unwrap(
       this.demoProps,
       member,
-      keyMaterial.encryptedKeyset,
       kid as string,
       attestation,
       private_wrapping_key,
@@ -397,18 +387,19 @@ class Demo {
     )) as [number, Uint8Array];
     Demo.assert("OK statusCode", statusCode == 200);
     Demo.assert(
-      "unwrapResponse.key instanceof Uint8Array",
-      unwrapResponse instanceof Uint8Array,
+      "typeof unwrapResponse === 'string'",
+      typeof unwrapResponse === "string",
     );
 
-    let keyset = new tink.Keyset();
-    // Should not throw
-    keyset.fromBinary(unwrapResponse);
-    console.log("keyset.toJsonString()", keyset.toJsonString());
-    let tinkHpkeKey = new hpke.HpkePrivateKey();
-    // Should not throw
-    tinkHpkeKey.fromBinary(keyset.key[0].keyData!.value!);
+    tinkHpkeKey = new hpke.HpkePrivateKey();
+    tinkHpkeKey.fromJsonString(unwrapResponse);
+    Demo.assert(
+      "tinkKey.privateKey instanceof Uint8Array",
+      tinkKey.privateKey instanceof Uint8Array,
+    );
+
     console.log("tinkHpkeKey.toJsonString()", tinkHpkeKey.toJsonString());
+
     //#endregion
 
     await this.addCheckpoint("Key generation Stage Complete");

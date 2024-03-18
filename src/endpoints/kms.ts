@@ -62,29 +62,8 @@ const isPemPublicKey = (key: string): boolean => {
   const isNewline =
     beginPatternNewline.test(key) && endPatternNewline.test(key);
 
-  console.log(
-    "BEGIN pattern match (literal newline):",
-    beginPatternLiteral.test(key),
-  );
-  console.log(
-    "END pattern match (literal newline):",
-    endPatternLiteral.test(key),
-  );
-  console.log("BEGIN pattern match (newline):", beginPatternNewline.test(key));
-  console.log("END pattern match (newline):", endPatternNewline.test(key));
-  console.log("CONTENT pattern match:", contentPattern.test(key));
-  console.log(
-    "Full pattern match (literal newline):",
-    /-----BEGIN PUBLIC KEY-----\\n([\s\S]+)\\n-----END PUBLIC KEY-----\\n$/.test(
-      key,
-    ),
-  );
-  console.log(
-    "Full pattern match (newline):",
-    /-----BEGIN PUBLIC KEY-----\n([\s\S]+)\n-----END PUBLIC KEY-----\n$/.test(
-      key,
-    ),
-  );
+  console.log("isLiteralNewline:", isLiteralNewline);
+  console.log("isNewline:", isNewline);
 
   return isLiteralNewline || isNewline;
 };
@@ -306,7 +285,7 @@ export interface IKeyResponse {
 export const key = (request: ccfapp.Request<IKeyRequest>) => {
   const body = request.body.json();
   const attestation: ISnpAttestation = body["attestation"];
-  console.log(`unwrapKey=> attestation:`, attestation);
+  //console.log(`unwrapKey=> attestation:`, attestation);
   const wrappingKey: string = body["wrappingKey"];
   console.log(`Key=> wrappingKey: ${wrappingKey}`);
   if (!isPemPublicKey(wrappingKey)) {
@@ -325,9 +304,7 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
 
   // Validate input
   if (!body || !attestation || !wrappingKey) {
-    const message = `The body is not a key request: ${JSON.stringify(
-      body,
-    )}`;
+    const message = `The body is not a key request: ${JSON.stringify(body)}`;
     console.error(message);
     return {
       statusCode: 400,
@@ -460,8 +437,8 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
     const response: IKeyResponse = {
       wrapped,
       wrappedKeyId: kid,
-      receipt
-    } 
+      receipt,
+    };
     console.log(
       `key api returns (${id}: ${JSON.stringify(response).length}): `,
       response,
@@ -485,7 +462,7 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
 
 interface IUnwrapRequest {
   wrapped: string;
-  kid: string;
+  wrappedKeyId: string;
   attestation: ISnpAttestation;
   wrappingKey: string;
 }
@@ -503,13 +480,11 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
 
   // check payload
   const body = request.body.json();
-  console.log(`unwrapKey=> wrapped:`, body);
+  //console.log(`unwrapKey=> wrapped:`, body);
   const attestation: ISnpAttestation = body["attestation"];
-  console.log(`unwrapKey=> attestation:`, attestation);
-  const wrapped: string = body["wrapped"];
-  console.log(`unwrapKey=> wrapped:`, wrapped);
-  const wrappedKid: string = body["wrappedKid"];
-  console.log(`unwrapKey=> wrappedKid:`, wrappedKid);
+  //console.log(`unwrapKey=> attestation:`, attestation);
+  const wrappedKeyId: string = body["wrappedKeyId"];
+  console.log(`unwrapKey=> wrappedKeyId:`, wrappedKeyId);
   const wrappingKey: string = body["wrappingKey"];
   console.log(`unwrapKey=> wrappingKey: ${wrappingKey}`);
   if (!isPemPublicKey(wrappingKey)) {
@@ -525,10 +500,10 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
   const wrappingKeyBuf = ccf.strToBuf(wrappingKey);
   const wrappingKeyHash = KeyGeneration.calculateHexHash(wrappingKeyBuf);
   console.log(`unwrapKey->wrapping key hash: ${wrappingKeyHash}`);
-  
+
   // Gen
   // Validate input
-  if (!body || !wrappedKid || !attestation || !wrappingKey) {
+  if (!body || !wrappedKeyId || !attestation || !wrappingKey) {
     const message = `The body is not a unwrap key request: ${JSON.stringify(
       body,
     )}`;
@@ -560,19 +535,19 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
   }
 
   // Be sure to request item and the receipt
-  console.log(`Get key with kid ${wrappedKid}`);
-  const keyItem = hpkeKeysMap.store.get(wrappedKid) as IKeyItem;
+  console.log(`Get key with kid ${wrappedKeyId}`);
+  const keyItem = hpkeKeysMap.store.get(wrappedKeyId) as IKeyItem;
   if (keyItem === undefined) {
     return {
       statusCode: 404,
       body: {
         error: {
-          message: `kid ${wrappedKid} not found in store`,
+          message: `kid ${wrappedKeyId} not found in store`,
         },
       },
     };
   }
-  const receipt = hpkeKeysMap.receipt(wrappedKid);
+  const receipt = hpkeKeysMap.receipt(wrappedKeyId);
 
   // Get receipt if available
   if (receipt !== undefined) {
@@ -602,34 +577,33 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
 
   // Get UnWrapping key
   try {
-    let wrapped: string;
     //let receipt = "";
     let wrapKey;
     if (fmt == "tink") {
       console.log(`Retrieve key in tink format`);
-      const wrapped = KeyWrapper.wrapKeyTink(
-        wrappingKeyBuf,
-        keyItem,
-      );
+      const wrapped = KeyWrapper.wrapKeyTink(wrappingKeyBuf, keyItem);
       const ret = { wrapped, receipt };
-      console.log(`key tink returns (${wrappedKid}, ${JSON.stringify(wrapped).length}): `, ret);
-      return { body:  ret};
+      console.log(
+        `key tink returns (${wrappedKeyId}, ${JSON.stringify(wrapped).length}): `,
+        ret,
+      );
+      return { body: ret };
     } else {
       // Default is JWT.
       console.log(
         `Retrieve key in JWK format (${wrappingKey.length}): ${wrappingKey}`,
       );
-      const wrapped = KeyWrapper.wrapKeyJwt(
-        wrappingKeyBuf,
-        keyItem,
-      );
+      const wrapped = KeyWrapper.wrapKeyJwt(wrappingKeyBuf, keyItem);
       const ret = { wrapped, receipt };
-      console.log(`key JWT returns (${wrappedKid}, ${wrapped.length}): `, ret);
-      return { body:  ret};
+      console.log(
+        `key JWT returns (${wrappedKeyId}, ${wrapped.length}): `,
+        ret,
+      );
+      return { body: ret };
     }
-    return { body:  ""};
+    return { body: "" };
   } catch (exception: any) {
-    const message = `Error unwrap (${wrappedKid}): ${exception.message}`;
+    const message = `Error unwrap (${wrappedKeyId}): ${exception.message}`;
     console.error(message);
     return {
       statusCode: 500,

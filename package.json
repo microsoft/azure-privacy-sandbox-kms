@@ -11,9 +11,9 @@
     "node": ">=16"
   },
   "dependencies": {
-    "@bufbuild/buf": "^1.28.1",
-    "@bufbuild/protobuf": "^1.5.0",
-    "@bufbuild/protoc-gen-es": "^1.5.0",
+    "@bufbuild/buf": "^1.30.0",
+    "@bufbuild/protobuf": "^1.8.0",
+    "@bufbuild/protoc-gen-es": "^1.8.0",
     "@microsoft/ccf-app": "^5.0.0-dev6",
     "i": "^0.3.7",
     "js-base64": "^3.5.2",
