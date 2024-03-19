@@ -424,7 +424,7 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
 
   // Get wrapped key
   try {
-    let wrapped: string | IWrapped;
+    let wrapped: string;
     if (fmt == "tink") {
       wrapped = KeyWrapper.wrapKeyTink(wrappingKeyBuf, keyItem);
     } else {

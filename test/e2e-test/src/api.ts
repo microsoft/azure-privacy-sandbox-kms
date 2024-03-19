@@ -180,6 +180,16 @@ export default class Api {
     wrapped: IWrapped,
     privateWrapKey: string,
   ) => {
+    const wrappedBuf = Base64.toUint8Array(wrapped);
+    const privateKey = new keyutil.Key("pem", privateWrapKey);
+    const unwrappedKey = await rsa.decrypt(
+      wrappedBuf,
+      (await privateKey.jwk) as JsonWebKey,
+    );
+    const unwrappedString = convertUint8ArrayToString(unwrappedKey);
+    console.log(`unwrappedString: `, unwrappedString);
+    return JSON.parse(unwrappedString);
+    /*
     const keyMaterial = JSON.parse(wrapped.keys[0].keyData[0].keyMaterial);
     console.log(`keyMaterial: `, keyMaterial);
     // Get base64 key set value
@@ -195,6 +205,7 @@ export default class Api {
     console.log(`unwrapped tink key: `, keyMaterial.encryptedKeyset);
     wrapped.keys[0].keyData[0].keyMaterial = JSON.stringify(keyMaterial);
     return wrapped;
+    */
   };
 
   public static async key(

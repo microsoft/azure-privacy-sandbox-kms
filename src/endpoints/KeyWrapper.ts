@@ -81,9 +81,7 @@ export type EncryptionKey = {
   keyData: IKeyData;
 };
 
-export type IWrapped = {
-  keys: EncryptionKey[];
-};
+export type IWrapped = string;
 
 export type IWrappedJwt = string;
 
@@ -142,9 +140,7 @@ export class KeyWrapper {
       `Tink Wrapped payload (${JSON.stringify(keyset).length}): `,
       keyset,
     );
-    const algo = KeyWrapper.WRAPALGO;
-    const wrapped = ccfcrypto.wrapKey(bufPayload, wrappingKey, algo);
-    const wrappedB64 = Base64.fromUint8Array(new Uint8Array(wrapped));
+    const wrappedB64 = Base64.fromUint8Array(new Uint8Array(bufPayload));
     const encryptionKey: EncryptionKey = {
       // The following id will be treated as keyId.
       // We need to figure out the exact format.
@@ -183,8 +179,12 @@ export class KeyWrapper {
         },
       ],
     };
-    console.log(`Encryption public key: `, encryptionKey);
-    const ret: IWrapped = { keys: [encryptionKey] };
+    const jsonEncryptionKey = JSON.stringify(encryptionKey)
+    console.log(`Encryption public key (${jsonEncryptionKey.length}): `, jsonEncryptionKey);
+    const algo = KeyWrapper.WRAPALGO;
+    const wrapped = ccfcrypto.wrapKey(ccf.strToBuf(jsonEncryptionKey), wrappingKey, algo);
+    
+    const ret: IWrapped = Base64.fromUint8Array(new Uint8Array(wrapped));
     return ret;
   };
 
