@@ -427,6 +427,7 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
     let wrapped: string | IWrapped;
     if (fmt == "tink") {
       wrapped = KeyWrapper.wrapKeyTink(wrappingKeyBuf, keyItem);
+      wrapped = JSON.stringify(wrapped);
     } else {
       // Default is JWT.
       wrapped = KeyWrapper.wrapKeyJwt(wrappingKeyBuf, keyItem);

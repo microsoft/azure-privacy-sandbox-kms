@@ -270,7 +270,8 @@ export default class Api {
       const receipt = resp.receipt;
       console.log(`Receipt: `, resp.receipt);
       console.log(`Wrapped key: `, resp.wrapped);
-      resp.wrapped = await this.decryptTinkKey(resp.wrapped, privateWrapKey);
+      const wrapped = JSON.parse(resp.wrapped)
+      resp.wrapped = await this.decryptTinkKey(wrapped, privateWrapKey);
       let tinkHpkeKey = new hpke.HpkePrivateKey();
       const jsonKey = tinkHpkeKey.toJsonString(resp.wrapped as any);
 
