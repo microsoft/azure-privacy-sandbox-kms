@@ -111,7 +111,7 @@ export class KeyWrapper {
   public static wrapKeyTink = (
     wrappingKey: ArrayBuffer,
     payload: IKeyItem,
-  ): IWrapped => {
+  ): [string, string] => {
     let tinkHpkeKey = new hpke.HpkePrivateKey();
     tinkHpkeKey.privateKey = Base64.toUint8Array(payload.d);
     // TODO: check if we need to set tinkHpkeKey.publicKey. Based on tink.proto, it's optional though.
@@ -135,13 +135,15 @@ export class KeyWrapper {
     console.log(`tink Keyset: `, keyData);
 
     const bufPayload = keyset.toBinary().buffer;
+    const algo = KeyWrapper.WRAPALGO;
+    const wrapped = ccfcrypto.wrapKey(bufPayload, wrappingKey, algo);
+    const wrappedB64 = Base64.fromUint8Array(new Uint8Array(wrapped));
 
     console.log(
-      `Tink Wrapped payload (${JSON.stringify(keyset).length}): `,
-      keyset,
+      `Tink wrappedB64 (${wrappedB64.length}): `,
+      wrappedB64,
     );
-    const wrappedB64 = Base64.fromUint8Array(new Uint8Array(bufPayload));
-    const encryptionKey: EncryptionKey = {
+      const encryptionKey: EncryptionKey = {
       // The following id will be treated as keyId.
       // We need to figure out the exact format.
       // - It will be treated as google::cmrt::sdk::private_key_service::v1::PrivateKey::key_id()
@@ -161,7 +163,7 @@ export class KeyWrapper {
           publicKeySignature: "",
           keyEncryptionKeyUri: keyEncryptionKeyUriPrefix + payload.kid,
           keyMaterial: JSON.stringify({
-            encryptedKeyset: wrappedB64, // This should be base64 encoded encrypted proto bytes of tink.
+            encryptedKeyset: "", // Will be passes as a seperate property as it is the only piece that needs encryption.
             // // keysetInfo is optional in tink https://github.com/tink-crypto/tink-java/blob/main/proto/tink.proto#L193,
             // // but we are not sure if we can omit it actually.
             // keysetInfo: {
@@ -179,13 +181,9 @@ export class KeyWrapper {
         },
       ],
     };
-    const jsonEncryptionKey = JSON.stringify(encryptionKey)
+    const jsonEncryptionKey = JSON.stringify({ keys: [encryptionKey] });
     console.log(`Encryption public key (${jsonEncryptionKey.length}): `, jsonEncryptionKey);
-    const algo = KeyWrapper.WRAPALGO;
-    const wrapped = ccfcrypto.wrapKey(ccf.strToBuf(jsonEncryptionKey), wrappingKey, algo);
-    
-    const ret: IWrapped = Base64.fromUint8Array(new Uint8Array(wrapped));
-    return ret;
+    return [wrappedB64, jsonEncryptionKey];
   };
 
   // Get key material

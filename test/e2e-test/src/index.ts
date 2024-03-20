@@ -364,7 +364,7 @@ class Demo {
     console.log(`Unwrap result: `, wrapResponse.wrapped);
 
     let tinkHpkeKey = new hpke.HpkePrivateKey();
-    const tinkKey = tinkHpkeKey.fromJsonString(wrapResponse.wrapped as any);
+    const tinkKey = tinkHpkeKey.fromJsonString(wrapResponse.wrapped as string);
     Demo.assert(
       "tinkKey.privateKey instanceof Uint8Array",
       tinkKey.privateKey instanceof Uint8Array,
@@ -373,7 +373,7 @@ class Demo {
     const kid = wrapResponse.wrappedKid;
     console.log("kid: ", kid);
 
-    console.log(`📝 Get private key with tink...`);
+    console.log(`📝 Unwrap private key with tink...`);
     [statusCode, unwrapResponse] = (await Api.unwrap(
       this.demoProps,
       member,
@@ -384,8 +384,9 @@ class Demo {
       true,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token,
-    )) as [number, Uint8Array];
+    )) as [number, string];
     Demo.assert("OK statusCode", statusCode == 200);
+    console.log(`unwrapResponse: `, unwrapResponse);
     Demo.assert(
       "typeof unwrapResponse === 'string'",
       typeof unwrapResponse === "string",

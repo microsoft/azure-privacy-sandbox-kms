@@ -179,6 +179,7 @@ export default class Api {
   private static decryptTinkKey = async (
     wrapped: IWrapped,
     privateWrapKey: string,
+    keyEnvelop: string
   ) => {
     const wrappedBuf = Base64.toUint8Array(wrapped);
     const privateKey = new keyutil.Key("pem", privateWrapKey);
@@ -186,9 +187,17 @@ export default class Api {
       wrappedBuf,
       (await privateKey.jwk) as JsonWebKey,
     );
-    const unwrappedString = convertUint8ArrayToString(unwrappedKey);
+    const unwrappedString = Base64.fromUint8Array(unwrappedKey);
     console.log(`unwrappedString: `, unwrappedString);
-    return JSON.parse(unwrappedString);
+    console.log(`keyEnvelop: `, keyEnvelop);
+    const envelop = JSON.parse(keyEnvelop);
+    console.log(`envelop: `, envelop);
+    const keyMaterial = JSON.parse(envelop.keys[0].keyData[0].keyMaterial);
+    console.log(`keyMaterial: `, keyMaterial);
+    keyMaterial.encryptedKeyset = unwrappedString;
+    envelop.keys[0].keyData[0].keyMaterial = JSON.stringify(keyMaterial);
+    console.log(`envelop: `, JSON.stringify(envelop));
+    return envelop;
     /*
     const keyMaterial = JSON.parse(wrapped.keys[0].keyData[0].keyMaterial);
     console.log(`keyMaterial: `, keyMaterial);
@@ -279,14 +288,15 @@ export default class Api {
     if (tink) {
       const resp = JSON.parse(response.data);
       const receipt = resp.receipt;
+      console.log(`Tink key`);
       console.log(`Receipt: `, resp.receipt);
+      console.log(`KeyEnvelop: `, resp.keyEnvelop);
       console.log(`Wrapped key: `, resp.wrapped);
-      resp.wrapped = await this.decryptTinkKey(resp.wrapped, privateWrapKey);
-      let tinkHpkeKey = new hpke.HpkePrivateKey();
-      const jsonKey = tinkHpkeKey.toJsonString(resp.wrapped as any);
+      const unwrapped = await this.decryptTinkKey(resp.wrapped, privateWrapKey, resp.keyEnvelop);
+      const jsonKey = JSON.stringify(unwrapped);
 
       console.log(
-        `private key tink result (${jsonKey.toString().length}): `,
+        `private key tink result (${jsonKey.length}): `,
         jsonKey,
       );
       resp.wrapped = jsonKey;
@@ -294,6 +304,7 @@ export default class Api {
       return [response.statusCode, resp];
     } else {
       const resp = JSON.parse(response.data);
+      console.log(`JWT key`);
       console.log(`key returned: `, response.data);
       const receipt = resp.receipt;
       console.log(`Wrapped key: `, resp.wrapped);
@@ -380,9 +391,12 @@ export default class Api {
       const receipt = resp.receipt;
       console.log(`Wrapped key: `, resp.wrapped);
       console.log(`Receipt: `, resp.receipt);
-      resp.wrapped = await this.decryptTinkKey(resp.wrapped, privateWrapKey);
+      console.log(`KeyEnvelop: `, resp.keyEnvelop);
+      const unwrapped = await this.decryptTinkKey(resp.wrapped, privateWrapKey, resp.keyEnvelop);
+      console.log(`unwrapped tink result (${unwrapped.length}): `, unwrapped);
+      
       let tinkHpkeKey = new hpke.HpkePrivateKey();
-      const jsonKey = tinkHpkeKey.toJsonString(resp.wrapped);
+      const jsonKey = JSON.stringify(unwrapped);
       console.log(`unwrap tink result (${jsonKey.length}): `, jsonKey);
       return [response.statusCode, jsonKey];
     } else {

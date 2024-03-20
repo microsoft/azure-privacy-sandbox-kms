@@ -276,6 +276,7 @@ export const setKeyHeaders = (): { [key: string]: string } => {
 //#region KMS Key endpoints
 export interface IKeyResponse {
   wrapped: string | IWrapped;
+  keyEnvelop: string,
   wrappedKid: string;
   receipt: string;
 }
@@ -356,6 +357,7 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
       };
     }
   }
+  console.log(`Key=> fmt: ${fmt}`);
 
   let validateResult: IAttestationValidationResult;
   try {
@@ -424,9 +426,10 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
 
   // Get wrapped key
   try {
+    let keyEnvelop: string;
     let wrapped: string;
     if (fmt == "tink") {
-      wrapped = KeyWrapper.wrapKeyTink(wrappingKeyBuf, keyItem);
+      [wrapped, keyEnvelop] = KeyWrapper.wrapKeyTink(wrappingKeyBuf, keyItem);
     } else {
       // Default is JWT.
       wrapped = KeyWrapper.wrapKeyJwt(wrappingKeyBuf, keyItem);
@@ -436,7 +439,12 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
       wrapped,
       wrappedKid: kid,
       receipt,
+      keyEnvelop,
     };
+    if (!keyEnvelop){
+      delete response.keyEnvelop; 
+    } 
+
     console.log(
       `key api returns (${id}: ${JSON.stringify(response).length}): `,
       response,
@@ -577,10 +585,11 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
   try {
     //let receipt = "";
     let wrapKey;
+    let keyEnvelop;
     if (fmt == "tink") {
       console.log(`Retrieve key in tink format`);
-      const wrapped = KeyWrapper.wrapKeyTink(wrappingKeyBuf, keyItem);
-      const ret = { wrapped, receipt };
+      const [wrapped, keyEnvelop] = KeyWrapper.wrapKeyTink(wrappingKeyBuf, keyItem);
+      const ret = { wrapped, receipt, keyEnvelop };
       console.log(
         `key tink returns (${wrappedKid}, ${JSON.stringify(wrapped).length}): `,
         ret,
