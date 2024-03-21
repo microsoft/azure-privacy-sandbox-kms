@@ -6,7 +6,6 @@ import { ccf } from "@microsoft/ccf-app/global";
 import { KeyGeneration } from "./KeyGeneration";
 import { Base64 } from "js-base64";
 import { IKeyItem, IWrapKey } from "./IKeyItem";
-import { convertUint8ArrayToString } from "../utils/Tooling";
 import * as tink from "./proto/gen/tink_pb";
 import * as hpke from "./proto/gen/hpke_pb";
 
@@ -108,10 +107,11 @@ export class KeyWrapper {
     return keyPair;
   };
 
-  public static wrapKeyTink = (
+  // Create an encrypted private tink keyset. Return the Base64 encoded result of the wrapped key.
+  public static createWrappedPrivateTinkKey = (
     wrappingKey: ArrayBuffer,
     payload: IKeyItem,
-  ): IWrapped => {
+  ): string => {
     let tinkHpkeKey = new hpke.HpkePrivateKey();
     tinkHpkeKey.privateKey = Base64.toUint8Array(payload.d);
     // TODO: check if we need to set tinkHpkeKey.publicKey. Based on tink.proto, it's optional though.
@@ -142,7 +142,16 @@ export class KeyWrapper {
     );
     const algo = KeyWrapper.WRAPALGO;
     const wrapped = ccfcrypto.wrapKey(bufPayload, wrappingKey, algo);
+
     const wrappedB64 = Base64.fromUint8Array(new Uint8Array(wrapped));
+    return wrappedB64;
+  };
+
+  // Create an EncryptionKey structure of a tink key
+  public static wrapKeyTink = (
+    wrappingKey: ArrayBuffer,
+    payload: IKeyItem,
+  ): IWrapped => {
     const encryptionKey: EncryptionKey = {
       // The following id will be treated as keyId.
       // We need to figure out the exact format.
@@ -163,7 +172,10 @@ export class KeyWrapper {
           publicKeySignature: "",
           keyEncryptionKeyUri: keyEncryptionKeyUriPrefix + payload.kid,
           keyMaterial: JSON.stringify({
-            encryptedKeyset: wrappedB64, // This should be base64 encoded encrypted proto bytes of tink.
+            encryptedKeyset: this.createWrappedPrivateTinkKey(
+              wrappingKey,
+              payload,
+            ), // This should be base64 encoded encrypted proto bytes of tink.
             // // keysetInfo is optional in tink https://github.com/tink-crypto/tink-java/blob/main/proto/tink.proto#L193,
             // // but we are not sure if we can omit it actually.
             // keysetInfo: {
@@ -209,40 +221,6 @@ export class KeyWrapper {
     return [wrapped, receipt];
   }
 
-  // Unwrap the payload
-  /*
-  public static unwrapKeyTink = (
-    wrapperKey: IWrapKey,
-    wrapped: string,
-  ): Uint8Array => {
-    const bufPayload = Base64.toUint8Array(wrapped).buffer;
-    const bufKey = ccf.strToBuf(wrapperKey.privateKey);
-    const algo = KeyWrapper.WRAPALGO;
-    const unwrapped = ccfcrypto.unwrapKey(bufPayload, bufKey, algo);
-    return new Uint8Array(unwrapped);
-
-    const unWrappedInt8array = new Uint8Array(unwrapped);
-    let wrappedString = convertUint8ArrayToString(unWrappedInt8array);
-    console.log(
-      `wrappedString tink payload (${wrappedString.length}): `,
-      wrappedString,
-    );
-
-    const [parsedKey, receipt] = this.getKeyMaterial(wrapperKey, wrappedString);
-    const unwrappedKey = JSON.stringify(parsedKey);
-    console.log(
-      `Unwrapped tink payload (${unwrappedKey.length}): `,
-      unwrappedKey,
-    );
-    //return [ unwrappedKey, receipt];
-
-    //const bufPayload = Base64.toUint8Array(wrapped).buffer;
-    //const bufKey = ccf.strToBuf(wrapperKey.privateKey);
-    //const algo = KeyWrapper.WRAPALGO;
-    //const unwrapped = ccfcrypto.unwrapKey(bufPayload, bufKey, algo);
-    //return new Uint8Array(unwrapped);
-  };
-*/
   // Wrap the JWT payload with the public key provided by client.
   public static wrapKeyJwt = (
     wrappingKey: ArrayBuffer,
@@ -251,40 +229,4 @@ export class KeyWrapper {
     const [wrappedKey, _] = this.getEncryptedKeyMaterial(wrappingKey, payload);
     return wrappedKey;
   };
-
-  /*
-  public static wrapKeyJwt = (
-    id: number,
-    wrapperKey: IWrapKey,
-    payload: IKeyItem,
-  ): IWrappedJwt => {
-    const bufPayload = ccf.strToBuf(JSON.stringify(payload));
-
-    console.log(`wrapKeyJwt->Encryption public key: `, wrapperKey.publicKey);
-    const bufKey = ccf.strToBuf(wrapperKey.publicKey);
-    const algo = KeyWrapper.WRAPALGO;
-    const wrapped = ccfcrypto.wrapKey(bufPayload, bufKey, algo);
-    const wrappedB64 = Base64.fromUint8Array(new Uint8Array(wrapped));
-    const wrappedKey: IWrappedJwt = {
-      wrapperKid: wrapperKey.kid,
-      wrappedKid: payload.id,
-      wrappedKeyContents: wrappedB64,
-    };
-    console.log(`Wrapped key: `, wrappedKey);
-    return wrappedKey;
-  };
-
-  public static unwrapKeyJwt = (
-
-    wrapped: string,
-  ): string => {
-    const [parsedKey, receipt] = this.getKeyMaterial(wrapperKey, wrapped);
-    const unwrappedKey = JSON.stringify(parsedKey);
-    console.log(
-      `Unwrapped JWT payload (${unwrappedKey.length}): `,
-      unwrappedKey,
-    );
-    return unwrappedKey;
-  };
-*/
 }

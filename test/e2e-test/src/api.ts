@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
-
+//import { ccf } from "@microsoft/ccf-app/global";
 import { DemoMemberProps, DemoProps } from "./index";
 import axios from "axios";
 import { IKeyItem } from "../../../src";
@@ -176,6 +176,20 @@ export default class Api {
     return [response.statusCode, JSON.parse(response.data)];
   }
 
+  private static decryptTinkPrivateKey = async (
+    encryptedKeyset: string,
+    privateWrapKey: string,
+  ) => {
+    // Get base64 key set value
+    const respBuf = Base64.toUint8Array(encryptedKeyset);
+    const privateKey = new keyutil.Key("pem", privateWrapKey);
+    const unwrappedKey = await rsa.decrypt(
+      respBuf,
+      (await privateKey.jwk) as JsonWebKey,
+    );
+    return unwrappedKey;
+  };
+
   private static decryptTinkKey = async (
     wrapped: IWrapped,
     privateWrapKey: string,
@@ -184,12 +198,10 @@ export default class Api {
     console.log(`keyMaterial: `, keyMaterial);
     // Get base64 key set value
     const encryptedKeyset = keyMaterial.encryptedKeyset;
-    console.log(`encryptedKeyset: `, encryptedKeyset);
-    const respBuf = Base64.toUint8Array(encryptedKeyset);
-    const privateKey = new keyutil.Key("pem", privateWrapKey);
-    const unwrappedKey = await rsa.decrypt(
-      respBuf,
-      (await privateKey.jwk) as JsonWebKey,
+
+    const unwrappedKey = await this.decryptTinkPrivateKey(
+      encryptedKeyset,
+      privateWrapKey,
     );
     keyMaterial.encryptedKeyset = Base64.fromUint8Array(unwrappedKey);
     console.log(`unwrapped tink key: `, keyMaterial.encryptedKeyset);
@@ -211,7 +223,7 @@ export default class Api {
       number,
       (
         | IWrapped
-        | { receipt: string; wrappedKid: string }
+        | { receipt: string; wrappedKid: string; wrapped: string }
         | undefined
       ),
     ]
@@ -270,6 +282,7 @@ export default class Api {
       const receipt = resp.receipt;
       console.log(`Receipt: `, resp.receipt);
       console.log(`key id: `, resp.wrappedKid);
+      console.log(`wrapped: `, resp.wrapped);
 
       return [response.statusCode, resp];
     } else {
@@ -283,15 +296,11 @@ export default class Api {
         response.statusCode,
         {
           receipt,
+          wrapped: resp.wrapped,
           wrappedKid: resp.wrappedKid,
         },
       ];
     }
-
-    if (response.data) {
-      return [response.statusCode, JSON.parse(response.data)];
-    }
-    return [response.statusCode, undefined];
   }
 
   public static async unwrap(
@@ -351,11 +360,13 @@ export default class Api {
       const receipt = resp.receipt;
       console.log(`Wrapped key: `, resp.wrapped);
       console.log(`Receipt: `, resp.receipt);
-      resp.wrapped = await this.decryptTinkKey(resp.wrapped, privateWrapKey);
+      resp.wrapped = Base64.fromUint8Array(
+        await this.decryptTinkPrivateKey(resp.wrapped, privateWrapKey),
+      );
       let tinkHpkeKey = new hpke.HpkePrivateKey();
       const jsonKey = tinkHpkeKey.toJsonString(resp.wrapped);
       console.log(`unwrap tink result (${jsonKey.length}): `, jsonKey);
-      return [response.statusCode, jsonKey];
+      return [response.statusCode, resp];
     } else {
       const resp = JSON.parse(response.data);
       console.log(`unwrapKey returned: `, response.data);

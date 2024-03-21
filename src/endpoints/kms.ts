@@ -19,8 +19,6 @@ import { KeyGeneration } from "./KeyGeneration";
 import { TinkKey, TinkPublicKey } from "./TinkKey";
 import { IWrapped, IWrappedJwt, KeyWrapper } from "./KeyWrapper";
 import { AuthenticationService } from "../authorization/AuthenticationService";
-import * as ccfcrypto from "@microsoft/ccf-app/crypto";
-import { ServiceResult } from "../utils/ServiceResult";
 export interface IAttestationValidationResult {
   result: boolean;
   errorMessage?: string;
@@ -277,6 +275,7 @@ export const setKeyHeaders = (): { [key: string]: string } => {
 export interface IKeyResponse {
   wrappedKid: string;
   receipt: string;
+  wrapped: string;
 }
 // Get latest private key
 export const key = (request: ccfapp.Request<IKeyRequest>) => {
@@ -434,6 +433,7 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
 
     const response: IKeyResponse = {
       wrappedKid: kid,
+      wrapped,
       receipt,
     };
     console.log(
@@ -467,7 +467,7 @@ interface IUnwrapRequest {
 // Unwrap private key
 export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
   // check if caller has a valid identity
-  const [policy, isValidIdentity] = new AuthenticationService().isAuthenticated(
+  const [_, isValidIdentity] = new AuthenticationService().isAuthenticated(
     request,
   );
   console.log(
@@ -578,7 +578,11 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
     let wrapKey;
     if (fmt == "tink") {
       console.log(`Retrieve key in tink format`);
-      const wrapped = KeyWrapper.wrapKeyTink(wrappingKeyBuf, keyItem);
+      const wrapped = KeyWrapper.createWrappedPrivateTinkKey(
+        wrappingKeyBuf,
+        keyItem,
+      );
+      //const wrapped = KeyWrapper.wrapKeyTink(wrappingKeyBuf, keyItem);
       const ret = { wrapped, receipt };
       console.log(
         `key tink returns (${wrappedKid}, ${JSON.stringify(wrapped).length}): `,
@@ -592,10 +596,7 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
       );
       const wrapped = KeyWrapper.wrapKeyJwt(wrappingKeyBuf, keyItem);
       const ret = { wrapped, receipt };
-      console.log(
-        `key JWT returns (${wrappedKid}, ${wrapped.length}): `,
-        ret,
-      );
+      console.log(`key JWT returns (${wrappedKid}, ${wrapped.length}): `, ret);
       return { body: ret };
     }
     return { body: "" };

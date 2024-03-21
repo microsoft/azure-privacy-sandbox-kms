@@ -16,9 +16,8 @@ import inquirer from "inquirer";
 import { IKeyItem } from "../../../src";
 import * as tink from "../../../src/endpoints/proto/gen/tink_pb.js";
 import * as hpke from "../../../src/endpoints/proto/gen/hpke_pb.js";
-import { IWrapped, IWrappedJwt } from "../../../src/endpoints/KeyWrapper.js";
-import { SnpAttestation } from "@microsoft/ccf-app/global.js";
 import { ISnpAttestation } from "../../../src/attestation/ISnpAttestation.js";
+import { Base64 } from "js-base64";
 
 const readJSON = async (filePath: string): Promise<any> => {
   try {
@@ -293,7 +292,12 @@ class Demo {
     Demo.assert("Status OK", statusCode == 200);
     Demo.assertField(member.name, keyResponse, "d", undefinedString);
     Demo.assertField(member.name, keyResponse, "x", undefinedString);
-    Demo.assertField(member.name, keyResponse, "wrappedKid", notUndefinedString);
+    Demo.assertField(
+      member.name,
+      keyResponse,
+      "wrappedKid",
+      notUndefinedString,
+    );
     Demo.assertField(member.name, keyResponse, "receipt", notUndefinedString);
     //#endregion
     //#region unwrap
@@ -356,6 +360,10 @@ class Demo {
       typeof wrapResponse.wrappedKid === "string",
     );
     Demo.assert(
+      "typeof wrapResponse.wrapped === 'string'",
+      typeof wrapResponse.wrapped === "string",
+    );
+    Demo.assert(
       "typeof wrapResponse.receipt === 'string'",
       typeof wrapResponse.receipt === "string",
     );
@@ -370,6 +378,7 @@ class Demo {
       this.demoProps,
       member,
       kid as string,
+
       attestation,
       private_wrapping_key,
       public_wrapping_key,
@@ -379,15 +388,16 @@ class Demo {
     )) as [number, Uint8Array];
     Demo.assert("OK statusCode", statusCode == 200);
     Demo.assert(
-      "typeof unwrapResponse === 'string'",
-      typeof unwrapResponse === "string",
+      "typeof unwrapResponse.wrapped === 'string'",
+      typeof unwrapResponse.wrapped === "string",
     );
 
-    //tinkHpkeKey = new hpke.HpkePrivateKey();
-    //tinkHpkeKey.fromJsonString(unwrapResponse);
+    //const wrappedBuf = Base64.toUint8Array(unwrapResponse.wrapped);
+    //let tinkHpkeKey = new hpke.HpkePrivateKey();
+    //tinkHpkeKey.fromBinary(new Uint8Array(wrappedBuf),);
     //Demo.assert(
-    //  "tinkKey.privateKey instanceof Uint8Array",
-    //  tinkKey.privateKey instanceof Uint8Array,
+    //  "tinkHpkeKey.privateKey instanceof Uint8Array",
+    //  tinkHpkeKey.privateKey instanceof Uint8Array,
     //);
 
     //console.log("tinkHpkeKey.toJsonString()", tinkHpkeKey.toJsonString());
