@@ -275,7 +275,6 @@ export const setKeyHeaders = (): { [key: string]: string } => {
 
 //#region KMS Key endpoints
 export interface IKeyResponse {
-  wrapped: string | IWrapped;
   wrappedKid: string;
   receipt: string;
 }
@@ -301,7 +300,7 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
   console.log(`Key->wrapping key hash: ${wrappingKeyHash}`);
 
   // Validate input
-  if (!body || !attestation || !wrappingKey) {
+  if (!body || !attestation) {
     const message = `The body is not a key request: ${JSON.stringify(body)}`;
     console.error(message);
     return {
@@ -434,7 +433,6 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
     }
 
     const response: IKeyResponse = {
-      wrapped,
       wrappedKid: kid,
       receipt,
     };

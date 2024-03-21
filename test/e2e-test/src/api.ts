@@ -211,7 +211,7 @@ export default class Api {
       number,
       (
         | IWrapped
-        | { wrapped: string; receipt: string; wrappedKid: string }
+        | { receipt: string; wrappedKid: string }
         | undefined
       ),
     ]
@@ -269,38 +269,19 @@ export default class Api {
       const resp = JSON.parse(response.data);
       const receipt = resp.receipt;
       console.log(`Receipt: `, resp.receipt);
-      console.log(`Wrapped key: `, resp.wrapped);
-      const wrapped = JSON.parse(resp.wrapped)
-      resp.wrapped = await this.decryptTinkKey(wrapped, privateWrapKey);
-      let tinkHpkeKey = new hpke.HpkePrivateKey();
-      const jsonKey = tinkHpkeKey.toJsonString(resp.wrapped as any);
+      console.log(`key id: `, resp.wrappedKid);
 
-      console.log(
-        `private key tink result (${jsonKey.toString().length}): `,
-        jsonKey,
-      );
-      resp.wrapped = jsonKey;
-      resp.wrappedKid = resp.wrappedKid;
       return [response.statusCode, resp];
     } else {
       const resp = JSON.parse(response.data);
       console.log(`key returned: `, response.data);
       const receipt = resp.receipt;
-      console.log(`Wrapped key: `, resp.wrapped);
+      console.log(`Key id: `, resp.wrappedKid);
       console.log(`Receipt: `, resp.receipt);
-      const respBuf = Base64.toUint8Array(resp.wrapped);
-      const privateKey = new keyutil.Key("pem", privateWrapKey);
-      const wrappedKey = await rsa.decrypt(
-        respBuf,
-        (await privateKey.jwk) as JsonWebKey,
-      );
-      let unwrappedKey = convertUint8ArrayToString(wrappedKey);
-      console.log(`Unwrapped key decrypted: `, unwrappedKey);
 
       return [
         response.statusCode,
         {
-          wrapped: JSON.parse(unwrappedKey),
           receipt,
           wrappedKid: resp.wrappedKid,
         },

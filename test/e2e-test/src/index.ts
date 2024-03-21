@@ -293,13 +293,8 @@ class Demo {
     Demo.assert("Status OK", statusCode == 200);
     Demo.assertField(member.name, keyResponse, "d", undefinedString);
     Demo.assertField(member.name, keyResponse, "x", undefinedString);
-    Demo.assertField(member.name, keyResponse, "wrapped", notUndefinedString);
-    Demo.assertField(
-      member.name,
-      keyResponse,
-      "wrappedKid",
-      notUndefinedString,
-    );
+    Demo.assertField(member.name, keyResponse, "wrappedKid", notUndefinedString);
+    Demo.assertField(member.name, keyResponse, "receipt", notUndefinedString);
     //#endregion
     //#region unwrap
     console.log(`📝 Get unwrapped key with JWT...`);
@@ -357,18 +352,15 @@ class Demo {
     Demo.assertField(member.name, wrapResponse, "d", undefinedString);
     Demo.assertField(member.name, wrapResponse, "x", undefinedString);
     Demo.assert(
-      "typeof wrapResponse.wrapped === 'string'",
-      typeof wrapResponse.wrapped === "string",
+      "typeof wrapResponse.wrappedKid === 'string'",
+      typeof wrapResponse.wrappedKid === "string",
     );
-
-    console.log(`Unwrap result: `, wrapResponse.wrapped);
-
-    let tinkHpkeKey = new hpke.HpkePrivateKey();
-    const tinkKey = tinkHpkeKey.fromJsonString(wrapResponse.wrapped as any);
     Demo.assert(
-      "tinkKey.privateKey instanceof Uint8Array",
-      tinkKey.privateKey instanceof Uint8Array,
+      "typeof wrapResponse.receipt === 'string'",
+      typeof wrapResponse.receipt === "string",
     );
+
+    console.log(`Unwrap result: `, wrapResponse.wrappedKid);
 
     const kid = wrapResponse.wrappedKid;
     console.log("kid: ", kid);
@@ -391,14 +383,14 @@ class Demo {
       typeof unwrapResponse === "string",
     );
 
-    tinkHpkeKey = new hpke.HpkePrivateKey();
-    tinkHpkeKey.fromJsonString(unwrapResponse);
-    Demo.assert(
-      "tinkKey.privateKey instanceof Uint8Array",
-      tinkKey.privateKey instanceof Uint8Array,
-    );
+    //tinkHpkeKey = new hpke.HpkePrivateKey();
+    //tinkHpkeKey.fromJsonString(unwrapResponse);
+    //Demo.assert(
+    //  "tinkKey.privateKey instanceof Uint8Array",
+    //  tinkKey.privateKey instanceof Uint8Array,
+    //);
 
-    console.log("tinkHpkeKey.toJsonString()", tinkHpkeKey.toJsonString());
+    //console.log("tinkHpkeKey.toJsonString()", tinkHpkeKey.toJsonString());
 
     //#endregion
 

@@ -108,8 +108,6 @@ export class KeyWrapper {
     return keyPair;
   };
 
-  // Wrap the payload
-
   public static wrapKeyTink = (
     wrappingKey: ArrayBuffer,
     payload: IKeyItem,
