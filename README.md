@@ -90,11 +90,18 @@ make demo
 Running TypeScript flow...
 ```
 
-## Start only KMS in sandbox
+## Start KMS and IDP in sandbox
 
 ```
 export KMS_WORKSPACE=${PWD}/workspace
-make start-host
+make start-host-idp
+
+export KMS_WORKSPACE=${PWD}/workspace
+export KMS_URL=https://127.0.0.1:8000
+export KEYS_DIR="$KMS_WORKSPACE"/sandbox_common
+export WRAPPING_KEY=$(jq -Rs . < test/data-samples/publicWrapKey.pem)
+export ATTESTATION=$(<test/attestation-samples/snp.json)
+export AUTHORIZATION=$(./scripts/authorization_header.sh)
 ```
 
 ## Propose and vote new key release policy
@@ -102,9 +109,6 @@ make start-host
 ### Add claims
 
 ```
-export KMS_WORKSPACE=${PWD}/workspace
-export KMS_URL=https://127.0.0.1:8000
-export KEYS_DIR="$KMS_WORKSPACE"/sandbox_common
 make propose-add-key-release-policy
 ```
 
@@ -117,9 +121,6 @@ make propose-rm-key-release-policy
 ### Script to setup policies and generate a key
 
 ```
-export KMS_WORKSPACE=${PWD}/workspace
-export KMS_URL=https://127.0.0.1:8000
-export KEYS_DIR="$KMS_WORKSPACE"/sandbox_common
 make setup
 ```
 
@@ -133,7 +134,7 @@ curl ${KMS_URL}/app/hearthbeat --cacert ${KEYS_DIR}/service_cert.pem --cert ${KE
 curl ${KMS_URL}/app/hearthbeat --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/member0_cert.pem --key ${KEYS_DIR}/member0_privk.pem -H "Content-Type: application/json" -w '\n' | jq
 
 # Testing with hearthbeat: Use JWT
-curl ${KMS_URL}/app/hearthbeat --cacert ${KEYS_DIR}/service_cert.pem  -H "Content-Type: application/json" -H "Authorization:$(./scripts/authorization_header.sh)"  -w '\n' | jq
+curl ${KMS_URL}/app/hearthbeat --cacert ${KEYS_DIR}/service_cert.pem  -H "Content-Type: application/json" -H "Authorization:$AUTHORIZATION"  -w '\n' | jq
 
 # Generate a new key item
 curl ${KMS_URL}/app/refresh -X POST --cacert ${KEYS_DIR}/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
@@ -147,9 +148,7 @@ curl ${KMS_URL}/app/pubkey?fmt=tink --cacert ${KEYS_DIR}/service_cert.pem  -H "C
 curl ${KMS_URL}/app/listpubkeys --cacert ${KEYS_DIR}/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
 
 # Get the latest private key (JWT)
-wrapping_key=$(jq -Rs . < test/data-samples/publicWrapKey.pem)
-attestation=$(<test/attestation-samples/snp.json)
-wrapped_resp=$(curl $KMS_URL/app/key -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -d "{\"attestation\":$attestation, \"wrappingKey\":$wrapping_key}"  | jq)
+wrapped_resp=$(curl $KMS_URL/app/key -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -d "{\"attestation\":$ATTESTATION, \"wrappingKey\":$WRAPPING_KEY}"  | jq)
 echo $wrapped_resp
 kid=$(echo $wrapped_resp | jq '.wrappedKid' -r)
 echo $kid
@@ -157,12 +156,12 @@ wrapped=$(echo $wrapped_resp | jq '.wrapped' -r)
 echo $wrapped
 
 # Unwrap key with attestation (JWT)
-curl $KMS_URL/app/unwrapKey -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -d "{\"attestation\":$attestation, \"wrappingKey\":$wrapping_key, \"wrapped\":\"$wrapped\", \"wrappedKid\":\"$kid\"}" | jq
+curl $KMS_URL/app/unwrapKey -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -d "{\"attestation\":$ATTESTATION, \"wrappingKey\":$WRAPPING_KEY, \"wrapped\":\"$wrapped\", \"wrappedKid\":\"$kid\"}" | jq
 
 # Get the latest private key (Tink)
-wrapped_resp=$(curl $KMS_URL/app/key?fmt=tink -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -d "{\"attestation\":$attestation, \"wrappingKey\":$wrapping_key}"  | jq)
+wrapped_resp=$(curl $KMS_URL/app/key?fmt=tink -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -d "{\"attestation\":$ATTESTATION, \"wrappingKey\":$WRAPPING_KEY}"  | jq)
 echo $wrapped_resp
-key=$(echo $wrapped_resp | jq '.wrapped.keys[0]')
+key=$(echo $wrapped_resp | jq -r '.wrapped' | jq -R 'fromjson' | jq '.keys[0]')
 # It has a format of "azu-kms://<kid>" like "azu-kms://tGe-cVHzNyim2Z0PzHO4y0ClXCa5J6x-bh7GmGJTr3c".
 key_encryption_key_uri=$(echo $key | jq '.keyData[0].keyEncryptionKeyUri' -r)
 kid=$(echo $key_encryption_key_uri | awk -F/ '{print $NF}')
@@ -172,7 +171,7 @@ wrapped=$(echo $keyMaterial | jq '.encryptedKeyset' -r)
 echo $wrapped
 
 # Unwrap key with attestation (Tink)
-curl $KMS_URL/app/unwrapKey?fmt=tink -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -d "{\"attestation\":$attestation, \"wrappingKey\":$wrapping_key, \"wrapped\":\"$wrapped\", \"wrappedKid\":\"$kid\"}" | jq
+curl $KMS_URL/app/unwrapKey?fmt=tink -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -d "{\"attestation\":$ATTESTATION, \"wrappingKey\":$WRAPPING_KEY, \"wrapped\":\"$wrapped\", \"wrappedKid\":\"$kid\"}" | jq
 
 # Get key release policy
 curl $KMS_URL/app/key_release_policy --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" | jq
