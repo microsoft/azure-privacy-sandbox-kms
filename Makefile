@@ -6,11 +6,14 @@ KMS_URL ?= https://127.0.0.1:8000
 KEYS_DIR ?= ${KMS_WORKSPACE}/sandbox_common
 RUN_BACK ?= true
 CCF_PLATFORM ?= virtual
+
 ifeq ($(findstring https://127.0.0.1,$(KMS_URL)),https://127.0.0.1)
     MEMBER_COUNT := 3
 else
     MEMBER_COUNT := 1
 endif
+
+CCF_SANDBOX_EXTRA_ARGS ?= 
 
 ifeq ($(INSTALL),local)
     CCFSB=../../CCF/tests/sandbox
@@ -61,8 +64,10 @@ start-host-idp: stop-host stop-idp start-idp build ## 🏃 Start the CCF network
 	@echo "Executing: $(COMMAND)"
 	if [ "$(RUN_BACK)" = "true" ]; then \
 		 env -i PATH=${PATH} KMS_WORKSPACE=${KMS_WORKSPACE} $(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count ${MEMBER_COUNT} --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js --jwt-issuer ${KMS_WORKSPACE}/proposals/set_jwt_issuer_test_sandbox.json  -v --http2 & \
+     		 	${CCF_SANDBOX_EXTRA_ARGS} & \
 	else \
 		 env -i PATH=${PATH} KMS_WORKSPACE=${KMS_WORKSPACE} $(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count ${MEMBER_COUNT} --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js --jwt-issuer ${KMS_WORKSPACE}/proposals/set_jwt_issuer_test_sandbox.json  -v --http2; \
+     		 	${CCF_SANDBOX_EXTRA_ARGS} & \
 	fi
 
 demo: stop-all start-host-idp ## 🎬 Demo the KMS Application in the Sandbox
