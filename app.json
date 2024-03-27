@@ -116,6 +116,9 @@
                     "kid": {
                       "type": "string"
                     },
+                    "wrappingKey": {
+                      "type": "string"
+                    },
                     "wrapped": {
                       "type": "string"
                     },
@@ -145,32 +148,14 @@
                   "application/json": {
                     "schema": {
                       "properties": {
-                        "publicKey": {
-                          "type": "string"
-                        },
-                        "privateKey": {
-                          "type": "string"
-                        },
-                        "kid": {
-                          "type": "string"
-                        },
-                        "keyType": {
+                        "wrapped": {
                           "type": "string"
                         },
                         "receipt": {
                           "type": "string"
-                        },
-                        "timeStamp": {
-                          "type": "number"
                         }
                       },
-                      "required": [
-                        "publicKey",
-                        "privateKey",
-                        "kid",
-                        "keyType",
-                        "timeStamp"
-                      ],
+                      "required": ["wrapped", "receipt"],
                       "type": "object"
                     }
                   }
@@ -207,16 +192,10 @@
               "application/json": {
                 "schema": {
                   "properties": {
-                    "evidence": {
+                    "attestation": {
                       "type": "string"
                     },
-                    "endorsements": {
-                      "type": "string"
-                    },
-                    "uvm_endorsements": {
-                      "type": "string"
-                    },
-                    "endorsed_tcb": {
+                    "wrappingKey": {
                       "type": "string"
                     }
                   },

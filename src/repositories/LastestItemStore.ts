@@ -49,7 +49,7 @@ export class LastestItemStore<K extends number, T> {
     const states = ccf.historical.getStateRange(id, version, version, 1800);
     if (states !== null) {
       const ret = JSON.stringify(states[0].receipt);
-      console.log(`Receipt: ${ret}`);
+      console.log(`LatestItemStore.Receipt: ${ret}`);
       return ret;
     }
     return undefined;
