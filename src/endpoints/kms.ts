@@ -19,14 +19,32 @@ import { KeyGeneration } from "./KeyGeneration";
 import { TinkKey, TinkPublicKey } from "./TinkKey";
 import { IWrapped, IWrappedJwt, KeyWrapper } from "./KeyWrapper";
 import { AuthenticationService } from "../authorization/AuthenticationService";
+import { IAttestationReport } from "../attestation/ISnpAttestationReport";
 export interface IAttestationValidationResult {
   result: boolean;
   errorMessage?: string;
   statusCode: number;
+  attestationClaims?: IAttestationReport;
+}
+
+export interface IWrappingKeyValidationResult {
+  result: boolean;
+  statusCode: number;
+  body?: object;
+  wrappingKeyHash?: string;
+  wrappingKey?: ArrayBuffer;
 }
 
 export interface IKeyRequest {
   attestation: ISnpAttestation;
+  wrappingKey?: string;
+}
+
+interface IUnwrapRequest {
+  wrapped: string;
+  wrappedKid: string;
+  attestation: ISnpAttestation;
+  wrappingKey: string;
 }
 
 //#region KMS Stores
@@ -178,7 +196,8 @@ const validateAttestation = (
 
     const claimsProvider = new SnpAttestationClaims(attestationReport);
     const attestationClaims = claimsProvider.getClaims();
-    console.log(`Attestation claims: ${JSON.stringify(attestationClaims)}`);
+    console.log(`Attestation claims: `, attestationClaims);
+    console.log(`Report Data: `, attestationClaims["x-ms-sevsnpvm-reportdata"]);
 
     // Get the key release policy
     const keyReleasePolicy = getKeyReleasePolicy();
@@ -234,6 +253,7 @@ const validateAttestation = (
     return {
       result: true,
       statusCode: 200,
+      attestationClaims,
     };
   } catch (exception: any) {
     return {
@@ -269,34 +289,72 @@ export const setKeyHeaders = (): { [key: string]: string } => {
   };
   return headers;
 };
+
+const requestHasWrappingKey = (
+  body: IKeyRequest | IUnwrapRequest,
+): IWrappingKeyValidationResult => {
+  let wrappingKey = body.wrappingKey;
+  let wrappingKeyBuf: ArrayBuffer;
+  let wrappingKeyHash: string;
+  if (wrappingKey) {
+    console.log(`requestHasWrappingKey=> wrappingKey: '${wrappingKey}'`);
+    if (!isPemPublicKey(wrappingKey)) {
+      console.log(`Key-> Not a pem key`);
+      return {
+        result: false,
+        statusCode: 400,
+        body: {
+          error: {
+            message: `${wrappingKey} not a PEM public key`,
+          },
+        },
+      };
+    }
+    wrappingKeyBuf = ccf.strToBuf(wrappingKey);
+    wrappingKeyHash = KeyGeneration.calculateHexHash(wrappingKeyBuf);
+    console.log(`Key->wrapping key hash: ${wrappingKeyHash}`);
+    return {
+      result: true,
+      statusCode: 200,
+      wrappingKey: wrappingKeyBuf,
+      wrappingKeyHash,
+    };
+  }
+
+  return {
+    result: true,
+    statusCode: 200,
+  };
+};
+
 //#endregion
 
 //#region KMS Key endpoints
+
 export interface IKeyResponse {
   wrappedKid: string;
   receipt: string;
   wrapped: string;
 }
+
 // Get latest private key
 export const key = (request: ccfapp.Request<IKeyRequest>) => {
   const body = request.body.json();
-  const attestation: ISnpAttestation = body["attestation"];
+  console.log(`Key->Request: `, body);
+  let attestation: ISnpAttestation;
+  if (body["attestation"]) {
+    attestation = body["attestation"];
+  }
   //console.log(`unwrapKey=> attestation:`, attestation);
-  const wrappingKey: string = body["wrappingKey"];
-  console.log(`Key=> wrappingKey: ${wrappingKey}`);
-  if (!isPemPublicKey(wrappingKey)) {
+  const wrappingKeyFromRequest = requestHasWrappingKey(body);
+  if (wrappingKeyFromRequest.body) {
+    // WrappingKey has errors
     return {
-      statusCode: 400,
-      body: {
-        error: {
-          message: `${wrappingKey} not a PEM public key`,
-        },
-      },
+      statusCode: wrappingKeyFromRequest.statusCode,
+      body: wrappingKeyFromRequest.body,
     };
   }
-  const wrappingKeyBuf = ccf.strToBuf(wrappingKey);
-  const wrappingKeyHash = KeyGeneration.calculateHexHash(wrappingKeyBuf);
-  console.log(`Key->wrapping key hash: ${wrappingKeyHash}`);
+  const wrappingKeyBuf = wrappingKeyFromRequest.wrappingKey;
 
   // Validate input
   if (!body || !attestation) {
@@ -355,15 +413,15 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
     }
   }
 
-  let validateResult: IAttestationValidationResult;
+  let validateAttestationResult: IAttestationValidationResult;
   try {
-    validateResult = validateAttestation(attestation);
-    if (!validateResult.result) {
+    validateAttestationResult = validateAttestation(attestation);
+    if (!validateAttestationResult.result) {
       return {
-        statusCode: validateResult.statusCode,
+        statusCode: validateAttestationResult.statusCode,
         body: {
           error: {
-            message: validateResult.errorMessage,
+            message: validateAttestationResult.errorMessage,
           },
         },
       };
@@ -383,6 +441,24 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
     };
   }
 
+  // Check if wrapping key match attestation
+  if (wrappingKeyFromRequest.result && wrappingKeyFromRequest.wrappingKey) {
+    if (
+      !validateAttestationResult.attestationClaims[
+        "x-ms-sevsnpvm-reportdata"
+      ].startsWith(wrappingKeyFromRequest.wrappingKeyHash!)
+    ) {
+      return {
+        statusCode: 400,
+        body: {
+          error: {
+            message: `wrapping key hash ${validateAttestationResult.attestationClaims["x-ms-sevsnpvm-reportdata"]} does not match wrappingKey`,
+          },
+        },
+      };
+    }
+  }
+
   // Be sure to request item and the receipt
   console.log(`Get key with kid ${kid}`);
   const keyItem = hpkeKeysMap.store.get(kid) as IKeyItem;
@@ -398,7 +474,7 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
   }
   const receipt = hpkeKeysMap.receipt(kid);
 
-  if (validateResult.statusCode === 202) {
+  if (validateAttestationResult.statusCode === 202) {
     return {
       statusCode: 202,
       headers: {
@@ -457,13 +533,6 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
   }
 };
 
-interface IUnwrapRequest {
-  wrapped: string;
-  wrappedKid: string;
-  attestation: ISnpAttestation;
-  wrappingKey: string;
-}
-
 // Unwrap private key
 export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
   // check if caller has a valid identity
@@ -484,17 +553,27 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
   console.log(`unwrapKey=> wrappedKid:`, wrappedKid);
   const wrappingKey: string = body["wrappingKey"];
   console.log(`unwrapKey=> wrappingKey: ${wrappingKey}`);
-  if (!isPemPublicKey(wrappingKey)) {
+  const wrappingKeyFromRequest = requestHasWrappingKey(body);
+  console.log(`unwrapKey->wrappingKeyFromRequest: `, wrappingKeyFromRequest);
+  if (wrappingKeyFromRequest.body) {
+    // WrappingKey has errors
+    return {
+      statusCode: wrappingKeyFromRequest.statusCode,
+      body: wrappingKeyFromRequest.body,
+    };
+  }
+  if (!wrappingKeyFromRequest.wrappingKey) {
     return {
       statusCode: 400,
       body: {
         error: {
-          message: `${wrappingKey} not a PEM public key`,
+          message: `Missing wrappingKey in request`,
         },
       },
     };
   }
-  const wrappingKeyBuf = ccf.strToBuf(wrappingKey);
+  const wrappingKeyBuf = wrappingKeyFromRequest.wrappingKey;
+
   const wrappingKeyHash = KeyGeneration.calculateHexHash(wrappingKeyBuf);
   console.log(`unwrapKey->wrapping key hash: ${wrappingKeyHash}`);
 
@@ -531,6 +610,37 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
     }
   }
 
+  // validate attestation
+  const validateAttestationResult = validateAttestation(attestation);
+  if (!validateAttestationResult.result) {
+    return {
+      statusCode: validateAttestationResult.statusCode,
+      body: {
+        error: {
+          message: validateAttestationResult.errorMessage,
+        },
+      },
+    };
+  }
+
+  // Check if wrapping key match attestation
+  if (wrappingKeyFromRequest.result && wrappingKeyFromRequest.wrappingKey) {
+    if (
+      !validateAttestationResult.attestationClaims[
+        "x-ms-sevsnpvm-reportdata"
+      ].startsWith(wrappingKeyFromRequest.wrappingKeyHash!)
+    ) {
+      return {
+        statusCode: 400,
+        body: {
+          error: {
+            message: `wrapping key hash ${validateAttestationResult.attestationClaims["x-ms-sevsnpvm-reportdata"]} does not match wrappingKey`,
+          },
+        },
+      };
+    }
+  }
+
   // Be sure to request item and the receipt
   console.log(`Get key with kid ${wrappedKid}`);
   const keyItem = hpkeKeysMap.store.get(wrappedKid) as IKeyItem;
@@ -559,20 +669,7 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
     };
   }
 
-  // validate attestation
-  const validateResult = validateAttestation(attestation);
-  if (!validateResult.result) {
-    return {
-      statusCode: validateResult.statusCode,
-      body: {
-        error: {
-          message: validateResult.errorMessage,
-        },
-      },
-    };
-  }
-
-  // Get UnWrapping key
+  // Get wrapped key
   try {
     //let receipt = "";
     let wrapKey;
@@ -582,7 +679,6 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
         wrappingKeyBuf,
         keyItem,
       );
-      //const wrapped = KeyWrapper.wrapKeyTink(wrappingKeyBuf, keyItem);
       const ret = { wrapped, receipt };
       console.log(
         `key tink returns (${wrappedKid}, ${JSON.stringify(wrapped).length}): `,

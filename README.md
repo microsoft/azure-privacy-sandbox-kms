@@ -96,6 +96,7 @@ Running TypeScript flow...
 export KMS_WORKSPACE=${PWD}/workspace
 make start-host-idp
 
+# Setup additional vars used in the manual tests
 export KMS_WORKSPACE=${PWD}/workspace
 export KMS_URL=https://127.0.0.1:8000
 export KEYS_DIR="$KMS_WORKSPACE"/sandbox_common

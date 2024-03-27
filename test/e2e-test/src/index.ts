@@ -118,11 +118,11 @@ class Demo {
     console.log(`Authorization header: ${access_token}`);
 
     this.printTestSectionHeader("🔬 [TEST]: set wrapping keys");
-    const public_wrapping_key = fs
+    const public_wrapping_key: string = fs
       .readFileSync("test/data-samples/publicWrapKey.pem", "utf-8")
       .replace(/\\n/g, "\n");
     console.log(`Public wrapping key: `, public_wrapping_key);
-    const private_wrapping_key = fs
+    const private_wrapping_key: string = fs
       .readFileSync("test/data-samples/privateWrapKey.pem", "utf-8")
       .replace(/\\n/g, "\n");
     console.log(`Private wrapping key: `, private_wrapping_key);
@@ -337,6 +337,39 @@ class Demo {
     Demo.assertField(member.name, keyInResponse, "crv", "X25519");
     Demo.assertField(member.name, keyInResponse, "kty", "OKP");
     Demo.assertField(member.name, receipt, "receipt", notUndefinedString);
+
+    console.log(`📝 Get unwrapped key with JWT and missing wrappingKey...`);
+    [statusCode, unwrapResponse] = (await Api.unwrap(
+      this.demoProps,
+      member,
+      keyResponse.wrappedKid,
+      attestation,
+      private_wrapping_key,
+      undefined,
+      false,
+      this.createHttpsAgent(member.id, AuthKinds.JWT),
+      access_token,
+    )) as [number, IKeyItem];
+    console.log("JWT unwrapResponse: ", unwrapResponse);
+    Demo.assert("Status BadRequest", statusCode == 400);
+
+    console.log(`📝 Get unwrapped key with JWT and wrong wrappingKey: `);
+    const badPublicKey = public_wrapping_key
+      .replace("1", "9")
+      .replace("2", "1");
+    [statusCode, unwrapResponse] = (await Api.unwrap(
+      this.demoProps,
+      member,
+      keyResponse.wrappedKid,
+      attestation,
+      private_wrapping_key,
+      badPublicKey,
+      false,
+      this.createHttpsAgent(member.id, AuthKinds.JWT),
+      access_token,
+    )) as [number, IKeyItem];
+    console.log("JWT unwrapResponse: ", unwrapResponse);
+    Demo.assert("Status BadRequest", statusCode == 400);
 
     // Test with Tink
     console.log(`📝 Get wrapped key with tink...`);

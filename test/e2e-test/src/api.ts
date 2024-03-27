@@ -346,6 +346,16 @@ export default class Api {
     try {
       response = await Api.responsePromise(req, responseType);
       console.log("Status:", response.statusCode);
+      if (response.statusCode > 200) {
+        console.log(
+          `Directly return statuscode with response: `,
+          response.data,
+        );
+        return [
+          response.statusCode,
+          response.data ? JSON.parse(response.data) : undefined,
+        ];
+      }
     } catch (error) {
       console.error("Error:", error.message);
       throw new Error(error.message);
