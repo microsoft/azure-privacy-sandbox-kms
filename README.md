@@ -97,13 +97,9 @@ export KMS_WORKSPACE=${PWD}/workspace
 make start-host-idp
 
 # Setup additional vars used in the manual tests
-export KMS_WORKSPACE=${PWD}/workspace
-export KMS_URL=https://127.0.0.1:8000
-export KEYS_DIR="$KMS_WORKSPACE"/sandbox_common
-export WRAPPING_KEY=$(jq -Rs . < test/data-samples/publicWrapKey.pem)
-export ATTESTATION=$(<test/attestation-samples/snp.json)
-export AUTHORIZATION=$(./scripts/authorization_header.sh)
+. ./scripts/setup_local.sh
 ```
+
 
 ## Propose and vote new key release policy
 
@@ -149,7 +145,7 @@ curl ${KMS_URL}/app/pubkey?fmt=tink --cacert ${KEYS_DIR}/service_cert.pem  -H "C
 curl ${KMS_URL}/app/listpubkeys --cacert ${KEYS_DIR}/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
 
 # Get the latest private key (JWT)
-wrapped_resp=$(curl $KMS_URL/app/key -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -d "{\"attestation\":$ATTESTATION, \"wrappingKey\":$WRAPPING_KEY}"  | jq)
+wrapped_resp=$(curl $KMS_URL/app/key -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/member0_cert.pem --key ${KEYS_DIR}/member0_privk.pem -H "Content-Type: application/json" -d "{\"attestation\":$ATTESTATION, \"wrappingKey\":$WRAPPING_KEY}"  | jq)
 echo $wrapped_resp
 kid=$(echo $wrapped_resp | jq '.wrappedKid' -r)
 echo $kid
