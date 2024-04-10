@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-CCF_NAME := "acceu-bingads-500dev10"
+CCF_NAME ?= "acceu-bingads-500dev10"
 PYTHON_VENV := .venv_ccf_sandbox
 KMS_WORKSPACE ?= ${PWD}/workspace
 KMS_URL ?= https://127.0.0.1:8000

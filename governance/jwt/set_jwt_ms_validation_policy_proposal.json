@@ -31,7 +31,6 @@
           "sub": "606456e7-34c3-4382-9352-b7903930bc94",
           "tid": "72f988bf-86f1-41af-91ab-2d7cd011db47",
           "ver": "1.0",
-          "xms_az_rid": "/subscriptions/85c61f94-8912-4e82-900e-6ab44de9bdf8/resourcegroups/kms/providers/Microsoft.ContainerInstance/containerGroups/kmsserver",
           "xms_mirid": "/subscriptions/85c61f94-8912-4e82-900e-6ab44de9bdf8/resourcegroups/kms/providers/Microsoft.ManagedIdentity/userAssignedIdentities/kms-mi"
         }
       }
