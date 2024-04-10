@@ -95,6 +95,19 @@ propose-rm-key-release-policy: ## 🚀 Deploy the remove claim key release polic
 	$(call check_defined, KMS_URL)
 	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/policies/key-release-policy-remove.json --certificate_dir "${KEYS_DIR}"
 
+refresh-key: ## 🚀 Refresh a key on the instance
+	@echo -e "\e[34m$@\e[0m" || true
+	$(call check_defined, KMS_URL)
+	@CCF_PLATFORM=${CCF_PLATFORM} curl "${KMS_URL}"/app/refresh -X POST --cacert "${KEYS_DIR}"/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
+
+set-constitution: ## Set new custom constitution
+	@echo -e "\e[34m$@\e[0m" || true
+	$(call check_defined, KMS_URL)
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_constitution.sh --network-url "${KMS_URL}" --certificate-dir  "${KEYS_DIR}" --custom-constitution ./governance/constitution/kms_actions.js --member-count ${MEMBER_COUNT}
+
+setup-mCCF: set-constitution deploy propose-add-key-release-policy propose-jwt-ms-validation-policy refresh-key  ## 🚀 Prepare an mCCF instance
+	@echo -e "\e[34m$@\e[0m" || true
+
 # The following are here in case you forget to change directory!
 deploy: build ## 🚀 Deploy Managed CCF or local
 	@echo -e "\e[34m$@\e[0m" || true
