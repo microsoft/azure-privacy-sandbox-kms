@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-CCF_NAME ?= "acceu-bingads-500dev10"
+CCF_NAME ?= "500dev10"
 PYTHON_VENV := .venv_ccf_sandbox
 KMS_WORKSPACE ?= ${PWD}/workspace
 KMS_URL ?= https://127.0.0.1:8000
@@ -96,14 +96,19 @@ propose-rm-key-release-policy: ## 🚀 Deploy the remove claim key release polic
 	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/policies/key-release-policy-remove.json --certificate_dir "${KEYS_DIR}"
 
 refresh-key: ## 🚀 Refresh a key on the instance
-	@echo -e "\e[34m$@\e[0m" || true
+	@echo -e "\e[34m$@\e[0m" || true	
 	$(call check_defined, KMS_URL)
-	@CCF_PLATFORM=${CCF_PLATFORM} curl "${KMS_URL}"/app/refresh -X POST --cacert "${KEYS_DIR}"/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
+	@CCF_PLATFORM=${CCF_PLATFORM} sleep 20;curl "${KMS_URL}"/app/refresh -X POST --cacert "${KEYS_DIR}"/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
 
 set-constitution: ## Set new custom constitution
 	@echo -e "\e[34m$@\e[0m" || true
 	$(call check_defined, KMS_URL)
 	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_constitution.sh --network-url "${KMS_URL}" --certificate-dir  "${KEYS_DIR}" --custom-constitution ./governance/constitution/kms_actions.js --member-count ${MEMBER_COUNT}
+
+get-service-cert: # Get the mCCF service cert
+	@echo -e "\e[34m$@\e[0m" || true
+	$(call check_defined, IDENTITY_URL)
+	curl ${IDENTITY_URL} | jq ' .ledgerTlsCertificate' | xargs echo -e > ${KEYS_DIR}/service_cert.pem
 
 setup-mCCF: set-constitution deploy propose-add-key-release-policy propose-jwt-ms-validation-policy refresh-key  ## 🚀 Prepare an mCCF instance
 	@echo -e "\e[34m$@\e[0m" || true
