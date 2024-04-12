@@ -4,10 +4,11 @@
 # Licensed under the MIT license.
 
 set -euo pipefail
+export AUTHORIZATION="Bearer $ACCESS"
+export CCF_NAME="500dev10"
 export CCF_PLATFORM=virtual
 export MEMBER_COUNT=1
 export KMS_WORKSPACE=${PWD}/workspace
-export CCF_NAME="acceu-bingads-500dev10"
 export KMS_URL=https://${CCF_NAME}.confidential-ledger.azure.com
 export KEYS_DIR=${PWD}/vol
 export PUBLIC_CERT=${KEYS_DIR}/member0_cert.pem
