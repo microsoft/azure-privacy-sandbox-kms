@@ -23,15 +23,15 @@
         "validation_policy": {
           "iss": "https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/",
           "aud": "https://management.azure.com/",
-          "appid": "e6e8b135-b2e3-4f51-bb68-1bd78facd01b",
+          "appid": "09cda15f-be0b-43de-a704-89a1f2e4b3f9",
           "appidacr": "2",
           "idp": "https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/",
           "idtyp": "app",
-          "oid": "606456e7-34c3-4382-9352-b7903930bc94",
-          "sub": "606456e7-34c3-4382-9352-b7903930bc94",
+          "oid": "da96e2ae-76bc-402e-abfe-2c3bd3bdf226",
+          "sub": "da96e2ae-76bc-402e-abfe-2c3bd3bdf226",
           "tid": "72f988bf-86f1-41af-91ab-2d7cd011db47",
           "ver": "1.0",
-          "xms_mirid": "/subscriptions/85c61f94-8912-4e82-900e-6ab44de9bdf8/resourcegroups/kms/providers/Microsoft.ManagedIdentity/userAssignedIdentities/kms-mi"
+          "xms_mirid": "/subscriptions/85c61f94-8912-4e82-900e-6ab44de9bdf8/resourcegroups/kms/providers/Microsoft.ManagedIdentity/userAssignedIdentities/acc-europe-mi"
         }
       }
     }
