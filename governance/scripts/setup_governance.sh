@@ -53,7 +53,7 @@ fi
 # Generic variables
 ##############################################
 app_dir=$PWD                    # application folder for reference
-root_dir=`dirname $PWD`         # root (parent) folder 
+root_dir=`dirname $PWD`         # root (parent) folder
 server="https://${nodeAddress}" # ccf network address
 ccf_prefix=${CCF_PLATFORM:-"virtual"} # ccf infra related scripts location
 

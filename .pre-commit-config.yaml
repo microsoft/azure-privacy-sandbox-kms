@@ -1,0 +1,12 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: detect-private-key
+  - repo: local
+    hooks:
+    - id: detect-secrets
+      name: Detect Secrets
+      entry: detect-secrets-hook --baseline .secrets.baseline
+      language: python

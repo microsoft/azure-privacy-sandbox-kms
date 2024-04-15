@@ -6,12 +6,12 @@
 # Exit when any command fails
 set -e
 
-display_usage() { 
+display_usage() {
 	echo "Lint checking script"
     echo -e "If no argument is passed, it runs with check mode\n"
 	echo "Usage:"
     echo -e "$0 [-f | --fix]"
-    echo -e "$0 -h | --help" 
+    echo -e "$0 -h | --help"
     echo ""
 }
 
@@ -32,7 +32,7 @@ do
 done
 
 echo "-- TypeScript, JavaScript, Markdown, YAML and JSON format"
-# Use same format as https://github.com/microsoft/CCF/blob/main/scripts/ci-checks.sh 
+# Use same format as https://github.com/microsoft/CCF/blob/main/scripts/ci-checks.sh
 npm install --loglevel=error --no-save prettier 1>/dev/null
 if [ "$MODE" == "fix" ]; then
     git ls-files | grep -e '\.ts$' -e '\.js$' -e '\.md$' -e '\.yaml$' -e '\.yml$' -e '\.json$' | grep -v 'gen/.*' | xargs npx prettier --write

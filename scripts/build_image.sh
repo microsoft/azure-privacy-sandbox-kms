@@ -12,7 +12,7 @@ if [ $# -eq 0 ]
     exit
 fi
 
-if [ "$1" != "virtual" -a "$1" != "enclave" ];then 
+if [ "$1" != "virtual" -a "$1" != "enclave" ];then
     echo "Wrong argument value. Define either 'virtual' or 'enclave'";
     exit
 fi
@@ -26,7 +26,7 @@ echo "-- Generating image for $setup_type container"
 mkdir -p $app_path/workspace/docker_certificates
 
 echo "-- generating member0 certificates"
-# This is directly related to the member described in host config file 
+# This is directly related to the member described in host config file
 cd $app_path/workspace/docker_certificates
 $ccf_prefix/keygenerator.sh --name member0 --gen-enc-key
 cd $app_path

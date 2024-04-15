@@ -19,12 +19,11 @@ RUN apt-get update && apt-get install -y \
     sudo \
     tar \
     default-jre
-    
+
 # Install Node.js
 RUN curl -fsSL https://deb.nodesource.com/setup_current.x | bash -
 RUN apt-get install -y nodejs
 RUN pip install --upgrade pip setuptools
-
 
 RUN apt-get -y autoremove \
     && apt-get -y clean
@@ -45,6 +44,9 @@ RUN tar -xzvf $TINKEY_VERSION.tar.gz
 RUN cp tinkey /usr/bin/
 RUN cp tinkey_deploy.jar /usr/bin/
 RUN rm tinkey tinkey_deploy.jar tinkey.bat $TINKEY_VERSION.tar.gz
+
+RUN pip install -r requirements.txt
+RUN pre-commit install
 
 # Define ci
 #FROM base as ci
