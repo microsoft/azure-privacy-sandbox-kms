@@ -29,7 +29,6 @@ jobs:
           KMS_WORKSPACE: ./workspace
 
   lint:
-    name: KMS Lint
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
