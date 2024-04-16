@@ -27,3 +27,13 @@ jobs:
             make demo && npm run test
         env:
           KMS_WORKSPACE: ./workspace
+
+  lint:
+    name: KMS Lint
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: KMS Lint
+        run: make lint
