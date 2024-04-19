@@ -236,7 +236,7 @@ export class KeyWrapper {
 
   // Wrap the JWT payload with the public key provided by client.
   public static wrapKeyJwt = (
-    wrappingKey: ArrayBuffer,
+    wrappingKey: ArrayBuffer | undefined,
     payload: IKeyItem,
   ): IWrappedJwt => {
     const [wrappedKey, _] = this.getEncryptedKeyMaterial(wrappingKey, payload);

@@ -291,7 +291,7 @@ export const setKeyHeaders = (): { [key: string]: string } => {
 };
 
 const requestHasWrappingKey = (
-  body: IKeyRequest | IUnwrapRequest,
+  body: IUnwrapRequest,
 ): IWrappingKeyValidationResult => {
   let wrappingKey = body.wrappingKey;
   let wrappingKeyBuf: ArrayBuffer;
@@ -346,15 +346,6 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
     attestation = body["attestation"];
   }
   //console.log(`unwrapKey=> attestation:`, attestation);
-  const wrappingKeyFromRequest = requestHasWrappingKey(body);
-  if (wrappingKeyFromRequest.body) {
-    // WrappingKey has errors
-    return {
-      statusCode: wrappingKeyFromRequest.statusCode,
-      body: wrappingKeyFromRequest.body,
-    };
-  }
-  const wrappingKeyBuf = wrappingKeyFromRequest.wrappingKey;
 
   // Validate input
   if (!body || !attestation) {
@@ -441,24 +432,6 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
     };
   }
 
-  // Check if wrapping key match attestation
-  if (wrappingKeyFromRequest.result && wrappingKeyFromRequest.wrappingKey) {
-    if (
-      !validateAttestationResult.attestationClaims[
-        "x-ms-sevsnpvm-reportdata"
-      ].startsWith(wrappingKeyFromRequest.wrappingKeyHash!)
-    ) {
-      return {
-        statusCode: 400,
-        body: {
-          error: {
-            message: `wrapping key hash ${validateAttestationResult.attestationClaims["x-ms-sevsnpvm-reportdata"]} does not match wrappingKey`,
-          },
-        },
-      };
-    }
-  }
-
   // Be sure to request item and the receipt
   console.log(`Get key with kid ${kid}`);
   const keyItem = hpkeKeysMap.store.get(kid) as IKeyItem;
@@ -500,11 +473,11 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
   try {
     let wrapped: string | IWrapped;
     if (fmt == "tink") {
-      wrapped = KeyWrapper.wrapKeyTink(wrappingKeyBuf, keyItem);
+      wrapped = KeyWrapper.wrapKeyTink(undefined, keyItem);
       wrapped = JSON.stringify(wrapped);
     } else {
       // Default is JWT.
-      wrapped = KeyWrapper.wrapKeyJwt(wrappingKeyBuf, keyItem);
+      wrapped = KeyWrapper.wrapKeyJwt(undefined, keyItem);
     }
 
     const response: IKeyResponse = {
