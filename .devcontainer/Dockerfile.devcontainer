@@ -10,7 +10,7 @@ FROM mcr.microsoft.com/ccf/app/dev:${BASE_CCF_IMAGE} as base
 
 ENV NVM_DIR /root/.nvm
 ENV TINKEY_VERSION=tinkey-1.10.1
-COPY install_packages.sh install_nodejs.sh setup_tinkey.sh /src/
+COPY .devcontainer/install_packages.sh .devcontainer/install_nodejs.sh .devcontainer/setup_tinkey.sh /src/
 
 RUN /src/install_packages.sh
 RUN /src/install_nodejs.sh
