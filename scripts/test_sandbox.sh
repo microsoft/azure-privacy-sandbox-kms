@@ -49,8 +49,8 @@ do
     esac
     shift;
 done
-echo "Node address: $nodeAddress" 
-echo "Certificate dir: $certificate_dir" 
+echo "Node address: $nodeAddress"
+echo "Certificate dir: $certificate_dir"
 
 # validate parameters
 if [ -z "$nodeAddress" ]; then
@@ -105,7 +105,7 @@ fi
 testScript="${testScript} --nodeAddress ${nodeAddress} --certificate_dir ${certificate_dir}"
 if [ $interactive -eq 1 ]; then
     testScript="${testScript} --interactive"
-fi    
+fi
 
 # call testScript command
 ${testScript}
