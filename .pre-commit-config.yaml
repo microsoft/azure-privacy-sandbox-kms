@@ -6,7 +6,7 @@ repos:
       - id: detect-private-key
   - repo: local
     hooks:
-    - id: detect-secrets
-      name: Detect Secrets
-      entry: detect-secrets-hook --baseline .secrets.baseline
-      language: python
+      - id: detect-secrets
+        name: Detect Secrets
+        entry: detect-secrets-hook --baseline .secrets.baseline
+        language: python
