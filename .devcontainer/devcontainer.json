@@ -4,7 +4,6 @@
     "dockerfile": "Dockerfile.devcontainer",
     "context": ".."
   },
-  "postCreateCommand": "cd /workspaces/azure-privacy-sandbox-kms && npm i && make build",
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       "version": "latest",
@@ -28,5 +27,5 @@
       "editor.defaultFormatter": "ms-python.black-formatter"
     }
   },
-  "postStartCommand": "pip install -r .devcontainer/requirements.txt && pre-commit install"
+  "postStartCommand": "npm i && make build && pip install -r .devcontainer/requirements.txt && pre-commit install"
 }
