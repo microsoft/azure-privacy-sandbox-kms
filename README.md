@@ -100,7 +100,6 @@ make start-host-idp
 . ./scripts/setup_local.sh
 ```
 
-
 ## Propose and vote new key release policy
 
 ### Add claims
