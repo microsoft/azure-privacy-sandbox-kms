@@ -28,7 +28,7 @@ help: ## 💬 This help message :)
 	@grep -E '[a-zA-Z_-]+:.*?## .*$$' $(firstword $(MAKEFILE_LIST)) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-22s\033[0m %s\n", $$1, $$2}'
 
 build: ## 🔨 Build the Application
-	@echo -e "\e[34m$@\e[0m" || true; 
+	@echo -e "\e[34m$@\e[0m" || true;
 	./scripts/set_python_env.sh
 	npm run build
 
@@ -43,10 +43,10 @@ stop-host:  ## 🏃 Stop the host
 stop-idp:  ## 🏃 Stop the idp
 	@echo -e "\e[34m$@\e[0m" || true
 	sudo lsof -t -i :3000 | xargs -r sudo kill -9
-	
+
 stop-all: stop-host stop-idp # Stop all services
 	@echo -e "\e[34m$@\e[0m" || true
-	
+
 # idp commands to issue JWT
 start-idp:  ## 🏃 Start the idp for testing jwt
 	@echo -e "\e[34m$@\e[0m" || true
@@ -120,8 +120,8 @@ deploy: build ## 🚀 Deploy Managed CCF or local
 
 lint: ## 🔍 Lint the code base (but don't fix)
 	@echo -e "\e[34m$@\e[0m" || true
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/lint.sh -f
-	
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/lint.sh
+
 # Keep this at the bottom.
 clean: ## 🧹 Clean the working folders created during build/demo
 	@rm -rf .venv_ccf_sandbox
