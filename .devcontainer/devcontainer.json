@@ -27,5 +27,5 @@
       "editor.defaultFormatter": "ms-python.black-formatter"
     }
   },
-  "postCreateCommand": "cd /workspaces/azure-privacy-sandbox-kms && npm i && make build && pip install -r requirements.txt && pre-commit install"
+  "postCreateCommand": "cd /workspaces/azure-privacy-sandbox-kms && npm i && make build && pip install -r requirements.txt && pre-commit install || true"
 }
