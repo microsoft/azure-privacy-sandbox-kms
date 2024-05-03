@@ -7,7 +7,6 @@ import { describe, expect, test } from "@jest/globals";
 import { convertUint8ArrayToString, arrayBufferToHex } from "../../../src";
 
 describe("Test Tooling", () => {
-
   test("Should do convertUint8ArrayToString successfully", () => {
     // Arrange
     const buf = Buffer.from("ABC");
