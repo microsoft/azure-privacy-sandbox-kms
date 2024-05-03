@@ -6,8 +6,6 @@ import "@microsoft/ccf-app/polyfill.js";
 import { describe, expect, test } from "@jest/globals";
 
 describe("Dummy Test", () => {
-  beforeAll(() => {});
-
   test("Should get all data successfully", () => {
     // Arrange
     // Act

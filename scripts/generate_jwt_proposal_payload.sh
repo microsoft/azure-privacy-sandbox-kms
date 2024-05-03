@@ -1,4 +1,48 @@
-{
+#!/bin/bash
+
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+set -euo pipefail
+
+# This script generate the proposal for jwt issuer policy for AAD
+
+function usage {
+    echo ""
+    echo "Generate the set_jwt_issuer proposal with the latest ca bundle."
+    echo ""
+    echo "usage: ./generate_jwt_proposal_payload.sh --proposal-file string"
+    echo ""
+    echo "  --proposal-file         string      path where to store the proposal file"
+    echo ""
+    exit 0
+}
+
+# Parse arguments
+
+while [ $# -gt 0 ]
+do
+    name="${1/--/}"
+    name="${name/-/_}"
+    case "--$name"  in
+        --proposal_file) proposal_file="$2"; shift;;
+        --help) usage; exit 0; shift;;
+        --) shift;;
+    esac
+    shift;
+done
+echo $proposal_file
+
+
+output=$(python3 $(pwd)/scripts/get_ca_bundle.py)
+if [[ -n "$output" ]]; then
+    cert_bundle=$(echo "$output" | awk 'NF {sub(/\r/, ""); printf "%s\n",$0;}')
+else
+    echo "Python script didn't output anything"
+    exit 1
+fi
+
+
+proposal='{
   "actions": [
     {
       "name": "set_ca_cert_bundle",
@@ -36,4 +80,10 @@
       }
     }
   ]
-}
+}'
+
+new_proposal=$(echo "$proposal" | jq --arg cert_bundle "$cert_bundle" '.actions[0].args.cert_bundle = $cert_bundle')
+#echo $new_proposal
+
+# Save new_proposal to the file
+echo $new_proposal > $proposal_file

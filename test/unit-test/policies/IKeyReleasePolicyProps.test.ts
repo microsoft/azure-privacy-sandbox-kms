@@ -7,8 +7,6 @@ import { describe, expect, test } from "@jest/globals";
 import { IKeyReleasePolicyProps } from "../../../src";
 
 describe("Test Key Release Policy properties", () => {
-  beforeAll(() => {});
-
   test("Should get all data successfully", () => {
     // Arrange
     const policy: IKeyReleasePolicyProps = {};

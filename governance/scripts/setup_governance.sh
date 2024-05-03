@@ -53,7 +53,7 @@ fi
 # Generic variables
 ##############################################
 app_dir=$PWD                    # application folder for reference
-root_dir=`dirname $PWD`         # root (parent) folder
+root_dir=`dirname $PWD`         # root (parent) folder 
 server="https://${nodeAddress}" # ccf network address
 ccf_prefix=${CCF_PLATFORM:-"virtual"} # ccf infra related scripts location
 
@@ -217,4 +217,4 @@ curl "${server}/gov/ack/update_state_digest" -X POST --cacert $certs/service_cer
 echo "Activating Member1 step 2/2: member being added acknoledges himself, becoming active"
 $ccf_prefix/scurl.sh "${server}/gov/ack" --cacert $certs/service_cert.pem --signing-key $certs/${memberName}_privk.pem --signing-cert $certs/${memberName}_cert.pem \
     --header "Content-Type: application/json" --data-binary @$certs/activation.json
-
+    

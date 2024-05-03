@@ -18,7 +18,7 @@ export enum TinkKeyMaterialType {
     Example of tink key
     "{\"primaryKeyId\":1135265501,\"key\":[{\"keyData\":{\"typeUrl\":"
       + "\"type.googleapis.com/google.crypto.tink.HpkePublicKey\",\"value\":\""
-      + "EgYIARABGAMaIOA9jsWlFpxJ46AKzJthzK/lb7XpbmH8uFLxNwneII4K"
+      + "EgYIARAB..."
       + "\",\"keyMaterialType\":"
       + "\"ASYMMETRIC_PUBLIC\"},\"status\":\"ENABLED\",\"keyId\":1135265501,"
       + "\"outputPrefixType\":\"RAW\"}]}";

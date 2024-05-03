@@ -1,12 +1,19 @@
 SHELL := /bin/bash
-CCF_NAME := "acceu-bingads-500dev10"
+CCF_NAME ?= "500dev10"
 PYTHON_VENV := .venv_ccf_sandbox
 KMS_WORKSPACE ?= ${PWD}/workspace
 KMS_URL ?= https://127.0.0.1:8000
 KEYS_DIR ?= ${KMS_WORKSPACE}/sandbox_common
 RUN_BACK ?= true
 CCF_PLATFORM ?= virtual
-CCF_SANDBOX_EXTRA_ARGS ?=
+
+ifeq ($(findstring https://127.0.0.1,$(KMS_URL)),https://127.0.0.1)
+    MEMBER_COUNT := 3
+else
+    MEMBER_COUNT := 1
+endif
+
+CCF_SANDBOX_EXTRA_ARGS ?= 
 
 ifeq ($(INSTALL),local)
     CCFSB=../../CCF/tests/sandbox
@@ -50,16 +57,16 @@ start-idp:  ## 🏃 Start the idp for testing jwt
 # Start hosting the application using `sandbox.sh` and enable custom JWT authentication
 start-host: stop-host build  ## 🏃 Start the CCF network using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
-	$(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count 3 --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js  -v --http2
+	$(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count ${MEMBER_COUNT} --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js  -v --http2
 
 start-host-idp: stop-host stop-idp start-idp build ## 🏃 Start the CCF network && idp using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
 	@echo "Executing: $(COMMAND)"
 	if [ "$(RUN_BACK)" = "true" ]; then \
-		 env -i PATH=${PATH} KMS_WORKSPACE=${KMS_WORKSPACE} $(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count 3 --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js --jwt-issuer ${KMS_WORKSPACE}/proposals/set_jwt_issuer_test_sandbox.json  -v --http2 \
+		 env -i PATH=${PATH} KMS_WORKSPACE=${KMS_WORKSPACE} $(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count  ${MEMBER_COUNT} --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js --jwt-issuer ${KMS_WORKSPACE}/proposals/set_jwt_issuer_test_sandbox.json  -v --http2 \
 		 	${CCF_SANDBOX_EXTRA_ARGS} & \
 	else \
-		 env -i PATH=${PATH} KMS_WORKSPACE=${KMS_WORKSPACE} $(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count 3 --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js --jwt-issuer ${KMS_WORKSPACE}/proposals/set_jwt_issuer_test_sandbox.json  -v --http2 \
+		 env -i PATH=${PATH} KMS_WORKSPACE=${KMS_WORKSPACE} $(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count  ${MEMBER_COUNT} --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js --jwt-issuer ${KMS_WORKSPACE}/proposals/set_jwt_issuer_test_sandbox.json  -v --http2 \
 		 	${CCF_SANDBOX_EXTRA_ARGS};  \
 	fi
 
@@ -70,22 +77,41 @@ demo: stop-all start-host-idp ## 🎬 Demo the KMS Application in the Sandbox
 # Propose the JWT validation policy
 propose-jwt-demo-validation-policy: ## 🚀 Deploy the JWT validation policy
 	@echo -e "\e[34m$@\e[0m" || true
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/jwt/set_jwt_demo_validation_policy_proposal.json --certificate_dir "${KEYS_DIR}" --member-count 2
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/jwt/set_jwt_demo_validation_policy_proposal.json --certificate_dir "${KEYS_DIR}" --member-count ${MEMBER_COUNT}
 
 # Propose a new idp
 propose-jwt-ms-validation-policy: ## 🚀 Propose the AAD as idp
 	@echo -e "\e[34m$@\e[0m" || true
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/jwt/set_jwt_ms_validation_policy_proposal.json --certificate_dir "${KEYS_DIR}" --member-count 2
+	@./scripts/generate_jwt_proposal_payload.sh  --proposal-file "${KMS_WORKSPACE}"/proposals/set_jwt_ms_validation_policy_proposal.json
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file "${KMS_WORKSPACE}"/proposals/set_jwt_ms_validation_policy_proposal.json --certificate_dir "${KEYS_DIR}" --member-count ${MEMBER_COUNT}
 
 # Propose a new key release policy
 propose-add-key-release-policy: ## 🚀 Deploy the add claim key release policy to the sandbox or mCCF
 	@echo -e "\e[34m$@\e[0m" || true
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/policies/key-release-policy-add.json --certificate_dir "${KEYS_DIR}" --member-count 2
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/policies/key-release-policy-add.json --certificate_dir "${KEYS_DIR}" --member-count ${MEMBER_COUNT}
 
 propose-rm-key-release-policy: ## 🚀 Deploy the remove claim key release policy to the sandbox or mCCF
 	@echo -e "\e[34m$@\e[0m" || true
 	$(call check_defined, KMS_URL)
 	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/policies/key-release-policy-remove.json --certificate_dir "${KEYS_DIR}"
+
+refresh-key: ## 🚀 Refresh a key on the instance
+	@echo -e "\e[34m$@\e[0m" || true	
+	$(call check_defined, KMS_URL)
+	@CCF_PLATFORM=${CCF_PLATFORM} sleep 20;curl "${KMS_URL}"/app/refresh -X POST --cacert "${KEYS_DIR}"/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
+
+set-constitution: ## Set new custom constitution
+	@echo -e "\e[34m$@\e[0m" || true
+	$(call check_defined, KMS_URL)
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_constitution.sh --network-url "${KMS_URL}" --certificate-dir  "${KEYS_DIR}" --custom-constitution ./governance/constitution/kms_actions.js --member-count ${MEMBER_COUNT}
+
+get-service-cert: # Get the mCCF service cert
+	@echo -e "\e[34m$@\e[0m" || true
+	$(call check_defined, IDENTITY_URL)
+	curl ${IDENTITY_URL} | jq ' .ledgerTlsCertificate' | xargs echo -e > ${KEYS_DIR}/service_cert.pem
+
+setup-mCCF: set-constitution deploy propose-add-key-release-policy propose-jwt-ms-validation-policy refresh-key  ## 🚀 Prepare an mCCF instance
+	@echo -e "\e[34m$@\e[0m" || true
 
 # The following are here in case you forget to change directory!
 deploy: build ## 🚀 Deploy Managed CCF or local

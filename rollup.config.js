@@ -14,4 +14,9 @@ export default {
     preserveModulesRoot: "src",
   },
   plugins: [nodeResolve(), typescript(), commonjs()],
+  onwarn: function (warning, rollupWarn) {
+    if (warning.code !== "THIS_IS_UNDEFINED") {
+      rollupWarn(warning);
+    }
+  },
 };
