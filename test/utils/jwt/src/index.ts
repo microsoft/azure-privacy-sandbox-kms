@@ -71,6 +71,7 @@ const token = (req: Request, res: Response) => {
   res.send({
     token_type: "bearer",
     expires_in: `${expiry}`,
+    ext_expires_in: `${expiry}`,
     access_token,
   });
 };
