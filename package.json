@@ -4,7 +4,7 @@
     "build": "rm -rf ./dist/ && rollup --config && cp app.json dist/ && node build_bundle.js dist/",
     "bundle": "node build_bundle.js dist",
     "test": "node  --trace-warnings --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "e2e-test": "node --loader ts-node/esm ./test/e2e-test/src/index.ts"
+    "e2e-test": "node --loader ./loader-register.js ./test/e2e-test/src/index.ts"
   },
   "type": "module",
   "engines": {
