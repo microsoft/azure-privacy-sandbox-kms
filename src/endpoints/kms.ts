@@ -20,6 +20,7 @@ import { TinkKey, TinkPublicKey } from "./TinkKey";
 import { IWrapped, IWrappedJwt, KeyWrapper } from "./KeyWrapper";
 import { AuthenticationService } from "../authorization/AuthenticationService";
 import { IAttestationReport } from "../attestation/ISnpAttestationReport";
+import { ServiceResult } from "../utils/ServiceResult";
 export interface IAttestationValidationResult {
   result: boolean;
   errorMessage?: string;
@@ -97,51 +98,46 @@ const queryParams = (request: ccfapp.Request) => {
 // Validate the attestation by means of the key release policy
 const validateAttestation = (
   attestation: ISnpAttestation,
-): IAttestationValidationResult => {
+): ServiceResult<string | IAttestationReport> => {
   console.log(`Start attestation validation`);
   if (!attestation) {
-    return {
-      result: false,
-      errorMessage: "missing attestation",
-      statusCode: 400,
-    };
+    return ServiceResult.Failed<string>(
+      { errorMessage: "missing attestation" },
+      400,
+    );
   }
   if (!attestation.evidence && typeof attestation.evidence !== "string") {
-    return {
-      result: false,
-      errorMessage: "missing or bad attestation.evidence",
-      statusCode: 400,
-    };
+    return ServiceResult.Failed<string>(
+      { errorMessage: "missing or bad attestation.evidence" },
+      400,
+    );
   }
   if (
     !attestation.endorsements &&
     typeof attestation.endorsements !== "string"
   ) {
-    return {
-      result: false,
-      errorMessage: "missing or bad attestation.endorsements",
-      statusCode: 400,
-    };
+    return ServiceResult.Failed<string>(
+      { errorMessage: "missing or bad attestation.evidence" },
+      400,
+    );
   }
   if (
     !attestation.uvm_endorsements &&
     typeof attestation.uvm_endorsements !== "string"
   ) {
-    return {
-      result: false,
-      errorMessage: "missing or bad attestation.uvm_endorsements",
-      statusCode: 400,
-    };
+    return ServiceResult.Failed<string>(
+      { errorMessage: "missing or bad attestation.uvm_endorsements" },
+      400,
+    );
   }
   if (
     !attestation.endorsed_tcb &&
     typeof attestation.endorsed_tcb !== "string"
   ) {
-    return {
-      result: false,
-      errorMessage: "missing or bad attestation.endorsed_tcb",
-      statusCode: 400,
-    };
+    return ServiceResult.Failed<string>(
+      { errorMessage: "missing or bad attestation.endorsed_tcb" },
+      400,
+    );
   }
   let evidence: ArrayBuffer;
   let endorsements: ArrayBuffer;
@@ -152,33 +148,30 @@ const validateAttestation = (
       .typedArray(Uint8Array)
       .encode(Base64.toUint8Array(attestation.evidence));
   } catch (exception: any) {
-    return {
-      result: false,
-      errorMessage: `Malformed attestation.evidence.`,
-      statusCode: 400,
-    };
+    return ServiceResult.Failed<string>(
+      { errorMessage: "Malformed attestation.evidence" },
+      400,
+    );
   }
   try {
     endorsements = ccfapp
       .typedArray(Uint8Array)
       .encode(Base64.toUint8Array(attestation.endorsements));
   } catch (exception: any) {
-    return {
-      result: false,
-      errorMessage: `Malformed attestation.endorsements.`,
-      statusCode: 400,
-    };
+    return ServiceResult.Failed<string>(
+      { errorMessage: "Malformed attestation.endorsements" },
+      400,
+    );
   }
   try {
     uvm_endorsements = ccfapp
       .typedArray(Uint8Array)
       .encode(Base64.toUint8Array(attestation.uvm_endorsements));
   } catch (exception: any) {
-    return {
-      result: false,
-      errorMessage: `Malformed attestation.uvm_endorsements.`,
-      statusCode: 400,
-    };
+    return ServiceResult.Failed<string>(
+      { errorMessage: "Malformed attestation.uvm_endorsements" },
+      400,
+    );
   }
   try {
     const endorsed_tcb = attestation.endorsed_tcb;
@@ -210,12 +203,13 @@ const validateAttestation = (
     );
 
     if (Object.keys(keyReleasePolicy).length === 0) {
-      return {
-        result: false,
-        errorMessage:
-          "The key release policy is missing. Please propose a new key release policy",
-        statusCode: 400,
-      };
+      return ServiceResult.Failed<string>(
+        {
+          errorMessage:
+            "The key release policy is missing. Please propose a new key release policy",
+        },
+        400,
+      );
     }
 
     for (let inx = 0; inx < Object.keys(keyReleasePolicy).length; inx++) {
@@ -229,12 +223,10 @@ const validateAttestation = (
         `Checking key ${key}, typeof attestationValue: ${typeof attestationValue}, isUndefined: ${isUndefined}, attestation value: ${attestationValue}, policyValue: ${policyValue}`,
       );
       if (isUndefined) {
-        console.log(`Policy claim ${key} is missing from attestation`);
-        return {
-          result: false,
-          errorMessage: `Missing claim in attestation: ${key}`,
-          statusCode: 400,
-        };
+        return ServiceResult.Failed<string>(
+          { errorMessage: `Missing claim in attestation: ${key}` },
+          400,
+        );
       }
       if (
         policyValue.filter((p) => {
@@ -242,25 +234,21 @@ const validateAttestation = (
           return p === attestationValue;
         }).length === 0
       ) {
-        return {
-          result: false,
-          errorMessage: `Attestation claim ${key}, value ${attestationValue} does not match policy values: ${policyValue}`,
-          statusCode: 400,
-        };
+        return ServiceResult.Failed<string>(
+          {
+            errorMessage: `Attestation claim ${key}, value ${attestationValue} does not match policy values: ${policyValue}`,
+          },
+          400,
+        );
       }
     }
 
-    return {
-      result: true,
-      statusCode: 200,
-      attestationClaims,
-    };
+    return ServiceResult.Succeeded<IAttestationReport>(attestationClaims);
   } catch (exception: any) {
-    return {
-      result: false,
-      errorMessage: `Internal error: ${exception.message}.`,
-      statusCode: 500,
-    };
+    return ServiceResult.Failed<string>(
+      { errorMessage: `Internal error: ${exception.message}` },
+      500,
+    );
   }
 };
 
@@ -349,16 +337,12 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
 
   // Validate input
   if (!body || !attestation) {
-    const message = `The body is not a key request: ${JSON.stringify(body)}`;
-    console.error(message);
-    return {
-      statusCode: 400,
-      body: {
-        error: {
-          message,
-        },
+    return ServiceResult.Failed<string>(
+      {
+        errorMessage: `The body is not a key request: ${JSON.stringify(body)}`,
       },
-    };
+      400,
+    );
   }
 
   // check if caller has a valid identity
@@ -378,14 +362,10 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
   } else {
     [id, kid] = hpkeKeyIdMap.latestItem();
     if (kid === undefined) {
-      return {
-        statusCode: 400,
-        body: {
-          error: {
-            message: `No keys in store`,
-          },
-        },
-      };
+      return ServiceResult.Failed<string>(
+        { errorMessage: `No keys in store` },
+        400,
+      );
     }
   }
 
@@ -393,57 +373,38 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
   if (query && query["fmt"]) {
     fmt = query["fmt"];
     if (!(fmt === "jwk" || fmt === "tink")) {
-      return {
-        statusCode: 400,
-        body: {
-          error: {
-            message: `Wrong fmt query parameter '${fmt}'. Must be jwt or tink.`,
-          },
+      return ServiceResult.Failed<string>(
+        {
+          errorMessage: `Wrong fmt query parameter '${fmt}'. Must be jwt or tink.`,
         },
-      };
+        400,
+      );
     }
   }
 
-  let validateAttestationResult: IAttestationValidationResult;
+  let validateAttestationResult: ServiceResult<string | IAttestationReport>;
   try {
     validateAttestationResult = validateAttestation(attestation);
-    if (!validateAttestationResult.result) {
-      return {
-        statusCode: validateAttestationResult.statusCode,
-        body: {
-          error: {
-            message: validateAttestationResult.errorMessage,
-          },
-        },
-      };
+    if (!validateAttestationResult.success) {
+      return validateAttestationResult;
     }
   } catch (exception: any) {
-    const message = `Error in validating attestation (${attestation}): ${exception.message}`;
-    console.error(message);
-    return {
-      statusCode: 500,
-      body: {
-        error: {
-          message,
-          exception,
-        },
-        inner: exception,
+    return ServiceResult.Failed<string>(
+      {
+        errorMessage: `Error in validating attestation (${attestation}): ${exception.message}`,
       },
-    };
+      500,
+    );
   }
 
   // Be sure to request item and the receipt
   console.log(`Get key with kid ${kid}`);
   const keyItem = hpkeKeysMap.store.get(kid) as IKeyItem;
   if (keyItem === undefined) {
-    return {
-      statusCode: 404,
-      body: {
-        error: {
-          message: `kid ${kid} not found in store`,
-        },
-      },
-    };
+    return ServiceResult.Failed<string>(
+      { errorMessage: `kid ${kid} not found in store` },
+      404,
+    );
   }
   const receipt = hpkeKeysMap.receipt(kid);
 
@@ -491,18 +452,10 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
     );
     return { body: response };
   } catch (exception: any) {
-    const message = `Error Key (${id}): ${exception.message}`;
-    console.error(message);
-    return {
-      statusCode: 500,
-      body: {
-        error: {
-          message,
-        },
-        inner: exception,
-        stack: exception.stack,
-      },
-    };
+    return ServiceResult.Failed<string>(
+      { errorMessage: `Error Key (${id}): ${exception.message}` },
+      500,
+    );
   }
 };
 
@@ -553,18 +506,12 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
   // Gen
   // Validate input
   if (!body || !wrappedKid || !attestation || !wrappingKey) {
-    const message = `The body is not a unwrap key request: ${JSON.stringify(
-      body,
-    )}`;
-    console.error(message);
-    return {
-      statusCode: 400,
-      body: {
-        error: {
-          message,
-        },
+    return ServiceResult.Failed<string>(
+      {
+        errorMessage: `The body is not a unwrap key request: ${JSON.stringify(body)}`,
       },
-    };
+      400,
+    );
   }
 
   const query = queryParams(request);
@@ -572,45 +519,34 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
   if (query && query["fmt"]) {
     fmt = query["fmt"];
     if (!(fmt === "jwk" || fmt === "tink")) {
-      return {
-        statusCode: 400,
-        body: {
-          error: {
-            message: `Wrong fmt query parameter '${fmt}'. Must be jwt or tink.`,
-          },
+      return ServiceResult.Failed<string>(
+        {
+          errorMessage: `Wrong fmt query parameter '${fmt}'. Must be jwt or tink.`,
         },
-      };
+        400,
+      );
     }
   }
 
   // validate attestation
   const validateAttestationResult = validateAttestation(attestation);
-  if (!validateAttestationResult.result) {
-    return {
-      statusCode: validateAttestationResult.statusCode,
-      body: {
-        error: {
-          message: validateAttestationResult.errorMessage,
-        },
-      },
-    };
+  if (!validateAttestationResult.success) {
+    return validateAttestationResult;
   }
 
   // Check if wrapping key match attestation
   if (wrappingKeyFromRequest.result && wrappingKeyFromRequest.wrappingKey) {
     if (
-      !validateAttestationResult.attestationClaims[
-        "x-ms-sevsnpvm-reportdata"
-      ].startsWith(wrappingKeyFromRequest.wrappingKeyHash!)
+      !validateAttestationResult.content["x-ms-sevsnpvm-reportdata"].startsWith(
+        wrappingKeyFromRequest.wrappingKeyHash!,
+      )
     ) {
-      return {
-        statusCode: 400,
-        body: {
-          error: {
-            message: `wrapping key hash ${validateAttestationResult.attestationClaims["x-ms-sevsnpvm-reportdata"]} does not match wrappingKey`,
-          },
+      return ServiceResult.Failed<string>(
+        {
+          errorMessage: `wrapping key hash ${validateAttestationResult.content["x-ms-sevsnpvm-reportdata"]} does not match wrappingKey`,
         },
-      };
+        400,
+      );
     }
   }
 
@@ -618,15 +554,12 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
   console.log(`Get key with kid ${wrappedKid}`);
   const keyItem = hpkeKeysMap.store.get(wrappedKid) as IKeyItem;
   if (keyItem === undefined) {
-    return {
-      statusCode: 404,
-      body: {
-        error: {
-          message: `kid ${wrappedKid} not found in store`,
-        },
-      },
-    };
+    return ServiceResult.Failed<string>(
+      { errorMessage: `kid ${wrappedKid} not found in store` },
+      404,
+    );
   }
+
   const receipt = hpkeKeysMap.receipt(wrappedKid);
 
   // Get receipt if available
@@ -668,20 +601,11 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
       console.log(`key JWT returns (${wrappedKid}, ${wrapped.length}): `, ret);
       return { body: ret };
     }
-    return { body: "" };
   } catch (exception: any) {
-    const message = `Error unwrap (${wrappedKid}): ${exception.message}`;
-    console.error(message);
-    return {
-      statusCode: 500,
-      body: {
-        error: {
-          message,
-          exception,
-        },
-        inner: exception,
-      },
-    };
+    return ServiceResult.Failed<string>(
+      { errorMessage: `Error unwrap (${wrappedKid}): ${exception.message}` },
+      500,
+    );
   }
 };
 
