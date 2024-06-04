@@ -169,12 +169,12 @@ $root_dir/scripts/submit_proposal.sh --network-url ${server} \
 echo "Enable Jwt authentication: submit proposal to network and vote as accepted"
 # Enable Test-Identity Provider jwt tokens
 $root_dir/scripts/submit_proposal.sh --network-url ${server} \
- --proposal-file "${app_dir}/workspace/proposals/set_jwt_issuer_test_proposal.json" \
+ --proposal-file "${app_dir}/governance/jwt/set_jwt_demo_validation_policy_proposal.json" \
  --certificate-dir $certs
 
 # Enable MS-Identity Provider jwt tokens
 $root_dir/scripts/submit_proposal.sh --network-url ${server} \
- --proposal-file "${app_dir}/workspace/proposals/set_jwt_issuer_ms_proposal.json" \
+ --proposal-file "${app_dir}/governance/jwt/set_jwt_ms_validation_policy_proposal.json" \
  --certificate-dir $certs
 
 ##############################################
