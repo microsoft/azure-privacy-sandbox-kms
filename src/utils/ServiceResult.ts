@@ -3,7 +3,7 @@
 
 export interface ErrorResponse {
   errorMessage: string;
-  errorType: string;
+  errorType?: string;
   details?: unknown;
 }
 
@@ -23,7 +23,7 @@ export class ServiceResult<T> {
   private constructor(
     content: T | null,
     error: ErrorResponse | null,
-    success: boolean,
+    success: boolean = false,
     statusCode: number,
   ) {
     this.content = content;
@@ -42,6 +42,7 @@ export class ServiceResult<T> {
     error: ErrorResponse,
     statusCode: number = 400,
   ): ServiceResult<T> {
+    console.log(`Failed result: ${statusCode}, `, error);
     return new ServiceResult<T>(null, error, false, statusCode);
   }
 }

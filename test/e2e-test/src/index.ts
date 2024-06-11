@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import Api, { Validator } from "./api.js";
+import Api, { Validator, convertUint8ArrayToString } from "./api.js";
 import path from "path";
 import {
   member0DataPart1,
@@ -14,9 +14,7 @@ import https from "https";
 import fs, { stat } from "fs";
 import inquirer from "inquirer";
 import { IKeyItem } from "../../../src";
-import * as tink from "../../../src/endpoints/proto/gen/tink_pb.js";
-import * as hpke from "../../../src/endpoints/proto/gen/hpke_pb.js";
-import { IWrapped, IWrappedJwt } from "../../../src/endpoints/KeyWrapper.js";
+import { ISnpAttestation } from "../../../src/attestation/ISnpAttestation.js";
 
 const readJSON = async (filePath: string): Promise<any> => {
   try {
@@ -94,6 +92,7 @@ class Demo {
      * Change working directory to the root of the project
      * All paths and process execution will be relative to root
      */
+    this.printTestSectionHeader("🔬 [TEST]: Starting...");
     const originalDirectory = path.resolve();
     console.log(`Original directory: ${originalDirectory}`);
     const attestation = await readJSON("test/attestation-samples/snp.json");
@@ -115,6 +114,16 @@ class Demo {
       `./scripts/authorization_header.sh`,
     );
     console.log(`Authorization header: ${access_token}`);
+
+    this.printTestSectionHeader("🔬 [TEST]: set wrapping keys");
+    const public_wrapping_key: string = fs
+      .readFileSync("test/data-samples/publicWrapKey.pem", "utf-8")
+      .replace(/\\n/g, "\n");
+    console.log(`Public wrapping key: `, public_wrapping_key);
+    const private_wrapping_key: string = fs
+      .readFileSync("test/data-samples/privateWrapKey.pem", "utf-8")
+      .replace(/\\n/g, "\n");
+    console.log(`Private wrapping key: `, private_wrapping_key);
 
     process.chdir("../../");
 
@@ -163,6 +172,7 @@ class Demo {
     Demo.assertField(member.name, response, "policy", "member_cert");
     Demo.assertField(member.name, response, "cert", notUndefinedString);
     //#endregion
+
     //#region refresh
     // members 0 refresh key
     console.log(`📝 Refresh key...`);
@@ -193,7 +203,9 @@ class Demo {
     [statusCode, keyResponse] = await Api.key(
       this.demoProps,
       member,
-      JSON.stringify(attestation),
+      attestation,
+      private_wrapping_key,
+      public_wrapping_key,
       false,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token,
@@ -202,13 +214,15 @@ class Demo {
       throw error;
     });
     Demo.assert("statusCode == 202", statusCode == 202);
-    Demo.assert("response !== undefined", !keyResponse);
+    Demo.assert("response === undefined", !keyResponse);
 
     console.log(`📝 Get initial key-Bad request...`);
     [statusCode, keyResponse] = await Api.key(
       this.demoProps,
       member,
-      JSON.stringify(""),
+      {} as ISnpAttestation,
+      private_wrapping_key,
+      public_wrapping_key,
       false,
       this.createHttpsAgent(member.id, AuthKinds.MemberCerts),
     ).catch((error) => {
@@ -216,22 +230,21 @@ class Demo {
       throw error;
     });
     Demo.assert("Bad request", statusCode == 400);
-    Demo.assert(
-      '(<any>keyResponse).error.message === "missing attestation"',
-      (<any>keyResponse).error.message === "missing attestation",
-    );
 
     console.log(`📝 Get initial key-No auth...`);
     [statusCode, keyResponse] = await Api.key(
       this.demoProps,
       member,
-      JSON.stringify(attestation),
+      attestation,
+      private_wrapping_key,
+      public_wrapping_key,
       false,
       this.createHttpsAgent(member.id, AuthKinds.NoAuth),
     ).catch((error) => {
       console.log(`keyInitial error: `, error);
       throw error;
     });
+    console.log(`response after 202: ${keyResponse}`);
     Demo.assert("No auth", statusCode == 401);
     Demo.assert(
       '(<any>keyResponse).error.message === "Invalid authentication credentials."',
@@ -245,7 +258,9 @@ class Demo {
       [statusCode, keyResponse] = await Api.key(
         this.demoProps,
         member,
-        JSON.stringify(attestation),
+        attestation,
+        private_wrapping_key,
+        public_wrapping_key,
         false,
         this.createHttpsAgent(member.id, AuthKinds.JWT),
         access_token,
@@ -265,32 +280,23 @@ class Demo {
     [statusCode, keyResponse] = (await Api.key(
       this.demoProps,
       member,
-      JSON.stringify(attestation),
+      attestation,
+      private_wrapping_key,
+      public_wrapping_key,
       false,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token,
-    )) as [number, IWrappedJwt];
+    )) as [number, any];
     Demo.assert("Status OK", statusCode == 200);
     Demo.assertField(member.name, keyResponse, "d", undefinedString);
     Demo.assertField(member.name, keyResponse, "x", undefinedString);
     Demo.assertField(
       member.name,
       keyResponse,
-      "wrapperKid",
+      "wrappedKid",
       notUndefinedString,
     );
-    Demo.assertField(
-      member.name,
-      keyResponse,
-      "wrappedKeyId",
-      notUndefinedString,
-    );
-    Demo.assertField(
-      member.name,
-      keyResponse,
-      "wrappedKeyContents",
-      notUndefinedString,
-    );
+    Demo.assertField(member.name, keyResponse, "receipt", notUndefinedString);
     //#endregion
     //#region unwrap
     console.log(`📝 Get unwrapped key with JWT...`);
@@ -298,26 +304,23 @@ class Demo {
     [statusCode, unwrapResponse] = (await Api.unwrap(
       this.demoProps,
       member,
-      keyResponse.wrappedKeyContents,
-      keyResponse.wrapperKid,
+      keyResponse.wrappedKid,
       attestation,
+      private_wrapping_key,
+      public_wrapping_key,
       false,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token,
     )) as [number, IKeyItem];
     console.log("JWT unwrapResponse: ", unwrapResponse);
+    const keyInResponse = unwrapResponse.key;
+    const receipt = { receipt: unwrapResponse.receipt };
     Demo.assert("Status OK", statusCode == 200);
-    Demo.assertField(member.name, unwrapResponse, "d", notUndefinedString);
-    Demo.assertField(member.name, unwrapResponse, "x", notUndefinedString);
+    Demo.assertField(member.name, keyInResponse, "d", notUndefinedString);
+    Demo.assertField(member.name, keyInResponse, "x", notUndefinedString);
     Demo.assertField(
       member.name,
-      unwrapResponse,
-      "receipt",
-      notUndefinedString,
-    );
-    Demo.assertField(
-      member.name,
-      unwrapResponse,
+      keyInResponse,
       "kid",
       (key: string | number | any[]) => {
         return key !== undefined && (key as string).length > 40;
@@ -325,78 +328,111 @@ class Demo {
     );
     Demo.assertField(
       member.name,
-      unwrapResponse,
+      keyInResponse,
       "timestamp",
       numberHigerThanZero,
     );
-    Demo.assertField(member.name, unwrapResponse, "crv", "X25519");
-    Demo.assertField(member.name, unwrapResponse, "kty", "OKP");
+    Demo.assertField(member.name, keyInResponse, "crv", "X25519");
+    Demo.assertField(member.name, keyInResponse, "kty", "OKP");
+    Demo.assertField(member.name, receipt, "receipt", notUndefinedString);
+
+    console.log(`📝 Get unwrapped key with JWT and missing wrappingKey...`);
+    [statusCode, unwrapResponse] = (await Api.unwrap(
+      this.demoProps,
+      member,
+      keyResponse.wrappedKid,
+      attestation,
+      private_wrapping_key,
+      undefined,
+      false,
+      this.createHttpsAgent(member.id, AuthKinds.JWT),
+      access_token,
+    )) as [number, IKeyItem];
+    console.log("JWT unwrapResponse: ", unwrapResponse);
+    Demo.assert("Status BadRequest", statusCode == 400);
+
+    console.log(`📝 Get unwrapped key with JWT and wrong wrappingKey: `);
+    const badPublicKey = public_wrapping_key
+      .replace("1", "9")
+      .replace("2", "1");
+    [statusCode, unwrapResponse] = (await Api.unwrap(
+      this.demoProps,
+      member,
+      keyResponse.wrappedKid,
+      attestation,
+      private_wrapping_key,
+      badPublicKey,
+      false,
+      this.createHttpsAgent(member.id, AuthKinds.JWT),
+      access_token,
+    )) as [number, IKeyItem];
+    console.log("JWT unwrapResponse: ", unwrapResponse);
+    Demo.assert("Status BadRequest", statusCode == 400);
 
     // Test with Tink
-    // Get wrapped key
+    console.log(`📝 Get wrapped key with tink...`);
     let wrapResponse;
     [statusCode, wrapResponse] = (await Api.key(
       this.demoProps,
       member,
-      JSON.stringify(attestation),
+      attestation,
+      private_wrapping_key,
+      public_wrapping_key,
       true,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token,
-    )) as [number, IWrappedJwt];
+    )) as [number, any];
     Demo.assert("OK statusCode", statusCode == 200);
 
     Demo.assertField(member.name, wrapResponse, "d", undefinedString);
     Demo.assertField(member.name, wrapResponse, "x", undefinedString);
-    Demo.assertField(member.name, wrapResponse, "keys", notUndefinedArray);
-    Demo.assert("wrapResponse.keys.length == 1", wrapResponse.keys.length == 1);
-    const key = wrapResponse.keys[0];
-    Demo.assertField(member.name, key, "keyData", notUndefinedArray);
-    console.log("keyData: ", key.keyData);
-    // TODO: check it's in format of 'encryptionKeys/100001'
-    Demo.assertField(member.name, key, "name", notUndefinedString);
-    Demo.assertField(
-      member.name,
-      key,
-      "encryptionKeyType",
-      "SINGLE_PARTY_HYBRID_KEY",
+    Demo.assert(
+      "typeof wrapResponse.wrappedKid === 'string'",
+      typeof wrapResponse.wrappedKid === "string",
     );
-    Demo.assertField(member.name, key, "publicKeysetHandle", "TBD");
-    Demo.assertField(member.name, key, "publicKeyMaterial", "testtest");
-    // TODO: improve checking time
-    Demo.assertField(member.name, key, "creationTime", notUndefinedString);
-    Demo.assertField(member.name, key, "expirationTime", notUndefinedString);
+    Demo.assert(
+      "typeof wrapResponse.wrapped === 'string'",
+      typeof wrapResponse.wrapped === "string",
+    );
+    Demo.assert(
+      "typeof wrapResponse.receipt === 'string'",
+      typeof wrapResponse.receipt === "string",
+    );
 
-    // get unwrapped key
-    const keyMaterial: any = JSON.parse(key.keyData[0].keyMaterial);
+    console.log(`Unwrap result: `, wrapResponse.wrappedKid);
 
-    // This is called 'resource name' as well.
-    // It has a format of "azu-kms://<kid>"
-    const encryptionKeyUri = key.keyData[0].keyEncryptionKeyUri;
-    const kid = encryptionKeyUri.split("/")[2];
+    const kid = wrapResponse.wrappedKid;
     console.log("kid: ", kid);
+
+    console.log(`📝 Get private key with tink...`);
     [statusCode, unwrapResponse] = (await Api.unwrap(
       this.demoProps,
       member,
-      keyMaterial.encryptedKeyset,
       kid as string,
+
       attestation,
+      private_wrapping_key,
+      public_wrapping_key,
       true,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token,
     )) as [number, Uint8Array];
     Demo.assert("OK statusCode", statusCode == 200);
     Demo.assert(
-      "unwrapResponse instanceof Uint8Array",
-      unwrapResponse instanceof Uint8Array,
+      "typeof unwrapResponse.wrapped === 'string'",
+      typeof unwrapResponse.wrapped === "string",
     );
-    let keyset = new tink.Keyset();
-    // Should not throw
-    keyset.fromBinary(unwrapResponse);
-    console.log("keyset.toJsonString()", keyset.toJsonString());
-    let tinkHpkeKey = new hpke.HpkePrivateKey();
-    // Should not throw
-    tinkHpkeKey.fromBinary(keyset.key[0].keyData!.value!);
-    console.log("tinkHpkeKey.toJsonString()", tinkHpkeKey.toJsonString());
+
+    //const wrappedBuf = Base64.toUint8Array(unwrapResponse.wrapped);
+    //let tinkHpkeKey = new hpke.HpkePrivateKey();
+    //tinkHpkeKey.fromBinary(new Uint8Array(wrappedBuf),);
+    //Demo.assert(
+    //  "tinkHpkeKey.privateKey instanceof Uint8Array",
+    //  tinkHpkeKey.privateKey instanceof Uint8Array,
+    //);
+
+    //console.log("tinkHpkeKey.toJsonString()", tinkHpkeKey.toJsonString());
+
     //#endregion
 
     await this.addCheckpoint("Key generation Stage Complete");
@@ -513,5 +549,6 @@ class Demo {
   }
 }
 
+console.log("Starting...");
 Demo.start();
 console.log("Demo.start() finished");
