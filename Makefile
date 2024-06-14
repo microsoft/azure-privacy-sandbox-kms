@@ -51,7 +51,7 @@ stop-all: stop-host stop-idp # Stop all services
 start-idp:  ## 🏃 Start the idp for testing jwt
 	@echo -e "\e[34m$@\e[0m" || true
 	mkdir -p ${KMS_WORKSPACE}
-	cd test/utils/jwt && KMS_WORKSPACE=${KMS_WORKSPACE} nohup npm run start  &
+	cd test/utils/jwt && KMS_WORKSPACE=${KMS_WORKSPACE} nohup npm run start > nohup.out 2>&1 &
 	./scripts/wait_idp_ready.sh
 
 # Start hosting the application using `sandbox.sh` and enable custom JWT authentication
