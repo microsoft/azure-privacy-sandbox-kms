@@ -237,3 +237,7 @@ which protoc-gen-ts
 
 We are using [protobuf-es](https://github.com/bufbuild/protobuf-es) to use protobuf.
 When you want to update protobuf generated code run `npm run build-proto`.
+
+# Contributing
+
+To take administrator actions such as adding users as contributors, please refer to [engineering hub](https://eng.ms/docs/initiatives/open-source-at-microsoft/github/opensource/repos/jit)
