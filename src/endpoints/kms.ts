@@ -773,7 +773,7 @@ export const refresh = (request: ccfapp.Request<void>) => {
     hpkeKeyIdMap.storeItem(id, keyItem.kid);
 
     // Store HPKE key pair
-    hpkeKeysMap.storeItem(keyItem.kid, keyItem, keyItem.d);
+    hpkeKeysMap.storeItem(keyItem.kid, keyItem, keyItem.x);
     console.log(`Key item with id ${id} and kid ${keyItem.kid} stored`);
 
     delete keyItem.d;
