@@ -5,7 +5,7 @@
         "js_module": "endpoints/kms.js",
         "js_function": "key_release_policy",
         "forwarding_required": "sometimes",
-        "authn_policies": ["jwt", "user_cert", "member_cert"],
+        "authn_policies": ["member_cert"],
         "mode": "readonly",
         "openapi": {
           "responses": {

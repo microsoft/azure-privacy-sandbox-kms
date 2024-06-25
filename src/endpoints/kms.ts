@@ -280,7 +280,7 @@ export const setKeyHeaders = (): { [key: string]: string } => {
 
 const requestHasWrappingKey = (
   body: IUnwrapRequest,
-): IWrappingKeyValidationResult => {
+): ServiceResult<{ wrappingKey: ArrayBuffer; wrappingKeyHash: string }> => {
   let wrappingKey = body.wrappingKey;
   let wrappingKeyBuf: ArrayBuffer;
   let wrappingKeyHash: string;
@@ -288,31 +288,34 @@ const requestHasWrappingKey = (
     console.log(`requestHasWrappingKey=> wrappingKey: '${wrappingKey}'`);
     if (!isPemPublicKey(wrappingKey)) {
       console.log(`Key-> Not a pem key`);
-      return {
-        result: false,
-        statusCode: 400,
-        body: {
-          error: {
-            message: `${wrappingKey} not a PEM public key`,
-          },
+      return ServiceResult.Failed<{
+        wrappingKey: ArrayBuffer;
+        wrappingKeyHash: string;
+      }>(
+        {
+          errorMessage: `${wrappingKey} not a PEM public key`,
         },
-      };
+        400,
+      );
     }
     wrappingKeyBuf = ccf.strToBuf(wrappingKey);
     wrappingKeyHash = KeyGeneration.calculateHexHash(wrappingKeyBuf);
     console.log(`Key->wrapping key hash: ${wrappingKeyHash}`);
-    return {
-      result: true,
-      statusCode: 200,
+    return ServiceResult.Succeeded({
       wrappingKey: wrappingKeyBuf,
       wrappingKeyHash,
-    };
+    });
   }
 
-  return {
-    result: true,
-    statusCode: 200,
-  };
+  return ServiceResult.Failed<{
+    wrappingKey: ArrayBuffer;
+    wrappingKeyHash: string;
+  }>(
+    {
+      errorMessage: `Missing wrappingKey`,
+    },
+    400,
+  );
 };
 
 //#endregion
@@ -460,7 +463,11 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
 };
 
 // Unwrap private key
-export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
+export const unwrapKey = (
+  request: ccfapp.Request<IUnwrapRequest>,
+):
+  | ServiceResult<string>
+  | ServiceResult<{ wrapped: string; receipt: string }> => {
   // check if caller has a valid identity
   const [_, isValidIdentity] = new AuthenticationService().isAuthenticated(
     request,
@@ -481,25 +488,25 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
   console.log(`unwrapKey=> wrappingKey: ${wrappingKey}`);
   const wrappingKeyFromRequest = requestHasWrappingKey(body);
   console.log(`unwrapKey->wrappingKeyFromRequest: `, wrappingKeyFromRequest);
-  if (wrappingKeyFromRequest.body) {
-    // WrappingKey has errors
-    return {
-      statusCode: wrappingKeyFromRequest.statusCode,
-      body: wrappingKeyFromRequest.body,
-    };
-  }
-  if (!wrappingKeyFromRequest.wrappingKey) {
-    return {
-      statusCode: 400,
-      body: {
-        error: {
-          message: `Missing wrappingKey in request`,
-        },
-      },
-    };
-  }
-  const wrappingKeyBuf = wrappingKeyFromRequest.wrappingKey;
 
+  if (wrappingKeyFromRequest.success === false) {
+    // WrappingKey has errors
+    return ServiceResult.Failed<string>(
+      wrappingKeyFromRequest.error,
+      wrappingKeyFromRequest.statusCode,
+    );
+  }
+
+  if (!wrappingKeyFromRequest.content.wrappingKey) {
+    return ServiceResult.Failed<string>(
+      {
+        errorMessage: `Missing wrappingKey in request`,
+      },
+      400,
+    );
+  }
+
+  const wrappingKeyBuf = wrappingKeyFromRequest.content.wrappingKey;
   const wrappingKeyHash = KeyGeneration.calculateHexHash(wrappingKeyBuf);
   console.log(`unwrapKey->wrapping key hash: ${wrappingKeyHash}`);
 
@@ -531,23 +538,24 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
   // validate attestation
   const validateAttestationResult = validateAttestation(attestation);
   if (!validateAttestationResult.success) {
-    return validateAttestationResult;
+    return ServiceResult.Failed<string>(
+      validateAttestationResult.error,
+      validateAttestationResult.statusCode,
+    );
   }
 
   // Check if wrapping key match attestation
-  if (wrappingKeyFromRequest.result && wrappingKeyFromRequest.wrappingKey) {
-    if (
-      !validateAttestationResult.content["x-ms-sevsnpvm-reportdata"].startsWith(
-        wrappingKeyFromRequest.wrappingKeyHash!,
-      )
-    ) {
-      return ServiceResult.Failed<string>(
-        {
-          errorMessage: `wrapping key hash ${validateAttestationResult.content["x-ms-sevsnpvm-reportdata"]} does not match wrappingKey`,
-        },
-        400,
-      );
-    }
+  if (
+    !validateAttestationResult.content["x-ms-sevsnpvm-reportdata"].startsWith(
+      wrappingKeyHash,
+    )
+  ) {
+    return ServiceResult.Failed<string>(
+      {
+        errorMessage: `wrapping key hash ${validateAttestationResult.content["x-ms-sevsnpvm-reportdata"]} does not match wrappingKey`,
+      },
+      400,
+    );
   }
 
   // Be sure to request item and the receipt
@@ -562,22 +570,16 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
 
   const receipt = hpkeKeysMap.receipt(wrappedKid);
 
-  // Get receipt if available
+  // Get receipt if available, otherwise return accepted
   if (receipt !== undefined) {
     keyItem.receipt = receipt;
     console.log(`Key->Receipt: ${receipt}`);
   } else {
-    return {
-      statusCode: 202,
-      headers: {
-        "retry-after": 3,
-      },
-    };
+    return ServiceResult.Accepted();
   }
 
   // Get wrapped key
   try {
-    //let receipt = "";
     let wrapKey;
     if (fmt == "tink") {
       console.log(`Retrieve key in tink format`);
@@ -590,7 +592,7 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
         `key tink returns (${wrappedKid}, ${JSON.stringify(wrapped).length}): `,
         ret,
       );
-      return { body: ret };
+      return ServiceResult.Succeeded<{ wrapped: string; receipt: string }>(ret);
     } else {
       // Default is JWT.
       console.log(
@@ -599,7 +601,7 @@ export const unwrapKey = (request: ccfapp.Request<IUnwrapRequest>) => {
       const wrapped = KeyWrapper.wrapKeyJwt(wrappingKeyBuf, keyItem);
       const ret = { wrapped, receipt };
       console.log(`key JWT returns (${wrappedKid}, ${wrapped.length}): `, ret);
-      return { body: ret };
+      return ServiceResult.Succeeded<{ wrapped: string; receipt: string }>(ret);
     }
   } catch (exception: any) {
     return ServiceResult.Failed<string>(

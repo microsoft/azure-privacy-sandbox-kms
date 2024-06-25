@@ -25,6 +25,7 @@ export class ServiceResult<T> {
     error: ErrorResponse | null,
     success: boolean = false,
     statusCode: number,
+    headers?: { [key: string]: string | number },
   ) {
     this.content = content;
     this.error = error;
@@ -36,6 +37,12 @@ export class ServiceResult<T> {
 
   public static Succeeded<T>(content: T): ServiceResult<T> {
     return new ServiceResult<T>(content, null, true, 200);
+  }
+
+  public static Accepted(): ServiceResult<string> {
+    return new ServiceResult<string>(null, null, true, 202, {
+      "retry-after": 3,
+    });
   }
 
   public static Failed<T>(
