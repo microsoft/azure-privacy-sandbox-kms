@@ -35,7 +35,7 @@ export class UserCertValidator implements IValidatorService {
     const userCaller = request.caller as unknown as UserMemberAuthnIdentity;
     const identityId = userCaller.id;
     const isValid = this.isUser(identityId);
-    if (isValid.success && isValid.content) {
+    if (isValid.success && isValid.body) {
       return ServiceResult.Succeeded(identityId);
     }
     return ServiceResult.Failed({

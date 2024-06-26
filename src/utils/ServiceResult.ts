@@ -17,17 +17,17 @@ export class ServiceResult<T> {
   public readonly failure: boolean;
   public readonly statusCode: number;
   public readonly status: string;
-  public readonly content: T | null;
+  public readonly body: T | null;
   public readonly error: ErrorResponse | null;
 
   private constructor(
-    content: T | null,
+    body: T | null,
     error: ErrorResponse | null,
     success: boolean = false,
     statusCode: number,
     headers?: { [key: string]: string | number },
   ) {
-    this.content = content;
+    this.body = body;
     this.error = error;
     this.success = success;
     this.failure = !success;
@@ -35,11 +35,13 @@ export class ServiceResult<T> {
     this.status = success ? "Success" : "Error";
   }
 
-  public static Succeeded<T>(content: T): ServiceResult<T> {
-    return new ServiceResult<T>(content, null, true, 200);
+  public static Succeeded<T>(body: T, headers?: { [key: string]: string | number }): ServiceResult<T> {
+    console.log('Response Succeeded: ', body);
+    return new ServiceResult<T>(body, null, true, 200, headers);
   }
 
   public static Accepted(): ServiceResult<string> {
+    console.log('Response Accepted');
     return new ServiceResult<string>(null, null, true, 202, {
       "retry-after": 3,
     });

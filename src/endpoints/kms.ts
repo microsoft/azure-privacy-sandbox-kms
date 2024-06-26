@@ -16,24 +16,17 @@ import { IKeyReleasePolicyProps } from "../policies/IKeyReleasePolicyProps";
 import { ISnpAttestation } from "../attestation/ISnpAttestation";
 import { SnpAttestationClaims } from "../attestation/SnpAttestationClaims";
 import { KeyGeneration } from "./KeyGeneration";
-import { TinkKey, TinkPublicKey } from "./TinkKey";
+import { ITinkPublicKeySet, TinkKey, TinkPublicKey } from "./TinkKey";
 import { IWrapped, IWrappedJwt, KeyWrapper } from "./KeyWrapper";
 import { AuthenticationService } from "../authorization/AuthenticationService";
 import { IAttestationReport } from "../attestation/ISnpAttestationReport";
 import { ServiceResult } from "../utils/ServiceResult";
+import { head } from "lodash-es";
 export interface IAttestationValidationResult {
   result: boolean;
   errorMessage?: string;
   statusCode: number;
   attestationClaims?: IAttestationReport;
-}
-
-export interface IWrappingKeyValidationResult {
-  result: boolean;
-  statusCode: number;
-  body?: object;
-  wrappingKeyHash?: string;
-  wrappingKey?: ArrayBuffer;
 }
 
 export interface IKeyRequest {
@@ -197,8 +190,7 @@ const validateAttestation = (
     console.log(
       `Key release policy: ${JSON.stringify(
         keyReleasePolicy,
-      )}, keys: ${Object.keys(keyReleasePolicy)}, keys: ${
-        Object.keys(keyReleasePolicy).length
+      )}, keys: ${Object.keys(keyReleasePolicy)}, keys: ${Object.keys(keyReleasePolicy).length
       }`,
     );
 
@@ -329,18 +321,17 @@ export interface IKeyResponse {
 }
 
 // Get latest private key
-export const key = (request: ccfapp.Request<IKeyRequest>): ServiceResult<IKeyResponse> | ServiceResult<string> => {
+export const key = (request: ccfapp.Request<IKeyRequest>): ServiceResult<string | IKeyResponse> => {
   const body = request.body.json();
   console.log(`Key->Request: `, body);
   let attestation: ISnpAttestation;
   if (body["attestation"]) {
     attestation = body["attestation"];
   }
-  //console.log(`unwrapKey=> attestation:`, attestation);
 
   // Validate input
   if (!body || !attestation) {
-    return ServiceResult.Failed<IKeyResponse>(
+    return ServiceResult.Failed<string>(
       {
         errorMessage: `The body is not a key request: ${JSON.stringify(body)}`,
       },
@@ -389,7 +380,10 @@ export const key = (request: ccfapp.Request<IKeyRequest>): ServiceResult<IKeyRes
   try {
     validateAttestationResult = validateAttestation(attestation);
     if (!validateAttestationResult.success) {
-      return validateAttestationResult;
+      return ServiceResult.Failed<string>(
+        validateAttestationResult.error,
+        validateAttestationResult.statusCode,
+      );
     }
   } catch (exception: any) {
     return ServiceResult.Failed<string>(
@@ -412,12 +406,7 @@ export const key = (request: ccfapp.Request<IKeyRequest>): ServiceResult<IKeyRes
   const receipt = hpkeKeysMap.receipt(kid);
 
   if (validateAttestationResult.statusCode === 202) {
-    return {
-      statusCode: 202,
-      headers: {
-        "retry-after": 3,
-      },
-    };
+    return ServiceResult.Accepted();
   }
 
   // Get receipt if available
@@ -425,12 +414,7 @@ export const key = (request: ccfapp.Request<IKeyRequest>): ServiceResult<IKeyRes
     keyItem.receipt = receipt;
     console.log(`Key->Receipt: ${receipt}`);
   } else {
-    return {
-      statusCode: 202,
-      headers: {
-        "retry-after": 3,
-      },
-    };
+    return ServiceResult.Accepted();
   }
 
   // Get wrapped key
@@ -453,7 +437,7 @@ export const key = (request: ccfapp.Request<IKeyRequest>): ServiceResult<IKeyRes
       `key api returns (${id}: ${JSON.stringify(response).length}): `,
       response,
     );
-    return { body: response };
+    return ServiceResult.Succeeded(response);
   } catch (exception: any) {
     return ServiceResult.Failed<string>(
       { errorMessage: `Error Key (${id}): ${exception.message}` },
@@ -462,12 +446,16 @@ export const key = (request: ccfapp.Request<IKeyRequest>): ServiceResult<IKeyRes
   }
 };
 
+export interface IUnwrapResponse {
+  wrapped: string;
+  receipt: string;
+}
+
 // Unwrap private key
 export const unwrapKey = (
   request: ccfapp.Request<IUnwrapRequest>,
 ):
-  | ServiceResult<string>
-  | ServiceResult<{ wrapped: string; receipt: string }> => {
+  | ServiceResult<string | IUnwrapResponse> => {
   // check if caller has a valid identity
   const [_, isValidIdentity] = new AuthenticationService().isAuthenticated(
     request,
@@ -495,7 +483,7 @@ export const unwrapKey = (
     );
   }
 
-  if (!wrappingKeyFromRequest.content.wrappingKey) {
+  if (!wrappingKeyFromRequest.body.wrappingKey) {
     return ServiceResult.Failed<string>(
       {
         errorMessage: `Missing wrappingKey in request`,
@@ -504,7 +492,7 @@ export const unwrapKey = (
     );
   }
 
-  const wrappingKeyBuf = wrappingKeyFromRequest.content.wrappingKey;
+  const wrappingKeyBuf = wrappingKeyFromRequest.body.wrappingKey;
   const wrappingKeyHash = KeyGeneration.calculateHexHash(wrappingKeyBuf);
   console.log(`unwrapKey->wrapping key hash: ${wrappingKeyHash}`);
 
@@ -544,13 +532,13 @@ export const unwrapKey = (
 
   // Check if wrapping key match attestation
   if (
-    !validateAttestationResult.content["x-ms-sevsnpvm-reportdata"].startsWith(
+    !validateAttestationResult.body["x-ms-sevsnpvm-reportdata"].startsWith(
       wrappingKeyHash,
     )
   ) {
     return ServiceResult.Failed<string>(
       {
-        errorMessage: `wrapping key hash ${validateAttestationResult.content["x-ms-sevsnpvm-reportdata"]} does not match wrappingKey`,
+        errorMessage: `wrapping key hash ${validateAttestationResult.body["x-ms-sevsnpvm-reportdata"]} does not match wrappingKey`,
       },
       400,
     );
@@ -590,7 +578,7 @@ export const unwrapKey = (
         `key tink returns (${wrappedKid}, ${JSON.stringify(wrapped).length}): `,
         ret,
       );
-      return ServiceResult.Succeeded<{ wrapped: string; receipt: string }>(ret);
+      return ServiceResult.Succeeded<IUnwrapResponse>(ret);
     } else {
       // Default is JWT.
       console.log(
@@ -599,7 +587,7 @@ export const unwrapKey = (
       const wrapped = KeyWrapper.wrapKeyJwt(wrappingKeyBuf, keyItem);
       const ret = { wrapped, receipt };
       console.log(`key JWT returns (${wrappedKid}, ${wrapped.length}): `, ret);
-      return ServiceResult.Succeeded<{ wrapped: string; receipt: string }>(ret);
+      return ServiceResult.Succeeded<IUnwrapResponse>(ret);
     }
   } catch (exception: any) {
     return ServiceResult.Failed<string>(
@@ -610,51 +598,36 @@ export const unwrapKey = (
 };
 
 // Get list of public keys
-export const listpubkeys = () => {
+export const listpubkeys = (): ServiceResult<string | ITinkPublicKeySet> => {
   try {
     // Get last key
     const [id, kid] = hpkeKeyIdMap.latestItem();
     if (kid === undefined) {
-      return {
-        statusCode: 400,
-        body: {
-          error: {
-            message: `No keys in store`,
-          },
-        },
-      };
+      return  ServiceResult.Failed<string>({
+        errorMessage: `No keys in store`
+      }, 400);
     }
     const keyItem = hpkeKeysMap.store.get(kid) as IKeyItem;
     if (keyItem === undefined) {
-      return {
-        statusCode: 404,
-        body: {
-          error: {
-            message: `kid ${kid} not found in store`,
-          },
-        },
-      };
+      return  ServiceResult.Failed<string>({
+        errorMessage: `kid ${kid} not found in store`
+      }, 404);
     }
 
     delete keyItem.d;
     const publicKey: any = new TinkPublicKey([keyItem]).get();
 
     const headers = setKeyHeaders();
-    const ret = publicKey;
-    console.log(`listpublickeys returns: ${JSON.stringify(ret)}`);
-    return {
-      headers,
-      body: ret,
-    };
+    return ServiceResult.Succeeded<ITinkPublicKeySet>(publicKey, headers);
   } catch (exception: any) {
-    const error = `KMS internal error: ${exception.message}`;
-    console.error(error);
-    throw new Error(error);
+    const errorMessage = `Error listpubkeys: ${exception.message}`;
+    console.error(errorMessage);
+    return ServiceResult.Failed<string>({ errorMessage }, 500);
   }
 };
 
 // Get latest public key
-export const pubkey = (request: ccfapp.Request<void>) => {
+export const pubkey = (request: ccfapp.Request<void>): ServiceResult<string | IKeyItem> => {
   let id: number, keyItem: IKeyItem;
   try {
     const query = queryParams(request);
@@ -665,14 +638,10 @@ export const pubkey = (request: ccfapp.Request<void>) => {
     } else {
       [id, kid] = hpkeKeyIdMap.latestItem();
       if (kid === undefined) {
-        return {
-          statusCode: 400,
-          body: {
-            error: {
-              message: `No keys in store`,
-            },
-          },
-        };
+        return ServiceResult.Failed({
+          errorMessage: `No keys in store`
+        },
+          400);
       }
     }
 
@@ -680,28 +649,20 @@ export const pubkey = (request: ccfapp.Request<void>) => {
     if (query && query["fmt"]) {
       fmt = query["fmt"];
       if (!(fmt === "jwk" || fmt === "tink")) {
-        return {
-          statusCode: 400,
-          body: {
-            error: {
-              message: `Wrong fmt query parameter '${kid}'. Must be jwt or tink.`,
-            },
-          },
-        };
+        return ServiceResult.Failed({
+          errorMessage: `Wrong fmt query parameter '${kid}'. Must be jwt or tink.`
+        },
+          400);
       }
     }
 
     console.log(`Get key with kid ${kid}`);
     const keyItem = hpkeKeysMap.store.get(kid) as IKeyItem;
     if (keyItem === undefined) {
-      return {
-        statusCode: 404,
-        body: {
-          error: {
-            message: `kid ${kid} not found in store`,
-          },
-        },
-      };
+      return ServiceResult.Failed({
+        errorMessage: `kid ${kid} not found in store`
+      },
+        404);
     }
 
     // Get receipt if available
@@ -710,12 +671,7 @@ export const pubkey = (request: ccfapp.Request<void>) => {
       keyItem.receipt = receipt;
       console.log(`pubkey->Receipt: ${receipt}`);
     } else {
-      return {
-        statusCode: 202,
-        headers: {
-          "retry-after": 3,
-        },
-      };
+      return ServiceResult.Accepted();
     }
 
     delete keyItem.d;
@@ -730,29 +686,19 @@ export const pubkey = (request: ccfapp.Request<void>) => {
       }
       const ret = publicKey;
       console.log(`pubkey returns (${id}) in tink:`, ret);
-      return {
-        body: ret,
-        headers,
-      };
+      return ServiceResult.Succeeded<string>(ret, headers);
     }
 
     const ret = keyItem;
     console.log(`pubkey returns (${id}) in jwk: ${JSON.stringify(ret)}`);
-    return { body: ret };
+    return ServiceResult.Succeeded<IKeyItem>(ret);
   } catch (exception: any) {
-    const message = `Error pubkey (${id}): ${exception.message}`;
-    console.error(message);
-    return {
-      statusCode: 500,
-      body: {
-        error: {
-          message,
-        },
-        inner: exception,
-      },
-    };
+    const errorMessage = `Error pubkey (${id}): ${exception.message}`;
+    console.error(errorMessage);
+    return ServiceResult.Failed<string>({ errorMessage }, 500);
   }
 };
+
 const hex = (buf: ArrayBuffer) => {
   return Array.from(new Uint8Array(buf))
     .map((n) => n.toString(16).padStart(2, "0"))
@@ -760,7 +706,7 @@ const hex = (buf: ArrayBuffer) => {
 };
 
 // Generate new key pair and store it on the store
-export const refresh = (request: ccfapp.Request<void>) => {
+export const refresh = (request: ccfapp.Request<void>): ServiceResult<string | IKeyItem> => {
   try {
     // Get HPKE key pair id
     const id = hpkeKeyIdMap.size + 1;
@@ -779,16 +725,16 @@ export const refresh = (request: ccfapp.Request<void>) => {
     delete keyItem.d;
     const ret = keyItem;
     console.log(`refresh returns: ${JSON.stringify(ret)}`);
-    return { body: ret };
+    return ServiceResult.Succeeded<IKeyItem>(ret);
   } catch (exception: any) {
-    const error = `KMS internal error: ${exception.message}`;
-    console.error(error);
-    throw new Error(error);
+    const errorMessage = `Error refresh: ${exception.message}`;
+    console.error(errorMessage);
+    return ServiceResult.Failed<string>({ errorMessage }, 500);
   }
 };
 
 // Hearthbeat endpoint currently used ro test authorization
-export const hearthbeat = (request: ccfapp.Request<void>) => {
+export const hearthbeat = (request: ccfapp.Request<void>): ServiceResult<string | ccfapp.AuthnIdentityCommon> => {
   // check if caller has a valid identity
   const [policy, isValidIdentity] = new AuthenticationService().isAuthenticated(
     request,
@@ -797,19 +743,14 @@ export const hearthbeat = (request: ccfapp.Request<void>) => {
     `Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`,
   );
   if (isValidIdentity.failure) return isValidIdentity;
-  const body = policy;
-  return {
-    body,
-  };
+  return ServiceResult.Succeeded<ccfapp.AuthnIdentityCommon>(policy);
 };
 
 //#endregion
 
 //#region KMS Policies
-export const key_release_policy = () => {
+export const key_release_policy = (): ServiceResult<IKeyReleasePolicyProps> => {
   const result = getKeyReleasePolicy();
-  const ret = result;
-  console.log(`key_release_policy returns: ${JSON.stringify(ret)}`);
-  return { body: ret };
+  return ServiceResult.Succeeded<IKeyReleasePolicyProps>(result);
 };
 //#endregion
