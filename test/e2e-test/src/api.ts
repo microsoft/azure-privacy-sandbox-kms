@@ -92,7 +92,7 @@ export default class Api {
     httpsAgent: https.Agent,
     authorizationHeader?: string,
   ): Promise<[number, object]> {
-    console.log(`📝 hearthbeat authorization header: ${authorizationHeader}`);
+    console.log(`hearthbeat authorization header: ${authorizationHeader}`);
 
     const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
       ? {
@@ -136,10 +136,10 @@ export default class Api {
     httpsAgent: https.Agent,
     authorizationHeader?: string,
   ): Promise<[number, IKeyItem]> {
-    console.log(`📝 Refresh props:`, props);
-    console.log(`📝 Refresh https agent:`, httpsAgent);
-    console.log(`📝 Refresh authorization header:`, authorizationHeader);
-    console.log(`📝 ${member.name} Refresh key:`);
+    console.log(`Refresh props:`, props);
+    console.log(`Refresh https agent:`, httpsAgent);
+    console.log(`Refresh authorization header:`, authorizationHeader);
+    console.log(`${member.name} Refresh key:`);
     const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
       ? {
           ":method": "POST",
@@ -229,7 +229,7 @@ export default class Api {
     ]
   > {
     console.log(
-      `📝 ${member.name} Get wrapped private key with receipt. tink: ${tink}:`,
+      `${member.name} Get wrapped private key with receipt. tink: ${tink}:`,
       authorizationHeader,
     );
     const query = tink ? "?fmt=tink" : "";
@@ -315,7 +315,7 @@ export default class Api {
     authorizationHeader?: string,
   ): Promise<[number, string | IKeyItem | { [key: string]: any }]> {
     console.log(
-      `📝 ${member.name} Get unwrapped private key with receipt, think: ${tink}:`,
+      `${member.name} Get unwrapped private key with receipt, think: ${tink}`,
     );
     const query = tink ? "?fmt=tink" : "";
     const responseType = tink ? "arraybuffer" : "json";
@@ -346,6 +346,7 @@ export default class Api {
     try {
       response = await Api.responsePromise(req, responseType);
       console.log("Status:", response.statusCode);
+      console.log(`Response--> `, response);
       if (response.statusCode > 200) {
         console.log(
           `Directly return statuscode with response: `,

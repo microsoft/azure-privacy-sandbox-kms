@@ -329,7 +329,7 @@ export interface IKeyResponse {
 }
 
 // Get latest private key
-export const key = (request: ccfapp.Request<IKeyRequest>) => {
+export const key = (request: ccfapp.Request<IKeyRequest>): ServiceResult<IKeyResponse> | ServiceResult<string> => {
   const body = request.body.json();
   console.log(`Key->Request: `, body);
   let attestation: ISnpAttestation;
@@ -340,7 +340,7 @@ export const key = (request: ccfapp.Request<IKeyRequest>) => {
 
   // Validate input
   if (!body || !attestation) {
-    return ServiceResult.Failed<string>(
+    return ServiceResult.Failed<IKeyResponse>(
       {
         errorMessage: `The body is not a key request: ${JSON.stringify(body)}`,
       },
@@ -479,9 +479,7 @@ export const unwrapKey = (
 
   // check payload
   const body = request.body.json();
-  //console.log(`unwrapKey=> wrapped:`, body);
   const attestation: ISnpAttestation = body["attestation"];
-  //console.log(`unwrapKey=> attestation:`, attestation);
   const wrappedKid: string = body["wrappedKid"];
   console.log(`unwrapKey=> wrappedKid:`, wrappedKid);
   const wrappingKey: string = body["wrappingKey"];
