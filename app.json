@@ -5,7 +5,9 @@
         "js_module": "endpoints/kms.js",
         "js_function": "key_release_policy",
         "forwarding_required": "sometimes",
-        "authn_policies": ["member_cert"],
+        "authn_policies": [
+          "member_cert"
+        ],
         "mode": "readonly",
         "openapi": {
           "responses": {
@@ -64,7 +66,12 @@
                         "type": "number"
                       }
                     },
-                    "required": ["publicKey", "kid", "keyType", "timeStamp"],
+                    "required": [
+                      "publicKey",
+                      "kid",
+                      "keyType",
+                      "timeStamp"
+                    ],
                     "type": "object"
                   }
                 }
@@ -101,10 +108,14 @@
     },
     "/unwrapKey": {
       "post": {
-        "js_module": "endpoints/kms.js",
+        "js_module": "endpoints/keyEndpoint.js",
         "js_function": "unwrapKey",
         "forwarding_required": "sometimes",
-        "authn_policies": ["jwt", "member_cert", "user_cert"],
+        "authn_policies": [
+          "jwt",
+          "member_cert",
+          "user_cert"
+        ],
         "mode": "readonly",
         "openapi": {
           "requestBody": {
@@ -155,7 +166,10 @@
                           "type": "string"
                         }
                       },
-                      "required": ["wrapped", "receipt"],
+                      "required": [
+                        "wrapped",
+                        "receipt"
+                      ],
                       "type": "object"
                     }
                   }
@@ -168,10 +182,14 @@
     },
     "/key": {
       "post": {
-        "js_module": "endpoints/kms.js",
+        "js_module": "endpoints/keyEndpoint.js",
         "js_function": "key",
         "forwarding_required": "sometimes",
-        "authn_policies": ["jwt", "member_cert", "user_cert"],
+        "authn_policies": [
+          "jwt",
+          "member_cert",
+          "user_cert"
+        ],
         "mode": "readonly",
         "parameters": [
           {
@@ -274,7 +292,12 @@
                         "type": "number"
                       }
                     },
-                    "required": ["publicKey", "kid", "keyType", "timeStamp"],
+                    "required": [
+                      "publicKey",
+                      "kid",
+                      "keyType",
+                      "timeStamp"
+                    ],
                     "type": "object"
                   }
                 }
@@ -289,7 +312,11 @@
         "js_module": "endpoints/kms.js",
         "js_function": "hearthbeat",
         "forwarding_required": "sometimes",
-        "authn_policies": ["user_cert", "member_cert", "jwt"],
+        "authn_policies": [
+          "user_cert",
+          "member_cert",
+          "jwt"
+        ],
         "mode": "readwrite",
         "openapi": {
           "responses": {

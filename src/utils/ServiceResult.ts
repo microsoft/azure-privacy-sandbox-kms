@@ -35,13 +35,16 @@ export class ServiceResult<T> {
     this.status = success ? "Success" : "Error";
   }
 
-  public static Succeeded<T>(body: T, headers?: { [key: string]: string | number }): ServiceResult<T> {
-    console.log('Response Succeeded: ', body);
+  public static Succeeded<T>(
+    body: T,
+    headers?: { [key: string]: string | number },
+  ): ServiceResult<T> {
+    console.log("Response Succeeded: ", body);
     return new ServiceResult<T>(body, null, true, 200, headers);
   }
 
   public static Accepted(): ServiceResult<string> {
-    console.log('Response Accepted');
+    console.log("Response Accepted");
     return new ServiceResult<string>(null, null, true, 202, {
       "retry-after": 3,
     });

@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 export * from "./endpoints/kms";
+export * from "./endpoints/keyEndpoint";
 export * from "./endpoints/IKeyItem";
 export * from "./endpoints/KeyGeneration";
 export * from "./endpoints/TinkKey";
