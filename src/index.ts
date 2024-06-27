@@ -3,6 +3,9 @@
 
 export * from "./endpoints/kms";
 export * from "./endpoints/keyEndpoint";
+export * from "./endpoints/publickeyEndpoint";
+export * from "./endpoints/refreshEndpoint";
+export * from "./endpoints/keyReleasePolicy";
 export * from "./endpoints/IKeyItem";
 export * from "./endpoints/KeyGeneration";
 export * from "./endpoints/TinkKey";

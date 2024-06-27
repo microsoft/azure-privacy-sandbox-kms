@@ -2,7 +2,7 @@
   "endpoints": {
     "/key_release_policy": {
       "get": {
-        "js_module": "endpoints/kms.js",
+        "js_module": "endpoints/keyReleasePolicy.js",
         "js_function": "key_release_policy",
         "forwarding_required": "sometimes",
         "authn_policies": [
@@ -25,7 +25,7 @@
     },
     "/pubkey": {
       "get": {
-        "js_module": "endpoints/kms.js",
+        "js_module": "endpoints/publickeyEndpoint.js",
         "js_function": "pubkey",
         "forwarding_required": "sometimes",
         "authn_policies": [],
@@ -83,7 +83,7 @@
     },
     "/listpubkeys": {
       "get": {
-        "js_module": "endpoints/kms.js",
+        "js_module": "endpoints/publickeyEndpoint.js",
         "js_function": "listpubkeys",
         "forwarding_required": "sometimes",
         "authn_policies": [],
@@ -266,7 +266,7 @@
     },
     "/refresh": {
       "post": {
-        "js_module": "endpoints/kms.js",
+        "js_module": "endpoints/refreshEndpoint.js",
         "js_function": "refresh",
         "forwarding_required": "sometimes",
         "authn_policies": [],

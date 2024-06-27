@@ -1,19 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import { ccf } from "@microsoft/ccf-app/global";
 import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../utils/ServiceResult";
 import { IWrapped, IWrappedJwt, KeyWrapper } from "./KeyWrapper";
 import { ISnpAttestation } from "../attestation/ISnpAttestation";
 import { AuthenticationService } from "../authorization/AuthenticationService";
-import { getKeyReleasePolicy, isPemPublicKey, queryParams } from "../utils/Tooling";
-import { LastestItemStore } from "../repositories/LastestItemStore";
-import { KeyStore } from "../repositories/KeyStore";
+import { isPemPublicKey, queryParams } from "../utils/Tooling";
 import { IAttestationReport } from "../attestation/ISnpAttestationReport";
 import { IKeyItem } from "./IKeyItem";
-import { ccf, snp_attestation, SnpAttestationResult } from "@microsoft/ccf-app/global";
-import { SnpAttestationClaims } from "../attestation/SnpAttestationClaims";
-import { Base64 } from "js-base64";
 import { KeyGeneration } from "./KeyGeneration";
 import { validateAttestation } from "../attestation/AttestationValidation";
 import { hpkeKeyIdMap, hpkeKeysMap } from "../repositories/Maps";
@@ -42,6 +38,11 @@ export interface IUnwrapResponse {
 }
 //#endregion
 
+/**
+ * Checks if the request has a wrapping key and returns the wrapping key and its hash.
+ * @param body - The request body containing the wrapping key.
+ * @returns A ServiceResult object containing the wrapping key and its hash if it exists, or an error message if it is missing or invalid.
+ */
 const requestHasWrappingKey = (
   body: IUnwrapRequest,
 ): ServiceResult<{ wrappingKey: ArrayBuffer; wrappingKeyHash: string }> => {
@@ -211,7 +212,12 @@ export const key = (
   }
 };
 
-// Unwrap private key
+/**
+ * Unwrap private key
+ *
+ * @param request - The request object containing the key unwrapping details.
+ * @returns A `ServiceResult` containing either the unwrapped key or an error message.
+ */
 export const unwrapKey = (
   request: ccfapp.Request<IUnwrapRequest>,
 ): ServiceResult<string | IUnwrapResponse> => {

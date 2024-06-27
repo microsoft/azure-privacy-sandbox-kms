@@ -6,12 +6,10 @@ import { ServiceResult } from "../utils/ServiceResult";
 import { IAttestationReport } from "./ISnpAttestationReport";
 import { ISnpAttestation } from "./ISnpAttestation";
 import { Base64 } from "js-base64";
-import { ccf, snp_attestation, SnpAttestationResult } from "@microsoft/ccf-app/global";
+import { snp_attestation, SnpAttestationResult } from "@microsoft/ccf-app/global";
 import { SnpAttestationClaims } from "./SnpAttestationClaims";
-import { getKeyReleasePolicy } from "..";
-import { LastestItemStore } from "../repositories/LastestItemStore";
-import { KeyStore } from "../repositories/KeyStore";
 import { keyReleasePolicyMap } from "../repositories/Maps";
+import { getKeyReleasePolicy } from "../utils/Tooling";
 
 // Validate the attestation by means of the key release policy
 export const validateAttestation = (

@@ -61,7 +61,6 @@ export default class Api {
       let statusCode = 0;
       request.on("data", (chunk: string | Buffer) => {
         if (responseType === "json") {
-          console.log("responsePromise chunk: ", chunk);
           data += chunk;
         } else {
           chunks.push(chunk as Buffer);
