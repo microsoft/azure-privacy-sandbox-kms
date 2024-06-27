@@ -10,8 +10,7 @@ import { keyReleasePolicyMap } from "../repositories/Maps";
  * Retrieves the key release policy.
  * @returns A ServiceResult containing the key release policy properties.
  */
-export const key_release_policy = (): ServiceResult<IKeyReleasePolicyProps> => {
-    const result = getKeyReleasePolicy(keyReleasePolicyMap);
-    return ServiceResult.Succeeded<IKeyReleasePolicyProps>(result);
-  };
-  
+export const keyReleasePolicy = (): ServiceResult<IKeyReleasePolicyProps> => {
+  const result = getKeyReleasePolicy(keyReleasePolicyMap);
+  return ServiceResult.Succeeded<IKeyReleasePolicyProps>(result);
+};

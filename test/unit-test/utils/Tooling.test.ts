@@ -4,7 +4,13 @@
 // Use the CCF polyfill to mock-up all key-value map functionality for unit-test
 import "@microsoft/ccf-app/polyfill.js";
 import { describe, expect, test } from "@jest/globals";
-import { convertUint8ArrayToString, arrayBufferToHex, queryParams, isPemPublicKey, setKeyHeaders } from "../../../src";
+import {
+  convertUint8ArrayToString,
+  arrayBufferToHex,
+  queryParams,
+  isPemPublicKey,
+  setKeyHeaders,
+} from "../../../src";
 import fs from "fs";
 
 describe("Test Tooling", () => {

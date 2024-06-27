@@ -36,6 +36,7 @@ export interface DemoProps {
   keyPath: string;
   unwrapPath: string;
   hearthbeatPath: string;
+  keyReleasePolicyPath: string;
 }
 
 export interface DemoMemberProps {
@@ -60,6 +61,7 @@ class Demo {
     keyPath: `/app/key`,
     unwrapPath: `/app/unwrapKey`,
     hearthbeatPath: `/app/hearthbeat`,
+    keyReleasePolicyPath: `/app/keyReleasePolicy`,
   };
 
   private static memberDataMap = new Map([
@@ -432,6 +434,34 @@ class Demo {
     //);
 
     //console.log("tinkHpkeKey.toJsonString()", tinkHpkeKey.toJsonString());
+
+    //#endregion
+
+    //#region keyReleasePolicy
+    console.log(`📝 Get key release policy...`);
+    [statusCode, keyResponse] = await Api.keyReleasePolicy(
+      this.demoProps,
+      member,
+      this.createHttpsAgent(member.id, AuthKinds.MemberCerts),
+    ).catch((error) => {
+      console.log(`keyReleasePolicy error: `, error);
+      throw error;
+    });
+    Demo.assert("statusCode == 200", statusCode == 200);
+
+    console.log("keyReleasePolicy response: ", keyResponse);
+    Demo.assert(
+      `keyResponse["x-ms-sevsnpvm-smt-allowed"][0] === true`,
+      keyResponse["x-ms-sevsnpvm-smt-allowed"][0] === true,
+    );
+    Demo.assert(
+      `keyResponse["x-ms-ver"][0] === '2'`,
+      keyResponse["x-ms-ver"][0] === "2",
+    );
+    Demo.assert(
+      `keyResponse["x-ms-sevsnpvm-is-debuggable"][0] === false`,
+      keyResponse["x-ms-sevsnpvm-is-debuggable"][0] === false,
+    );
 
     //#endregion
 

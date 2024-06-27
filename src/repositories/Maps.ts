@@ -5,7 +5,6 @@ import { ccf } from "@microsoft/ccf-app/global";
 import { LastestItemStore } from "./LastestItemStore";
 import { KeyStore } from "./KeyStore";
 
-
 //#region KMS Stores
 // Stores
 export const hpkeKeysMap = new KeyStore("HpkeKeys");

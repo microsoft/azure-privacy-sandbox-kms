@@ -3,7 +3,7 @@
 //import { ccf } from "@microsoft/ccf-app/global";
 import { DemoMemberProps, DemoProps } from "./index";
 import axios from "axios";
-import { IKeyItem } from "../../../src";
+import { IKeyItem, IKeyReleasePolicyProps, ServiceResult } from "../../../src";
 import { IWrapped, IWrappedJwt } from "../../../src/endpoints/KeyWrapper";
 import { ISnpAttestation } from "../../../src/attestation/ISnpAttestation";
 import https from "https";
@@ -395,5 +395,57 @@ export default class Api {
 
       return [response.statusCode, { key: JSON.parse(unwrappedKey), receipt }];
     }
+  }
+
+  public static async keyReleasePolicy(
+    props: DemoProps,
+    member: DemoMemberProps,
+    httpsAgent: https.Agent,
+    authorizationHeader?: string,
+  ): Promise<[number, IKeyReleasePolicyProps]> {
+    console.log(`${member.name} Get key release policy`);
+    console.log(`Get key release policy props:`, props);
+    console.log(`Get key release policy https agent:`, httpsAgent);
+    console.log(
+      `Get key release policy authorization header:`,
+      authorizationHeader,
+    );
+    const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
+      ? {
+          ":method": "GET",
+          ":path": `${props.keyReleasePolicyPath}`,
+          "Content-Type": "application/json",
+          Authorization: authorizationHeader,
+        }
+      : {
+          ":method": "GET",
+          ":path": `${props.keyReleasePolicyPath}`,
+          "Content-Type": "application/json",
+        };
+    const client = http2.connect(props.url, {
+      ...httpsAgent.options,
+      rejectUnauthorized: true,
+    } as http2.SecureClientSessionOptions);
+    const req = client.request(reqProps);
+
+    req.end();
+
+    let response;
+    try {
+      response = await Api.responsePromise(req);
+      console.log("Status:", response.statusCode);
+      console.log("Response data:", response.data);
+    } catch (error) {
+      console.error("Error:", error.message);
+    } finally {
+      // Close the client session when done
+      if (client) {
+        client.close();
+      }
+    }
+    return [
+      response.statusCode,
+      <IKeyReleasePolicyProps>JSON.parse(response.data),
+    ];
   }
 }
