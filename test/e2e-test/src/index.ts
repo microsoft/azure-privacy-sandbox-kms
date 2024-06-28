@@ -508,7 +508,8 @@ class Demo {
 
     //#region listpubkeys
     console.log(`📝 Get listpubkeys...`);
-    [statusCode, keyResponse] = await Api.listpubkeys(
+    let headers: { [key: string]: string | number };
+    [statusCode, keyResponse, headers] = await Api.listpubkeys(
       this.demoProps,
       member,
       this.createHttpsAgent(member.id, AuthKinds.MemberCerts),
@@ -532,6 +533,11 @@ class Demo {
       "id",
       notUndefinedString,
     );
+    Demo.assert(
+      "statusCode == 200",
+      headers["cache-control"] == "max-age=254838",
+    );
+
     //#endregion
 
     await this.addCheckpoint("Key generation Stage Complete");

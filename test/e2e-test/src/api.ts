@@ -64,6 +64,8 @@ export default class Api {
       let data: string = "";
       let chunks: Buffer[] = [];
       let statusCode = 0;
+      let headers: http2.IncomingHttpHeaders = {};
+
       request.on("data", (chunk: string | Buffer) => {
         if (responseType === "json") {
           data += chunk;
@@ -74,17 +76,20 @@ export default class Api {
 
       request.on("end", () => {
         if (responseType === "json") {
-          resolve({ statusCode, data });
+          resolve({ statusCode, data, headers });
         } else {
           let data = Buffer.concat(chunks);
-          resolve({ statusCode, data });
+          resolve({ statusCode, data, headers });
         }
       });
 
-      request.on("response", (headers) => {
-        statusCode = headers[":status"] || 0;
+      request.on("response", (responseHeaders) => {
+        headers = responseHeaders;
+        const statusHeader = headers[":status"];
+        statusCode = Array.isArray(statusHeader)
+          ? parseInt(statusHeader[0])
+          : parseInt(statusHeader || "0");
       });
-
       request.on("error", (error) => {
         reject(error);
       });
@@ -407,7 +412,9 @@ export default class Api {
     member: DemoMemberProps,
     httpsAgent: https.Agent,
     authorizationHeader?: string,
-  ): Promise<[number, IKeyReleasePolicyProps]> {
+  ): Promise<
+    [number, IKeyReleasePolicyProps, { [key: string]: string | number }]
+  > {
     console.log(`${member.name} Get key release policy`);
     console.log(`Get key release policy props:`, props);
     console.log(`Get key release policy https agent:`, httpsAgent);
@@ -451,6 +458,7 @@ export default class Api {
     return [
       response.statusCode,
       <IKeyReleasePolicyProps>JSON.parse(response.data),
+      response.headers,
     ];
   }
 
@@ -507,7 +515,7 @@ export default class Api {
     member: DemoMemberProps,
     httpsAgent: https.Agent,
     authorizationHeader?: string,
-  ): Promise<[number, ITinkPublicKeySet]> {
+  ): Promise<[number, ITinkPublicKeySet, { [key: string]: string | number }]> {
     console.log(`${member.name} Get listpubkeys`);
     console.log(`Get listpubkeys props:`, props);
     console.log(`Get listpubkeys https agent:`, httpsAgent);
@@ -537,6 +545,7 @@ export default class Api {
       response = await Api.responsePromise(req);
       console.log("Status:", response.statusCode);
       console.log("Response data:", response.data);
+      console.log("Response headers:", response.headers);
     } catch (error) {
       console.error("Error:", error.message);
     } finally {
@@ -545,6 +554,10 @@ export default class Api {
         client.close();
       }
     }
-    return [response.statusCode, <ITinkPublicKeySet>JSON.parse(response.data)];
+    return [
+      response.statusCode,
+      <ITinkPublicKeySet>JSON.parse(response.data),
+      response.headers,
+    ];
   }
 }

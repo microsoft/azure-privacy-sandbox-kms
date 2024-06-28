@@ -19,6 +19,7 @@ export class ServiceResult<T> {
   public readonly status: string;
   public readonly body: T | null;
   public readonly error: ErrorResponse | null;
+  public readonly headers?: { [key: string]: string | number };
 
   private constructor(
     body: T | null,
@@ -33,6 +34,7 @@ export class ServiceResult<T> {
     this.failure = !success;
     this.statusCode = statusCode;
     this.status = success ? "Success" : "Error";
+    this.headers = headers ? headers : {};
   }
 
   public static Succeeded<T>(
@@ -40,6 +42,7 @@ export class ServiceResult<T> {
     headers?: { [key: string]: string | number },
   ): ServiceResult<T> {
     console.log("Response Succeeded: ", body);
+    console.log("Response headers: ", headers);
     return new ServiceResult<T>(body, null, true, 200, headers);
   }
 
