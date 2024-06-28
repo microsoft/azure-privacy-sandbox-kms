@@ -3,7 +3,12 @@
 //import { ccf } from "@microsoft/ccf-app/global";
 import { DemoMemberProps, DemoProps } from "./index";
 import axios from "axios";
-import { IKeyItem, IKeyReleasePolicyProps, ITinkPublicKeySet, ServiceResult } from "../../../src";
+import {
+  IKeyItem,
+  IKeyReleasePolicyProps,
+  ITinkPublicKeySet,
+  ServiceResult,
+} from "../../../src";
 import { IWrapped, IWrappedJwt } from "../../../src/endpoints/KeyWrapper";
 import { ISnpAttestation } from "../../../src/attestation/ISnpAttestation";
 import https from "https";
@@ -494,10 +499,7 @@ export default class Api {
         client.close();
       }
     }
-    return [
-      response.statusCode,
-      <IKeyItem>JSON.parse(response.data),
-    ];
+    return [response.statusCode, <IKeyItem>JSON.parse(response.data)];
   }
 
   public static async listpubkeys(
@@ -509,10 +511,7 @@ export default class Api {
     console.log(`${member.name} Get listpubkeys`);
     console.log(`Get listpubkeys props:`, props);
     console.log(`Get listpubkeys https agent:`, httpsAgent);
-    console.log(
-      `Get listpubkeys authorization header:`,
-      authorizationHeader,
-    );
+    console.log(`Get listpubkeys authorization header:`, authorizationHeader);
     const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
       ? {
           ":method": "GET",
@@ -546,9 +545,6 @@ export default class Api {
         client.close();
       }
     }
-    return [
-      response.statusCode,
-      <ITinkPublicKeySet>JSON.parse(response.data),
-    ];
+    return [response.statusCode, <ITinkPublicKeySet>JSON.parse(response.data)];
   }
 }

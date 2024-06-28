@@ -65,7 +65,7 @@ class Demo {
     hearthbeatPath: `/app/hearthbeat`,
     keyReleasePolicyPath: `/app/keyReleasePolicy`,
     pubkeyPath: `/app/pubkey`,
-    listpubkeysPath: `/app/listpubkeys`
+    listpubkeysPath: `/app/listpubkeys`,
   };
 
   private static memberDataMap = new Map([
@@ -472,7 +472,7 @@ class Demo {
       this.demoProps,
       member,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
-      access_token
+      access_token,
     ).catch((error) => {
       console.log(`keyReleasePolicy error: `, error);
       throw error;
@@ -497,22 +497,13 @@ class Demo {
 
     console.log("pubkey response: ", keyResponse);
 
-    Demo.assert(
-      `keyResponse.crv === 'X25519'`,
-      keyResponse.crv === 'X25519',
-    );
+    Demo.assert(`keyResponse.crv === 'X25519'`, keyResponse.crv === "X25519");
     Demo.assertField(member.name, keyResponse, "kid", notUndefinedString);
     Demo.assertField(member.name, keyResponse, "x", notUndefinedString);
     Demo.assertField(member.name, keyResponse, "receipt", notUndefinedString);
 
-    Demo.assert(
-      `keyResponse.timestamp > 0`,
-      keyResponse.timestamp > 0,
-    );
-    Demo.assert(
-      `keyResponse.id > 100000`,
-      keyResponse.id > 100000,
-    );
+    Demo.assert(`keyResponse.timestamp > 0`, keyResponse.timestamp > 0);
+    Demo.assert(`keyResponse.id > 100000`, keyResponse.id > 100000);
     //#endregion
 
     //#region listpubkeys
@@ -529,8 +520,18 @@ class Demo {
 
     console.log("listpubkeys response: ", keyResponse);
 
-    Demo.assertField(member.name, keyResponse.keys[0], "key", notUndefinedString);
-    Demo.assertField(member.name, keyResponse.keys[0], "id", notUndefinedString);
+    Demo.assertField(
+      member.name,
+      keyResponse.keys[0],
+      "key",
+      notUndefinedString,
+    );
+    Demo.assertField(
+      member.name,
+      keyResponse.keys[0],
+      "id",
+      notUndefinedString,
+    );
     //#endregion
 
     await this.addCheckpoint("Key generation Stage Complete");
