@@ -37,6 +37,8 @@ export interface DemoProps {
   unwrapPath: string;
   hearthbeatPath: string;
   keyReleasePolicyPath: string;
+  pubkeyPath: string;
+  listpubkeysPath: string;
 }
 
 export interface DemoMemberProps {
@@ -62,6 +64,8 @@ class Demo {
     unwrapPath: `/app/unwrapKey`,
     hearthbeatPath: `/app/hearthbeat`,
     keyReleasePolicyPath: `/app/keyReleasePolicy`,
+    pubkeyPath: `/app/pubkey`,
+    listpubkeysPath: `/app/listpubkeys`
   };
 
   private static memberDataMap = new Map([
@@ -463,6 +467,70 @@ class Demo {
       keyResponse["x-ms-sevsnpvm-is-debuggable"][0] === false,
     );
 
+    // JWT not allowed
+    [statusCode, keyResponse] = await Api.keyReleasePolicy(
+      this.demoProps,
+      member,
+      this.createHttpsAgent(member.id, AuthKinds.JWT),
+      access_token
+    ).catch((error) => {
+      console.log(`keyReleasePolicy error: `, error);
+      throw error;
+    });
+    Demo.assert("statusCode == 401", statusCode == 401);
+
+    //#endregion
+
+    //#region pubkey
+    console.log(`📝 Get pubkey...`);
+    [statusCode, keyResponse] = await Api.pubkey(
+      this.demoProps,
+      member,
+      "kid",
+      "fmt",
+      this.createHttpsAgent(member.id, AuthKinds.MemberCerts),
+    ).catch((error) => {
+      console.log(`keyReleasePolicy error: `, error);
+      throw error;
+    });
+    Demo.assert("statusCode == 200", statusCode == 200);
+
+    console.log("pubkey response: ", keyResponse);
+
+    Demo.assert(
+      `keyResponse.crv === 'X25519'`,
+      keyResponse.crv === 'X25519',
+    );
+    Demo.assertField(member.name, keyResponse, "kid", notUndefinedString);
+    Demo.assertField(member.name, keyResponse, "x", notUndefinedString);
+    Demo.assertField(member.name, keyResponse, "receipt", notUndefinedString);
+
+    Demo.assert(
+      `keyResponse.timestamp > 0`,
+      keyResponse.timestamp > 0,
+    );
+    Demo.assert(
+      `keyResponse.id > 100000`,
+      keyResponse.id > 100000,
+    );
+    //#endregion
+
+    //#region listpubkeys
+    console.log(`📝 Get listpubkeys...`);
+    [statusCode, keyResponse] = await Api.listpubkeys(
+      this.demoProps,
+      member,
+      this.createHttpsAgent(member.id, AuthKinds.MemberCerts),
+    ).catch((error) => {
+      console.log(`keyReleasePolicy error: `, error);
+      throw error;
+    });
+    Demo.assert("statusCode == 200", statusCode == 200);
+
+    console.log("listpubkeys response: ", keyResponse);
+
+    Demo.assertField(member.name, keyResponse.keys[0], "key", notUndefinedString);
+    Demo.assertField(member.name, keyResponse.keys[0], "id", notUndefinedString);
     //#endregion
 
     await this.addCheckpoint("Key generation Stage Complete");
