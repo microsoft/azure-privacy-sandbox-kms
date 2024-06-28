@@ -13,7 +13,7 @@ import { exec } from "child_process";
 import https from "https";
 import fs, { stat } from "fs";
 import inquirer from "inquirer";
-import { IKeyItem } from "../../../src";
+import { IKeyItem, key } from "../../../src";
 import { ISnpAttestation } from "../../../src/attestation/ISnpAttestation.js";
 
 const readJSON = async (filePath: string): Promise<any> => {
@@ -203,10 +203,12 @@ class Demo {
     Demo.assertField(member.name, response, "crv", "X25519");
     Demo.assertField(member.name, response, "kty", "OKP");
     //#endregion
+
     //#region key
     console.log(`📝 Get initial key...`);
     let keyResponse;
-    [statusCode, keyResponse] = await Api.key(
+    let headers: {[key: string]: string | number};
+    [headers, statusCode, keyResponse] = await Api.key(
       this.demoProps,
       member,
       attestation,
@@ -219,11 +221,18 @@ class Demo {
       console.log(`keyInitial error: `, error);
       throw error;
     });
+    console.log("initial keyResponse: ", keyResponse);
+
     Demo.assert("statusCode == 202", statusCode == 202);
+    Demo.assert(
+      `headers["retry-after"] == 3`,
+      headers["retry-after"] == 3,
+    );
+
     Demo.assert("response === undefined", !keyResponse);
 
     console.log(`📝 Get initial key-Bad request...`);
-    [statusCode, keyResponse] = await Api.key(
+    [headers, statusCode, keyResponse] = await Api.key(
       this.demoProps,
       member,
       {} as ISnpAttestation,
@@ -238,7 +247,7 @@ class Demo {
     Demo.assert("Bad request", statusCode == 400);
 
     console.log(`📝 Get initial key-No auth...`);
-    [statusCode, keyResponse] = await Api.key(
+    [headers, statusCode, keyResponse] = await Api.key(
       this.demoProps,
       member,
       attestation,
@@ -250,7 +259,7 @@ class Demo {
       console.log(`keyInitial error: `, error);
       throw error;
     });
-    console.log(`response after 202: ${keyResponse}`);
+    console.log(`response after 202: `, keyResponse);
     Demo.assert("No auth", statusCode == 401);
     Demo.assert(
       '(<any>keyResponse).error.message === "Invalid authentication credentials."',
@@ -261,7 +270,7 @@ class Demo {
     // Wait for receipt to be generated
     statusCode = 202;
     do {
-      [statusCode, keyResponse] = await Api.key(
+      [headers, statusCode, keyResponse] = await Api.key(
         this.demoProps,
         member,
         attestation,
@@ -274,6 +283,7 @@ class Demo {
         console.log(`keyInitial error: `, error);
         throw error;
       });
+
       if (statusCode === 202) {
         await Demo.sleep(1000);
       } else if (statusCode !== 200) {
@@ -283,7 +293,7 @@ class Demo {
 
     // Test with JWT
     console.log(`📝 Get wrapped key with JWT...`);
-    [statusCode, keyResponse] = (await Api.key(
+    [headers, statusCode, keyResponse] = (await Api.key(
       this.demoProps,
       member,
       attestation,
@@ -292,7 +302,7 @@ class Demo {
       false,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token,
-    )) as [number, any];
+    )) as [{[key: string]: string | number}, number, any];
     Demo.assert("Status OK", statusCode == 200);
     Demo.assertField(member.name, keyResponse, "d", undefinedString);
     Demo.assertField(member.name, keyResponse, "x", undefinedString);
@@ -361,6 +371,7 @@ class Demo {
     const badPublicKey = public_wrapping_key
       .replace("1", "9")
       .replace("2", "1");
+
     [statusCode, unwrapResponse] = (await Api.unwrap(
       this.demoProps,
       member,
@@ -373,12 +384,12 @@ class Demo {
       access_token,
     )) as [number, IKeyItem];
     console.log("JWT unwrapResponse: ", unwrapResponse);
-    Demo.assert("Status BadRequest", statusCode == 400);
+    Demo.assert("Status BadRequest", statusCode === 400);
 
     // Test with Tink
     console.log(`📝 Get wrapped key with tink...`);
     let wrapResponse;
-    [statusCode, wrapResponse] = (await Api.key(
+    [headers, statusCode, wrapResponse] = (await Api.key(
       this.demoProps,
       member,
       attestation,
@@ -387,8 +398,8 @@ class Demo {
       true,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token,
-    )) as [number, any];
-    Demo.assert("OK statusCode", statusCode == 200);
+    )) as [{[key: string]: string | number}, number, any];
+    Demo.assert("OK statusCode", statusCode === 200);
 
     Demo.assertField(member.name, wrapResponse, "d", undefinedString);
     Demo.assertField(member.name, wrapResponse, "x", undefinedString);
@@ -508,7 +519,6 @@ class Demo {
 
     //#region listpubkeys
     console.log(`📝 Get listpubkeys...`);
-    let headers: { [key: string]: string | number };
     [statusCode, keyResponse, headers] = await Api.listpubkeys(
       this.demoProps,
       member,
@@ -534,7 +544,7 @@ class Demo {
       notUndefinedString,
     );
     Demo.assert(
-      "statusCode == 200",
+      `headers["cache-control"] == "max-age=254838"`,
       headers["cache-control"] == "max-age=254838",
     );
 
