@@ -58,6 +58,6 @@ export class ServiceResult<T> {
     statusCode: number = 400,
   ): ServiceResult<T> {
     console.log(`Failed result: ${statusCode}, `, error);
-    return new ServiceResult<T>(null, error, false, statusCode);
+    return new ServiceResult<T>(undefined, error, false, statusCode);
   }
 }

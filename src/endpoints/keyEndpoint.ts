@@ -338,7 +338,7 @@ export const unwrapKey = (
         wrappingKeyBuf,
         keyItem,
       );
-      const ret = { wrapped, receipt };
+      const ret: IUnwrapResponse = { wrapped, receipt };
       console.log(
         `key tink returns (${wrappedKid}, ${JSON.stringify(wrapped).length}): `,
         ret,
