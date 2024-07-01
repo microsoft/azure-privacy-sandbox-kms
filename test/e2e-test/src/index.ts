@@ -207,7 +207,7 @@ class Demo {
     //#region key
     console.log(`📝 Get initial key...`);
     let keyResponse;
-    let headers: {[key: string]: string | number};
+    let headers: { [key: string]: string | number };
     [headers, statusCode, keyResponse] = await Api.key(
       this.demoProps,
       member,
@@ -224,10 +224,7 @@ class Demo {
     console.log("initial keyResponse: ", keyResponse);
 
     Demo.assert("statusCode == 202", statusCode == 202);
-    Demo.assert(
-      `headers["retry-after"] == 3`,
-      headers["retry-after"] == 3,
-    );
+    Demo.assert(`headers["retry-after"] == 3`, headers["retry-after"] == 3);
 
     Demo.assert("response === undefined", !keyResponse);
 
@@ -302,7 +299,7 @@ class Demo {
       false,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token,
-    )) as [{[key: string]: string | number}, number, any];
+    )) as [{ [key: string]: string | number }, number, any];
     Demo.assert("Status OK", statusCode == 200);
     Demo.assertField(member.name, keyResponse, "d", undefinedString);
     Demo.assertField(member.name, keyResponse, "x", undefinedString);
@@ -398,7 +395,7 @@ class Demo {
       true,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token,
-    )) as [{[key: string]: string | number}, number, any];
+    )) as [{ [key: string]: string | number }, number, any];
     Demo.assert("OK statusCode", statusCode === 200);
 
     Demo.assertField(member.name, wrapResponse, "d", undefinedString);

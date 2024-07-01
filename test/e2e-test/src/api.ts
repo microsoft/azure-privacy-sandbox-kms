@@ -230,14 +230,13 @@ export default class Api {
     authorizationHeader?: string,
   ): Promise<
     [
-      {[key: string]: string | number},
+      { [key: string]: string | number },
       number,
       (
         | IWrapped
         | { receipt: string; wrappedKid: string; wrapped: string }
         | undefined
-      )
-      
+      ),
     ]
   > {
     console.log(
@@ -277,7 +276,7 @@ export default class Api {
         return [
           response.headers,
           response.statusCode,
-          response.data ? JSON.parse(response.data) : undefined          
+          response.data ? JSON.parse(response.data) : undefined,
         ];
       }
       console.log("Response data:", response.data);
@@ -297,7 +296,7 @@ export default class Api {
       console.log(`key id: `, resp.wrappedKid);
       console.log(`wrapped: `, resp.wrapped);
 
-      return [ response.headers, response.statusCode, resp];
+      return [response.headers, response.statusCode, resp];
     } else {
       const resp = JSON.parse(response.data);
       console.log(`key returned: `, response.data);
@@ -313,7 +312,6 @@ export default class Api {
           wrapped: resp.wrapped,
           wrappedKid: resp.wrappedKid,
         },
-        
       ];
     }
   }
