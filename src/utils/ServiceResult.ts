@@ -48,7 +48,7 @@ export class ServiceResult<T> {
 
   public static Accepted(): ServiceResult<string> {
     console.log("Response Accepted");
-    return new ServiceResult<string>(null, null, true, 202, {
+    return new ServiceResult<string>(undefined, null, true, 202, {
       "retry-after": 3,
     });
   }
