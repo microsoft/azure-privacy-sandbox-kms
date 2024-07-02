@@ -3,6 +3,7 @@
 
 import { Base64 } from "js-base64";
 import { IKeyItem } from "./IKeyItem";
+import { ccf } from "@microsoft/ccf-app/global";
 
 export enum TinkKeyStatus {
   enabled = "ENABLED",
@@ -45,6 +46,13 @@ export interface ITinkKeySet {
 
 export interface ITinkPublicKeySet {
   keys: ITinkPublicKey[];
+}
+
+// Set CCF state for date and time
+try {
+  ccf.enableUntrustedDateTime(true);
+} catch {
+  // Will fail for unit tests. Do nothing
 }
 
 export class TinkPublicKey {

@@ -88,6 +88,13 @@ export type IWrappedJwt = string;
 
 export const WrapAlgorithms: string[] = [WRAPALGONAME];
 
+// Set CCF state for date and time
+try {
+  ccf.enableUntrustedDateTime(true);
+} catch {
+  // Will fail for unit tests. Do nothing
+}
+
 // keyEncryptionKeyUri should be in the format of `<10-character length prefix><cloud-specific contents to specify wrapping key>`.
 // https://github.com/privacysandbox/data-plane-shared-libraries/blob/042c6f93558638376ac3f6ab479aed7f0342da67/scp/cc/cpio/client_providers/private_key_client_provider/src/private_key_client_utils.cc#L113
 // This variable defines the prefix.
