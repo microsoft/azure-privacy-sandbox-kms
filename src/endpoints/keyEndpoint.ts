@@ -13,6 +13,7 @@ import { IKeyItem } from "./IKeyItem";
 import { KeyGeneration } from "./KeyGeneration";
 import { validateAttestation } from "../attestation/AttestationValidation";
 import { hpkeKeyIdMap, hpkeKeysMap } from "../repositories/Maps";
+import { ServiceRequest } from "../utils/ServiceRequest";
 
 //#region Key endpoints interface
 export interface IKeyRequest {
@@ -88,37 +89,30 @@ const requestHasWrappingKey = (
 export const key = (
   request: ccfapp.Request<IKeyRequest>,
 ): ServiceResult<string | IKeyResponse> => {
-  const body = request.body.json();
-  console.log(`Key->Request: `, body);
+  const serviceRequest = new ServiceRequest<IKeyRequest>("key", request);
   let attestation: ISnpAttestation;
-  if (body["attestation"]) {
-    attestation = body["attestation"];
+  if (serviceRequest.body["attestation"]) {
+    attestation = serviceRequest.body["attestation"];
   }
 
   // Validate input
-  if (!body || !attestation) {
+  if (!serviceRequest.body || !attestation) {
     return ServiceResult.Failed<string>(
       {
-        errorMessage: `The body is not a key request: ${JSON.stringify(body)}`,
+        errorMessage: `The body is not a key request: ${JSON.stringify(serviceRequest.body)}`,
       },
       400,
     );
   }
 
   // check if caller has a valid identity
-  const [policy, isValidIdentity] = new AuthenticationService().isAuthenticated(
-    request,
-  );
-  console.log(
-    `Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`,
-  );
+  const [_, isValidIdentity] = serviceRequest.isAuthenticated();
   if (isValidIdentity.failure) return isValidIdentity;
 
-  const query = queryParams(request);
   let kid: string;
   let id: number;
-  if (query && query["kid"]) {
-    kid = query["kid"];
+  if (serviceRequest.query && serviceRequest.query["kid"]) {
+    kid = serviceRequest.query["kid"];
   } else {
     [id, kid] = hpkeKeyIdMap.latestItem();
     if (kid === undefined) {
@@ -129,17 +123,14 @@ export const key = (
     }
   }
 
-  let fmt = "jwk";
-  if (query && query["fmt"]) {
-    fmt = query["fmt"];
-    if (!(fmt === "jwk" || fmt === "tink")) {
-      return ServiceResult.Failed<string>(
-        {
-          errorMessage: `Wrong fmt query parameter '${fmt}'. Must be jwt or tink.`,
-        },
-        400,
-      );
-    }
+  const fmt = serviceRequest.query?.["fmt"] || "jwk";
+  if (!(fmt === "jwk" || fmt === "tink")) {
+    return ServiceResult.Failed<string>(
+      {
+        errorMessage: `Wrong fmt query parameter '${fmt}'. Must be jwt or tink.`,
+      },
+      400,
+    );
   }
 
   let validateAttestationResult: ServiceResult<string | IAttestationReport>;
