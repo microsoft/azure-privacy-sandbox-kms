@@ -3,7 +3,7 @@
   "scripts": {
     "build": "rm -rf ./dist/ && rollup --config && cp app.json dist/ && node build_bundle.js dist/",
     "bundle": "node build_bundle.js dist",
-    "test": "node  --trace-warnings --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "e2e-test": "node --loader ./loader-register.js ./test/e2e-test/src/index.ts"
   },
   "type": "module",
@@ -42,21 +42,21 @@
     "del-cli": "^5.0.0",
     "http-server": "^0.13.0",
     "inquirer": "9.1.4",
-    "jest": "^29.3.1",
+    "jest": "^29.7.0",
     "js-crypto-key-utils": "^1.0.7",
     "js-crypto-rsa": "^1.0.7",
     "jsonwebtoken": "^9.0.0",
     "node-fetch": "^3.3.2",
     "rollup": "^2.79.1",
-    "ts-jest": "^29.1.1",
+    "ts-jest": "^29.1.5",
     "ts-node": "^10.9.2",
     "tslib": "^2.0.1",
     "typescript": "^5.4.5",
     "uglify-js": "^3.17.4"
   },
   "jest": {
+    "preset": "ts-jest/presets/default-esm",
     "collectCoverage": false,
-    "preset": "ts-jest",
     "testEnvironment": "node",
     "extensionsToTreatAsEsm": [
       ".ts"
@@ -73,21 +73,15 @@
       "/lib/"
     ],
     "transform": {
-      "^.+\\.[t|j]sx?$": "babel-jest"
+      "^.+\\.[tj]sx?$": "babel-jest"
     },
     "globals": {
       "ts-jest": {
-        "tsconfig": "tsconfig.json",
-        "diagnostics": false
+        "useESM": true
       }
     },
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json",
-      "node"
-    ]
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    }
   }
 }

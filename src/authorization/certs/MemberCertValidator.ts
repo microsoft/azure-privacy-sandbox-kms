@@ -20,7 +20,7 @@ export class MemberCertValidator implements IValidatorService {
     const memberCaller = request.caller as unknown as UserMemberAuthnIdentity;
     const identityId = memberCaller.id;
     const isValid = this.isActiveMember(identityId);
-    if (isValid.success && isValid.content) {
+    if (isValid.success && isValid.body) {
       return ServiceResult.Succeeded(identityId);
     }
     return ServiceResult.Failed({
