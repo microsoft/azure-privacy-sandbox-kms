@@ -9,13 +9,6 @@ import { IKeyItem, IWrapKey } from "./IKeyItem";
 import * as tink from "./proto/gen/tink_pb";
 import * as hpke from "./proto/gen/hpke_pb";
 
-// Set CCF state for date and time
-try {
-  ccf.enableUntrustedDateTime(true);
-} catch {
-  // Will fail for unit tests. Do nothing
-}
-
 // Used by tink_pb and hpke_pb
 export class TextEncoder {
   encode(input: string): Uint8Array {

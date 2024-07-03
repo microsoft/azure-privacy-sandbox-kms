@@ -7,7 +7,7 @@ import { ServiceResult } from "../utils/ServiceResult";
 import { IWrapped, IWrappedJwt, KeyWrapper } from "./KeyWrapper";
 import { ISnpAttestation } from "../attestation/ISnpAttestation";
 import { AuthenticationService } from "../authorization/AuthenticationService";
-import { isPemPublicKey, queryParams } from "../utils/Tooling";
+import { enableEndpoint, isPemPublicKey, queryParams } from "../utils/Tooling";
 import { IAttestationReport } from "../attestation/ISnpAttestationReport";
 import { IKeyItem } from "./IKeyItem";
 import { KeyGeneration } from "./KeyGeneration";
@@ -38,6 +38,9 @@ export interface IUnwrapResponse {
   receipt: string;
 }
 //#endregion
+
+// Enable the endpoint
+enableEndpoint();
 
 /**
  * Checks if the request has a wrapping key and returns the wrapping key and its hash.

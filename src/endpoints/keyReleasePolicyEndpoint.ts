@@ -3,8 +3,11 @@
 
 import { ServiceResult } from "../utils/ServiceResult";
 import { IKeyReleasePolicyProps } from "../policies/IKeyReleasePolicyProps";
-import { getKeyReleasePolicy } from "../utils/Tooling";
+import { enableEndpoint, getKeyReleasePolicy } from "../utils/Tooling";
 import { keyReleasePolicyMap } from "../repositories/Maps";
+
+// Enable the endpoint
+enableEndpoint();
 
 /**
  * Retrieves the key release policy.

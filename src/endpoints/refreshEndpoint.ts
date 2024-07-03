@@ -1,19 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { ccf } from "@microsoft/ccf-app/global";
 import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../utils/ServiceResult";
 import { IKeyItem } from "./IKeyItem";
 import { hpkeKeyIdMap, hpkeKeysMap } from "../repositories/Maps";
 import { KeyGeneration } from "./KeyGeneration";
+import { enableEndpoint } from "../utils/Tooling";
 
-// Set CCF state for date and time
-try {
-  ccf.enableUntrustedDateTime(true);
-} catch {
-  // Will fail for unit tests. Do nothing
-}
+// Enable the endpoint
+enableEndpoint();
 
 /**
  * Refreshes the HPKE key pair and stores it in the key maps.

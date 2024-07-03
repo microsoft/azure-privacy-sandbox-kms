@@ -7,13 +7,6 @@ import { Base64 } from "js-base64";
 import { IKeyItem } from "./IKeyItem";
 import { arrayBufferToHex } from "../utils/Tooling";
 
-// Set CCF state for date and time
-try {
-  ccf.enableUntrustedDateTime(true);
-} catch {
-  // Will fail for unit tests. Do nothing
-}
-
 export class KeyGeneration {
   // Calculate a sha2 digest
   public static calculateHash = (data: ArrayBuffer): Uint8Array => {

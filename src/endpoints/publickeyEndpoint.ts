@@ -6,7 +6,10 @@ import { ServiceResult } from "../utils/ServiceResult";
 import { ITinkPublicKeySet, TinkKey, TinkPublicKey } from "./TinkKey";
 import { hpkeKeyIdMap, hpkeKeysMap } from "../repositories/Maps";
 import { IKeyItem } from "./IKeyItem";
-import { queryParams, setKeyHeaders } from "../utils/Tooling";
+import { enableEndpoint, queryParams, setKeyHeaders } from "../utils/Tooling";
+
+// Enable the endpoint
+enableEndpoint();
 
 // Get list of public keys
 export const listpubkeys = (): ServiceResult<string | ITinkPublicKeySet> => {

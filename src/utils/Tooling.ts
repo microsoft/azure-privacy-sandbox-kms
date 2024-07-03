@@ -102,3 +102,18 @@ export const setKeyHeaders = (): { [key: string]: string } => {
   };
   return headers;
 };
+
+/**
+ * Enables the endpoint.
+ * @remarks
+ * This function enables untrusted date and time for the endpoint.
+ * @throws Will eat a throw because it is needed for unit tests.
+ */
+export const enableEndpoint = () => {
+  // Set CCF state for date and time
+  try {
+    ccf.enableUntrustedDateTime(true);
+  } catch {
+    // Will fail for unit tests. Do nothing
+  }
+}

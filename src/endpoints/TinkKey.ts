@@ -48,13 +48,6 @@ export interface ITinkPublicKeySet {
   keys: ITinkPublicKey[];
 }
 
-// Set CCF state for date and time
-try {
-  ccf.enableUntrustedDateTime(true);
-} catch {
-  // Will fail for unit tests. Do nothing
-}
-
 export class TinkPublicKey {
   constructor(public keyItem: IKeyItem[]) {}
 
