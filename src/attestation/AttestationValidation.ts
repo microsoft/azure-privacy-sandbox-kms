@@ -13,12 +13,13 @@ import {
 import { SnpAttestationClaims } from "./SnpAttestationClaims";
 import { keyReleasePolicyMap } from "../repositories/Maps";
 import { getKeyReleasePolicy } from "../utils/Tooling";
+import { Logger } from "../utils/Logger";
 
 // Validate the attestation by means of the key release policy
 export const validateAttestation = (
   attestation: ISnpAttestation,
 ): ServiceResult<string | IAttestationReport> => {
-  console.log(`Start attestation validation`);
+  Logger.debug(`Start attestation validation`);
   if (!attestation) {
     return ServiceResult.Failed<string>(
       { errorMessage: "missing attestation" },
@@ -102,18 +103,21 @@ export const validateAttestation = (
         uvm_endorsements,
         endorsed_tcb,
       );
-    console.log(
+    Logger.debug(
       `Attestation validation report: ${JSON.stringify(attestationReport)}`,
     );
 
     const claimsProvider = new SnpAttestationClaims(attestationReport);
     const attestationClaims = claimsProvider.getClaims();
-    console.log(`Attestation claims: `, attestationClaims);
-    console.log(`Report Data: `, attestationClaims["x-ms-sevsnpvm-reportdata"]);
+    Logger.debug(`Attestation claims: `, attestationClaims);
+    Logger.debug(
+      `Report Data: `,
+      attestationClaims["x-ms-sevsnpvm-reportdata"],
+    );
 
     // Get the key release policy
     const keyReleasePolicy = getKeyReleasePolicy(keyReleasePolicyMap);
-    console.log(
+    Logger.debug(
       `Key release policy: ${JSON.stringify(
         keyReleasePolicy,
       )}, keys: ${Object.keys(keyReleasePolicy)}, keys: ${
@@ -138,7 +142,7 @@ export const validateAttestation = (
       const attestationValue = attestationClaims[key];
       const policyValue = keyReleasePolicy[key];
       const isUndefined = typeof attestationValue === "undefined";
-      console.log(
+      Logger.debug(
         `Checking key ${key}, typeof attestationValue: ${typeof attestationValue}, isUndefined: ${isUndefined}, attestation value: ${attestationValue}, policyValue: ${policyValue}`,
       );
       if (isUndefined) {
@@ -149,7 +153,7 @@ export const validateAttestation = (
       }
       if (
         policyValue.filter((p) => {
-          console.log(`Check if policy value ${p} === ${attestationValue}`);
+          Logger.debug(`Check if policy value ${p} === ${attestationValue}`);
           return p === attestationValue;
         }).length === 0
       ) {

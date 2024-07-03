@@ -10,6 +10,7 @@ import {
   queryParams,
   isPemPublicKey,
   setKeyHeaders,
+  aToHex,
 } from "../../../src";
 import fs from "fs";
 
@@ -85,4 +86,15 @@ test("Should set key headers correctly", () => {
     "cache-control": "max-age=254838",
     date: expect.any(String),
   });
+});
+
+test("Should convert to hex", () => {
+  // Arrange
+  const arrayBuffer = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]).buffer;
+
+  // Act
+  const result = aToHex(arrayBuffer);
+
+  // Assert
+  expect(result).toEqual("0102030405060708");
 });

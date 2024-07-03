@@ -7,19 +7,30 @@ import { ITinkPublicKeySet, TinkKey, TinkPublicKey } from "./TinkKey";
 import { hpkeKeyIdMap, hpkeKeysMap } from "../repositories/Maps";
 import { IKeyItem } from "./IKeyItem";
 import { enableEndpoint, queryParams, setKeyHeaders } from "../utils/Tooling";
+import { ServiceRequest } from "../utils/ServiceRequest";
+import { Logger } from "../utils/Logger";
 
 // Enable the endpoint
 enableEndpoint();
 
 // Get list of public keys
-export const listpubkeys = (): ServiceResult<string | ITinkPublicKeySet> => {
+export const listpubkeys = (
+  request: ccfapp.Request<void>,
+): ServiceResult<string | ITinkPublicKeySet> => {
+  const name = "listpubkeys";
+  const serviceRequest = new ServiceRequest<void>(name, request);
+
+  // check if caller has a valid identity
+  const [_, isValidIdentity] = serviceRequest.isAuthenticated();
+  if (isValidIdentity.failure) return isValidIdentity;
+
   try {
     // Get last key
-    const [id, kid] = hpkeKeyIdMap.latestItem();
+    const [_, kid] = hpkeKeyIdMap.latestItem();
     if (kid === undefined) {
       return ServiceResult.Failed<string>(
         {
-          errorMessage: `No keys in store`,
+          errorMessage: `${name}: No keys in store`,
         },
         400,
       );
@@ -28,7 +39,7 @@ export const listpubkeys = (): ServiceResult<string | ITinkPublicKeySet> => {
     if (keyItem === undefined) {
       return ServiceResult.Failed<string>(
         {
-          errorMessage: `kid ${kid} not found in store`,
+          errorMessage: `${name}: kid ${kid} not found in store`,
         },
         404,
       );
@@ -40,7 +51,7 @@ export const listpubkeys = (): ServiceResult<string | ITinkPublicKeySet> => {
     const headers = setKeyHeaders();
     return ServiceResult.Succeeded<ITinkPublicKeySet>(publicKey, headers);
   } catch (exception: any) {
-    const errorMessage = `Error listpubkeys: ${exception.message}`;
+    const errorMessage = `${name}: Error: ${exception.message}`;
     console.error(errorMessage);
     return ServiceResult.Failed<string>({ errorMessage }, 500);
   }
@@ -50,39 +61,41 @@ export const listpubkeys = (): ServiceResult<string | ITinkPublicKeySet> => {
 export const pubkey = (
   request: ccfapp.Request<void>,
 ): ServiceResult<string | IKeyItem> => {
-  let id: number, keyItem: IKeyItem;
+  const name = "pubkey";
+  const serviceRequest = new ServiceRequest<void>(name, request);
+
+  // check if caller has a valid identity
+  const [_, isValidIdentity] = serviceRequest.isAuthenticated();
+  if (isValidIdentity.failure) return isValidIdentity;
+
+  let id: number;
   try {
-    const query = queryParams(request);
     let kid: string;
     let id: number;
-    if (query && query["kid"]) {
-      kid = query["kid"];
+    if (serviceRequest.query && serviceRequest.query["kid"]) {
+      kid = serviceRequest.query["kid"];
     } else {
       [id, kid] = hpkeKeyIdMap.latestItem();
       if (kid === undefined) {
         return ServiceResult.Failed(
           {
-            errorMessage: `No keys in store`,
+            errorMessage: `${name}: No keys in store`,
           },
           400,
         );
       }
     }
-
-    let fmt = "jwk";
-    if (query && query["fmt"]) {
-      fmt = query["fmt"];
-      if (!(fmt === "jwk" || fmt === "tink")) {
-        return ServiceResult.Failed(
-          {
-            errorMessage: `Wrong fmt query parameter '${kid}'. Must be jwt or tink.`,
-          },
-          400,
-        );
-      }
+    const fmt = serviceRequest.query?.["fmt"] || "jwk";
+    if (!(fmt === "jwk" || fmt === "tink")) {
+      return ServiceResult.Failed<string>(
+        {
+          errorMessage: `${name}: Wrong fmt query parameter '${fmt}'. Must be jwt or tink.`,
+        },
+        400,
+      );
     }
 
-    console.log(`Get key with kid ${kid}`);
+    Logger.debug(`Get key with kid ${kid}`);
     const keyItem = hpkeKeysMap.store.get(kid) as IKeyItem;
     if (keyItem === undefined) {
       return ServiceResult.Failed(
@@ -97,7 +110,7 @@ export const pubkey = (
     const receipt = hpkeKeysMap.receipt(kid);
     if (receipt !== undefined) {
       keyItem.receipt = receipt;
-      console.log(`pubkey->Receipt: ${receipt}`);
+      Logger.debug(`pubkey->Receipt: ${receipt}`);
     } else {
       return ServiceResult.Accepted();
     }
@@ -105,30 +118,20 @@ export const pubkey = (
     delete keyItem.d;
     if (fmt === "tink") {
       const headers = setKeyHeaders();
-      console.log(`response headers: `, headers, keyItem);
+      Logger.debug(`response headers: `, headers, keyItem);
       const tinkKey = new TinkKey([keyItem]);
-      console.log(`tinkKey: `, tinkKey);
+      Logger.debug(`tinkKey: `, tinkKey);
       const publicKey: any = tinkKey.get();
       if (receipt !== undefined) {
         publicKey.receipt = receipt;
       }
-      const ret = publicKey;
-      console.log(`pubkey returns (${id}) in tink:`, ret);
-      return ServiceResult.Succeeded<string>(ret, headers);
+      return ServiceResult.Succeeded<string>(publicKey, headers);
     }
 
-    const ret = keyItem;
-    console.log(`pubkey returns (${id}) in jwk: ${JSON.stringify(ret)}`);
-    return ServiceResult.Succeeded<IKeyItem>(ret);
+    return ServiceResult.Succeeded<IKeyItem>(keyItem);
   } catch (exception: any) {
-    const errorMessage = `Error pubkey (${id}): ${exception.message}`;
+    const errorMessage = `${name}: Error (${id}): ${exception.message}`;
     console.error(errorMessage);
     return ServiceResult.Failed<string>({ errorMessage }, 500);
   }
-};
-
-const hex = (buf: ArrayBuffer) => {
-  return Array.from(new Uint8Array(buf))
-    .map((n) => n.toString(16).padStart(2, "0"))
-    .join("");
 };

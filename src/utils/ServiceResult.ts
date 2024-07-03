@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import { Logger } from "./Logger";
+
 export interface ErrorResponse {
   errorMessage: string;
   errorType?: string;
@@ -41,13 +43,16 @@ export class ServiceResult<T> {
     body: T,
     headers?: { [key: string]: string | number },
   ): ServiceResult<T> {
-    console.log("Response Succeeded: ", body);
-    console.log("Response headers: ", headers);
+    Logger.debug("Response Succeeded: ", body);
+    if (headers) {
+      Logger.debug("Response headers: ", headers);
+    }
+
     return new ServiceResult<T>(body, null, true, 200, headers);
   }
 
   public static Accepted(): ServiceResult<string> {
-    console.log("Response Accepted");
+    Logger.debug("Response Accepted");
     return new ServiceResult<string>(undefined, null, true, 202, {
       "retry-after": 3,
     });
@@ -57,7 +62,7 @@ export class ServiceResult<T> {
     error: ErrorResponse,
     statusCode: number = 400,
   ): ServiceResult<T> {
-    console.log(`Failed result: ${statusCode}, `, error);
+    Logger.error(`Failed result: ${statusCode}, `, error);
     return new ServiceResult<T>(undefined, error, false, statusCode);
   }
 }

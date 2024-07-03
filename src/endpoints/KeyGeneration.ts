@@ -6,6 +6,7 @@ import { ccf } from "@microsoft/ccf-app/global";
 import { Base64 } from "js-base64";
 import { IKeyItem } from "./IKeyItem";
 import { arrayBufferToHex } from "../utils/Tooling";
+import { Logger } from "../utils/Logger";
 
 export class KeyGeneration {
   // Calculate a sha2 digest
@@ -41,7 +42,7 @@ export class KeyGeneration {
     jwk.timestamp = Date.now();
     jwk.id = id;
 
-    console.log(`JWK: `, jwk);
+    Logger.secret(`JWK: `, jwk);
     return jwk;
   };
 }

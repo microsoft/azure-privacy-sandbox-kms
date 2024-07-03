@@ -4,6 +4,7 @@
 import * as ccfapp from "@microsoft/ccf-app";
 import { IKeyReleasePolicyProps } from "../policies/IKeyReleasePolicyProps";
 import { ccf } from "@microsoft/ccf-app/global";
+import { Logger, LogLevel } from "./Logger";
 
 /**
  * Converts a Uint8Array to a string representation.
@@ -40,7 +41,7 @@ export const queryParams = (request: ccfapp.Request) => {
   for (let inx = 0; inx < elements.length; inx++) {
     const param = elements[inx].split("=");
     obj[param[0]] = param[1];
-    console.log(`Query: ${param[0]} = ${param[1]}`);
+    Logger.debug(`Query: ${param[0]} = ${param[1]}`);
   }
   return obj;
 };
@@ -62,8 +63,8 @@ export const isPemPublicKey = (key: string): boolean => {
   const isNewline =
     beginPatternNewline.test(key) && endPatternNewline.test(key);
 
-  console.log("isLiteralNewline:", isLiteralNewline);
-  console.log("isNewline:", isNewline);
+  Logger.debug("isLiteralNewline:", isLiteralNewline);
+  Logger.debug("isNewline:", isNewline);
 
   return isLiteralNewline || isNewline;
 };
@@ -81,9 +82,9 @@ export const getKeyReleasePolicy = (
     const kvKey = ccf.bufToStr(key);
     const kvValue = JSON.parse(ccf.bufToStr(values));
     result[kvKey] = kvValue;
-    console.log(`key policy item with key: ${kvKey} and value: ${kvValue}`);
+    Logger.debug(`key policy item with key: ${kvKey} and value: ${kvValue}`);
   });
-  console.log(
+  Logger.debug(
     `Resulting key release policy: ${JSON.stringify(
       result,
     )}, keys: ${Object.keys(result)}, keys: ${Object.keys(result).length}`,
@@ -116,4 +117,18 @@ export const enableEndpoint = () => {
   } catch {
     // Will fail for unit tests. Do nothing
   }
-}
+  // Set Logger level. Needs to come from proposal
+  Logger.setLogLevel(LogLevel.DEBUG);
+};
+
+/**
+ * Converts an ArrayBuffer to a hexadecimal string representation.
+ *
+ * @param buf - The ArrayBuffer to convert.
+ * @returns The hexadecimal string representation of the ArrayBuffer.
+ */
+export const aToHex = (buf: ArrayBuffer) => {
+  return Array.from(new Uint8Array(buf))
+    .map((n) => n.toString(16).padStart(2, "0"))
+    .join("");
+};

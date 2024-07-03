@@ -6,7 +6,6 @@ import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../utils/ServiceResult";
 import { IWrapped, IWrappedJwt, KeyWrapper } from "./KeyWrapper";
 import { ISnpAttestation } from "../attestation/ISnpAttestation";
-import { AuthenticationService } from "../authorization/AuthenticationService";
 import { enableEndpoint, isPemPublicKey, queryParams } from "../utils/Tooling";
 import { IAttestationReport } from "../attestation/ISnpAttestationReport";
 import { IKeyItem } from "./IKeyItem";
@@ -14,6 +13,7 @@ import { KeyGeneration } from "./KeyGeneration";
 import { validateAttestation } from "../attestation/AttestationValidation";
 import { hpkeKeyIdMap, hpkeKeysMap } from "../repositories/Maps";
 import { ServiceRequest } from "../utils/ServiceRequest";
+import { Logger } from "../utils/Logger";
 
 //#region Key endpoints interface
 export interface IKeyRequest {
@@ -54,9 +54,9 @@ const requestHasWrappingKey = (
   let wrappingKeyBuf: ArrayBuffer;
   let wrappingKeyHash: string;
   if (wrappingKey) {
-    console.log(`requestHasWrappingKey=> wrappingKey: '${wrappingKey}'`);
+    Logger.debug(`requestHasWrappingKey=> wrappingKey: '${wrappingKey}'`);
     if (!isPemPublicKey(wrappingKey)) {
-      console.log(`Key-> Not a pem key`);
+      Logger.error(`Key-> Not a pem key`);
       return ServiceResult.Failed<{
         wrappingKey: ArrayBuffer;
         wrappingKeyHash: string;
@@ -69,7 +69,7 @@ const requestHasWrappingKey = (
     }
     wrappingKeyBuf = ccf.strToBuf(wrappingKey);
     wrappingKeyHash = KeyGeneration.calculateHexHash(wrappingKeyBuf);
-    console.log(`Key->wrapping key hash: ${wrappingKeyHash}`);
+    Logger.debug(`Key->wrapping key hash: ${wrappingKeyHash}`);
     return ServiceResult.Succeeded({
       wrappingKey: wrappingKeyBuf,
       wrappingKeyHash,
@@ -92,7 +92,8 @@ const requestHasWrappingKey = (
 export const key = (
   request: ccfapp.Request<IKeyRequest>,
 ): ServiceResult<string | IKeyResponse> => {
-  const serviceRequest = new ServiceRequest<IKeyRequest>("key", request);
+  const name = "key";
+  const serviceRequest = new ServiceRequest<IKeyRequest>(name, request);
   let attestation: ISnpAttestation;
   if (serviceRequest.body["attestation"]) {
     attestation = serviceRequest.body["attestation"];
@@ -102,7 +103,7 @@ export const key = (
   if (!serviceRequest.body || !attestation) {
     return ServiceResult.Failed<string>(
       {
-        errorMessage: `The body is not a key request: ${JSON.stringify(serviceRequest.body)}`,
+        errorMessage: `${name}: The body is not a ${name} request: ${JSON.stringify(serviceRequest.body)}`,
       },
       400,
     );
@@ -120,7 +121,7 @@ export const key = (
     [id, kid] = hpkeKeyIdMap.latestItem();
     if (kid === undefined) {
       return ServiceResult.Failed<string>(
-        { errorMessage: `No keys in store` },
+        { errorMessage: `${name}: No keys in store` },
         400,
       );
     }
@@ -130,7 +131,7 @@ export const key = (
   if (!(fmt === "jwk" || fmt === "tink")) {
     return ServiceResult.Failed<string>(
       {
-        errorMessage: `Wrong fmt query parameter '${fmt}'. Must be jwt or tink.`,
+        errorMessage: `${name}: Wrong fmt query parameter '${fmt}'. Must be jwt or tink.`,
       },
       400,
     );
@@ -148,18 +149,18 @@ export const key = (
   } catch (exception: any) {
     return ServiceResult.Failed<string>(
       {
-        errorMessage: `Error in validating attestation (${attestation}): ${exception.message}`,
+        errorMessage: `${name}: Error in validating attestation (${attestation}): ${exception.message}`,
       },
       500,
     );
   }
 
   // Be sure to request item and the receipt
-  console.log(`Get key with kid ${kid}`);
+  Logger.debug(`Get key with kid ${kid}`);
   const keyItem = hpkeKeysMap.store.get(kid) as IKeyItem;
   if (keyItem === undefined) {
     return ServiceResult.Failed<string>(
-      { errorMessage: `kid ${kid} not found in store` },
+      { errorMessage: `${name}: kid ${kid} not found in store` },
       404,
     );
   }
@@ -172,7 +173,7 @@ export const key = (
   // Get receipt if available
   if (receipt !== undefined) {
     keyItem.receipt = receipt;
-    console.log(`Key->Receipt: ${receipt}`);
+    Logger.debug(`Key->Receipt: ${receipt}`);
   } else {
     return ServiceResult.Accepted();
   }
@@ -193,14 +194,10 @@ export const key = (
       wrapped,
       receipt,
     };
-    console.log(
-      `key api returns (${id}: ${JSON.stringify(response).length}): `,
-      response,
-    );
     return ServiceResult.Succeeded(response);
   } catch (exception: any) {
     return ServiceResult.Failed<string>(
-      { errorMessage: `Error Key (${id}): ${exception.message}` },
+      { errorMessage: `${name}: Error Key (${id}): ${exception.message}` },
       500,
     );
   }
@@ -215,25 +212,42 @@ export const key = (
 export const unwrapKey = (
   request: ccfapp.Request<IUnwrapRequest>,
 ): ServiceResult<string | IUnwrapResponse> => {
+  const name = "unwrapKey";
+  const serviceRequest = new ServiceRequest<IKeyRequest>(name, request);
+
+  let attestation: ISnpAttestation;
+  if (serviceRequest.body["attestation"]) {
+    attestation = serviceRequest.body["attestation"];
+  }
+
+  // Validate input
+  if (!serviceRequest.body || !attestation) {
+    return ServiceResult.Failed<string>(
+      {
+        errorMessage: `${name}: The body is not a ${name} request: ${JSON.stringify(serviceRequest.body)}`,
+      },
+      400,
+    );
+  }
+
   // check if caller has a valid identity
-  const [_, isValidIdentity] = new AuthenticationService().isAuthenticated(
-    request,
-  );
-  console.log(
-    `Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`,
-  );
+  const [_, isValidIdentity] = serviceRequest.isAuthenticated();
   if (isValidIdentity.failure) return isValidIdentity;
 
   // check payload
-  const body = request.body.json();
-  const attestation: ISnpAttestation = body["attestation"];
-  const wrappedKid: string = body["wrappedKid"];
-  console.log(`unwrapKey=> wrappedKid:`, wrappedKid);
-  const wrappingKey: string = body["wrappingKey"];
-  console.log(`unwrapKey=> wrappingKey: ${wrappingKey}`);
-  const wrappingKeyFromRequest = requestHasWrappingKey(body);
-  console.log(`unwrapKey->wrappingKeyFromRequest: `, wrappingKeyFromRequest);
+  const wrappedKid: string = serviceRequest.body["wrappedKid"];
+  if (wrappedKid === undefined) {
+    return ServiceResult.Failed<string>(
+      {
+        errorMessage: `${name}: Missing  ${name} wrappedKid in request: ${JSON.stringify(serviceRequest.body)}`,
+      },
+      400,
+    );
+  }
 
+  const wrappingKeyFromRequest = requestHasWrappingKey(
+    serviceRequest.body as IUnwrapRequest,
+  );
   if (wrappingKeyFromRequest.success === false) {
     // WrappingKey has errors
     return ServiceResult.Failed<string>(
@@ -242,50 +256,36 @@ export const unwrapKey = (
     );
   }
 
-  if (!wrappingKeyFromRequest.body.wrappingKey) {
-    return ServiceResult.Failed<string>(
-      {
-        errorMessage: `Missing wrappingKey in request`,
-      },
-      400,
-    );
-  }
-
   const wrappingKeyBuf = wrappingKeyFromRequest.body.wrappingKey;
   const wrappingKeyHash = KeyGeneration.calculateHexHash(wrappingKeyBuf);
-  console.log(`unwrapKey->wrapping key hash: ${wrappingKeyHash}`);
+  Logger.debug(`unwrapKey->wrapping key hash: ${wrappingKeyHash}`);
 
-  // Gen
-  // Validate input
-  if (!body || !wrappedKid || !attestation || !wrappingKey) {
+  const fmt = serviceRequest.query?.["fmt"] || "jwk";
+  if (!(fmt === "jwk" || fmt === "tink")) {
     return ServiceResult.Failed<string>(
       {
-        errorMessage: `The body is not a unwrap key request: ${JSON.stringify(body)}`,
+        errorMessage: `${name}: Wrong fmt query parameter '${fmt}'. Must be jwt or tink.`,
       },
       400,
     );
   }
 
-  const query = queryParams(request);
-  let fmt = "jwk";
-  if (query && query["fmt"]) {
-    fmt = query["fmt"];
-    if (!(fmt === "jwk" || fmt === "tink")) {
+  // Validate attestation
+  let validateAttestationResult: ServiceResult<string | IAttestationReport>;
+  try {
+    validateAttestationResult = validateAttestation(attestation);
+    if (!validateAttestationResult.success) {
       return ServiceResult.Failed<string>(
-        {
-          errorMessage: `Wrong fmt query parameter '${fmt}'. Must be jwt or tink.`,
-        },
-        400,
+        validateAttestationResult.error,
+        validateAttestationResult.statusCode,
       );
     }
-  }
-
-  // validate attestation
-  const validateAttestationResult = validateAttestation(attestation);
-  if (!validateAttestationResult.success) {
+  } catch (exception: any) {
     return ServiceResult.Failed<string>(
-      validateAttestationResult.error,
-      validateAttestationResult.statusCode,
+      {
+        errorMessage: `${name}: Error in validating attestation (${attestation}): ${exception.message}`,
+      },
+      500,
     );
   }
 
@@ -297,18 +297,18 @@ export const unwrapKey = (
   ) {
     return ServiceResult.Failed<string>(
       {
-        errorMessage: `wrapping key hash ${validateAttestationResult.body["x-ms-sevsnpvm-reportdata"]} does not match wrappingKey`,
+        errorMessage: `${name}:wrapping key hash ${validateAttestationResult.body["x-ms-sevsnpvm-reportdata"]} does not match wrappingKey`,
       },
       400,
     );
   }
 
   // Be sure to request item and the receipt
-  console.log(`Get key with kid ${wrappedKid}`);
+  Logger.debug(`Get key with kid ${wrappedKid}`);
   const keyItem = hpkeKeysMap.store.get(wrappedKid) as IKeyItem;
   if (keyItem === undefined) {
     return ServiceResult.Failed<string>(
-      { errorMessage: `kid ${wrappedKid} not found in store` },
+      { errorMessage: `${name}:kid ${wrappedKid} not found in store` },
       404,
     );
   }
@@ -318,7 +318,7 @@ export const unwrapKey = (
   // Get receipt if available, otherwise return accepted
   if (receipt !== undefined) {
     keyItem.receipt = receipt;
-    console.log(`Key->Receipt: ${receipt}`);
+    Logger.debug(`Key->Receipt: ${receipt}`);
   } else {
     return ServiceResult.Accepted();
   }
@@ -327,30 +327,22 @@ export const unwrapKey = (
   try {
     let wrapKey;
     if (fmt == "tink") {
-      console.log(`Retrieve key in tink format`);
+      Logger.debug(`Retrieve key in tink format`);
       const wrapped = KeyWrapper.createWrappedPrivateTinkKey(
         wrappingKeyBuf,
         keyItem,
       );
       const ret: IUnwrapResponse = { wrapped, receipt };
-      console.log(
-        `key tink returns (${wrappedKid}, ${JSON.stringify(wrapped).length}): `,
-        ret,
-      );
       return ServiceResult.Succeeded<IUnwrapResponse>(ret);
     } else {
       // Default is JWT.
-      console.log(
-        `Retrieve key in JWK format (${wrappingKey.length}): ${wrappingKey}`,
-      );
       const wrapped = KeyWrapper.wrapKeyJwt(wrappingKeyBuf, keyItem);
       const ret = { wrapped, receipt };
-      console.log(`key JWT returns (${wrappedKid}, ${wrapped.length}): `, ret);
       return ServiceResult.Succeeded<IUnwrapResponse>(ret);
     }
   } catch (exception: any) {
     return ServiceResult.Failed<string>(
-      { errorMessage: `Error unwrap (${wrappedKid}): ${exception.message}` },
+      { errorMessage: `${name}: Error (${wrappedKid}): ${exception.message}` },
       500,
     );
   }

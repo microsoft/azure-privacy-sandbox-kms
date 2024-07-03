@@ -7,6 +7,8 @@ import { IKeyItem } from "./IKeyItem";
 import { hpkeKeyIdMap, hpkeKeysMap } from "../repositories/Maps";
 import { KeyGeneration } from "./KeyGeneration";
 import { enableEndpoint } from "../utils/Tooling";
+import { ServiceRequest } from "../utils/ServiceRequest";
+import { Logger } from "../utils/Logger";
 
 // Enable the endpoint
 enableEndpoint();
@@ -20,6 +22,13 @@ enableEndpoint();
 export const refresh = (
   request: ccfapp.Request<void>,
 ): ServiceResult<string | IKeyItem> => {
+  const name = "refresh";
+  const serviceRequest = new ServiceRequest<void>(name, request);
+
+  // check if caller has a valid identity
+  const [_, isValidIdentity] = serviceRequest.isAuthenticated();
+  if (isValidIdentity.failure) return isValidIdentity;
+
   try {
     // Get HPKE key pair id
     const id = hpkeKeyIdMap.size + 1;
@@ -33,14 +42,13 @@ export const refresh = (
 
     // Store HPKE key pair
     hpkeKeysMap.storeItem(keyItem.kid, keyItem, keyItem.x);
-    console.log(`Key item with id ${id} and kid ${keyItem.kid} stored`);
+    Logger.secret(`Key item with id ${id} and kid ${keyItem.kid} stored`);
 
     delete keyItem.d;
     const ret = keyItem;
-    console.log(`refresh returns: ${JSON.stringify(ret)}`);
     return ServiceResult.Succeeded<IKeyItem>(ret);
   } catch (exception: any) {
-    const errorMessage = `Error refresh: ${exception.message}`;
+    const errorMessage = `${name}: Error: ${exception.message}`;
     console.error(errorMessage);
     return ServiceResult.Failed<string>({ errorMessage }, 500);
   }
