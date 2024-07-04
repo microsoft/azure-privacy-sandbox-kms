@@ -80,7 +80,7 @@ propose-jwt-demo-validation-policy: ## 🚀 Deploy the JWT validation policy
 	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/jwt/set_jwt_demo_validation_policy_proposal.json --certificate_dir "${KEYS_DIR}" --member-count ${MEMBER_COUNT}
 
 # Propose a new idp
-propose-jwt-ms-validation-policy: ## 🚀 Propose the AAD as idp
+propose-jwt-ms-validation-policy: ## 🚀 Propose the AAD as idp. If AAD rolled keys, governance/jwt/set_jwt_ms_validation_policy_proposal.json will be updated and can be checked in
 	@echo -e "\e[34m$@\e[0m" || true
 	@./scripts/generate_jwt_proposal_payload.sh  --proposal-file "${PWD}"/governance/jwt/set_jwt_ms_validation_policy_proposal.json
 	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file "${PWD}"/governance/jwt/set_jwt_ms_validation_policy_proposal.json --certificate_dir "${KEYS_DIR}" --member-count ${MEMBER_COUNT}
