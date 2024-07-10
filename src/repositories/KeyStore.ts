@@ -4,6 +4,7 @@
 import * as ccfapp from "@microsoft/ccf-app";
 import { ccf } from "@microsoft/ccf-app/global";
 import { IKeyItem, IWrapKey } from "../endpoints/IKeyItem";
+import { Logger } from "../utils/Logger";
 
 export class KeyStore {
   private _store;
@@ -41,13 +42,13 @@ export class KeyStore {
         identifier += buf[inx];
       }
 
-      console.log(`Calculated version: ${identifier}`);
+      Logger.debug(`Calculated version: ${identifier}`);
       return identifier;
     };
 
     const version = this.store.getVersionOfPreviousWrite(id);
 
-    console.log(`version for id ${id}: ${JSON.stringify(version)}`);
+    Logger.debug(`version for id ${id}: ${JSON.stringify(version)}`);
     const states = ccf.historical.getStateRange(
       calcVersion(id),
       version,
@@ -56,7 +57,7 @@ export class KeyStore {
     );
     if (states !== null) {
       const ret = JSON.stringify(states[0].receipt);
-      console.log(`Receipt: ${ret}`);
+      Logger.debug(`Receipt: ${ret}`);
       return ret;
     }
     return undefined;

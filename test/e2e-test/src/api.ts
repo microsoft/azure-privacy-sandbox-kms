@@ -3,7 +3,12 @@
 //import { ccf } from "@microsoft/ccf-app/global";
 import { DemoMemberProps, DemoProps } from "./index";
 import axios from "axios";
-import { IKeyItem } from "../../../src";
+import {
+  IKeyItem,
+  IKeyReleasePolicyProps,
+  ITinkPublicKeySet,
+  ServiceResult,
+} from "../../../src";
 import { IWrapped, IWrappedJwt } from "../../../src/endpoints/KeyWrapper";
 import { ISnpAttestation } from "../../../src/attestation/ISnpAttestation";
 import https from "https";
@@ -59,6 +64,8 @@ export default class Api {
       let data: string = "";
       let chunks: Buffer[] = [];
       let statusCode = 0;
+      let headers: http2.IncomingHttpHeaders = {};
+
       request.on("data", (chunk: string | Buffer) => {
         if (responseType === "json") {
           data += chunk;
@@ -69,17 +76,20 @@ export default class Api {
 
       request.on("end", () => {
         if (responseType === "json") {
-          resolve({ statusCode, data });
+          resolve({ statusCode, data, headers });
         } else {
           let data = Buffer.concat(chunks);
-          resolve({ statusCode, data });
+          resolve({ statusCode, data, headers });
         }
       });
 
-      request.on("response", (headers) => {
-        statusCode = headers[":status"] || 0;
+      request.on("response", (responseHeaders) => {
+        headers = responseHeaders;
+        const statusHeader = headers[":status"];
+        statusCode = Array.isArray(statusHeader)
+          ? parseInt(statusHeader[0])
+          : parseInt(statusHeader || "0");
       });
-
       request.on("error", (error) => {
         reject(error);
       });
@@ -92,7 +102,7 @@ export default class Api {
     httpsAgent: https.Agent,
     authorizationHeader?: string,
   ): Promise<[number, object]> {
-    console.log(`📝 hearthbeat authorization header: ${authorizationHeader}`);
+    console.log(`hearthbeat authorization header: ${authorizationHeader}`);
 
     const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
       ? {
@@ -136,10 +146,10 @@ export default class Api {
     httpsAgent: https.Agent,
     authorizationHeader?: string,
   ): Promise<[number, IKeyItem]> {
-    console.log(`📝 Refresh props:`, props);
-    console.log(`📝 Refresh https agent:`, httpsAgent);
-    console.log(`📝 Refresh authorization header:`, authorizationHeader);
-    console.log(`📝 ${member.name} Refresh key:`);
+    console.log(`Refresh props:`, props);
+    console.log(`Refresh https agent:`, httpsAgent);
+    console.log(`Refresh authorization header:`, authorizationHeader);
+    console.log(`${member.name} Refresh key:`);
     const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
       ? {
           ":method": "POST",
@@ -220,6 +230,7 @@ export default class Api {
     authorizationHeader?: string,
   ): Promise<
     [
+      { [key: string]: string | number },
       number,
       (
         | IWrapped
@@ -229,7 +240,7 @@ export default class Api {
     ]
   > {
     console.log(
-      `📝 ${member.name} Get wrapped private key with receipt. tink: ${tink}:`,
+      `${member.name} Get wrapped private key with receipt. tink: ${tink}:`,
       authorizationHeader,
     );
     const query = tink ? "?fmt=tink" : "";
@@ -259,10 +270,11 @@ export default class Api {
       console.log("Status:", response.statusCode);
       if (response.statusCode > 200) {
         console.log(
-          `Directly return statuscode with response: `,
+          `Directly return statuscode with response (${response.statusCode}): `,
           response.data,
         );
         return [
+          response.headers,
           response.statusCode,
           response.data ? JSON.parse(response.data) : undefined,
         ];
@@ -284,7 +296,7 @@ export default class Api {
       console.log(`key id: `, resp.wrappedKid);
       console.log(`wrapped: `, resp.wrapped);
 
-      return [response.statusCode, resp];
+      return [response.headers, response.statusCode, resp];
     } else {
       const resp = JSON.parse(response.data);
       console.log(`key returned: `, response.data);
@@ -293,6 +305,7 @@ export default class Api {
       console.log(`Receipt: `, resp.receipt);
 
       return [
+        response.headers,
         response.statusCode,
         {
           receipt,
@@ -315,7 +328,7 @@ export default class Api {
     authorizationHeader?: string,
   ): Promise<[number, string | IKeyItem | { [key: string]: any }]> {
     console.log(
-      `📝 ${member.name} Get unwrapped private key with receipt, think: ${tink}:`,
+      `${member.name} Get unwrapped private key with receipt, think: ${tink}`,
     );
     const query = tink ? "?fmt=tink" : "";
     const responseType = tink ? "arraybuffer" : "json";
@@ -346,6 +359,7 @@ export default class Api {
     try {
       response = await Api.responsePromise(req, responseType);
       console.log("Status:", response.statusCode);
+      console.log(`Response--> `, response);
       if (response.statusCode > 200) {
         console.log(
           `Directly return statuscode with response: `,
@@ -394,5 +408,159 @@ export default class Api {
 
       return [response.statusCode, { key: JSON.parse(unwrappedKey), receipt }];
     }
+  }
+
+  public static async keyReleasePolicy(
+    props: DemoProps,
+    member: DemoMemberProps,
+    httpsAgent: https.Agent,
+    authorizationHeader?: string,
+  ): Promise<
+    [number, IKeyReleasePolicyProps, { [key: string]: string | number }]
+  > {
+    console.log(`${member.name} Get key release policy`);
+    console.log(`Get key release policy props:`, props);
+    console.log(`Get key release policy https agent:`, httpsAgent);
+    console.log(
+      `Get key release policy authorization header:`,
+      authorizationHeader,
+    );
+    const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
+      ? {
+          ":method": "GET",
+          ":path": `${props.keyReleasePolicyPath}`,
+          "Content-Type": "application/json",
+          Authorization: authorizationHeader,
+        }
+      : {
+          ":method": "GET",
+          ":path": `${props.keyReleasePolicyPath}`,
+          "Content-Type": "application/json",
+        };
+    const client = http2.connect(props.url, {
+      ...httpsAgent.options,
+      rejectUnauthorized: true,
+    } as http2.SecureClientSessionOptions);
+    const req = client.request(reqProps);
+
+    req.end();
+
+    let response;
+    try {
+      response = await Api.responsePromise(req);
+      console.log("Status:", response.statusCode);
+      console.log("Response data:", response.data);
+    } catch (error) {
+      console.error("Error:", error.message);
+    } finally {
+      // Close the client session when done
+      if (client) {
+        client.close();
+      }
+    }
+    return [
+      response.statusCode,
+      <IKeyReleasePolicyProps>JSON.parse(response.data),
+      response.headers,
+    ];
+  }
+
+  public static async pubkey(
+    props: DemoProps,
+    member: DemoMemberProps,
+    kid: string,
+    fmt: string,
+    httpsAgent: https.Agent,
+    authorizationHeader?: string,
+  ): Promise<[number, IKeyItem]> {
+    console.log(`${member.name} Get pubkey`);
+    console.log(`Get pubkey props:`, props);
+    console.log(`Get pubkey https agent:`, httpsAgent);
+    console.log(`Get pubkey authorization header:`, authorizationHeader);
+    const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
+      ? {
+          ":method": "GET",
+          ":path": `${props.pubkeyPath}`,
+          "Content-Type": "application/json",
+          Authorization: authorizationHeader,
+        }
+      : {
+          ":method": "GET",
+          ":path": `${props.pubkeyPath}`,
+          "Content-Type": "application/json",
+        };
+    const client = http2.connect(props.url, {
+      ...httpsAgent.options,
+      rejectUnauthorized: true,
+    } as http2.SecureClientSessionOptions);
+    const req = client.request(reqProps);
+
+    req.end();
+
+    let response;
+    try {
+      response = await Api.responsePromise(req);
+      console.log("Status:", response.statusCode);
+      console.log("Response data:", response.data);
+    } catch (error) {
+      console.error("Error:", error.message);
+    } finally {
+      // Close the client session when done
+      if (client) {
+        client.close();
+      }
+    }
+    return [response.statusCode, <IKeyItem>JSON.parse(response.data)];
+  }
+
+  public static async listpubkeys(
+    props: DemoProps,
+    member: DemoMemberProps,
+    httpsAgent: https.Agent,
+    authorizationHeader?: string,
+  ): Promise<[number, ITinkPublicKeySet, { [key: string]: string | number }]> {
+    console.log(`${member.name} Get listpubkeys`);
+    console.log(`Get listpubkeys props:`, props);
+    console.log(`Get listpubkeys https agent:`, httpsAgent);
+    console.log(`Get listpubkeys authorization header:`, authorizationHeader);
+    const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
+      ? {
+          ":method": "GET",
+          ":path": `${props.listpubkeysPath}`,
+          "Content-Type": "application/json",
+          Authorization: authorizationHeader,
+        }
+      : {
+          ":method": "GET",
+          ":path": `${props.listpubkeysPath}`,
+          "Content-Type": "application/json",
+        };
+    const client = http2.connect(props.url, {
+      ...httpsAgent.options,
+      rejectUnauthorized: true,
+    } as http2.SecureClientSessionOptions);
+    const req = client.request(reqProps);
+
+    req.end();
+
+    let response;
+    try {
+      response = await Api.responsePromise(req);
+      console.log("Status:", response.statusCode);
+      console.log("Response data:", response.data);
+      console.log("Response headers:", response.headers);
+    } catch (error) {
+      console.error("Error:", error.message);
+    } finally {
+      // Close the client session when done
+      if (client) {
+        client.close();
+      }
+    }
+    return [
+      response.statusCode,
+      <ITinkPublicKeySet>JSON.parse(response.data),
+      response.headers,
+    ];
   }
 }

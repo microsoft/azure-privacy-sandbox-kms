@@ -9,6 +9,7 @@ import { IValidatorService } from "./IValidationService";
 import { UserCertValidator } from "./certs/UserCertValidator";
 import { MemberCertValidator } from "./certs/MemberCertValidator";
 import { ccf } from "@microsoft/ccf-app/global";
+import { Logger } from "../utils/Logger";
 
 /**
  * CCF authentication policies
@@ -55,7 +56,7 @@ export class AuthenticationService implements IAuthenticationService {
         // no caller policy
         return [caller, ServiceResult.Succeeded("")];
       }
-      console.log(
+      Logger.debug(
         `Authorization: isAuthenticated result (AuthenticationService)-> ${caller.policy},${JSON.stringify(caller)}`,
       );
       const validator = this.validators.get(

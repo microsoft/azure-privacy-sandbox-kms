@@ -2,6 +2,7 @@ import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../../utils/ServiceResult";
 import { IJwtIdentityProvider } from "./IJwtIdentityProvider";
 import { JwtValidationPolicyMap } from "./JwtValidationPolicyMap";
+import { Logger } from "../../utils/Logger";
 
 /**
  * MS Access Token
@@ -24,7 +25,7 @@ export const authorizeJwt = (
     const key = keys[inx];
     const jwtProp = identity?.jwt?.payload[key];
     const compliant = jwtProp === policy[key];
-    console.log(
+    Logger.debug(
       `isValidJwtToken: ${key}, expected: ${policy[key]}, found: ${jwtProp}, ${compliant}`,
     );
     if (!compliant) {

@@ -8,6 +8,7 @@ import { JwtIdentityProviderEnum } from "./JwtIdentityProviderEnum";
 import { IJwtIdentityProvider } from "./IJwtIdentityProvider";
 import { DemoJwtProvider } from "./DemoJwtProvider";
 import { MsJwtProvider } from "./MsJwtProvider";
+import { Logger } from "../../utils/Logger";
 
 export class JwtValidator implements IValidatorService {
   private readonly identityProviders = new Map<
@@ -28,7 +29,7 @@ export class JwtValidator implements IValidatorService {
 
   validate(request: ccfapp.Request<any>): ServiceResult<string> {
     const jwtCaller = request.caller as unknown as ccfapp.JwtAuthnIdentity;
-    console.log(
+    Logger.debug(
       `Authorization: JWT jwtCaller (JwtValidator)-> ${<JwtIdentityProviderEnum>jwtCaller.jwt.keyIssuer}`,
     );
     const provider = this.identityProviders.get(
@@ -37,14 +38,14 @@ export class JwtValidator implements IValidatorService {
 
     if (!provider) {
       const error = `Authorization: JWT validation provider is undefined (JwtValidator) for ${<JwtIdentityProviderEnum>jwtCaller.jwt.keyIssuer}`;
-      console.log(error);
+      Logger.error(error);
       return ServiceResult.Failed(
         { errorMessage: error, errorType: "caller error" },
         400,
       );
     }
     const isValidJwtToken = provider.isValidJwtToken(jwtCaller);
-    console.log(
+    Logger.debug(
       `Authorization: JWT validation result (JwtValidator) for provider ${provider.name}-> ${JSON.stringify(isValidJwtToken)}`,
     );
     return isValidJwtToken;

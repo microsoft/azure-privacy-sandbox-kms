@@ -8,6 +8,7 @@ import { Base64 } from "js-base64";
 import { IKeyItem, IWrapKey } from "./IKeyItem";
 import * as tink from "./proto/gen/tink_pb";
 import * as hpke from "./proto/gen/hpke_pb";
+import { Logger } from "../utils/Logger";
 
 // Used by tink_pb and hpke_pb
 export class TextEncoder {
@@ -103,7 +104,7 @@ export class KeyWrapper {
   public static generateKey = (): IWrapKey => {
     const keyPair: IWrapKey = ccfcrypto.generateRsaKeyPair(WRAPKEYSIZE);
     keyPair.kid = KeyGeneration.calculateKid(keyPair.publicKey);
-    console.log(`Wrap public key: `, keyPair.publicKey);
+    Logger.debug(`Wrap public key: `, keyPair.publicKey);
     return keyPair;
   };
 
@@ -132,11 +133,11 @@ export class KeyWrapper {
     keyData.typeUrl = "type.googleapis.com/google.crypto.tink.HpkePrivateKey";
     keyData.value = tinkHpkeKey.toBinary();
     keyset.key[0].keyData = keyData;
-    console.log(`tink Keyset: `, keyData);
+    Logger.secret(`tink Keyset: `, keyData);
 
     let bufPayload = keyset.toBinary().buffer;
 
-    console.log(
+    Logger.secret(
       `Tink Wrapped payload (${JSON.stringify(keyset).length}): `,
       keyset,
     );
@@ -202,7 +203,7 @@ export class KeyWrapper {
         },
       ],
     };
-    console.log(`Encryption public key: `, encryptionKey);
+    Logger.debug(`Encryption public key: `, encryptionKey);
     const ret: IWrapped = { keys: [encryptionKey] };
     return ret;
   };
@@ -212,7 +213,7 @@ export class KeyWrapper {
     wrappingKey: ArrayBuffer | undefined,
     payload: IKeyItem,
   ): [string, string] {
-    console.log(`getEncryptedKeyMaterial: `, payload);
+    Logger.debug(`getEncryptedKeyMaterial: `, payload);
     const receipt = payload.receipt;
     delete payload.receipt;
 
