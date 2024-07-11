@@ -51,8 +51,6 @@ export class MsJwtProvider implements IJwtIdentityProvider {
   public isValidJwtToken(
     identity: ccfapp.JwtAuthnIdentity,
   ): ServiceResult<string> {
-    const msClaims = identity.jwt.payload as MSAccessToken;
-
     const issuer = identity?.jwt?.payload?.iss;
     if (!issuer) {
       return ServiceResult.Failed(

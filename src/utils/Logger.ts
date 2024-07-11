@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { Console } from "console";
-
 // Logging levels enum
 export enum LogLevel {
   ERROR = 0,

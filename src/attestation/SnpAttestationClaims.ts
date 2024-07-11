@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { SnpAttestationResult, ccf } from "@microsoft/ccf-app/global";
+import { SnpAttestationResult } from "@microsoft/ccf-app/global";
 import { IAttestationReport } from "./ISnpAttestationReport";
 
 export class SnpAttestationClaims {

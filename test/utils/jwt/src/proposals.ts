@@ -39,7 +39,6 @@ export const issuerProposal = async (
 };
 
 export const issuerConfiguration = async (
-  host: string,
   privateKeyPath: string,
   certPath: string,
   proposalsPath: string,
