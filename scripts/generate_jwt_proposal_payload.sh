@@ -86,4 +86,4 @@ new_proposal=$(echo "$proposal" | jq --arg cert_bundle "$cert_bundle" '.actions[
 #echo $new_proposal
 
 # Save new_proposal to the file
-echo $new_proposal > $proposal_file
+echo $new_proposal | jq '.' > $proposal_file
