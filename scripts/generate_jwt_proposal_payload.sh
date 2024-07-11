@@ -71,11 +71,11 @@ proposal='{
           "appidacr": "2",
           "idp": "https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/",
           "idtyp": "app",
-          "oid": "da96e2ae-76bc-402e-abfe-2c3bd3bdf226",
-          "sub": "da96e2ae-76bc-402e-abfe-2c3bd3bdf226",
+          "oid": "049a48cd-7652-4159-82cf-7a2a42248b38",
+          "sub": "049a48cd-7652-4159-82cf-7a2a42248b38",
           "tid": "72f988bf-86f1-41af-91ab-2d7cd011db47",
           "ver": "1.0",
-          "xms_mirid": "/subscriptions/85c61f94-8912-4e82-900e-6ab44de9bdf8/resourcegroups/kms/providers/Microsoft.ManagedIdentity/userAssignedIdentities/acc-europe-mi"
+          "xms_mirid": "/subscriptions/85c61f94-8912-4e82-900e-6ab44de9bdf8/resourcegroups/privacy-sandbox-dev/providers/Microsoft.ManagedIdentity/userAssignedIdentities/privacysandbox"
         }
       }
     }
