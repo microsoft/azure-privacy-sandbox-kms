@@ -67,7 +67,7 @@ proposal='{
         "validation_policy": {
           "iss": "https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/",
           "aud": "https://management.azure.com/",
-          "appid": "09cda15f-be0b-43de-a704-89a1f2e4b3f9",
+          "appid": "6b505410-70b8-46b6-a840-4403122e2a40",
           "appidacr": "2",
           "idp": "https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/",
           "idtyp": "app",
