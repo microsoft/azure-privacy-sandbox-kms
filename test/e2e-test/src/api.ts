@@ -7,9 +7,8 @@ import {
   IKeyItem,
   IKeyReleasePolicyProps,
   ITinkPublicKeySet,
-  ServiceResult,
 } from "../../../src";
-import { IWrapped, IWrappedJwt } from "../../../src/endpoints/KeyWrapper";
+import { IWrapped } from "../../../src/endpoints/KeyWrapper";
 import { ISnpAttestation } from "../../../src/attestation/ISnpAttestation";
 import https from "https";
 import * as http2 from "http2";
@@ -200,25 +199,6 @@ export default class Api {
     return unwrappedKey;
   };
 
-  private static decryptTinkKey = async (
-    wrapped: IWrapped,
-    privateWrapKey: string,
-  ) => {
-    const keyMaterial = JSON.parse(wrapped.keys[0].keyData[0].keyMaterial);
-    console.log(`keyMaterial: `, keyMaterial);
-    // Get base64 key set value
-    const encryptedKeyset = keyMaterial.encryptedKeyset;
-
-    const unwrappedKey = await this.decryptTinkPrivateKey(
-      encryptedKeyset,
-      privateWrapKey,
-    );
-    keyMaterial.encryptedKeyset = Base64.fromUint8Array(unwrappedKey);
-    console.log(`unwrapped tink key: `, keyMaterial.encryptedKeyset);
-    wrapped.keys[0].keyData[0].keyMaterial = JSON.stringify(keyMaterial);
-    return wrapped;
-  };
-
   public static async key(
     props: DemoProps,
     member: DemoMemberProps,
@@ -291,7 +271,6 @@ export default class Api {
 
     if (tink) {
       const resp = JSON.parse(response.data);
-      const receipt = resp.receipt;
       console.log(`Receipt: `, resp.receipt);
       console.log(`key id: `, resp.wrappedKid);
       console.log(`wrapped: `, resp.wrapped);
@@ -354,7 +333,6 @@ export default class Api {
     ); // Send the request body
     req.end();
 
-    let wrappedKey: Uint8Array;
     let response;
     try {
       response = await Api.responsePromise(req, responseType);
@@ -381,7 +359,6 @@ export default class Api {
     }
     if (tink) {
       const resp = JSON.parse(response.data);
-      const receipt = resp.receipt;
       console.log(`Wrapped key: `, resp.wrapped);
       console.log(`Receipt: `, resp.receipt);
       resp.wrapped = Base64.fromUint8Array(

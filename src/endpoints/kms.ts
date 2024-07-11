@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 import * as ccfapp from "@microsoft/ccf-app";
-import { AuthenticationService } from "../authorization/AuthenticationService";
 import { ServiceResult } from "../utils/ServiceResult";
 import { enableEndpoint } from "../utils/Tooling";
 import { ServiceRequest } from "../utils/ServiceRequest";

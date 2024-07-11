@@ -4,9 +4,9 @@
 import { ccf } from "@microsoft/ccf-app/global";
 import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../utils/ServiceResult";
-import { IWrapped, IWrappedJwt, KeyWrapper } from "./KeyWrapper";
+import { IWrapped, KeyWrapper } from "./KeyWrapper";
 import { ISnpAttestation } from "../attestation/ISnpAttestation";
-import { enableEndpoint, isPemPublicKey, queryParams } from "../utils/Tooling";
+import { enableEndpoint, isPemPublicKey } from "../utils/Tooling";
 import { IAttestationReport } from "../attestation/ISnpAttestationReport";
 import { IKeyItem } from "./IKeyItem";
 import { KeyGeneration } from "./KeyGeneration";
@@ -325,7 +325,6 @@ export const unwrapKey = (
 
   // Get wrapped key
   try {
-    let wrapKey;
     if (fmt == "tink") {
       Logger.debug(`Retrieve key in tink format`);
       const wrapped = KeyWrapper.createWrappedPrivateTinkKey(

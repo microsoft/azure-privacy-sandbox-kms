@@ -6,7 +6,7 @@ import { ServiceResult } from "../utils/ServiceResult";
 import { ITinkPublicKeySet, TinkKey, TinkPublicKey } from "./TinkKey";
 import { hpkeKeyIdMap, hpkeKeysMap } from "../repositories/Maps";
 import { IKeyItem } from "./IKeyItem";
-import { enableEndpoint, queryParams, setKeyHeaders } from "../utils/Tooling";
+import { enableEndpoint, setKeyHeaders } from "../utils/Tooling";
 import { ServiceRequest } from "../utils/ServiceRequest";
 import { Logger } from "../utils/Logger";
 
@@ -71,7 +71,6 @@ export const pubkey = (
   let id: number;
   try {
     let kid: string;
-    let id: number;
     if (serviceRequest.query && serviceRequest.query["kid"]) {
       kid = serviceRequest.query["kid"];
     } else {

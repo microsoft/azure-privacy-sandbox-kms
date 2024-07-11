@@ -1,19 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import Api, { Validator, convertUint8ArrayToString } from "./api.js";
+import Api from "./api.js";
 import path from "path";
-import {
-  member0DataPart1,
-  member0DataPart2,
-  member1Data,
-  member2Data,
-} from "./data.js";
+import { member0DataPart1, member1Data, member2Data } from "./data.js";
 import { exec } from "child_process";
 import https from "https";
-import fs, { stat } from "fs";
+import fs from "fs";
 import inquirer from "inquirer";
-import { IKeyItem, key } from "../../../src";
+import { IKeyItem } from "../../../src";
 import { ISnpAttestation } from "../../../src/attestation/ISnpAttestation.js";
 
 const readJSON = async (filePath: string): Promise<any> => {
@@ -113,7 +108,7 @@ class Demo {
     }
 
     this.printTestSectionHeader("🔬 [TEST]: Setup kms");
-    const output = await Demo.executeCommand(`make setup >/tmp/make.txt`);
+    await Demo.executeCommand(`make setup >/tmp/make.txt`);
 
     this.printTestSectionHeader("🔬 [TEST]: generate access token");
     const access_token = await Demo.executeCommand(
@@ -136,10 +131,6 @@ class Demo {
     this.printTestSectionHeader("🔬 [TEST]: Key generation Service");
 
     const notUndefinedString = (key: string | number | any[]) => {
-      return key !== undefined;
-    };
-
-    const notUndefinedArray = (key: string | number | any[]) => {
       return key !== undefined;
     };
 

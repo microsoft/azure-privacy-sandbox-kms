@@ -3,7 +3,6 @@
 
 import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../../utils/ServiceResult";
-import { JwtValidationPolicyMap } from "./JwtValidationPolicyMap";
 import { IJwtIdentityProvider } from "./IJwtIdentityProvider";
 import { authorizeJwt } from "./MsJwtProvider";
 import { Logger } from "../../utils/Logger";

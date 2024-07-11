@@ -8,7 +8,6 @@ import { JwtValidator } from "./jwt/JwtValidator";
 import { IValidatorService } from "./IValidationService";
 import { UserCertValidator } from "./certs/UserCertValidator";
 import { MemberCertValidator } from "./certs/MemberCertValidator";
-import { ccf } from "@microsoft/ccf-app/global";
 import { Logger } from "../utils/Logger";
 
 /**

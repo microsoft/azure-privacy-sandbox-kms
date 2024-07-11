@@ -17,7 +17,6 @@ export class KeyGeneration {
 
   // Calculate hex hash
   public static calculateHexHash = (data: ArrayBuffer): string => {
-    const digest = new Uint8Array(ccfcrypto.digest("SHA-256", data));
     return arrayBufferToHex(KeyGeneration.calculateHash(data).buffer);
   };
 

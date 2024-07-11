@@ -56,7 +56,6 @@ export const isPemPublicKey = (key: string): boolean => {
   const endPatternLiteral = /\\n-----END PUBLIC KEY-----\\n$/;
   const beginPatternNewline = /-----BEGIN PUBLIC KEY-----\n/;
   const endPatternNewline = /\n-----END PUBLIC KEY-----\n$/;
-  const contentPattern = /([\s\S]+)/;
 
   const isLiteralNewline =
     beginPatternLiteral.test(key) && endPatternLiteral.test(key);
