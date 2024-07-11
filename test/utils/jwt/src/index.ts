@@ -42,7 +42,6 @@ const createProposalsFolder = async (): Promise<void> => {
 
     // generate issuer configuration used in sandbox
     await Proposals.issuerConfiguration(
-      host,
       privateKeyPath,
       certificatePath,
       proposalsPath,
