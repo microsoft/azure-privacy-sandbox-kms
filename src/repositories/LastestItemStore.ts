@@ -45,7 +45,7 @@ export class LastestItemStore<K extends number, T> {
   }
 
   public receipt(id: K) {
-    const version = this.store.getVersionOfPreviousWrite(id);
+    const version = this.store.getVersionOfPreviousWrite(id) || 0;
     Logger.debug(`version for id ${id}: ${JSON.stringify(version)}`);
     const states = ccf.historical.getStateRange(id, version, version, 1800);
     if (states !== null) {

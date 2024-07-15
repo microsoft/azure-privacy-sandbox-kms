@@ -19,13 +19,13 @@ export class ServiceResult<T> {
   public readonly failure: boolean;
   public readonly statusCode: number;
   public readonly status: string;
-  public readonly body: T | null;
-  public readonly error: ErrorResponse | null;
+  public readonly body: T | undefined;
+  public readonly error: ErrorResponse | undefined;
   public readonly headers?: { [key: string]: string | number };
 
   private constructor(
-    body: T | null,
-    error: ErrorResponse | null,
+    body: T | undefined,
+    error: ErrorResponse | undefined,
     success: boolean = false,
     statusCode: number,
     headers?: { [key: string]: string | number },
@@ -48,12 +48,12 @@ export class ServiceResult<T> {
       Logger.debug("Response headers: ", headers);
     }
 
-    return new ServiceResult<T>(body, null, true, 200, headers);
+    return new ServiceResult<T>(body, undefined, true, 200, headers);
   }
 
   public static Accepted(): ServiceResult<string> {
     Logger.debug("Response Accepted");
-    return new ServiceResult<string>(undefined, null, true, 202, {
+    return new ServiceResult<string>(undefined, undefined, true, 202, {
       "retry-after": 3,
     });
   }

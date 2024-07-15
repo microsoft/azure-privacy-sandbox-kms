@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "strict": true,
     "lib": ["ES2020"],
     "target": "ES2020",
     "module": "ES2020",
@@ -11,6 +12,12 @@
     "sourceMap": false,
     "resolveJsonModule": true,
     "types": ["@types/node"],
+    "strictNullChecks": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
     "noUnusedLocals": true
   },
   "include": ["src/**/*", "test/**/*"]

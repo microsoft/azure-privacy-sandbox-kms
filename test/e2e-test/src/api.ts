@@ -128,7 +128,7 @@ export default class Api {
       response = await Api.responsePromise(req);
       console.log("Status:", response.statusCode);
       console.log("Response data:", response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error.message);
     } finally {
       // Close the client session when done
@@ -174,7 +174,7 @@ export default class Api {
       response = await Api.responsePromise(req);
       console.log("Status:", response.statusCode);
       console.log("Response data:", response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error.message);
     } finally {
       // Close the client session when done
@@ -260,7 +260,7 @@ export default class Api {
         ];
       }
       console.log("Response data:", response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error.message);
     } finally {
       // Close the client session when done
@@ -348,7 +348,7 @@ export default class Api {
           response.data ? JSON.parse(response.data) : undefined,
         ];
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error.message);
       throw new Error(error.message);
     } finally {
@@ -427,7 +427,7 @@ export default class Api {
       response = await Api.responsePromise(req);
       console.log("Status:", response.statusCode);
       console.log("Response data:", response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error.message);
     } finally {
       // Close the client session when done
@@ -479,7 +479,7 @@ export default class Api {
       response = await Api.responsePromise(req);
       console.log("Status:", response.statusCode);
       console.log("Response data:", response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error.message);
     } finally {
       // Close the client session when done
@@ -526,7 +526,7 @@ export default class Api {
       console.log("Status:", response.statusCode);
       console.log("Response data:", response.data);
       console.log("Response headers:", response.headers);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error.message);
     } finally {
       // Close the client session when done
