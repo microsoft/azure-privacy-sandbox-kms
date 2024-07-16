@@ -6,7 +6,7 @@
         "issuer": "http://Demo-jwt-issuer",
         "validation_policy": {
           "iss": "http://Demo-jwt-issuer",
-          "sub": "c0d8e9a7-6b8e-4e1f-9e4a-3b2c1d0f5a6b",
+          "sub": ["c0d8e9a7-6b8e-4e1f-9e4a-3b2c1d0f5a6b", "some value"],
           "name": "Cool caller"
         }
       }
