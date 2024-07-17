@@ -9,6 +9,10 @@ import { IKeyItem, IWrapKey } from "./IKeyItem";
 import * as tink from "./proto/gen/tink_pb";
 import * as hpke from "./proto/gen/hpke_pb";
 import { Logger } from "../utils/Logger";
+import { enableEndpoint } from "../utils/Tooling";
+
+// Enable the endpoint
+enableEndpoint();
 
 // Used by tink_pb and hpke_pb
 export class TextEncoder {

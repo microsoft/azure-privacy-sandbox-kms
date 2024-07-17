@@ -3,6 +3,10 @@
 
 import { Base64 } from "js-base64";
 import { IKeyItem } from "./IKeyItem";
+import { enableEndpoint } from "../utils/Tooling";
+
+// Enable the endpoint
+enableEndpoint();
 
 export enum TinkKeyStatus {
   enabled = "ENABLED",

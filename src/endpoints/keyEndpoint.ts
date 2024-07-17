@@ -15,6 +15,9 @@ import { hpkeKeyIdMap, hpkeKeysMap } from "../repositories/Maps";
 import { ServiceRequest } from "../utils/ServiceRequest";
 import { Logger } from "../utils/Logger";
 
+// Enable the endpoint
+enableEndpoint();
+
 //#region Key endpoints interface
 export interface IKeyRequest {
   attestation: ISnpAttestation;
@@ -38,9 +41,6 @@ export interface IUnwrapResponse {
   receipt: string;
 }
 //#endregion
-
-// Enable the endpoint
-enableEndpoint();
 
 /**
  * Checks if the request has a wrapping key and returns the wrapping key and its hash.
