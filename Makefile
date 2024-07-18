@@ -127,3 +127,5 @@ clean: ## 🧹 Clean the working folders created during build/demo
 	@rm -rf .venv_ccf_sandbox
 	@rm -rf ${KMS_WORKSPACE}
 	@rm -rf dist
+	@rm -rf node_modules
+	@rm -f package-lock.json

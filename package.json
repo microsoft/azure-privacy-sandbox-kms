@@ -15,7 +15,6 @@
     "@bufbuild/protobuf": "^1.8.0",
     "@bufbuild/protoc-gen-es": "^1.8.0",
     "@microsoft/ccf-app": "5.0.0",
-    "i": "^0.3.7",
     "js-base64": "^3.5.2",
     "jsrsasign": "^11.0.0",
     "jsrsasign-util": "^1.0.2",
