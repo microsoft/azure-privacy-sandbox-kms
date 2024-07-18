@@ -12,6 +12,6 @@ ENV NVM_DIR /root/.nvm
 ENV TINKEY_VERSION=tinkey-1.10.1
 COPY .devcontainer/install_packages.sh .devcontainer/install_nodejs.sh .devcontainer/setup_tinkey.sh /src/
 
-RUN /src/install_packages.sh
 RUN /src/install_nodejs.sh
+RUN /src/install_packages.sh
 RUN /src/setup_tinkey.sh
