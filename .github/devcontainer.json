@@ -4,7 +4,7 @@
     "dockerfile": "Dockerfile.ci",
     "context": ".."
   },
-  "postCreateCommand": "cd /workspaces/azure-privacy-sandbox-kms && npm i && make build",
+  "postCreateCommand": "cd /workspaces/azure-privacy-sandbox-kms && npm i && npm -g npm@latest rollup@4.18.1  && make build",
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       "version": "latest",

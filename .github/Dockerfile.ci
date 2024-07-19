@@ -8,8 +8,12 @@ ARG ENVIRONMENT=ci
 # hadolint ignore=DL3006
 FROM mcr.microsoft.com/ccf/app/dev:${BASE_CCF_IMAGE} as base
 
+# Install Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_current.x | bash -
+
 # Custom Deps
 RUN apt-get update && apt-get install -y \
+    nodejs \
     python3-pip \
     openssh-client \
     make \
@@ -18,11 +22,8 @@ RUN apt-get update && apt-get install -y \
     lsof \
     sudo \
     tar \
-    default-jre
+    default-jre 
 
-# Install Node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_current.x | bash -
-RUN apt-get install -y nodejs
 RUN pip install --upgrade pip setuptools
 
 RUN apt-get -y autoremove \
