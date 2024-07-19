@@ -13,7 +13,7 @@ ENV TINKEY_VERSION=tinkey-1.10.1
 COPY .devcontainer/install_packages.sh .devcontainer/install_nodejs.sh .devcontainer/setup_tinkey.sh /src/
 
 # "Install necessary packages."
-RUN /src/install_nodejs.sh
 RUN /src/install_packages.sh
+RUN /src/install_nodejs.sh
 RUN /src/setup_tinkey.sh
 # "All necessary packages and tinkey setup completed."
