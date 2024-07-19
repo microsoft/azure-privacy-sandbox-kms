@@ -124,8 +124,6 @@ lint: ## 🔍 Lint the code base (but don't fix)
 
 # Keep this at the bottom.
 clean: ## 🧹 Clean the working folders created during build/demo
-	@rm -rf .venv_ccf_sandbox
+	@rm -rf ${PYTHON_VENV}
 	@rm -rf ${KMS_WORKSPACE}
 	@rm -rf dist
-	@rm -rf node_modules
-	@rm -f package-lock.json
