@@ -18,7 +18,7 @@ export const authorizeJwt = (
   issuer: string,
   identity: ccfapp.JwtAuthnIdentity,
 ): ServiceResult<string> => {
-  const policy = JwtValidationPolicyMap.read(issuer);
+  const policy = JwtValidationPolicyMap.read(issuer) || {};
   const keys = Object.keys(policy);
 
   for (let inx = 0; inx < keys.length; inx++) {

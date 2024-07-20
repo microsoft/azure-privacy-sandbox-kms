@@ -51,9 +51,15 @@ export class MemberCertValidator implements IValidatorService {
     );
 
     const memberInfoBuf = membersInfo.get(ccf.strToBuf(memberId));
-    const memberInfo = ccf.bufToJsonCompatible(memberInfoBuf) as CCFMember;
-    const isActiveMember = memberInfo && memberInfo.status === "Active";
-
-    return ServiceResult.Succeeded(isActiveMember && isMember);
+    if (memberInfoBuf !== undefined) {
+      const memberInfo = ccf.bufToJsonCompatible(memberInfoBuf) as CCFMember;
+      const isActiveMember = memberInfo && memberInfo.status === "Active";
+      return ServiceResult.Succeeded(isActiveMember && isMember);
+    } else {
+      // memberInfoBuf is undefined
+      return ServiceResult.Failed({
+        errorMessage: "Member information is undefined.",
+      });
+    }
   }
 }
