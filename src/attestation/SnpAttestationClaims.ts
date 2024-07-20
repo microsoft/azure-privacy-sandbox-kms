@@ -83,7 +83,7 @@ export class SnpAttestationClaims {
     // report_id_ma
     // reported_tcb
     // chip_id
-    // committed_tcb
+    // committed_tcbx`
     // current_minor
     // current_build
     // committed_minor
