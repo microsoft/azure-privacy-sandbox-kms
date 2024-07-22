@@ -115,11 +115,9 @@ export const key = (
   const [_, isValidIdentity] = serviceRequest.isAuthenticated();
   if (isValidIdentity.failure) return isValidIdentity;
 
-  let kid: string | undefined = undefined;
+  let kid = serviceRequest.query?.["kid"];
   let id: number | undefined;
-  if (serviceRequest.query && serviceRequest.query["kid"]) {
-    kid = serviceRequest.query["kid"];
-  } else {
+  if (kid === undefined) {
     [id, kid] = hpkeKeyIdMap.latestItem();
     if (kid === undefined) {
       return ServiceResult.Failed<string>(
