@@ -68,10 +68,12 @@ export const pubkey = (
   const [_, isValidIdentity] = serviceRequest.isAuthenticated();
   if (isValidIdentity.failure) return isValidIdentity;
 
-  let id: number | undefined;
+  let id: number;
   try {
-    let kid = serviceRequest.query?.["kid"];
-    if (kid === undefined) {
+    let kid: string;
+    if (serviceRequest.query && serviceRequest.query["kid"]) {
+      kid = serviceRequest.query["kid"];
+    } else {
       [id, kid] = hpkeKeyIdMap.latestItem();
       if (kid === undefined) {
         return ServiceResult.Failed(
@@ -93,7 +95,7 @@ export const pubkey = (
     }
 
     Logger.debug(`Get key with kid ${kid}`);
-    const keyItem = hpkeKeysMap.store.get(kid!) as IKeyItem;
+    const keyItem = hpkeKeysMap.store.get(kid) as IKeyItem;
     if (keyItem === undefined) {
       return ServiceResult.Failed(
         {
@@ -104,7 +106,7 @@ export const pubkey = (
     }
 
     // Get receipt if available
-    const receipt = hpkeKeysMap.receipt(kid!);
+    const receipt = hpkeKeysMap.receipt(kid);
     if (receipt !== undefined) {
       keyItem.receipt = receipt;
       Logger.debug(`pubkey->Receipt: ${receipt}`);
