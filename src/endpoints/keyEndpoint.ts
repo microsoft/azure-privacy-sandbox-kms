@@ -15,6 +15,9 @@ import { hpkeKeyIdMap, hpkeKeysMap } from "../repositories/Maps";
 import { ServiceRequest } from "../utils/ServiceRequest";
 import { Logger } from "../utils/Logger";
 
+// Enable the endpoint
+enableEndpoint();
+
 //#region Key endpoints interface
 export interface IKeyRequest {
   attestation: ISnpAttestation;
@@ -38,9 +41,6 @@ export interface IUnwrapResponse {
   receipt: string;
 }
 //#endregion
-
-// Enable the endpoint
-enableEndpoint();
 
 /**
  * Checks if the request has a wrapping key and returns the wrapping key and its hash.
@@ -94,8 +94,10 @@ export const key = (
 ): ServiceResult<string | IKeyResponse> => {
   const name = "key";
   const serviceRequest = new ServiceRequest<IKeyRequest>(name, request);
-  let attestation: ISnpAttestation;
-  if (serviceRequest.body["attestation"]) {
+  let attestation: ISnpAttestation | undefined = undefined;
+
+  // Check if serviceRequest.body is defined before accessing "attestation"
+  if (serviceRequest.body && serviceRequest.body["attestation"]) {
     attestation = serviceRequest.body["attestation"];
   }
 
@@ -113,8 +115,8 @@ export const key = (
   const [_, isValidIdentity] = serviceRequest.isAuthenticated();
   if (isValidIdentity.failure) return isValidIdentity;
 
-  let kid: string;
-  let id: number;
+  let kid: string | undefined = undefined;
+  let id: number | undefined;
   if (serviceRequest.query && serviceRequest.query["kid"]) {
     kid = serviceRequest.query["kid"];
   } else {
@@ -142,7 +144,7 @@ export const key = (
     validateAttestationResult = validateAttestation(attestation);
     if (!validateAttestationResult.success) {
       return ServiceResult.Failed<string>(
-        validateAttestationResult.error,
+        validateAttestationResult.error!,
         validateAttestationResult.statusCode,
       );
     }
@@ -215,8 +217,15 @@ export const unwrapKey = (
   const name = "unwrapKey";
   const serviceRequest = new ServiceRequest<IKeyRequest>(name, request);
 
-  let attestation: ISnpAttestation;
-  if (serviceRequest.body["attestation"]) {
+  let attestation: ISnpAttestation | undefined = undefined;
+
+  // Check if serviceRequest.body is defined before accessing "attestation"
+  if (serviceRequest.body && serviceRequest.body["attestation"]) {
+    attestation = serviceRequest.body["attestation"];
+  }
+
+  // Repeat the check wherever serviceRequest.body["attestation"] is accessed
+  if (serviceRequest.body && serviceRequest.body["attestation"]) {
     attestation = serviceRequest.body["attestation"];
   }
 
@@ -251,12 +260,12 @@ export const unwrapKey = (
   if (wrappingKeyFromRequest.success === false) {
     // WrappingKey has errors
     return ServiceResult.Failed<string>(
-      wrappingKeyFromRequest.error,
+      wrappingKeyFromRequest.error!,
       wrappingKeyFromRequest.statusCode,
     );
   }
 
-  const wrappingKeyBuf = wrappingKeyFromRequest.body.wrappingKey;
+  const wrappingKeyBuf = wrappingKeyFromRequest.body!.wrappingKey;
   const wrappingKeyHash = KeyGeneration.calculateHexHash(wrappingKeyBuf);
   Logger.debug(`unwrapKey->wrapping key hash: ${wrappingKeyHash}`);
 
@@ -276,7 +285,7 @@ export const unwrapKey = (
     validateAttestationResult = validateAttestation(attestation);
     if (!validateAttestationResult.success) {
       return ServiceResult.Failed<string>(
-        validateAttestationResult.error,
+        validateAttestationResult.error!,
         validateAttestationResult.statusCode,
       );
     }
@@ -291,13 +300,13 @@ export const unwrapKey = (
 
   // Check if wrapping key match attestation
   if (
-    !validateAttestationResult.body["x-ms-sevsnpvm-reportdata"].startsWith(
+    !validateAttestationResult.body!["x-ms-sevsnpvm-reportdata"].startsWith(
       wrappingKeyHash,
     )
   ) {
     return ServiceResult.Failed<string>(
       {
-        errorMessage: `${name}:wrapping key hash ${validateAttestationResult.body["x-ms-sevsnpvm-reportdata"]} does not match wrappingKey`,
+        errorMessage: `${name}:wrapping key hash ${validateAttestationResult.body!["x-ms-sevsnpvm-reportdata"]} does not match wrappingKey`,
       },
       400,
     );
