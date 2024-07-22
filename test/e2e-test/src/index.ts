@@ -15,7 +15,7 @@ const readJSON = async (filePath: string): Promise<any> => {
   try {
     const fileContents = fs.readFileSync(filePath, "utf-8");
     return JSON.parse(fileContents);
-  } catch (error) {
+  } catch (error: any) {
     throw new Error(`Error reading JSON file: ${error.message}`);
   }
 };
@@ -347,7 +347,7 @@ class Demo {
       keyResponse.wrappedKid,
       attestation,
       private_wrapping_key,
-      undefined,
+      <any>undefined,
       false,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token,
