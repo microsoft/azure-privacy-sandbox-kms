@@ -5,11 +5,8 @@ import * as ccfcrypto from "@microsoft/ccf-app/crypto";
 import { ccf } from "@microsoft/ccf-app/global";
 import { Base64 } from "js-base64";
 import { IKeyItem } from "./IKeyItem";
-import { arrayBufferToHex, enableEndpoint } from "../utils/Tooling";
+import { arrayBufferToHex } from "../utils/Tooling";
 import { Logger } from "../utils/Logger";
-
-// Enable the endpoint
-enableEndpoint();
 
 export class KeyGeneration {
   // Calculate a sha2 digest
