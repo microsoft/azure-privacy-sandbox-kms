@@ -114,7 +114,12 @@ export class KeyWrapper {
     payload: IKeyItem,
   ): string => {
     let tinkHpkeKey = new hpke.HpkePrivateKey();
-    tinkHpkeKey.privateKey = Base64.toUint8Array(payload.d);
+    if (typeof payload.d === "string") {
+      tinkHpkeKey.privateKey = Base64.toUint8Array(payload.d);
+    } else {
+      throw new Error("payload.d is undefined or not a string");
+    }
+
     // TODO: check if we need to set tinkHpkeKey.publicKey. Based on tink.proto, it's optional though.
     // From the tink code, you can see currently version=0 is the only option
     tinkHpkeKey.version = 0;
@@ -212,7 +217,7 @@ export class KeyWrapper {
   private static getEncryptedKeyMaterial(
     wrappingKey: ArrayBuffer | undefined,
     payload: IKeyItem,
-  ): [string, string] {
+  ): [string, string | undefined] {
     Logger.debug(`getEncryptedKeyMaterial: `, payload);
     const receipt = payload.receipt;
     delete payload.receipt;
