@@ -25,5 +25,5 @@ export const hearthbeat = (
   const [policy, isValidIdentity] = serviceRequest.isAuthenticated();
   if (isValidIdentity.failure) return isValidIdentity;
 
-  return ServiceResult.Succeeded<ccfapp.AuthnIdentityCommon>(policy);
+  return ServiceResult.Succeeded<ccfapp.AuthnIdentityCommon>(policy!);
 };
