@@ -68,9 +68,9 @@ export const pubkey = (
   const [_, isValidIdentity] = serviceRequest.isAuthenticated();
   if (isValidIdentity.failure) return isValidIdentity;
 
-  let id: number | undefined;
+  let id: number;
   try {
-    let kid: string | undefined;
+    let kid: string;
     if (serviceRequest.query && serviceRequest.query["kid"]) {
       kid = serviceRequest.query["kid"];
     } else {
