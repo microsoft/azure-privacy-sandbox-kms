@@ -11,7 +11,7 @@
     "sourceMap": false,
     "resolveJsonModule": true,
     "types": ["@types/node"],
-    "strict": false,
+    "strict": true,
     "noUnusedLocals": true
   },
   "include": ["src/**/*", "test/**/*"]
