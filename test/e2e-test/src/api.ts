@@ -206,6 +206,7 @@ export default class Api {
     privateWrapKey: string,
     publicWrapKey: string,
     tink: boolean,
+    kid: string | undefined,
     httpsAgent: https.Agent,
     authorizationHeader?: string,
   ): Promise<
@@ -223,7 +224,12 @@ export default class Api {
       `${member.name} Get wrapped private key with receipt. tink: ${tink}:`,
       authorizationHeader,
     );
-    const query = tink ? "?fmt=tink" : "";
+    let query = tink ? "?fmt=tink" : "";
+    if (kid) {
+      if (query === "") {
+        query = `?kid=${kid}`;
+      } else query = `${query}&kid=${kid}`;
+    }
     const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
       ? {
           ":method": "POST",
@@ -280,7 +286,7 @@ export default class Api {
       const resp = JSON.parse(response.data);
       console.log(`key returned: `, response.data);
       const receipt = resp.receipt;
-      console.log(`Key id: `, resp.wrappedKid);
+      console.log(`wrappedKid: `, resp.wrappedKid);
       console.log(`Receipt: `, resp.receipt);
 
       return [
