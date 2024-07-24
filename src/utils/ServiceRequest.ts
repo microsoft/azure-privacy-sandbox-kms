@@ -55,10 +55,6 @@ export class ServiceRequest<T> {
     const [policy, isValidIdentity] =
       new AuthenticationService().isAuthenticated(this.request);
 
-    if (isValidIdentity === undefined) {
-      throw new Error("Could not retrieve validation provider");
-    }
-
     Logger.debug(
       `${this.name} Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`,
     );

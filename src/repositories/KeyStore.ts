@@ -46,7 +46,13 @@ export class KeyStore {
       return identifier;
     };
 
-    const version = this.store.getVersionOfPreviousWrite(id) || 0;
+    const version = this.store.getVersionOfPreviousWrite(id);
+    if (version === undefined) {
+      Logger.debug(
+        `version for id ${id} is undefined: ${JSON.stringify(version)}`,
+      );
+      return undefined;
+    }
 
     Logger.debug(`version for id ${id}: ${JSON.stringify(version)}`);
     const states = ccf.historical.getStateRange(

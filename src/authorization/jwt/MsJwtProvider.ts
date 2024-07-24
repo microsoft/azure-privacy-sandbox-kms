@@ -18,7 +18,16 @@ export const authorizeJwt = (
   issuer: string,
   identity: ccfapp.JwtAuthnIdentity,
 ): ServiceResult<string> => {
-  const policy = JwtValidationPolicyMap.read(issuer) || {};
+  const policy = JwtValidationPolicyMap.read(issuer);
+  if (policy === undefined) {
+    return ServiceResult.Failed(
+      {
+        errorMessage: `issuer ${issuer} is not defined in the policy`,
+        errorType: "AuthenticationError",
+      },
+      500,
+    );
+  }
   const keys = Object.keys(policy);
 
   for (let inx = 0; inx < keys.length; inx++) {

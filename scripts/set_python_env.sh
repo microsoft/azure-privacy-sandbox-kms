@@ -11,7 +11,7 @@ if [ ! -d "$PYTHON_VENV" ]; then
 	python3.8 -m venv $PYTHON_VENV
 	echo "Activating virtual environment and installing dependencies..."
 	source $PYTHON_VENV/bin/activate
-	pip install wheel
+	pip install wheel==0.43.0
 	pip install -U -r ./requirements.txt
 else
 	echo "Activating existing virtual environment..."

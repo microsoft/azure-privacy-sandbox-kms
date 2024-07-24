@@ -12,8 +12,5 @@ export interface IAuthenticationService {
    */
   isAuthenticated(
     request: ccfapp.Request<any>,
-  ): [
-    ccfapp.AuthnIdentityCommon | undefined,
-    ServiceResult<string> | undefined,
-  ];
+  ): [ccfapp.AuthnIdentityCommon | undefined, ServiceResult<string>];
 }
