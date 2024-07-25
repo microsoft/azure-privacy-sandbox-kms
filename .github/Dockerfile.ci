@@ -1,17 +1,43 @@
-# Base container image which is built nightly
-# Used as a starting point to make building other containers fast
-
+# Define the base CCF image version
 ARG BASE_CCF_IMAGE=5.0.0-rc0-virtual
-ARG ENVIRONMENT=ci
 
-# ignore this hadolint error as BASE_IMAGE contains an image tag
-# hadolint ignore=DL3006
-FROM mcr.microsoft.com/ccf/app/dev:${BASE_CCF_IMAGE} as base
+# Stage 1: Build stage using the devcontainer image
+FROM mcr.microsoft.com/ccf/app/dev:${BASE_CCF_IMAGE} as build
 
+# Set environment variables
+ENV NVM_DIR /root/.nvm
+ENV TINKEY_VERSION=tinkey-1.10.1
+
+# Copy necessary scripts into the container
 COPY .devcontainer/install_packages.sh .devcontainer/install_nodejs.sh .devcontainer/setup_tinkey.sh /src/
 
-# "Install necessary packages."
+# Run the scripts to install packages and set up the environment
 RUN /src/install_packages.sh
 RUN /src/install_nodejs.sh
 RUN /src/setup_tinkey.sh
-# "All necessary packages and tinkey setup completed."
+
+# Copy the application source code into the container
+COPY . /kms
+
+# Change to the application directory
+WORKDIR /kms
+
+# Run the build process (adjust this command as needed for your build process)
+RUN npm install && make build
+
+# Stage 2: Runtime stage using a clean runtime image
+FROM mcr.microsoft.com/ccf/app/run:${BASE_CCF_IMAGE} as runtime
+
+# Copy the build artifacts from the build stage
+COPY --from=build /kms/dist /kms/dist
+COPY --from=build /opt/ccf_virtual/bin /opt/ccf_virtual/bin
+COPY --from=build /kms//governance/constitution/kms_actions.js /kms
+
+# Ensure /opt/ccf_virtual/bin is part of the PATH
+ENV PATH="/opt/ccf_virtual/bin:${PATH}"
+
+# Set the working directory
+WORKDIR /kms
+
+# Command to run the application (adjust this command as needed for your application)
+CMD ["sandbox.sh --js-app-bundle ./dist/ --initial-member-count 1 --initial-user-count 1 --constitution ./kms_actions.js  -v --http2"]
