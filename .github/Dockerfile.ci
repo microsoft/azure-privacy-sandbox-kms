@@ -1,37 +1,17 @@
 # Base container image which is built nightly
 # Used as a starting point to make building other containers fast
 
-ARG BASE_CCF_IMAGE=5.0.0-dev10-virtual
+ARG BASE_CCF_IMAGE=5.0.0-rc0-virtual
 ARG ENVIRONMENT=ci
 
 # ignore this hadolint error as BASE_IMAGE contains an image tag
 # hadolint ignore=DL3006
 FROM mcr.microsoft.com/ccf/app/dev:${BASE_CCF_IMAGE} as base
 
-# Custom Deps
-RUN apt-get update && apt-get install -y \
-    python3-pip \
-    openssh-client \
-    make \
-    libuv1 \
-    jq \
-    lsof \
-    sudo \
-    tar \
-    default-jre
+COPY .devcontainer/install_packages.sh .devcontainer/install_nodejs.sh .devcontainer/setup_tinkey.sh /src/
 
-# Install Node.js
-RUN curl -fsSL https://deb.nodesource.com/setup_current.x | bash -
-RUN apt-get install -y nodejs
-RUN pip install --upgrade pip setuptools
-
-RUN apt-get -y autoremove \
- && apt-get -y clean
-
-# Setup tinkey
-ENV TINKEY_VERSION=tinkey-1.10.1
-RUN curl -O https://storage.googleapis.com/tinkey/$TINKEY_VERSION.tar.gz
-RUN tar -xzvf $TINKEY_VERSION.tar.gz
-RUN cp tinkey /usr/bin/
-RUN cp tinkey_deploy.jar /usr/bin/
-RUN rm tinkey tinkey_deploy.jar tinkey.bat $TINKEY_VERSION.tar.gz
+# "Install necessary packages."
+RUN /src/install_packages.sh
+RUN /src/install_nodejs.sh
+RUN /src/setup_tinkey.sh
+# "All necessary packages and tinkey setup completed."

@@ -19,10 +19,17 @@ actions.set(
       // Check validation policy
       if (args.validation_policy) {
         Object.keys(args.validation_policy).forEach((key) => {
-          console.log(
-            `validation policy: key ${key} = ${args.validation_policy[key]}`,
-          );
-          checkType(args.validation_policy[key], "string", key);
+          if (Array.isArray(args.validation_policy[key])) {
+            console.log(
+              `validation policy: key ${key} is array = `,
+              args.validation_policy[key],
+            );
+          } else {
+            console.log(
+              `validation policy: key ${key} = ${args.validation_policy[key]}`,
+            );
+            checkType(args.validation_policy[key], "string", key);
+          }
         });
       }
     },

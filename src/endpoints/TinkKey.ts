@@ -101,7 +101,10 @@ export class TinkKey {
     }
 
     // Get id of key
-    const primaryKeyId = this.keyItem[0].id;
+    const primaryKeyId = this.keyItem[0]?.id;
+    if (typeof primaryKeyId !== "number") {
+      throw new Error("primaryKeyId is undefined or not a number");
+    }
 
     const tinkKeySet: ITinkKeySet = {
       primaryKeyId,

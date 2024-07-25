@@ -49,11 +49,12 @@ export class ServiceRequest<T> {
    * @returns {boolean} Returns true if the API is authenticated, otherwise false.
    */
   public isAuthenticated(): [
-    ccfapp.AuthnIdentityCommon,
+    ccfapp.AuthnIdentityCommon | undefined,
     ServiceResult<string>,
   ] {
     const [policy, isValidIdentity] =
       new AuthenticationService().isAuthenticated(this.request);
+
     Logger.debug(
       `${this.name} Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`,
     );

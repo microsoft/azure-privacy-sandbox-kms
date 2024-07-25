@@ -15,7 +15,7 @@ const readJSON = async (filePath: string): Promise<any> => {
   try {
     const fileContents = fs.readFileSync(filePath, "utf-8");
     return JSON.parse(fileContents);
-  } catch (error) {
+  } catch (error: any) {
     throw new Error(`Error reading JSON file: ${error.message}`);
   }
 };
@@ -206,6 +206,7 @@ class Demo {
       private_wrapping_key,
       public_wrapping_key,
       false,
+      undefined,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token,
     ).catch((error) => {
@@ -227,6 +228,7 @@ class Demo {
       private_wrapping_key,
       public_wrapping_key,
       false,
+      undefined,
       this.createHttpsAgent(member.id, AuthKinds.MemberCerts),
     ).catch((error) => {
       console.log(`keyInitial error: `, error);
@@ -242,6 +244,7 @@ class Demo {
       private_wrapping_key,
       public_wrapping_key,
       false,
+      undefined,
       this.createHttpsAgent(member.id, AuthKinds.NoAuth),
     ).catch((error) => {
       console.log(`keyInitial error: `, error);
@@ -265,6 +268,7 @@ class Demo {
         private_wrapping_key,
         public_wrapping_key,
         false,
+        undefined,
         this.createHttpsAgent(member.id, AuthKinds.JWT),
         access_token,
       ).catch((error) => {
@@ -288,6 +292,7 @@ class Demo {
       private_wrapping_key,
       public_wrapping_key,
       false,
+      undefined,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token,
     )) as [{ [key: string]: string | number }, number, any];
@@ -302,6 +307,7 @@ class Demo {
     );
     Demo.assertField(member.name, keyResponse, "receipt", notUndefinedString);
     //#endregion
+
     //#region unwrap
     console.log(`📝 Get unwrapped key with JWT...`);
     let unwrapResponse;
@@ -347,7 +353,7 @@ class Demo {
       keyResponse.wrappedKid,
       attestation,
       private_wrapping_key,
-      undefined,
+      <any>undefined,
       false,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token,
@@ -384,6 +390,7 @@ class Demo {
       private_wrapping_key,
       public_wrapping_key,
       true,
+      undefined,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token,
     )) as [{ [key: string]: string | number }, number, any];
@@ -408,6 +415,41 @@ class Demo {
 
     const kid = wrapResponse.wrappedKid;
     console.log("kid: ", kid);
+
+    // Fetch with kid in jwt and tink
+    [headers, statusCode, wrapResponse] = (await Api.key(
+      this.demoProps,
+      member,
+      attestation,
+      private_wrapping_key,
+      public_wrapping_key,
+      false,
+      kid,
+      this.createHttpsAgent(member.id, AuthKinds.JWT),
+      access_token,
+    )) as [{ [key: string]: string | number }, number, any];
+    Demo.assert("OK statusCode", statusCode === 200);
+    Demo.assert(
+      `keyResponse["wrappedKid"] === kid`,
+      keyResponse["wrappedKid"] === kid,
+    );
+
+    [headers, statusCode, wrapResponse] = (await Api.key(
+      this.demoProps,
+      member,
+      attestation,
+      private_wrapping_key,
+      public_wrapping_key,
+      true,
+      kid,
+      this.createHttpsAgent(member.id, AuthKinds.JWT),
+      access_token,
+    )) as [{ [key: string]: string | number }, number, any];
+    Demo.assert("OK statusCode", statusCode === 200);
+    Demo.assert(
+      `keyResponse["wrappedKid"] === kid`,
+      keyResponse["wrappedKid"] === kid,
+    );
 
     console.log(`📝 Get private key with tink...`);
     [statusCode, unwrapResponse] = (await Api.unwrap(

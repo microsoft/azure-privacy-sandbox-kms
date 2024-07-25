@@ -19,7 +19,13 @@ export class JwtValidationPolicyMap {
       return undefined;
     }
 
-    const policy = ccf.bufToStr(ccf.kv[validationPolicyMapName].get(keyBuf));
+    const policyBuf = ccf.kv[validationPolicyMapName].get(keyBuf);
+    if (policyBuf === undefined) {
+      Logger.error(`Policy buffer is undefined for issuer: ${issuer}`);
+      return undefined;
+    }
+
+    const policy = ccf.bufToStr(policyBuf);
     Logger.info(`JWT validation: Policy: ${policy} for issuer: ${issuer}`);
     return JSON.parse(policy);
   }

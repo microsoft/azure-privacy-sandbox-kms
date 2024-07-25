@@ -14,20 +14,48 @@ export interface MSAccessToken {
   appid: string;
   ver: string;
 }
+
+/**
+ * Validate the JWT token
+ * @param issuer name of the issuer
+ * @param identity used to validate the JWT token
+ * @returns
+ */
 export const authorizeJwt = (
   issuer: string,
   identity: ccfapp.JwtAuthnIdentity,
 ): ServiceResult<string> => {
   const policy = JwtValidationPolicyMap.read(issuer);
+  if (policy === undefined) {
+    return ServiceResult.Failed(
+      {
+        errorMessage: `issuer ${issuer} is not defined in the policy`,
+        errorType: "AuthenticationError",
+      },
+      500,
+    );
+  }
+
   const keys = Object.keys(policy);
 
   for (let inx = 0; inx < keys.length; inx++) {
     const key = keys[inx];
     const jwtProp = identity?.jwt?.payload[key];
-    const compliant = jwtProp === policy[key];
+    let compliant = false;
+
+    // Check if policy[key] is an array
+    if (Array.isArray(policy[key])) {
+      // Check if jwtProp is in the array
+      compliant = policy[key].includes(jwtProp);
+    } else {
+      // Perform the existing equality check
+      compliant = jwtProp === policy[key];
+    }
+
     Logger.debug(
       `isValidJwtToken: ${key}, expected: ${policy[key]}, found: ${jwtProp}, ${compliant}`,
     );
+
     if (!compliant) {
       const errorMessage = `The JWT has no valid ${key}, expected: ${policy[key]}, found: ${jwtProp}`;
       return ServiceResult.Failed(

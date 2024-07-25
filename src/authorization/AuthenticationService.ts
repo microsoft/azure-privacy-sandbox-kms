@@ -47,8 +47,8 @@ export class AuthenticationService implements IAuthenticationService {
    */
   public isAuthenticated(
     request: ccfapp.Request<any>,
-  ): [ccfapp.AuthnIdentityCommon, ServiceResult<string>] {
-    let caller: ccfapp.AuthnIdentityCommon;
+  ): [ccfapp.AuthnIdentityCommon | undefined, ServiceResult<string>] {
+    let caller: ccfapp.AuthnIdentityCommon | undefined = undefined;
     try {
       const caller = request.caller as unknown as ccfapp.AuthnIdentityCommon;
       if (!caller) {
@@ -61,7 +61,18 @@ export class AuthenticationService implements IAuthenticationService {
       const validator = this.validators.get(
         <CcfAuthenticationPolicyEnum>caller.policy,
       );
-      return [caller, validator.validate(request)];
+
+      if (!validator === undefined) {
+        return [
+          caller,
+          ServiceResult.Failed({
+            errorMessage: `Error: invalid caller identity (AuthenticationService)-> ${caller.policy}`,
+            errorType: "AuthenticationError",
+          }),
+        ];
+      }
+
+      return [caller, validator!.validate(request)];
     } catch (ex) {
       return [
         caller,

@@ -128,7 +128,7 @@ export default class Api {
       response = await Api.responsePromise(req);
       console.log("Status:", response.statusCode);
       console.log("Response data:", response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error.message);
     } finally {
       // Close the client session when done
@@ -174,7 +174,7 @@ export default class Api {
       response = await Api.responsePromise(req);
       console.log("Status:", response.statusCode);
       console.log("Response data:", response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error.message);
     } finally {
       // Close the client session when done
@@ -206,6 +206,7 @@ export default class Api {
     privateWrapKey: string,
     publicWrapKey: string,
     tink: boolean,
+    kid: string | undefined,
     httpsAgent: https.Agent,
     authorizationHeader?: string,
   ): Promise<
@@ -223,7 +224,12 @@ export default class Api {
       `${member.name} Get wrapped private key with receipt. tink: ${tink}:`,
       authorizationHeader,
     );
-    const query = tink ? "?fmt=tink" : "";
+    let query = tink ? "?fmt=tink" : "";
+    if (kid) {
+      if (query === "") {
+        query = `?kid=${kid}`;
+      } else query = `${query}&kid=${kid}`;
+    }
     const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
       ? {
           ":method": "POST",
@@ -260,7 +266,7 @@ export default class Api {
         ];
       }
       console.log("Response data:", response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error.message);
     } finally {
       // Close the client session when done
@@ -280,7 +286,7 @@ export default class Api {
       const resp = JSON.parse(response.data);
       console.log(`key returned: `, response.data);
       const receipt = resp.receipt;
-      console.log(`Key id: `, resp.wrappedKid);
+      console.log(`wrappedKid: `, resp.wrappedKid);
       console.log(`Receipt: `, resp.receipt);
 
       return [
@@ -348,7 +354,7 @@ export default class Api {
           response.data ? JSON.parse(response.data) : undefined,
         ];
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error.message);
       throw new Error(error.message);
     } finally {
@@ -427,7 +433,7 @@ export default class Api {
       response = await Api.responsePromise(req);
       console.log("Status:", response.statusCode);
       console.log("Response data:", response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error.message);
     } finally {
       // Close the client session when done
@@ -479,7 +485,7 @@ export default class Api {
       response = await Api.responsePromise(req);
       console.log("Status:", response.statusCode);
       console.log("Response data:", response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error.message);
     } finally {
       // Close the client session when done
@@ -526,7 +532,7 @@ export default class Api {
       console.log("Status:", response.statusCode);
       console.log("Response data:", response.data);
       console.log("Response headers:", response.headers);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error.message);
     } finally {
       // Close the client session when done
