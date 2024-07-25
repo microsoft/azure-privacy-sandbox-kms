@@ -8,7 +8,7 @@ import { JwtValidator } from "./jwt/JwtValidator";
 import { IValidatorService } from "./IValidationService";
 import { UserCertValidator } from "./certs/UserCertValidator";
 import { MemberCertValidator } from "./certs/MemberCertValidator";
-import { ccf } from "@microsoft/ccf-app/global";
+import { Logger } from "../utils/Logger";
 
 /**
  * CCF authentication policies
@@ -47,21 +47,32 @@ export class AuthenticationService implements IAuthenticationService {
    */
   public isAuthenticated(
     request: ccfapp.Request<any>,
-  ): [ccfapp.AuthnIdentityCommon, ServiceResult<string>] {
-    let caller: ccfapp.AuthnIdentityCommon;
+  ): [ccfapp.AuthnIdentityCommon | undefined, ServiceResult<string>] {
+    let caller: ccfapp.AuthnIdentityCommon | undefined = undefined;
     try {
       const caller = request.caller as unknown as ccfapp.AuthnIdentityCommon;
       if (!caller) {
         // no caller policy
         return [caller, ServiceResult.Succeeded("")];
       }
-      console.log(
+      Logger.debug(
         `Authorization: isAuthenticated result (AuthenticationService)-> ${caller.policy},${JSON.stringify(caller)}`,
       );
       const validator = this.validators.get(
         <CcfAuthenticationPolicyEnum>caller.policy,
       );
-      return [caller, validator.validate(request)];
+
+      if (!validator === undefined) {
+        return [
+          caller,
+          ServiceResult.Failed({
+            errorMessage: `Error: invalid caller identity (AuthenticationService)-> ${caller.policy}`,
+            errorType: "AuthenticationError",
+          }),
+        ];
+      }
+
+      return [caller, validator!.validate(request)];
     } catch (ex) {
       return [
         caller,

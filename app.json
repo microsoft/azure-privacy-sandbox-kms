@@ -1,11 +1,11 @@
 {
   "endpoints": {
-    "/key_release_policy": {
+    "/keyReleasePolicy": {
       "get": {
-        "js_module": "endpoints/kms.js",
-        "js_function": "key_release_policy",
+        "js_module": "endpoints/keyReleasePolicyEndpoint.js",
+        "js_function": "keyReleasePolicy",
         "forwarding_required": "sometimes",
-        "authn_policies": ["jwt", "user_cert", "member_cert"],
+        "authn_policies": ["member_cert"],
         "mode": "readonly",
         "openapi": {
           "responses": {
@@ -23,7 +23,7 @@
     },
     "/pubkey": {
       "get": {
-        "js_module": "endpoints/kms.js",
+        "js_module": "endpoints/publickeyEndpoint.js",
         "js_function": "pubkey",
         "forwarding_required": "sometimes",
         "authn_policies": [],
@@ -76,7 +76,7 @@
     },
     "/listpubkeys": {
       "get": {
-        "js_module": "endpoints/kms.js",
+        "js_module": "endpoints/publickeyEndpoint.js",
         "js_function": "listpubkeys",
         "forwarding_required": "sometimes",
         "authn_policies": [],
@@ -101,7 +101,7 @@
     },
     "/unwrapKey": {
       "post": {
-        "js_module": "endpoints/kms.js",
+        "js_module": "endpoints/keyEndpoint.js",
         "js_function": "unwrapKey",
         "forwarding_required": "sometimes",
         "authn_policies": ["jwt", "member_cert", "user_cert"],
@@ -114,6 +114,9 @@
                 "schema": {
                   "properties": {
                     "kid": {
+                      "type": "string"
+                    },
+                    "wrappingKey": {
                       "type": "string"
                     },
                     "wrapped": {
@@ -145,32 +148,14 @@
                   "application/json": {
                     "schema": {
                       "properties": {
-                        "publicKey": {
-                          "type": "string"
-                        },
-                        "privateKey": {
-                          "type": "string"
-                        },
-                        "kid": {
-                          "type": "string"
-                        },
-                        "keyType": {
+                        "wrapped": {
                           "type": "string"
                         },
                         "receipt": {
                           "type": "string"
-                        },
-                        "timeStamp": {
-                          "type": "number"
                         }
                       },
-                      "required": [
-                        "publicKey",
-                        "privateKey",
-                        "kid",
-                        "keyType",
-                        "timeStamp"
-                      ],
+                      "required": ["wrapped", "receipt"],
                       "type": "object"
                     }
                   }
@@ -183,7 +168,7 @@
     },
     "/key": {
       "post": {
-        "js_module": "endpoints/kms.js",
+        "js_module": "endpoints/keyEndpoint.js",
         "js_function": "key",
         "forwarding_required": "sometimes",
         "authn_policies": ["jwt", "member_cert", "user_cert"],
@@ -207,16 +192,10 @@
               "application/json": {
                 "schema": {
                   "properties": {
-                    "evidence": {
+                    "attestation": {
                       "type": "string"
                     },
-                    "endorsements": {
-                      "type": "string"
-                    },
-                    "uvm_endorsements": {
-                      "type": "string"
-                    },
-                    "endorsed_tcb": {
+                    "wrappingKey": {
                       "type": "string"
                     }
                   },
@@ -269,7 +248,7 @@
     },
     "/refresh": {
       "post": {
-        "js_module": "endpoints/kms.js",
+        "js_module": "endpoints/refreshEndpoint.js",
         "js_function": "refresh",
         "forwarding_required": "sometimes",
         "authn_policies": [],

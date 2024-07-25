@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import { Logger } from "./Logger";
+
 export interface ErrorResponse {
   errorMessage: string;
-  errorType: string;
+  errorType?: string;
   details?: unknown;
 }
 
@@ -17,31 +19,50 @@ export class ServiceResult<T> {
   public readonly failure: boolean;
   public readonly statusCode: number;
   public readonly status: string;
-  public readonly content: T | null;
-  public readonly error: ErrorResponse | null;
+  public readonly body: T | undefined;
+  public readonly error: ErrorResponse | undefined;
+  public readonly headers?: { [key: string]: string | number };
 
   private constructor(
-    content: T | null,
-    error: ErrorResponse | null,
-    success: boolean,
+    body: T | undefined,
+    error: ErrorResponse | undefined,
+    success: boolean = false,
     statusCode: number,
+    headers?: { [key: string]: string | number },
   ) {
-    this.content = content;
+    this.body = body;
     this.error = error;
     this.success = success;
     this.failure = !success;
     this.statusCode = statusCode;
     this.status = success ? "Success" : "Error";
+    this.headers = headers ? headers : {};
   }
 
-  public static Succeeded<T>(content: T): ServiceResult<T> {
-    return new ServiceResult<T>(content, null, true, 200);
+  public static Succeeded<T>(
+    body: T,
+    headers?: { [key: string]: string | number },
+  ): ServiceResult<T> {
+    Logger.debug("Response Succeeded: ", body);
+    if (headers) {
+      Logger.debug("Response headers: ", headers);
+    }
+
+    return new ServiceResult<T>(body, undefined, true, 200, headers);
+  }
+
+  public static Accepted(): ServiceResult<string> {
+    Logger.debug("Response Accepted");
+    return new ServiceResult<string>(undefined, undefined, true, 202, {
+      "retry-after": 3,
+    });
   }
 
   public static Failed<T>(
     error: ErrorResponse,
     statusCode: number = 400,
   ): ServiceResult<T> {
-    return new ServiceResult<T>(null, error, false, statusCode);
+    Logger.error(`Failed result: ${statusCode}, `, error);
+    return new ServiceResult<T>(undefined, error, false, statusCode);
   }
 }

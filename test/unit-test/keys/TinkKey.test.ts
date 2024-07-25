@@ -7,11 +7,9 @@ import { describe, expect, test } from "@jest/globals";
 import { ITinkKeySet, KeyGeneration, TinkKey } from "../../../src";
 
 describe("Construct a new tink key set", () => {
-  beforeAll(() => {});
-
   test("Should create a tink key successfully", () => {
     // Arrange
-    const keyItem = KeyGeneration.generateKeyItem();
+    const keyItem = KeyGeneration.generateKeyItem(100);
 
     // Act
     const tinkKey = new TinkKey([keyItem]).get();
@@ -24,13 +22,13 @@ describe("Construct a new tink key set", () => {
         "https://schema.org/PublicKey/Azure/HpkePublicKey",
     );
     expect(tinkKey.key[0].keyData.keyMaterialType === "ASYMMETRIC_PUBLIC");
-    expect(tinkKey.key[0].keyData.status === "ENABLED");
-    expect(tinkKey.key[0].keyData.outputPrefixType === "RAW");
+    expect(tinkKey.key[0].status === "ENABLED");
+    expect(tinkKey.key[0].outputPrefixType === "RAW");
   });
 
   test("Should serialize a tink key successfully", () => {
     // Arrange
-    const keyItem = KeyGeneration.generateKeyItem();
+    const keyItem = KeyGeneration.generateKeyItem(100);
     // Act
     const serialized = new TinkKey([keyItem]).serialized();
     const tinkKey = JSON.parse(serialized) as ITinkKeySet;
@@ -42,7 +40,7 @@ describe("Construct a new tink key set", () => {
         "https://schema.org/PublicKey/Azure/HpkePublicKey",
     );
     expect(tinkKey.key[0].keyData.keyMaterialType === "ASYMMETRIC_PUBLIC");
-    expect(tinkKey.key[0].keyData.status === "ENABLED");
-    expect(tinkKey.key[0].keyData.outputPrefixType === "RAW");
+    expect(tinkKey.key[0].status === "ENABLED");
+    expect(tinkKey.key[0].outputPrefixType === "RAW");
   });
 });

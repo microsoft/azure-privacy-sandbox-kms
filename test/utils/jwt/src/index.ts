@@ -5,7 +5,6 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import fs from "fs";
 import { Request, Response } from "express";
-import crypto from "crypto";
 import * as Keys from "./keys";
 import * as Proposals from "./proposals";
 
@@ -43,7 +42,6 @@ const createProposalsFolder = async (): Promise<void> => {
 
     // generate issuer configuration used in sandbox
     await Proposals.issuerConfiguration(
-      host,
       privateKeyPath,
       certificatePath,
       proposalsPath,
@@ -70,8 +68,7 @@ const token = (req: Request, res: Response) => {
   });
   res.send({
     token_type: "bearer",
-    expires_in: expiry,
-    ext_expires_in: expiry,
+    expires_in: `${expiry}`,
     access_token,
   });
 };

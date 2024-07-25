@@ -3,9 +3,9 @@
 
 import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../../utils/ServiceResult";
-import { JwtValidationPolicyMap } from "./JwtValidationPolicyMap";
 import { IJwtIdentityProvider } from "./IJwtIdentityProvider";
 import { authorizeJwt } from "./MsJwtProvider";
+import { Logger } from "../../utils/Logger";
 
 const errorType = "AuthenticationError";
 
@@ -34,7 +34,7 @@ export class DemoJwtProvider implements IJwtIdentityProvider {
     }
 
     const identityId = identity?.jwt?.payload?.sub;
-    console.log(`JWT validation succeeded: ${identityId}`);
+    Logger.debug(`JWT validation succeeded: ${identityId}`);
     return ServiceResult.Succeeded(identityId);
   }
 }

@@ -20,7 +20,7 @@ export class MemberCertValidator implements IValidatorService {
     const memberCaller = request.caller as unknown as UserMemberAuthnIdentity;
     const identityId = memberCaller.id;
     const isValid = this.isActiveMember(identityId);
-    if (isValid.success && isValid.content) {
+    if (isValid.success && isValid.body) {
       return ServiceResult.Succeeded(identityId);
     }
     return ServiceResult.Failed({
@@ -51,9 +51,15 @@ export class MemberCertValidator implements IValidatorService {
     );
 
     const memberInfoBuf = membersInfo.get(ccf.strToBuf(memberId));
-    const memberInfo = ccf.bufToJsonCompatible(memberInfoBuf) as CCFMember;
-    const isActiveMember = memberInfo && memberInfo.status === "Active";
-
-    return ServiceResult.Succeeded(isActiveMember && isMember);
+    if (memberInfoBuf !== undefined) {
+      const memberInfo = ccf.bufToJsonCompatible(memberInfoBuf) as CCFMember;
+      const isActiveMember = memberInfo && memberInfo.status === "Active";
+      return ServiceResult.Succeeded(isActiveMember && isMember);
+    } else {
+      // memberInfoBuf is undefined
+      return ServiceResult.Failed({
+        errorMessage: "Member information is undefined.",
+      });
+    }
   }
 }

@@ -14,5 +14,5 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash 
     && nvm install node \
     && nvm use node
 
-. $NVM_DIR/nvm.sh \
-    && npm install -g npm@latest
+echo "Install rollup"
+npm install -g rollup@4.18.1
