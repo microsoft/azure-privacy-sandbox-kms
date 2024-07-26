@@ -26,18 +26,18 @@ WORKDIR /kms
 RUN npm install && make build
 
 # Stage 2: Runtime stage using a clean runtime image
-FROM mcr.microsoft.com/ccf/app/run:${BASE_CCF_IMAGE} as runtime
+#FROM mcr.microsoft.com/ccf/app/run:${BASE_CCF_IMAGE} as runtime
 
 # Copy the build artifacts from the build stage
-COPY --from=build /kms/dist /kms/dist
-COPY --from=build /opt/ccf_virtual/bin /opt/ccf_virtual/bin
-COPY --from=build /kms//governance/constitution/kms_actions.js /kms
+#COPY --from=build /kms/dist /kms/dist
+#COPY --from=build /opt/ccf_virtual/bin /opt/ccf_virtual/bin
+#COPY --from=build /kms//governance/constitution/kms_actions.js /kms
 
 # Ensure /opt/ccf_virtual/bin is part of the PATH
 ENV PATH="/opt/ccf_virtual/bin:${PATH}"
 
 # Set the working directory
-WORKDIR /kms
+#WORKDIR /kms
 
 # Command to run the application (adjust this command as needed for your application)
 CMD ["sandbox.sh --js-app-bundle ./dist/ --initial-member-count 1 --initial-user-count 1 --constitution ./kms_actions.js  -v --http2"]
