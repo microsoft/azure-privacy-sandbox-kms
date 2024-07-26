@@ -36,6 +36,8 @@ COPY test /kms/test
 FROM mcr.microsoft.com/ccf/app/dev:${CCF_VERSION}-${CCF_PLATFORM}
 ARG CCF_PLATFORM
 
+RUN apt-get update && apt-get install -y lsof
+
 COPY --from=builder /kms /kms
 
 # Install Node to run IDP (Currently bundled to KMS but should be separated)
