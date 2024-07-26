@@ -8,10 +8,18 @@ ARG ENVIRONMENT=ci
 # hadolint ignore=DL3006
 FROM mcr.microsoft.com/ccf/app/dev:${BASE_CCF_IMAGE} as base
 
-COPY .devcontainer/install_packages.sh .devcontainer/install_nodejs.sh .devcontainer/setup_tinkey.sh /src/
+COPY .devcontainer/install_packages.sh \ 
+    .devcontainer/install_nodejs.sh \
+    .devcontainer/setup_tinkey.sh \
+    scripts/set_python_env.sh \
+    /kms/
+
+WORKDIR /kms
 
 # "Install necessary packages."
-RUN /src/install_packages.sh
-RUN /src/install_nodejs.sh
-RUN /src/setup_tinkey.sh
+RUN install_packages.sh
+RUN install_nodejs.sh
+RUN setup_tinkey.sh
 # "All necessary packages and tinkey setup completed."
+
+RUN set_python_env.sh && npm i && make build

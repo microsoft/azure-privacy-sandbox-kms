@@ -1,0 +1,7 @@
+**/dist
+**/node_modules
+**/package-lock.json
+**/workspace
+**/nohup.out
+**.log
+**/.venv_ccf_sandbox
