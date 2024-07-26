@@ -13,13 +13,14 @@ COPY .devcontainer/install_packages.sh \
     .devcontainer/setup_tinkey.sh \
     scripts/set_python_env.sh \
     /kms/
+COPY . /kms
 
 WORKDIR /kms
 
 # "Install necessary packages."
-RUN install_packages.sh
-RUN install_nodejs.sh
-RUN setup_tinkey.sh
+RUN /kms/install_packages.sh
+RUN /kms/install_nodejs.sh
+RUN /kms/setup_tinkey.sh
 # "All necessary packages and tinkey setup completed."
 
-RUN set_python_env.sh && npm i && make build
+RUN /kms/set_python_env.sh && npm i && make build
