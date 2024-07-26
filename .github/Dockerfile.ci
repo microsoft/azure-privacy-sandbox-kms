@@ -22,5 +22,5 @@ RUN /kms/install_packages.sh
 RUN /kms/install_nodejs.sh
 RUN /kms/setup_tinkey.sh
 # "All necessary packages and tinkey setup completed."
-
+RUN ls -la /kms
 RUN /kms/set_python_env.sh && npm i && make build
