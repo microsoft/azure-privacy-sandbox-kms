@@ -13,7 +13,7 @@ else
     MEMBER_COUNT := 1
 endif
 
-CCF_SANDBOX_EXTRA_ARGS ?= 
+CCF_SANDBOX_EXTRA_ARGS ?=
 
 ifeq ($(INSTALL),local)
     CCFSB=../../CCF/tests/sandbox
@@ -30,6 +30,7 @@ help: ## 💬 This help message :)
 build: ## 🔨 Build the Application
 	@echo -e "\e[34m$@\e[0m" || true;
 	./scripts/set_python_env.sh
+	npm install
 	npm run build
 
 setup: ## Setup proposals and generate an initial key
@@ -55,7 +56,7 @@ start-idp:  ## 🏃 Start the idp for testing jwt
 	./scripts/wait_idp_ready.sh
 
 # Start hosting the application using `sandbox.sh` and enable custom JWT authentication
-start-host: stop-host build  ## 🏃 Start the CCF network using Sandbox.sh
+start-host: stop-host  ## 🏃 Start the CCF network using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
 	$(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count ${MEMBER_COUNT} --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js  -v --http2
 
@@ -96,7 +97,7 @@ propose-rm-key-release-policy: ## 🚀 Deploy the remove claim key release polic
 	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/policies/key-release-policy-remove.json --certificate_dir "${KEYS_DIR}"
 
 refresh-key: ## 🚀 Refresh a key on the instance
-	@echo -e "\e[34m$@\e[0m" || true	
+	@echo -e "\e[34m$@\e[0m" || true
 	$(call check_defined, KMS_URL)
 	@CCF_PLATFORM=${CCF_PLATFORM} sleep 20;curl "${KMS_URL}"/app/refresh -X POST --cacert "${KEYS_DIR}"/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
 
