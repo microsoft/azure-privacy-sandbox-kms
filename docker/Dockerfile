@@ -12,10 +12,6 @@ RUN /src/install_packages.sh
 COPY .devcontainer/install_nodejs.sh /src/
 RUN NVM_DIR=/kms/.nvm /src/install_nodejs.sh
 
-# COPY .devcontainer/setup_tinkey.sh /src/
-# ENV TINKEY_VERSION=tinkey-1.10.1
-# RUN /src/setup_tinkey.sh
-
 # Copy minimal set of files to build KMS bundle to reduce rebuilds
 COPY Makefile /kms/Makefile
 COPY src /kms/src
