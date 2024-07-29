@@ -10,7 +10,8 @@ COPY .devcontainer/install_packages.sh /src/
 RUN /src/install_packages.sh
 
 COPY .devcontainer/install_nodejs.sh /src/
-RUN NVM_DIR=/kms/.nvm /src/install_nodejs.sh
+ENV NVM_DIR /kms/.nvm
+RUN /src/install_nodejs.sh
 
 # Copy minimal set of files to build KMS bundle to reduce rebuilds
 COPY Makefile /kms/Makefile
@@ -22,6 +23,7 @@ COPY requirements.txt /kms/requirements.txt
 COPY rollup.config.js /kms/rollup.config.js
 COPY app.json /kms/app.json
 COPY build_bundle.js /kms/build_bundle.js
+COPY tsconfig.json /kms/tsconfig.json
 
 WORKDIR /kms
 RUN make build
@@ -41,7 +43,5 @@ RUN apt-get update && apt-get install -y lsof
 COPY --from=builder /kms /kms
 
 # Install Node to run IDP (Currently bundled to KMS but should be separated)
-ENV PATH=/kms/.nvm/versions/node/v22.5.1/bin/:$PATH
-
-ENV CCF_PLATFORM=${CCF_PLATFORM}
+ENV CCF_PLATFORM=${CCF_PLATFORM} PATH=/kms/.nvm/versions/node/v22.5.1/bin/:$PATH
 CMD ["/bin/bash", "-c", "cd /kms && (make start-host-idp & (./scripts/kms_wait.sh && make setup && tail -f /dev/null))"]
