@@ -116,8 +116,6 @@ export const enableEndpoint = () => {
   } catch {
     // Will fail for unit tests. Do nothing
   }
-  // Set Logger level. Needs to come from proposal
-  Logger.setLogLevel(LogLevel.DEBUG);
 };
 
 /**

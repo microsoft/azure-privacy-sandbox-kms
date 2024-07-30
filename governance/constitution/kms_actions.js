@@ -1,6 +1,43 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 const validationPolicyMapName = "public:ccf.gov.policies.jwt_validation";
+const settingsPolicyMapName = "public:ccf.gov.policies.jwt_validation";
+
+actions.set(
+  "set_settings_policy",
+  new Action(
+    function (args) {
+      console.log(`set_settings_policy, check args: ${JSON.stringify(args)}`);
+      checkType(args.settings_policy, "object", "settings_policy");
+
+      // Check settings policy
+      if (args.settings_policy) {
+        if (args.settings_policy.service) {
+          checkType(args.settings_policy.service.name, "string");
+          checkType(args.settings_policy.service.description, "string");
+          checkType(args.settings_policy.service.version, "string");
+          checkType(args.settings_policy.service.debug, "boolean");
+          console.log(`Settings policy validation passed`);
+        } else {
+          console.error("settings_policy.service is not defined");
+        }
+      }
+    },
+    function (args) {
+      const settingsPolicyMapName = "public:ccf.gov.policies.settings";
+
+      // Save policy in the KV
+      const key = "settings_policy";
+      const keyBuf = ccf.strToBuf(key);
+      const jsonItems = JSON.stringify(args.settings_policy);
+      const jsonItemsBuf = ccf.strToBuf(jsonItems);
+      ccf.kv[settingsPolicyMapName].set(keyBuf, jsonItemsBuf);
+      console.log(
+        `Settings policy ${jsonItems} saved in ${settingsPolicyMapName}`,
+      );
+    },
+  ),
+);
 actions.set(
   "set_jwt_validation_policy",
   new Action(

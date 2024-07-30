@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import { Settings } from "../policies/Settings";
+
 // Logging levels enum
 export enum LogLevel {
   ERROR = 0,
@@ -29,6 +31,12 @@ export class Logger {
       `Setting log level (${LogLevel[Logger.logLevel]}) to ${levelKey}`,
     );
     Logger.logLevel = level;
+  }
+  
+  static setLogLevelFromSettings(settings: Settings): void {
+    if (settings.settings.service.debug) {
+      Logger.setLogLevel(LogLevel.DEBUG);
+    }
   }
 
   /**
@@ -95,4 +103,5 @@ export class Logger {
   static secret(message: string, ...args: any[]): boolean {
     return this.debug(message, ...args);
   }
-}
+  
+}    
