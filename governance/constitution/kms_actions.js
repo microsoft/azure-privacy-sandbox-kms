@@ -1,7 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
-const validationPolicyMapName = "public:ccf.gov.policies.jwt_validation";
-const settingsPolicyMapName = "public:ccf.gov.policies.jwt_validation";
 
 actions.set(
   "set_settings_policy",
@@ -9,19 +7,14 @@ actions.set(
     function (args) {
       console.log(`set_settings_policy, check args: ${JSON.stringify(args)}`);
       checkType(args.settings_policy, "object", "settings_policy");
+      checkType(args.settings_policy.service, "object", "service");
 
       // Check settings policy
-      if (args.settings_policy) {
-        if (args.settings_policy.service) {
-          checkType(args.settings_policy.service.name, "string");
-          checkType(args.settings_policy.service.description, "string");
-          checkType(args.settings_policy.service.version, "string");
-          checkType(args.settings_policy.service.debug, "boolean");
-          console.log(`Settings policy validation passed`);
-        } else {
-          console.error("settings_policy.service is not defined");
-        }
-      }
+      checkType(args.settings_policy.service.name, "string");
+      checkType(args.settings_policy.service.description, "string");
+      checkType(args.settings_policy.service.version, "string");
+      checkType(args.settings_policy.service.debug, "boolean");
+      console.log(`Settings policy validation passed`);
     },
     function (args) {
       const settingsPolicyMapName = "public:ccf.gov.policies.settings";
