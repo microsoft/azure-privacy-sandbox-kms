@@ -28,7 +28,7 @@ export class Settings {
      * Returns the default settings for the Key Management Service.
      * @returns The default settings object.
      */
-    private static defaultSettings(): ISettings {
+    public static defaultSettings(): ISettings {
         return {
             service: {
                 name: "KMS",
@@ -37,6 +37,16 @@ export class Settings {
                 debug: false
             }
         };
+    }
+
+    /**
+     * Logs the settings of a service.
+     * @param settings - The settings object containing service information.
+     */
+    public static logSettings(settings: ISettings): void {
+        Logger.debug(`Service Name: ${settings.service.name}`);
+        Logger.debug(`Service Description: ${settings.service.description}`);
+        Logger.debug(`Service Version: ${settings.service.version}`);        
     }
 
     /**

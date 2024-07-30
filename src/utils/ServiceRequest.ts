@@ -26,6 +26,7 @@ export class ServiceRequest<T> {
     // Set the log level from the settings
     const settings = Settings.loadSettings();
     Logger.setLogLevelFromSettings(settings);
+    Settings.logSettings(settings.settings);
 
     Logger.info(`${name} Request: `, request);
     this.query = queryParams(request);
