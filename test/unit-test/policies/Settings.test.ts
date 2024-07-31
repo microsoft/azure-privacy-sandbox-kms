@@ -17,7 +17,7 @@ describe("Test Settings Policy properties", () => {
     // Assert
     expect(settings.service.debug).toEqual(false);
     expect(settings.service.description).toContain("Key Management Service");
-    expect(settings.service.name).toContain("KMS");
+    expect(settings.service.name).toContain("azure-privacy-sandbox-kms");
     expect(settings.service.version).toContain("1.0.0");
   });
 
