@@ -4,7 +4,7 @@
 import * as ccfapp from "@microsoft/ccf-app";
 import { IKeyReleasePolicyProps } from "../policies/IKeyReleasePolicyProps";
 import { ccf } from "@microsoft/ccf-app/global";
-import { Logger, LogLevel } from "./Logger";
+import { Logger } from "./Logger";
 
 /**
  * Converts a Uint8Array to a string representation.
@@ -116,8 +116,6 @@ export const enableEndpoint = () => {
   } catch {
     // Will fail for unit tests. Do nothing
   }
-  // Set Logger level. Needs to come from proposal
-  Logger.setLogLevel(LogLevel.DEBUG);
 };
 
 /**

@@ -114,6 +114,21 @@ make propose-add-key-release-policy
 make propose-rm-key-release-policy
 ```
 
+## Propose and vote new settings policy
+
+change governance/policies/settings-policy.json and change make debug=false.
+Use the following make command to change the settings.
+
+```
+make propose-settings-policy
+```
+
+### Remove claims
+
+```
+make propose-rm-key-release-policy
+```
+
 ### Script to setup policies and generate a key
 
 ```

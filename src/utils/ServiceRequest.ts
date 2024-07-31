@@ -5,6 +5,7 @@ import { ErrorResponse, ServiceResult } from "./ServiceResult";
 import { queryParams } from "./Tooling";
 import { AuthenticationService } from "../authorization/AuthenticationService";
 import { Logger } from "./Logger";
+import { Settings } from "../policies/Settings";
 
 /**
  * A generic request.
@@ -22,6 +23,23 @@ export class ServiceRequest<T> {
     public name: string,
     public request: ccfapp.Request<T>,
   ) {
+    // Set the log level from the settings
+    let settings: Settings;
+    try {
+      settings = Settings.loadSettings();
+    } catch (error) {
+      const errorMessage = `${name} Error loading settings: ${error}`;
+      Logger.error(errorMessage);
+      this.error = {
+        errorMessage,
+      };
+      this.success = false;
+      return;
+    }
+
+    Logger.setLogLevelFromSettings(settings);
+    Settings.logSettings(settings.settings);
+
     Logger.info(`${name} Request: `, request);
     this.query = queryParams(request);
     if (this.query) {

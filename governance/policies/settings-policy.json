@@ -1,0 +1,17 @@
+{
+  "actions": [
+    {
+      "name": "set_settings_policy",
+      "args": {
+        "settings_policy": {
+          "service": {
+            "name": "azure-privacy-sandbox-kms",
+            "description": "Key Management Service",
+            "version": "1.0.0",
+            "debug": true
+          }
+        }
+      }
+    }
+  ]
+}
