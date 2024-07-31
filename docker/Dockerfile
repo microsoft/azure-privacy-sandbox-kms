@@ -41,6 +41,7 @@ ARG CCF_PLATFORM
 RUN apt-get update && apt-get install -y lsof
 
 COPY --from=builder /kms /kms
+WORKDIR /kms
 
 # Install Node to run IDP (Currently bundled to KMS but should be separated)
 ENV CCF_PLATFORM=${CCF_PLATFORM} PATH=/kms/.nvm/versions/node/v22.5.1/bin/:$PATH
