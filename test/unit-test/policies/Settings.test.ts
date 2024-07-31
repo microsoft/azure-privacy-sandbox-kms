@@ -13,7 +13,7 @@ describe("Test Settings Policy properties", () => {
     const settings = Settings.defaultSettings();
 
     // Act
-    
+
     // Assert
     expect(settings.service.debug).toEqual(false);
     expect(settings.service.description).toContain("Key Management Service");
@@ -28,15 +28,21 @@ describe("Test Settings Policy properties", () => {
     Logger.setLogLevel(LogLevel.DEBUG);
 
     // Mock Logger.debug
-    const debugSpy = jest.spyOn(console, 'log').mockImplementation(() => true);
+    const debugSpy = jest.spyOn(console, "log").mockImplementation(() => true);
 
     // Act
     Settings.logSettings(settings);
 
     // Assert
-    expect(debugSpy).toHaveBeenCalledWith(`[DEBUG] Service Name: ${settings.service.name}`);
-    expect(debugSpy).toHaveBeenCalledWith(`[DEBUG] Service Description: ${settings.service.description}`);
-    expect(debugSpy).toHaveBeenCalledWith(`[DEBUG] Service Version: ${settings.service.version}`);
+    expect(debugSpy).toHaveBeenCalledWith(
+      `[DEBUG] Service Name: ${settings.service.name}`,
+    );
+    expect(debugSpy).toHaveBeenCalledWith(
+      `[DEBUG] Service Description: ${settings.service.description}`,
+    );
+    expect(debugSpy).toHaveBeenCalledWith(
+      `[DEBUG] Service Version: ${settings.service.version}`,
+    );
 
     // Clean up
     debugSpy.mockRestore();
@@ -49,7 +55,7 @@ describe("Test Settings Policy properties", () => {
     Logger.setLogLevel(LogLevel.INFO);
 
     // Mock Logger.debug
-    const debugSpy = jest.spyOn(console, 'log').mockImplementation(() => true);
+    const debugSpy = jest.spyOn(console, "log").mockImplementation(() => true);
 
     // Act
     Settings.logSettings(settings);

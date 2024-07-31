@@ -67,15 +67,12 @@ source .venv_ccf_sandbox/bin/activate
 make propose-settings-policy
 
 # Add key release policy
-source .venv_ccf_sandbox/bin/activate
 make propose-add-key-release-policy
 
 # Add demo validation policy
-source .venv_ccf_sandbox/bin/activate
 make propose-jwt-demo-validation-policy
 
 # Add AAD validation policy
-source .venv_ccf_sandbox/bin/activate
 make propose-jwt-ms-validation-policy
 
 # Generate a new key item

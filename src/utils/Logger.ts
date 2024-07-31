@@ -32,7 +32,7 @@ export class Logger {
     );
     Logger.logLevel = level;
   }
-  
+
   static setLogLevelFromSettings(settings: Settings): void {
     if (settings.settings.service.debug) {
       Logger.setLogLevel(LogLevel.DEBUG);
@@ -103,5 +103,4 @@ export class Logger {
   static secret(message: string, ...args: any[]): boolean {
     return this.debug(message, ...args);
   }
-  
-}    
+}

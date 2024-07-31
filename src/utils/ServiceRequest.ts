@@ -24,7 +24,19 @@ export class ServiceRequest<T> {
     public request: ccfapp.Request<T>,
   ) {
     // Set the log level from the settings
-    const settings = Settings.loadSettings();
+    let settings: Settings;
+    try {
+      settings = Settings.loadSettings();
+    } catch (error) {
+      const errorMessage = `${name} Error loading settings: ${error}`;
+      Logger.error(errorMessage);
+      this.error = {
+        errorMessage,
+      };
+      this.success = false;
+      return;
+    }
+
     Logger.setLogLevelFromSettings(settings);
     Settings.logSettings(settings.settings);
 
