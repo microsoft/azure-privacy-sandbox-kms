@@ -69,8 +69,9 @@ signing_key="$certificate_dir/member0_privk.pem"
 
 #cat $proposal_file
 
-proposal0_id=$( (ccf_cose_sign1 --content $proposal_file --signing-cert $signing_cert --signing-key $signing_key --ccf-gov-msg-type proposal --ccf-gov-msg-created_at $(date -Is)  | curl $network_url/gov/proposals -k -H "Content-Type: application/cose" --data-binary @- --cacert $service_cert -w '\n'| jq -r '.proposal_id') )
-
+resp=$( (ccf_cose_sign1 --content $proposal_file --signing-cert $signing_cert --signing-key $signing_key --ccf-gov-msg-type proposal --ccf-gov-msg-created_at $(date -Is)  | curl $network_url/gov/proposals -k -H "Content-Type: application/cose" --data-binary @- --cacert $service_cert -w '\n') )
+echo "resp: ${resp}"
+proposal0_id=$(echo $resp | jq -r '.proposal_id')
 # Check if proposal0_id is null or empty
 if [ -z "$proposal0_id" ]; then
     echo "Error: proposal0_id is null or empty"
