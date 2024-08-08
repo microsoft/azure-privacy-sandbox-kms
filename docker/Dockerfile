@@ -9,7 +9,7 @@ COPY .devcontainer/install_packages.sh /src/
 RUN /src/install_packages.sh
 
 COPY .devcontainer/install_nodejs.sh /src/
-ENV NVM_DIR /kms/.nvm
+ENV NVM_DIR=/kms/.nvm
 RUN /src/install_nodejs.sh
 
 COPY .devcontainer/setup_tinkey.sh /src/
@@ -41,9 +41,12 @@ RUN make build
 # FROM mcr.microsoft.com/ccf/app/run-js:${CCF_VERSION}-${CCF_PLATFORM}
 FROM mcr.microsoft.com/ccf/app/dev:${CCF_VERSION}-${CCF_PLATFORM}
 
+COPY .devcontainer/install_nodejs.sh /src/
+RUN NVM_DIR=/root/.nvm /src/install_nodejs.sh
+
 COPY --from=builder /kms /kms
 WORKDIR /kms
 
 ARG CCF_PLATFORM
-ENV CCF_PLATFORM=${CCF_PLATFORM} PATH=/kms/.nvm/versions/node/v22.5.1/bin/:$PATH
+ENV CCF_PLATFORM=${CCF_PLATFORM}
 CMD ["/bin/bash", "-c", "make start-host-idp & (./scripts/kms_wait.sh && make setup && tail -f /dev/null)"]
