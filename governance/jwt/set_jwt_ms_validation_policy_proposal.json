@@ -10,7 +10,7 @@
     {
       "name": "set_jwt_issuer",
       "args": {
-        "issuer": "https://sts.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/",
+        "issuer": "https://login.microsoftonline.com/common/v2.0/",
         "key_filter": "all",
         "ca_cert_bundle_name": "jwt_ms",
         "auto_refresh": true
