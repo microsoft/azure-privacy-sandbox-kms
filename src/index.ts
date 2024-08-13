@@ -3,8 +3,8 @@
 
 export * from "./endpoints/kms";
 export * from "./endpoints/keyEndpoint";
-export * from "./endpoints/publickeyEndpoint";
-export * from "./endpoints/refreshEndpoint";
+export * from "./inference/publickeyEndpoint";
+export * from "./inference/refreshEndpoint";
 export * from "./endpoints/keyReleasePolicyEndpoint";
 export * from "./endpoints/IKeyItem";
 export * from "./endpoints/KeyGeneration";

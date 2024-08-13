@@ -1,0 +1,73 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+
+import { Base64 } from "js-base64";
+import { IKeyItem } from "../endpoints/IKeyItem";
+import { aToHex } from "..";
+import { Logger } from "../utils/Logger";
+
+/*
+    * This class is responsible for creating the public key
+    * in the OHTTP format.
+    * Example:
+    * 002d0000209f7ee31cfc658c9c98d15707b7ff450854d1faa9edca1fd088b2900c5406710500080001000100010003
+    * 002d - key length, 45 bytes is key configuration
+    * KeyID: 00
+    * HPKE KEM ID: 0020 (X25519Sha256)
+    * Public key: 9f….105 (32 bytes)
+    * HPKE algorithms length: 0008 (2 x 4)
+    * HPKE KDF ID: 0001 (HkdfSha256)
+    * HPKE AEAD ID: 0001 (Aes128Gcm)
+    * HPKE KDF ID: 0001 (HkdfSha256)
+    * HPKE AEAD ID: 0003 (ChaCha20Poly1305)
+
+    */
+
+export class OhttpPublicKey {
+    constructor(public keyItem: IKeyItem) {
+        Logger.debug(`KeyItem: `, keyItem);
+    }
+
+    public get(): string {
+        if (this.keyItem.crv !== "P-384") {
+            throw new Error(`Curve: ${this.keyItem.crv} not supported`);
+        }
+
+        return this.keyLength() + this.keyId() + this.hpkeKemId() + this.publicKey() + this.hpkeAlgorithmsLength() + this.hpkeSymmetricAlgorithms();
+    }
+
+    private keyLength(): string {
+        return "0069";
+    }
+
+    private keyId(): string {
+        return this.keyItem.id!.toString(16).padStart(2, "0");
+    }
+
+    // HPKE KEM ID
+    private hpkeKemId(): string {
+        return "0011";
+    }
+
+    // Public key
+    private publicKey(): string {
+        const x = Base64.toUint8Array(this.keyItem.x);
+        const xHex = aToHex(x.buffer);
+        Logger.info(`Public key X: ${xHex}`);
+        const y = Base64.toUint8Array(this.keyItem.y);
+        const yHex = aToHex(y.buffer);
+        Logger.info(`Public key Y: ${yHex}`);
+        return xHex + yHex;
+    }
+
+    // HPKE algorithms length
+    private hpkeAlgorithmsLength(): string {
+        return  "0004";
+    }
+
+    // HPKE Symmetric Algorithms 
+    private hpkeSymmetricAlgorithms(): string {
+        return  "00010001";
+    }
+
+}
