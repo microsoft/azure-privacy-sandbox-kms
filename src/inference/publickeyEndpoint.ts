@@ -12,10 +12,17 @@ import { OhttpPublicKey } from "./OhttpPublicKey";
 // Enable the endpoint
 enableEndpoint();
 
+
+export interface IPublicKey {
+  publicKey: string;
+  kid: number;
+  receipt: string;
+}
+
 // Get list of public keys
 export const listpubkeys = (
   request: ccfapp.Request<void>,
-): ServiceResult<string> => {
+): ServiceResult<string | IPublicKey[]> => {
   const name = "listpubkeys";
   const serviceRequest = new ServiceRequest<void>(name, request);
   Logger.info(`${name}: Request received`);
@@ -36,14 +43,28 @@ export const listpubkeys = (
       );
     }
 
+    // Get receipt if available
+    const receipt = hpkeKeyMap.receipt(keyItem.id!);
+    if (receipt !== undefined) {
+      keyItem.receipt = receipt;
+      Logger.debug(`pubkey->Receipt: ${receipt}`);
+    } else {
+      return ServiceResult.Accepted();
+    }
+
     delete keyItem.d;
     const publicKey: string = new OhttpPublicKey(keyItem).get();
 
     const headers: { [key: string]: string } = {
-      "content-type": "application/ohttp-keys "
+      "content-type": "application/json",
     };
-  
-    return ServiceResult.Succeeded<string>(publicKey, headers);
+    const payload: IPublicKey[] = [{
+      publicKey,
+      kid: keyItem.id!,
+      receipt,
+    }];
+         
+    return ServiceResult.Succeeded<IPublicKey[]>(payload, headers);
   } catch (exception: any) {
     const errorMessage = `${name}: Error: ${exception.message}`;
     console.error(errorMessage);
