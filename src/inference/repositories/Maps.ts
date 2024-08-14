@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import { LastestItemStore } from "../../repositories/LastestItemStore";
-import { IKeyItem } from "../../endpoints/IKeyItem";
+import { IKeyItem } from "../IKeyItem";
 
 //#region KMS Stores
 // Stores

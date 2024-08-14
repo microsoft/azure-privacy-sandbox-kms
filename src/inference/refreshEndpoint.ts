@@ -3,7 +3,7 @@
 
 import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../utils/ServiceResult";
-import { IKeyItem } from "../endpoints/IKeyItem";
+import { IKeyItem } from "./IKeyItem";
 import { hpkeKeyMap } from "./repositories/Maps";
 import { KeyGeneration } from "./KeyGeneration";
 import { enableEndpoint } from "../utils/Tooling";
@@ -39,7 +39,7 @@ export const refresh = (
 
     // Store HPKE key pair using kid
     keyItem.kid = `${keyItem.kid!}`;
-    hpkeKeyMap.storeItem(id, keyItem, keyItem.x);
+    hpkeKeyMap.storeItem(id, keyItem, keyItem.x + keyItem.y);
     Logger.info(`Key item with id ${id} and kid ${keyItem.kid} stored`);
 
     delete keyItem.d;

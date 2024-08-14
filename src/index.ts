@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 export * from "./endpoints/kms";
-export * from "./endpoints/keyEndpoint";
+export * from "./inference/keyEndpoint";
 export * from "./inference/publickeyEndpoint";
 export * from "./inference/refreshEndpoint";
 export * from "./endpoints/keyReleasePolicyEndpoint";

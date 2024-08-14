@@ -46,76 +46,9 @@
         }
       }
     },
-    "/unwrapKey": {
-      "post": {
-        "js_module": "endpoints/keyEndpoint.js",
-        "js_function": "unwrapKey",
-        "forwarding_required": "sometimes",
-        "authn_policies": ["jwt", "member_cert", "user_cert"],
-        "mode": "readonly",
-        "openapi": {
-          "requestBody": {
-            "required": true,
-            "content": {
-              "application/json": {
-                "schema": {
-                  "properties": {
-                    "kid": {
-                      "type": "string"
-                    },
-                    "wrappingKey": {
-                      "type": "string"
-                    },
-                    "wrapped": {
-                      "type": "string"
-                    },
-                    "attestation": {
-                      "evidence": {
-                        "type": "string"
-                      },
-                      "endorsements": {
-                        "type": "string"
-                      },
-                      "uvm_endorsements": {
-                        "type": "string"
-                      },
-                      "endorsed_tcb": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "type": "object"
-                }
-              }
-            },
-            "responses": {
-              "200": {
-                "description": "Return unwrapped private key",
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "properties": {
-                        "wrapped": {
-                          "type": "string"
-                        },
-                        "receipt": {
-                          "type": "string"
-                        }
-                      },
-                      "required": ["wrapped", "receipt"],
-                      "type": "object"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/key": {
       "post": {
-        "js_module": "endpoints/keyEndpoint.js",
+        "js_module": "inference/keyEndpoint.js",
         "js_function": "key",
         "forwarding_required": "sometimes",
         "authn_policies": ["jwt", "member_cert", "user_cert"],

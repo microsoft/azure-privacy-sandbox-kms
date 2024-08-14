@@ -4,7 +4,7 @@
 import * as ccfcrypto from "@microsoft/ccf-app/crypto";
 import { ccf } from "@microsoft/ccf-app/global";
 import { Base64 } from "js-base64";
-import { IKeyItem } from "../endpoints/IKeyItem";
+import { IKeyItem } from "./IKeyItem";
 import { arrayBufferToHex } from "../utils/Tooling";
 import { Logger } from "../utils/Logger";
 
