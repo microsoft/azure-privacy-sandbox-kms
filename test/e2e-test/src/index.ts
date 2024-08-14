@@ -147,7 +147,7 @@ class Demo {
     // authorization on hearthbeat
     const member = this.members[0];
     console.log(`📝 Heartbeat JWT...`);
-    let [statusCode, response] = await Api.hearthbeat(
+    let [statusCode, hearthBeatResponse] = await Api.hearthbeat(
       this.demoProps,
       member,
       this.createHttpsAgent("", AuthKinds.JWT),
@@ -155,24 +155,43 @@ class Demo {
     );
     Demo.assert("OK statusCode", statusCode == 200);
 
-    Demo.assertField(member.name, response, "policy", "jwt");
-    Demo.assertField(member.name, response, "cert", undefined);
+    Demo.assertField(member.name, hearthBeatResponse.auth, "policy", "jwt");
+    Demo.assertField(member.name, hearthBeatResponse.auth, "cert", undefined);
+    Demo.assert(
+      "response.description.length > 0",
+      hearthBeatResponse.description.length > 0,
+    );
 
     console.log(`📝 Heartbeat member certs...`);
-    [statusCode, response] = await Api.hearthbeat(
+    [statusCode, hearthBeatResponse] = await Api.hearthbeat(
       this.demoProps,
       member,
       this.createHttpsAgent(member.id, AuthKinds.MemberCerts),
     );
     Demo.assert("OK statusCode", statusCode == 200);
 
-    Demo.assertField(member.name, response, "policy", "member_cert");
-    Demo.assertField(member.name, response, "cert", notUndefinedString);
+    Demo.assertField(
+      member.name,
+      hearthBeatResponse.auth,
+      "policy",
+      "member_cert",
+    );
+    Demo.assertField(
+      member.name,
+      hearthBeatResponse.auth,
+      "cert",
+      notUndefinedString,
+    );
+    Demo.assert(
+      "response.description.length > 0",
+      hearthBeatResponse.description.length > 0,
+    );
     //#endregion
 
     //#region refresh
     // members 0 refresh key
     console.log(`📝 Refresh key...`);
+    let response: IKeyItem;
     [statusCode, response] = await Api.refresh(
       this.demoProps,
       member,

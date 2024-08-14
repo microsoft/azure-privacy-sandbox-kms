@@ -5,14 +5,10 @@
 
 set -euo pipefail
 export AUTHORIZATION="Bearer $ACCESS"
-export CCF_NAME="500dev10"
+export CCF_NAME="acceu-..."
 export CCF_PLATFORM=virtual
 export MEMBER_COUNT=1
 export KMS_WORKSPACE=${PWD}/workspace
-export CCF_PLATFORM=virtual
-export MEMBER_COUNT=1
-export KMS_WORKSPACE=${PWD}/workspace
-export CCF_NAME="500dev10"
 export KMS_URL=https://${CCF_NAME}.confidential-ledger.azure.com
 export IDENTITY_URL=https://identity.confidential-ledger.core.azure.com/ledgerIdentity/${CCF_NAME}
 export KEYS_DIR=${PWD}/vol
