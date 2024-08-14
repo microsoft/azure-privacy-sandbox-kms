@@ -38,9 +38,9 @@ export const hearthbeat = (
     settings.settings.service.version,
     settings.settings.service.debug.toString(),
   ];
-  
+
   return ServiceResult.Succeeded<IHeartbeatResponse>({
     auth: policy!,
-    description
+    description,
   });
 };

@@ -4,6 +4,7 @@
 import { DemoMemberProps, DemoProps } from "./index";
 import axios from "axios";
 import {
+  IHeartbeatResponse,
   IKeyItem,
   IKeyReleasePolicyProps,
   ITinkPublicKeySet,
@@ -100,7 +101,7 @@ export default class Api {
     member: DemoMemberProps,
     httpsAgent: https.Agent,
     authorizationHeader?: string,
-  ): Promise<[number, object]> {
+  ): Promise<[number, IHeartbeatResponse]> {
     console.log(`hearthbeat authorization header: ${authorizationHeader}`);
 
     const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
