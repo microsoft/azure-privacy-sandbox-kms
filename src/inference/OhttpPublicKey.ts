@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 import { Base64 } from "js-base64";
-import { IKeyItem } from "../endpoints/IKeyItem";
-import { aToHex } from "..";
+import { IKeyItem } from "./IKeyItem";
+import { aToHex } from "../utils/Tooling";
 import { Logger } from "../utils/Logger";
 
 /*
@@ -24,6 +24,8 @@ import { Logger } from "../utils/Logger";
     */
 
 export class OhttpPublicKey {
+    private messageCount = 0;
+
     constructor(public keyItem: IKeyItem) {
         Logger.debug(`KeyItem: `, keyItem);
     }
@@ -32,20 +34,24 @@ export class OhttpPublicKey {
         if (this.keyItem.crv !== "P-384") {
             throw new Error(`Curve: ${this.keyItem.crv} not supported`);
         }
-
-        return this.keyLength() + this.keyId() + this.hpkeKemId() + this.publicKey() + this.hpkeAlgorithmsLength() + this.hpkeSymmetricAlgorithms();
+        
+        this.messageCount = 0;
+        const publicKey = this.keyId() + this.hpkeKemId() + this.publicKey() + this.hpkeAlgorithmsLength() + this.hpkeSymmetricAlgorithms();
+        return this.keyLength() + publicKey 
     }
 
     private keyLength(): string {
-        return "0069";
+        return this.messageCount.toString(16).padStart(4, "0");
     }
 
     private keyId(): string {
+        this.messageCount += 1;
         return this.keyItem.id!.toString(16).padStart(2, "0");
     }
 
     // HPKE KEM ID
     private hpkeKemId(): string {
+        this.messageCount += 2;
         return "0011";
     }
 
@@ -57,17 +63,20 @@ export class OhttpPublicKey {
         const y = Base64.toUint8Array(this.keyItem.y);
         const yHex = aToHex(y.buffer);
         Logger.info(`Public key Y: ${yHex}`);
-        return xHex + yHex;
+        const publicKey = "04" + xHex + yHex;
+        this.messageCount += (publicKey.length/2);
+        return publicKey;
     }
 
     // HPKE algorithms length
     private hpkeAlgorithmsLength(): string {
+        this.messageCount += 2;
         return  "0004";
     }
 
     // HPKE Symmetric Algorithms 
     private hpkeSymmetricAlgorithms(): string {
-        return  "00010001";
+        this.messageCount += 4;
+        return  "00020002";
     }
-
 }

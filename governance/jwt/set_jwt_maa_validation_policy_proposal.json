@@ -10,7 +10,7 @@
     {
       "name": "set_jwt_issuer",
       "args": {
-        "issuer": "https://sharedeus2.eus2.attest.azure.net/",
+        "issuer": "https://sharedeus2.eus2.attest.azure.net",
         "key_filter": "all",
         "ca_cert_bundle_name": "jwt_maa",
         "auto_refresh": true
@@ -19,9 +19,9 @@
     {
       "name": "set_jwt_validation_policy",
       "args": {
-        "issuer": "https://sharedeus2.eus2.attest.azure.net/",
+        "issuer": "https://sharedeus2.eus2.attest.azure.net",
         "validation_policy": {
-          "iss": "https://sharedeus2.eus2.attest.azure.net/"
+          "iss": "https://sharedeus2.eus2.attest.azure.net"
         }
       }
     }

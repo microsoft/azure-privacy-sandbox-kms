@@ -89,7 +89,7 @@ propose-jwt-ms-validation-policy: ## 🚀 Propose the AAD as idp
 # Propose a maa idp
 propose-jwt-maa-validation-policy: ## 🚀 Propose MAA as idp
 	@echo -e "\e[34m$@\e[0m" || true
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file governance/jwt/set_jwt_maa_validation_policy_proposal.json --certificate_dir "${KEYS_DIR}" --member-count ${MEMBER_COUNT}
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/jwt/set_jwt_maa_validation_policy_proposal.json --certificate_dir "${KEYS_DIR}" --member-count ${MEMBER_COUNT}
 
 # Propose a new settings policy
 propose-settings-policy: ## 🚀 Deploy the settings policy

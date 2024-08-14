@@ -2,7 +2,6 @@ import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../../utils/ServiceResult";
 import { IJwtIdentityProvider } from "./IJwtIdentityProvider";
 import { JwtValidationPolicyMap } from "./JwtValidationPolicyMap";
-import { Logger } from "../../utils/Logger";
 
 /**
  * MS Access Token
@@ -27,15 +26,18 @@ export const authorizeJwt = (
 ): ServiceResult<string> => {
   const policy = JwtValidationPolicyMap.read(issuer);
   if (policy === undefined) {
+    const errorMessage = `issuer ${issuer} is not defined in the policy`;
+    console.error(errorMessage);
     return ServiceResult.Failed(
       {
-        errorMessage: `issuer ${issuer} is not defined in the policy`,
+        errorMessage,
         errorType: "AuthenticationError",
       },
       500,
     );
   }
 
+  console.log(`Validate JWT policy for issuer ${issuer}: ${JSON.stringify(policy)}`);
   const keys = Object.keys(policy);
 
   for (let inx = 0; inx < keys.length; inx++) {
@@ -52,12 +54,13 @@ export const authorizeJwt = (
       compliant = jwtProp === policy[key];
     }
 
-    Logger.debug(
+    console.log(
       `isValidJwtToken: ${key}, expected: ${policy[key]}, found: ${jwtProp}, ${compliant}`,
     );
 
     if (!compliant) {
       const errorMessage = `The JWT has no valid ${key}, expected: ${policy[key]}, found: ${jwtProp}`;
+      console.error(errorMessage);
       return ServiceResult.Failed(
         { errorMessage, errorType: "AuthenticationError" },
         401,
