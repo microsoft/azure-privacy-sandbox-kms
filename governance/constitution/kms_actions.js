@@ -236,3 +236,35 @@ actions.set(
     },
   ),
 );
+
+
+actions.set(
+  "set_key_rotation_policy",
+  // validate function
+  new Action(
+    function (args) {
+      console.log(`set_key_rotation_policy, check args: ${JSON.stringify(args)}`);
+      checkType(args.key_rotation_policy, "object", "set_key_rotation_policy");
+
+      // Check settings policy
+      checkType(args.key_rotation_policy.rotation_interval_seconds, "integer");
+      checkType(args.key_rotation_policy.grace_period_seconds, "integer");
+      console.log(`Key rotation policy validation passed.`);
+    },
+
+    // apply function
+    function (args) {
+      const keyRotationPolicyMapName = "public:ccf.gov.policies.key_rotation";
+
+      // Save policy in the KV
+      const key = "key_rotation_policy";
+      const keyBuf = ccf.strToBuf(key);
+      const jsonItems = JSON.stringify(args.key_rotation_policy);
+      const jsonItemsBuf = ccf.strToBuf(jsonItems);
+      ccf.kv[keyRotationPolicyMapName].set(keyBuf, jsonItemsBuf);
+      console.log(
+        `Key rotation policy ${jsonItems} saved in ${keyRotationPolicyMapName}`,
+      );
+    },
+  ),
+);
