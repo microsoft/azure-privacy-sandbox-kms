@@ -5,8 +5,8 @@
       "args": {
         "settings_policy": {
           "service": {
-            "name": "azure-privacy-sandbox-kms",
-            "description": "Key Management Service",
+            "name": "KMS-AML",
+            "description": "Key Management Service for AML",
             "version": "1.0.0",
             "debug": true
           }
