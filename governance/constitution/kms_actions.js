@@ -247,8 +247,8 @@ actions.set(
       checkType(args.key_rotation_policy, "object", "set_key_rotation_policy");
 
       // Check settings policy
-      checkType(args.key_rotation_policy.rotation_interval_seconds, "integer");
-      checkType(args.key_rotation_policy.grace_period_seconds, "integer");
+      checkType(args.key_rotation_policy.rotation_interval_seconds, "integer", "Number_of_seconds_between_key_rotations");
+      checkType(args.key_rotation_policy.grace_period_seconds, "integer", "Number_of_seconds_to_allow_an_expired_key_to_be_used_by_clients");
       console.log(`Key rotation policy validation passed.`);
     },
 
