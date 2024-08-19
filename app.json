@@ -51,7 +51,7 @@
         "js_module": "inference/keyEndpoint.js",
         "js_function": "key",
         "forwarding_required": "sometimes",
-        "authn_policies": [],
+        "authn_policies": ["jwt"],
         "mode": "readonly",
         "parameters": [
           {
@@ -130,7 +130,7 @@
       "post": {
         "js_module": "inference/refreshEndpoint.js",
         "js_function": "refresh",
-        "forwarding_required": "sometimes",
+        "forwarding_required": "always",
         "authn_policies": [],
         "mode": "readwrite",
         "openapi": {

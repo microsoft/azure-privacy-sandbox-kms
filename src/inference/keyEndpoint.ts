@@ -8,6 +8,8 @@ import { IKeyItem } from "./IKeyItem";
 import { hpkeKeyMap } from "./repositories/Maps";
 import { ServiceRequest } from "../utils/ServiceRequest";
 import { Logger } from "../utils/Logger";
+import { IMaaAttestationReport } from "../attestation/IMaaAttestationReport";
+import { MaaAttestationValidation } from "../attestation/MaaAttestationValidation";
 
 // Enable the endpoint
 enableEndpoint();
@@ -35,9 +37,29 @@ export const key = (
   const serviceRequest = new ServiceRequest<IKeyRequest>(name, request);
 
   // check if caller has a valid identity
-  const [_, isValidIdentity] = serviceRequest.isAuthenticated();
+  const [policy, isValidIdentity] = serviceRequest.isAuthenticated();
   if (isValidIdentity.failure) return isValidIdentity;
 
+  // check MAA attestation  
+  let validateAttestationResult: ServiceResult<string | IMaaAttestationReport>;
+  try {
+    validateAttestationResult = new MaaAttestationValidation(policy! as ccfapp.JwtAuthnIdentity).validateAttestation();
+    if (!validateAttestationResult.success) {
+      return ServiceResult.Failed<string>(
+        validateAttestationResult.error!,
+        validateAttestationResult.statusCode,
+      );
+    }
+  } catch (exception: any) {
+    return ServiceResult.Failed<string>(
+      {
+        errorMessage: `${name}: Error in validating attestation (${JSON.stringify(policy)}): ${exception.message}`,
+      },
+      500,
+    );
+  }
+
+  // Check kid
   let kid = serviceRequest.body?.["kid"];
   let keyItem: IKeyItem | undefined;
   if (kid === undefined) {
