@@ -64,10 +64,10 @@ start-host-idp: stop-host stop-idp start-idp build ## 🏃 Start the CCF network
 	@echo -e "\e[34m$@\e[0m" || true
 	@echo "Executing: $(COMMAND)"
 	if [ "$(RUN_BACK)" = "true" ]; then \
-		 env -i PATH=${PATH} KMS_WORKSPACE=${KMS_WORKSPACE} $(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count  ${MEMBER_COUNT} --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js --jwt-issuer ${KMS_WORKSPACE}/proposals/set_jwt_issuer_test_sandbox.json  -v --http2 \
+		 env -i PATH=${PATH} KMS_WORKSPACE=${KMS_WORKSPACE} $(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count  ${MEMBER_COUNT} --initial-user-count 1 --constitution ./governance/constitution/kms_actions_maa.js --jwt-issuer ${KMS_WORKSPACE}/proposals/set_jwt_issuer_test_sandbox.json  -v --http2 \
 		 	${CCF_SANDBOX_EXTRA_ARGS} & \
 	else \
-		 env -i PATH=${PATH} KMS_WORKSPACE=${KMS_WORKSPACE} $(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count  ${MEMBER_COUNT} --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js --jwt-issuer ${KMS_WORKSPACE}/proposals/set_jwt_issuer_test_sandbox.json  -v --http2 \
+		 env -i PATH=${PATH} KMS_WORKSPACE=${KMS_WORKSPACE} $(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count  ${MEMBER_COUNT} --initial-user-count 1 --constitution ./governance/constitution/kms_actions_maa.js --jwt-issuer ${KMS_WORKSPACE}/proposals/set_jwt_issuer_test_sandbox.json  -v --http2 \
 		 	${CCF_SANDBOX_EXTRA_ARGS};  \
 	fi
 
@@ -106,6 +106,15 @@ propose-rm-key-release-policy: ## 🚀 Deploy the remove claim key release polic
 	$(call check_defined, KMS_URL)
 	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/policies/key-release-policy-remove.json --certificate_dir "${KEYS_DIR}"
 
+propose-add-key-release-policy-maa: ## 🚀 Deploy the add claim key release policy to the sandbox or mCCF
+	@echo -e "\e[34m$@\e[0m" || true
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/policies/key-release-policy-maa-add.json --certificate_dir "${KEYS_DIR}" --member-count ${MEMBER_COUNT}
+
+propose-rm-key-release-policy-maa: ## 🚀 Deploy the remove claim key release policy to the sandbox or mCCF
+	@echo -e "\e[34m$@\e[0m" || true
+	$(call check_defined, KMS_URL)
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/policies/key-release-policy-maa-remove.json --certificate_dir "${KEYS_DIR}"
+
 refresh-key: ## 🚀 Refresh a key on the instance
 	@echo -e "\e[34m$@\e[0m" || true
 	$(call check_defined, KMS_URL)
@@ -114,7 +123,7 @@ refresh-key: ## 🚀 Refresh a key on the instance
 set-constitution: ## Set new custom constitution
 	@echo -e "\e[34m$@\e[0m" || true
 	$(call check_defined, KMS_URL)
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_constitution.sh --network-url "${KMS_URL}" --certificate-dir  "${KEYS_DIR}" --custom-constitution ./governance/constitution/kms_actions.js --member-count ${MEMBER_COUNT}
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_constitution.sh --network-url "${KMS_URL}" --certificate-dir  "${KEYS_DIR}" --custom-constitution ./governance/constitution/kms_actions_maa.js --member-count ${MEMBER_COUNT}
 
 get-service-cert: # Get the mCCF service cert
 	@echo -e "\e[34m$@\e[0m" || true

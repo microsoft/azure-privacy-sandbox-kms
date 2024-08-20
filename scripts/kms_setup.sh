@@ -67,7 +67,7 @@ source .venv_ccf_sandbox/bin/activate
 make propose-settings-policy
 
 # Add key release policy
-make propose-add-key-release-policy
+make propose-add-key-release-policy-maa
 
 # Add demo validation policy
 make propose-jwt-demo-validation-policy
