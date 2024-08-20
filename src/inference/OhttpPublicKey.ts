@@ -37,7 +37,8 @@ export class OhttpPublicKey {
         
         this.messageCount = 0;
         const publicKey = this.keyId() + this.hpkeKemId() + this.publicKey() + this.hpkeAlgorithmsLength() + this.hpkeSymmetricAlgorithms();
-        return this.keyLength() + publicKey 
+        Logger.debug(`Public key length: ${this.keyLength()}`);
+        return publicKey 
     }
 
     private keyLength(): string {

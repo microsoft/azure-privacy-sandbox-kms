@@ -15,7 +15,6 @@ enableEndpoint();
 
 export interface IPublicKey {
   publicKey: string;
-  kid: number;
   receipt: string;
 }
 
@@ -60,7 +59,6 @@ export const listpubkeys = (
     };
     const payload: IPublicKey[] = [{
       publicKey,
-      kid: keyItem.id!,
       receipt,
     }];
          
