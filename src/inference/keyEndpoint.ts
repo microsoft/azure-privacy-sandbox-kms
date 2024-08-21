@@ -10,6 +10,7 @@ import { ServiceRequest } from "../utils/ServiceRequest";
 import { Logger } from "../utils/Logger";
 import { IMaaAttestationReport } from "../attestation/IMaaAttestationReport";
 import { MaaAttestationValidation } from "../attestation/MaaAttestationValidation";
+import { MaaWrappedKey, MaaWrapping } from "../wrapping/MaaWrapping";
 
 // Enable the endpoint
 enableEndpoint();
@@ -82,9 +83,22 @@ export const key = (
     return ServiceResult.Accepted();
   }
 
+  // wrap the private key
+  let wrappedKey: MaaWrappedKey;
+  try {
+    wrappedKey = new MaaWrapping(keyItem!, MaaWrapping.getWrappingKey(policy! as ccfapp.JwtAuthnIdentity)).wrapKey();
+  } catch (exception: any) {
+    return ServiceResult.Failed<string>(
+      {
+        errorMessage: `${name}: Error in wrapping key (${JSON.stringify(policy)}): ${exception.message}`,
+      },
+      500,
+    );
+  } 
+  
   return ServiceResult.Succeeded({
     kid: kid,
-    key: JSON.stringify(keyItem),
+    key: wrappedKey.wrappedKey,
     receipt: receipt
   });
 };
