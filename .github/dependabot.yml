@@ -1,15 +1,15 @@
 version: 2
 updates:
   # npm dependencies
-  - package-ecosystem: "npm" 
-    directory: "/"           
+  - package-ecosystem: "npm"
+    directory: "/"
     schedule:
-      interval: "weekly"     
+      interval: "weekly"
     commit-message:
-      prefix: "dependabot"         
-    open-pull-requests-limit: 10 
-    rebase-strategy: "auto
-    
+      prefix: "dependabot"
+    open-pull-requests-limit: 10
+    rebase-strategy: "auto"
+  # pip dependencies
   - package-ecosystem: "pip"
     directory: "/" # points to requirements.txt
     schedule:
