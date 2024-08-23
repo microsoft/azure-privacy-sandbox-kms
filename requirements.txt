@@ -9,7 +9,7 @@ better-exceptions==0.3.3
 blinker==1.8.2
 Brotli==1.1.0
 cbor2==5.6.4
-ccf==5.0.0
+ccf==5.0.4
 certifi==2024.7.4
 certvalidator==0.11.1
 cffi==1.16.0
