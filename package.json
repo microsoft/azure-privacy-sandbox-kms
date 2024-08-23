@@ -42,7 +42,7 @@
     "ts-jest": "29.2.2",
     "ts-node": "10.9.2",
     "tslib": "2.6.3",
-    "typescript": "5.5.3",
+    "typescript": "5.5.4",
     "uglify-js": "3.19.0"
   },
   "jest": {
