@@ -20,7 +20,7 @@ click==8.1.7
 colorama==0.4.6
 Columnar==1.4.1
 ConfigArgParse==1.7
-contourpy==1.1.1
+contourpy==1.2.1
 cramjam==2.8.3
 cryptography==42.0.8
 cycler==0.12.1
