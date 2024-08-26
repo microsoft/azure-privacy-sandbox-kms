@@ -54,7 +54,7 @@ hyperframe==6.0.1
 identify==2.6.0
 idna==3.7
 importlib-metadata==8.0.0
-importlib-resources==6.4.0
+importlib-resources==6.4.4
 isodate==0.6.1
 itsdangerous==2.2.0
 jinja2==3.1.4
