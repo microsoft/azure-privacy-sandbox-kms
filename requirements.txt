@@ -88,7 +88,7 @@ platformdirs==4.2.2
 plotext==5.2.8
 polars==1.2.1
 pre-commit==3.5.0
-prettytable==3.10.2
+prettytable==3.11.0
 protobuf==3.20.3
 psutil==6.0.0
 py-spy==0.3.14
