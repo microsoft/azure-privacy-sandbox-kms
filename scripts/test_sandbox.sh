@@ -28,7 +28,7 @@ function failed {
     exit 1
 }
 
-# parse parameters
+# Parse parameters
 
 if [ $# -gt 7 ]; then
     usage
@@ -39,7 +39,7 @@ while [ $# -gt 0 ]
 do
     name="${1/--/}"
     name="${name/-/_}"
-    case "--$name"  in
+    case "--$name" in
         --nodeAddress) nodeAddress="$2"; shift;;
         --certificate_dir) certificate_dir=$2; shift;;
         --constitution) constitution=$2; shift;;
@@ -49,10 +49,11 @@ do
     esac
     shift;
 done
+
 echo "Node address: $nodeAddress"
 echo "Certificate dir: $certificate_dir"
 
-# validate parameters
+# Validate parameters
 if [ -z "$nodeAddress" ]; then
     failed "You must supply --nodeAddress"
 fi
@@ -63,8 +64,8 @@ if [ -z "$constitution" ]; then
     failed "You must supply --constitution"
 fi
 if [ ! -f "$constitution" ]; then
-  echo "💥📁 Constitution file not found: $constitution"
-  exit 1
+    echo "💥📁 Constitution file not found: $constitution"
+    exit 1
 fi
 
 source .venv_ccf_sandbox/bin/activate
@@ -73,8 +74,8 @@ echo "💤 Waiting for sandbox in ${app_dir} . . .)"
 echo "▶️ sandbox is running"
 
 function finish {
-  # Get the exit status of the last command
   local exit_status=$?
+  local last_command=${BASH_COMMAND}
 
   if [ $interactive -eq 1 ]; then
     echo "🤔 Do you want to stop the sandbox? (Y/n)"
@@ -87,6 +88,10 @@ function finish {
 
   if [ $exit_status -ne 0 ]; then
     echo "💀 Stopped sandbox process due to an error"
+    echo "💥 Error details:"
+    echo "  Exit Status  : $exit_status"
+    echo "  Last Command : $last_command"
+    echo "  Error Output : $(tail -n 10 sandbox_process.log 2>/dev/null || echo 'No log available')"
   else
     echo "💀 Stopped sandbox process"
   fi
@@ -101,18 +106,19 @@ if [ ! -f "$testScript" ]; then
     exit 1
 fi
 
-# build testScript command
+# Build testScript command
 testScript="${testScript} --nodeAddress ${nodeAddress} --certificate_dir ${certificate_dir}"
 if [ $interactive -eq 1 ]; then
     testScript="${testScript} --interactive"
 fi
 
-# call testScript command
-${testScript}
+# Run the testScript command and log the output
+${testScript} 2>&1
 
 # Check if ${testScript} failed
 if [ $? -ne 0 ]; then
   echo "${testScript} failed"
   exit 1
 fi
+
 exit 0
