@@ -4,7 +4,7 @@
     "build": "rm -rf ./dist/ && rollup --config && cp app.json dist/ && node build_bundle.js dist/",
     "bundle": "node build_bundle.js dist",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "e2e-test": "node --loader ./loader-register.js ./test/e2e-test/src/index.ts"
+    "e2e-test": "node  --trace-deprecation --loader ./loader-register.js ./test/e2e-test/src/index.ts"
   },
   "type": "module",
   "engines": {
@@ -32,6 +32,7 @@
     "axios": "1.7.4",
     "babel-jest": "29.7.0",
     "express": "4.19.2",
+    "inquirer": "10.1.8",
     "jest": "29.7.0",
     "js-crypto-key-utils": "1.0.7",
     "js-crypto-rsa": "1.0.7",
