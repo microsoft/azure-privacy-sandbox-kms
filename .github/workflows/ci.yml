@@ -24,7 +24,7 @@ jobs:
           push: never
           configFile: .devcontainer/devcontainer.json
           runCmd: |
-            make demo && npm run test
+            scripts/set_python_env.sh && make demo && npm run test
         env:
           KMS_WORKSPACE: ./workspace
 
