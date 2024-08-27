@@ -16,4 +16,4 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash 
     && nvm use node
 
 echo "Install rollup, this is a temporary workaround to a bug around symlinking"
-npm install -g rollup@4.21.0
+npm install -g rollup@4.21.1
