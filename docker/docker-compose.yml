@@ -5,5 +5,5 @@ services:
       context: ../
       dockerfile: docker/Dockerfile
       args:
-        - BASE_CCF_IMAGE=${CCF_VERSION:-5.0.0-rc0}
         - CCF_PLATFORM=${CCF_PLATFORM:-virtual}
+        - BASE_CCF_IMAGE=ghcr.io/microsoft/ccf/app/dev/${CCF_PLATFORM}:ccf-5.0.4

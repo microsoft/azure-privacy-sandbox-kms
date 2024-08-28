@@ -1,9 +1,9 @@
 ARG CCF_PLATFORM
-ARG CCF_VERSION=5.0.0-dev10
+ARG BASE_CCF_IMAGE
 
 # Build Image ------------------------------------------------------------------
 
-FROM mcr.microsoft.com/ccf/app/dev:${CCF_VERSION}-virtual AS builder
+FROM ${BASE_CCF_IMAGE} AS builder
 
 COPY .devcontainer/install_packages.sh /src/
 RUN /src/install_packages.sh
@@ -38,8 +38,7 @@ RUN make build
 # Run Image --------------------------------------------------------------------
 
 # While KMS relies on running on sandbox.sh we need to use dev image
-# FROM mcr.microsoft.com/ccf/app/run-js:${CCF_VERSION}-${CCF_PLATFORM}
-FROM mcr.microsoft.com/ccf/app/dev:${CCF_VERSION}-${CCF_PLATFORM}
+FROM ${BASE_CCF_IMAGE}
 
 COPY .devcontainer/install_nodejs.sh /src/
 RUN NVM_DIR=/root/.nvm /src/install_nodejs.sh
@@ -49,4 +48,4 @@ WORKDIR /kms
 
 ARG CCF_PLATFORM
 ENV CCF_PLATFORM=${CCF_PLATFORM}
-CMD ["/bin/bash", "-c", "make start-host-idp & (./scripts/kms_wait.sh && make setup && tail -f /dev/null)"]
+CMD ["/bin/bash", "-c", "scripts/set_python_env.sh && pip install -r requirements.txt && make start-host-idp & (./scripts/kms_wait.sh && make setup && tail -f /dev/null)"]
