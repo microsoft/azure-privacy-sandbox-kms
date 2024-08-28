@@ -48,4 +48,4 @@ WORKDIR /kms
 
 ARG CCF_PLATFORM
 ENV CCF_PLATFORM=${CCF_PLATFORM}
-CMD ["/bin/bash", "-c", "scripts/set_python_env.sh && pip install -r requirements.txt && make start-host-idp & (./scripts/kms_wait.sh && make setup && tail -f /dev/null)"]
+CMD ["/bin/bash", "-c", "source .venv_ccf_sandbox/bin/activate && make start-host-idp & (./scripts/kms_wait.sh && make setup && tail -f /dev/null)"]
