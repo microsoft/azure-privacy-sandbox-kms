@@ -40,15 +40,19 @@ export class MaaWrapping {
     }
 
     public cborFormat(): ArrayBuffer {
-        const header: Uint8Array = new Uint8Array([0xa6]);
-        const kty: Uint8Array = new Uint8Array([0x01, 0x02]);
-        const crv: Uint8Array = new Uint8Array([0x03, 0x02]);
+        const header: Uint8Array = new Uint8Array([0xa5]);
+        //const kty: Uint8Array = new Uint8Array([0x01, 0x02]);
+        //const crv: Uint8Array = new Uint8Array([0x03, 0x02]);
+        const xType: Uint8Array = new Uint8Array([0x21, 0x58, 0x30]);
         const x: Uint8Array = Base64.toUint8Array(this.keyItem.x);
+        const yType: Uint8Array = new Uint8Array([0x22, 0x58, 0x30]);
         const y: Uint8Array = Base64.toUint8Array(this.keyItem.y);
+        const dType: Uint8Array = new Uint8Array([0x23, 0x58, 0x30]);
         const d: Uint8Array = Base64.toUint8Array(this.keyItem.d!);
-        const kid: Uint8Array = new Uint8Array([0x04, 0X41, this.keyItem.id! % 256]);
+        const kid: Uint8Array = new Uint8Array([0x20, 0x02, 0x04, this.keyItem.id! % 256]);
 
-        const cbor = this.concatUint8ArraysToArrayBuffer([header, kty, crv, x, y, d, kid]);
+        //const cbor = this.concatUint8ArraysToArrayBuffer([header, kty, crv, xType, x, yType, y, dType, d, kid]);
+        const cbor = this.concatUint8ArraysToArrayBuffer([header, dType, d, xType, x, yType, y, kid]);
         // secret
         Logger.info(`CBOR format: ${aToHex(cbor)}`);
         return cbor.buffer;
@@ -100,6 +104,7 @@ export class MaaWrapping {
         for (const array of arrays) {
             concatenatedArray.set(array, offset);
             offset += array.length;
+            Logger.info(`Concatenated array (${offset}): ${aToHex(concatenatedArray)}`);
         }
     
         // Step 4: Return the underlying ArrayBuffer
