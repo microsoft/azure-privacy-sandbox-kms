@@ -7,7 +7,7 @@ import * as ccfapp from "@microsoft/ccf-app";
 import { IKeyItem } from "../inference/IKeyItem";
 import { Base64 } from "js-base64";
 import { Logger } from "../utils/Logger";
-import { aToHex } from "../utils/Tooling";
+import { arrayBufferToHex, aToHex } from "../utils/Tooling";
 
 export interface MaaWrappedKey {
     kid: string;
@@ -17,19 +17,25 @@ export interface MaaWrappedKey {
 export class MaaWrapping {
     constructor(public keyItem: IKeyItem, public pubKey: JsonWebKeyRSAPublic) { }
 
-    public wrapKey(): MaaWrappedKey {
+    public wrapKey(encrypted: boolean): MaaWrappedKey {
         const pubRsa = ccfcrypto.pubRsaJwkToPem(this.pubKey);
         const pubRsaBuf = ccf.strToBuf(pubRsa);
         const privKeyBuf = this.cborFormat();
+        if (encrypted) {
 
-        const algo = {
-            name: "RSA-OAEP",
-          } as ccfcrypto.RsaOaepParams;
-          const wrappedKey = ccfcrypto.wrapKey(privKeyBuf, pubRsaBuf, algo);
-
+            const algo = {
+                name: "RSA-OAEP",
+              } as ccfcrypto.RsaOaepParams;
+              const wrappedKey = ccfcrypto.wrapKey(privKeyBuf, pubRsaBuf, algo);
+    
+            return {
+                kid: this.pubKey.kid!,
+                wrappedKey: Base64.fromUint8Array(new Uint8Array(wrappedKey)),
+            }    
+        }
         return {
             kid: this.pubKey.kid!,
-            wrappedKey: Base64.fromUint8Array(new Uint8Array(wrappedKey)),
+            wrappedKey: arrayBufferToHex(privKeyBuf)
         }
     }
 

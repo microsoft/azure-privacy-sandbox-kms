@@ -51,7 +51,7 @@
         "js_module": "inference/keyEndpoint.js",
         "js_function": "key",
         "forwarding_required": "sometimes",
-        "authn_policies": ["jwt"],
+        "authn_policies": [],
         "mode": "readonly",
         "parameters": [
           {

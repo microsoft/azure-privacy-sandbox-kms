@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import { ccf } from "@microsoft/ccf-app/global";
 import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../utils/ServiceResult";
 import { enableEndpoint } from "../utils/Tooling";
@@ -11,6 +12,7 @@ import { Logger } from "../utils/Logger";
 import { IMaaAttestationReport } from "../attestation/IMaaAttestationReport";
 import { MaaAttestationValidation } from "../attestation/MaaAttestationValidation";
 import { MaaWrappedKey, MaaWrapping } from "../wrapping/MaaWrapping";
+import { Base64 } from "js-base64";
 
 // Enable the endpoint
 enableEndpoint();
@@ -38,8 +40,49 @@ export const key = (
   const serviceRequest = new ServiceRequest<IKeyRequest>(name, request);
 
   // check if caller has a valid identity
-  const [policy, isValidIdentity] = serviceRequest.isAuthenticated();
+  let [policy, isValidIdentity] = serviceRequest.isAuthenticated();
   if (isValidIdentity.failure) return isValidIdentity;
+
+  // Check for encrypted key
+  let encrypted = false;
+  if (serviceRequest.query) {
+    encrypted = serviceRequest.query["encrypted"] === "true";
+  }
+
+
+  Logger.info(`headers: `, serviceRequest.headers);
+  let authorization = serviceRequest.headers?.["authorization"];
+  if (authorization === undefined) {
+    return ServiceResult.Failed<string>(
+      { errorMessage: `${name}: No authorization header` },
+      400,
+    );
+  }
+
+  // strip Bearer
+  if (authorization) {
+    authorization = authorization.replace("Bearer ", "");
+  }
+  // base64 decode
+  let jwt: any = Base64.toUint8Array(authorization);
+  Logger.info(`Authorization: `, jwt);
+  jwt = ccf.bufToStr(jwt.buffer);
+  Logger.info(`Authorization string: `, jwt);
+  let start = jwt.indexOf('{"exp":');
+  let end = jwt.indexOf('"x-ms-ver":"1.0"}') + 'x-ms-ver":"1.0"}'.length + 1;
+  jwt = jwt.substring(start, end);
+  Logger.info(`JWT string: `, jwt);
+  
+  const payload = JSON.parse(jwt);
+  Logger.info(`Payload: `, payload);
+  policy = {
+    policy: "jwt",
+    jwt: { 
+      payload
+    }
+  } as unknown as ccfapp.JwtAuthnIdentity;
+  
+  Logger.info(`Policy: `, policy);
 
   // check MAA attestation  
   let validateAttestationResult: ServiceResult<string | IMaaAttestationReport>;
@@ -86,7 +129,7 @@ export const key = (
   // wrap the private key
   let wrappedKey: MaaWrappedKey;
   try {
-    wrappedKey = new MaaWrapping(keyItem!, MaaWrapping.getWrappingKey(policy! as ccfapp.JwtAuthnIdentity)).wrapKey();
+    wrappedKey = new MaaWrapping(keyItem!, MaaWrapping.getWrappingKey(policy! as ccfapp.JwtAuthnIdentity)).wrapKey(encrypted);
   } catch (exception: any) {
     return ServiceResult.Failed<string>(
       {

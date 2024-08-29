@@ -46,6 +46,11 @@ export class ServiceRequest<T> {
       Logger.info(`${name} query: `, this.query);
     }
 
+    this.headers = request.headers;
+    if (this.headers) {
+      Logger.debug(`${name} headers: `, this.headers);
+    }
+
     try {
       this.body = request.body.json();
     } catch (exception) {
@@ -54,10 +59,6 @@ export class ServiceRequest<T> {
       };
       this.success = false;
       return;
-    }
-    this.headers = request.headers;
-    if (this.headers) {
-      Logger.debug(`${name} headers: `, this.headers);
     }
     this.success = true;
   }
