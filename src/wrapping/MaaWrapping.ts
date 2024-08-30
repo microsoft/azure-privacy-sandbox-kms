@@ -75,21 +75,17 @@ export class MaaWrapping {
             throw new Error("Authentication Policy jwt payload is not set");
         }
 
-        if (!jwtIdentity.jwt.payload["x-ms-isolation-tee"]) {
-            throw new Error("Authentication Policy jwt x-ms-isolation-tee is not set");
-        }
-
-        if (!jwtIdentity.jwt.payload["x-ms-isolation-tee"]["x-ms-runtime"]) {
+        if (!jwtIdentity.jwt.payload["x-ms-runtime"]) {
             throw new Error("Authentication Policy jwt x-ms-runtime is not set");
         }
 
-        const keys: JsonWebKeyRSAPublic[]  = jwtIdentity.jwt.payload["x-ms-isolation-tee"]["x-ms-runtime"]["keys"];
+        const keys: JsonWebKeyRSAPublic[]  = jwtIdentity.jwt.payload["x-ms-runtime"]["keys"];
         if (!keys) {
             throw new Error("Authentication Policy jwt keys is not set");
         }
-        const pubKey =  keys.filter((key: JsonWebKeyRSAPublic) => key.kid === "HCLAkPub");
+        const pubKey =  keys.filter((key: JsonWebKeyRSAPublic) => key.kid === "TpmEphemeralEncryptionKey");
         if (pubKey.length === 0) {
-            throw new Error("Authentication Policy does not contain public key HCLAkPub");
+            throw new Error("Authentication Policy does not contain public key TpmEphemeralEncryptionKey");
         }
         
         return pubKey[0];
