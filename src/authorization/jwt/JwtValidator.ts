@@ -17,10 +17,15 @@ export class JwtValidator implements IValidatorService {
 
   constructor() {
     this.identityProviders.set(
-      JwtIdentityProviderEnum.MAA,
+      JwtIdentityProviderEnum.MAA_deus2,
       new MsJwtProvider("JwtMaaProvider"),
     );
-    console.log("JwtValidator: JwtIdentityProviderEnum.MAA", JwtIdentityProviderEnum.MAA);
+    console.log("JwtValidator: JwtIdentityProviderEnum.MAA_deus2", JwtIdentityProviderEnum.MAA_deus2);
+    this.identityProviders.set(
+      JwtIdentityProviderEnum.MAA_NoSecureBoot,
+      new MsJwtProvider("JwtMaaProvider"),
+    );
+    console.log("JwtValidator: JwtIdentityProviderEnum.MAA_NoSecureBoot", JwtIdentityProviderEnum.MAA_NoSecureBoot);
     this.identityProviders.set(
       JwtIdentityProviderEnum.MS_AAD,
       new MsJwtProvider("JwtProvider"),

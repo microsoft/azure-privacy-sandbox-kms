@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { ccf } from "@microsoft/ccf-app/global";
 import * as ccfapp from "@microsoft/ccf-app";
+//import { ccf } from "@microsoft/ccf-app/global";
+//import { Base64 } from "js-base64";
 import { ServiceResult } from "../utils/ServiceResult";
 import { enableEndpoint } from "../utils/Tooling";
 import { IKeyItem } from "./IKeyItem";
@@ -12,7 +13,6 @@ import { Logger } from "../utils/Logger";
 import { IMaaAttestationReport } from "../attestation/IMaaAttestationReport";
 import { MaaAttestationValidation } from "../attestation/MaaAttestationValidation";
 import { MaaWrappedKey, MaaWrapping } from "../wrapping/MaaWrapping";
-import { Base64 } from "js-base64";
 
 // Enable the endpoint
 enableEndpoint();
@@ -45,6 +45,8 @@ export const key = (
 
   // Check for encrypted key
   let encrypted = false;
+
+  /**********************************************
   if (serviceRequest.query) {
     encrypted = serviceRequest.query["encrypted"] === "true";
   }
@@ -81,7 +83,7 @@ export const key = (
       payload
     }
   } as unknown as ccfapp.JwtAuthnIdentity;
-  
+  **********************************************/
   Logger.info(`Policy: `, policy);
 
   // check MAA attestation  
