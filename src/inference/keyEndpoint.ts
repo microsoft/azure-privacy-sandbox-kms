@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 import * as ccfapp from "@microsoft/ccf-app";
-import { ccf } from "@microsoft/ccf-app/global";
-import { Base64 } from "js-base64";
+//import { ccf } from "@microsoft/ccf-app/global";
+//import { Base64 } from "js-base64";
 import { ServiceResult } from "../utils/ServiceResult";
 import { enableEndpoint } from "../utils/Tooling";
 import { IKeyItem } from "./IKeyItem";
