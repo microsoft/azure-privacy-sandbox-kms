@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 import * as ccfapp from "@microsoft/ccf-app";
-//import { ccf } from "@microsoft/ccf-app/global";
-//import { Base64 } from "js-base64";
+import { ccf } from "@microsoft/ccf-app/global";
+import { Base64 } from "js-base64";
 import { ServiceResult } from "../utils/ServiceResult";
 import { enableEndpoint } from "../utils/Tooling";
 import { IKeyItem } from "./IKeyItem";
@@ -46,12 +46,11 @@ export const key = (
   // Check for encrypted key
   let encrypted = false;
 
-  /**********************************************
   if (serviceRequest.query) {
     encrypted = serviceRequest.query["encrypted"] === "true";
   }
 
-
+  /**********************************************
   Logger.info(`headers: `, serviceRequest.headers);
   let authorization = serviceRequest.headers?.["authorization"];
   if (authorization === undefined) {
@@ -67,11 +66,11 @@ export const key = (
   }
   // base64 decode
   let jwt: any = Base64.toUint8Array(authorization);
-  Logger.info(`Authorization: `, jwt);
   jwt = ccf.bufToStr(jwt.buffer);
   Logger.info(`Authorization string: `, jwt);
   let start = jwt.indexOf('{"exp":');
   let end = jwt.indexOf('"x-ms-ver":"1.0"}') + 'x-ms-ver":"1.0"}'.length + 1;
+  Logger.info(`Authorization string: start: ${start}, end: ${end}`, jwt);
   jwt = jwt.substring(start, end);
   Logger.info(`JWT string: `, jwt);
   
@@ -84,6 +83,7 @@ export const key = (
     }
   } as unknown as ccfapp.JwtAuthnIdentity;
   **********************************************/
+
   Logger.info(`Policy: `, policy);
 
   // check MAA attestation  
