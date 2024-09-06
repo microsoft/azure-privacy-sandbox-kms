@@ -3,12 +3,12 @@
     {
       "name": "set_key_release_policy",
       "args": {
-        "service": "some service",
+        "service": "AML",
         "type": "add",
         "claims": {
           "x-ms-ver": ["1.0"],
-          "secureboot": true,
-          "x-ms-azurevm-debuggersdisabled": true
+          "x-ms-azurevm-debuggersdisabled": true,
+          "x-ms-azurevm-osversion-major": [22, 23]
         }
       }
     }
