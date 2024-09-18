@@ -103,6 +103,7 @@ export const key = (
 
   // Validate input
   if (!serviceRequest.body || !attestation) {
+    Logger.error(`Key->The body is not a ${name} request`);
     return ServiceResult.Failed<string>(
       {
         errorMessage: `${name}: The body is not a ${name} request: ${JSON.stringify(serviceRequest.body)}`,
@@ -113,11 +114,16 @@ export const key = (
 
   // check if caller has a valid identity
   const [_, isValidIdentity] = serviceRequest.isAuthenticated();
-  if (isValidIdentity.failure) return isValidIdentity;
+  if (isValidIdentity.failure){
+    Logger.error(`Key->Caller does not have a valid identity`);
+    return isValidIdentity;
+  }
 
   let kid = serviceRequest.query?.["kid"];
+  Logger.debug(`Received request to release private key for kid: ${kid}`);
   let id: number | undefined;
   if (kid === undefined) {
+    Logger.debug(`Kid not present in request, so releasing latest kid: ${kid}`);
     [id, kid] = hpkeKeyIdMap.latestItem();
     if (kid === undefined) {
       return ServiceResult.Failed<string>(
@@ -141,6 +147,7 @@ export const key = (
   try {
     validateAttestationResult = validateAttestation(attestation);
     if (!validateAttestationResult.success) {
+      Logger.error(`Key->Error in validating attestation`);
       return ServiceResult.Failed<string>(
         validateAttestationResult.error!,
         validateAttestationResult.statusCode,
@@ -229,6 +236,7 @@ export const unwrapKey = (
 
   // Validate input
   if (!serviceRequest.body || !attestation) {
+    Logger.error(`unwrapKey->The body is not a ${name} request`);
     return ServiceResult.Failed<string>(
       {
         errorMessage: `${name}: The body is not a ${name} request: ${JSON.stringify(serviceRequest.body)}`,
@@ -239,11 +247,15 @@ export const unwrapKey = (
 
   // check if caller has a valid identity
   const [_, isValidIdentity] = serviceRequest.isAuthenticated();
-  if (isValidIdentity.failure) return isValidIdentity;
+  if (isValidIdentity.failure) {
+    Logger.error(`unwrapKey->Caller does not have a valid identity`);
+    return isValidIdentity;
+  }
 
   // check payload
   const wrappedKid: string = serviceRequest.body["wrappedKid"];
   if (wrappedKid === undefined) {
+    Logger.error(`unwrapKey->Missing wrappedKid in request`);
     return ServiceResult.Failed<string>(
       {
         errorMessage: `${name}: Missing  ${name} wrappedKid in request: ${JSON.stringify(serviceRequest.body)}`,
