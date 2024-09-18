@@ -250,7 +250,7 @@
       "post": {
         "js_module": "endpoints/refreshEndpoint.js",
         "js_function": "refresh",
-        "forwarding_required": "sometimes",
+        "forwarding_required": "always",
         "authn_policies": [],
         "mode": "readwrite",
         "openapi": {
