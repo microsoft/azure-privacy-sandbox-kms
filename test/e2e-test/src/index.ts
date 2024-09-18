@@ -126,8 +126,6 @@ class Demo {
       .replace(/\\n/g, "\n");
     console.log(`Private wrapping key: `, private_wrapping_key);
 
-    process.chdir("../../");
-
     this.printTestSectionHeader("🔬 [TEST]: Key generation Service");
 
     const notUndefinedString = (key: string | number | any[]) => {
@@ -301,6 +299,33 @@ class Demo {
         throw new Error(`🛑 [TEST FAILURE]: Expected ${statusCode} to be 200`);
       }
     } while (statusCode !== 200);
+
+
+    console.log(`📝 Get initial key-Bad hostdata in key release policy...`);
+    await Demo.executeCommand(
+      `./scripts/add_hostdata_keyreleasepolicy.sh --network_url $KMS_URL --certificate_dir $KEYS_DIR --hostdata 73973b78xxx`,
+    );
+    [headers, statusCode, keyResponse] = await Api.key(
+      this.demoProps,
+      member,
+      attestation,
+      private_wrapping_key,
+      public_wrapping_key,
+      false,
+      undefined,
+      this.createHttpsAgent(member.id, AuthKinds.JWT),
+      access_token,
+    ).catch((error) => {
+      console.log(`keyInitial error: `, error);
+      throw error;
+    });
+    console.log(`response bad hostdata: `, keyResponse);
+    Demo.assert("bad hostdata", statusCode == 400);
+
+    // Set correct hostdata so the rest of test will pass
+    await Demo.executeCommand(
+      `./scripts/add_hostdata_keyreleasepolicy.sh --network_url $KMS_URL --certificate_dir $KEYS_DIR --hostdata 73973b78d70cc68353426de188db5dfc57e5b766e399935fb73a61127ea26d20`,
+    );
 
     // Test with JWT
     console.log(`📝 Get wrapped key with JWT...`);
