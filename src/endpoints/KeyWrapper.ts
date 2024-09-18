@@ -6,8 +6,8 @@ import { ccf } from "@microsoft/ccf-app/global";
 import { KeyGeneration } from "./KeyGeneration";
 import { Base64 } from "js-base64";
 import { IKeyItem, IWrapKey } from "./IKeyItem";
-import * as tink from "./proto/gen/tink_pb";
-import * as hpke from "./proto/gen/hpke_pb";
+import tink from "./proto/gen/tink_pb";
+import hpke from "./proto/gen/hpke_pb";
 import { Logger } from "../utils/Logger";
 
 // Used by tink_pb and hpke_pb
@@ -115,32 +115,36 @@ export class KeyWrapper {
   ): string => {
     let tinkHpkeKey = new hpke.HpkePrivateKey();
     if (typeof payload.d === "string") {
-      tinkHpkeKey.privateKey = Base64.toUint8Array(payload.d);
+      tinkHpkeKey.setPrivateKey(Base64.toUint8Array(payload.d));
     } else {
       throw new Error("payload.d is undefined or not a string");
     }
 
     // TODO: check if we need to set tinkHpkeKey.publicKey. Based on tink.proto, it's optional though.
     // From the tink code, you can see currently version=0 is the only option
-    tinkHpkeKey.version = 0;
+    tinkHpkeKey.setVersion(0);
     let keyset = new tink.Keyset();
     // TODO: Check if it is okey as a tink key ID
     // primaryKeyId should match with key[0].keyId when size(key) is 1.
     const keyId = 0;
-    keyset.primaryKeyId = keyId;
-    keyset.key = [new tink.Keyset_Key()];
-    keyset.key[0].keyId = keyId;
-    keyset.key[0].status = tink.KeyStatusType.ENABLED;
-    keyset.key[0].outputPrefixType = tink.OutputPrefixType.TINK;
+    keyset.setPrimaryKeyId(payload.id!);
+    keyset.setKeyList([new tink.Keyset.Key()]);
+
+    const key = new tink.Keyset.Key();
+    key.setKeyId(keyId);
+    key.setStatus(tink.KeyStatusType.ENABLED);
+    key.setOutputPrefixType(tink.OutputPrefixType.TINK);
 
     let keyData = new tink.KeyData();
-    keyData.keyMaterialType = tink.KeyData_KeyMaterialType.ASYMMETRIC_PRIVATE;
-    keyData.typeUrl = "type.googleapis.com/google.crypto.tink.HpkePrivateKey";
-    keyData.value = tinkHpkeKey.toBinary();
-    keyset.key[0].keyData = keyData;
+    keyData.setKeyMaterialType(tink.KeyData.KeyMaterialType.ASYMMETRIC_PRIVATE);
+    keyData.setTypeUrl("type.googleapis.com/google.crypto.tink.HpkePrivateKey");
+    keyData.setValue(tinkHpkeKey.serializeBinary());
+    key.setKeyData(keyData);
+    keyset.setKeyList([key]);
+
     Logger.secret(`tink Keyset: `, keyData);
 
-    let bufPayload = keyset.toBinary().buffer;
+    let bufPayload = keyset.serializeBinary().buffer;
 
     Logger.secret(
       `Tink Wrapped payload (${JSON.stringify(keyset).length}): `,

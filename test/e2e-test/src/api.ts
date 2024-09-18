@@ -372,7 +372,7 @@ export default class Api {
         await this.decryptTinkPrivateKey(resp.wrapped, privateWrapKey),
       );
       let tinkHpkeKey = new hpke.HpkePrivateKey();
-      const jsonKey = tinkHpkeKey.toJsonString(resp.wrapped);
+      const jsonKey = JSON.stringify(tinkHpkeKey.toObject(resp.wrapped));
       console.log(`unwrap tink result (${jsonKey.length}): `, jsonKey);
       return [response.statusCode, resp];
     } else {
