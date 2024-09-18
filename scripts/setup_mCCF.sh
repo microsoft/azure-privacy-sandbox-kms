@@ -3,7 +3,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-set -euo pipefail
 export AUTHORIZATION="Bearer $ACCESS"
 export CCF_NAME="acceu-..."
 export CCF_PLATFORM=virtual
