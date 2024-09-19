@@ -3,10 +3,11 @@
 
 import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../utils/ServiceResult";
-import { IKeyReleasePolicyProps } from "../policies/IKeyReleasePolicyProps";
-import { enableEndpoint, getKeyReleasePolicy } from "../utils/Tooling";
+import { IKeyReleasePolicySnpProps } from "../policies/IKeyReleasePolicySnpProps";
+import { enableEndpoint } from "../utils/Tooling";
 import { keyReleasePolicyMap } from "../repositories/Maps";
 import { ServiceRequest } from "../utils/ServiceRequest";
+import { KeyReleasePolicy } from "../policies/KeyReleasePolicy";
 
 // Enable the endpoint
 enableEndpoint();
@@ -17,7 +18,7 @@ enableEndpoint();
  */
 export const keyReleasePolicy = (
   request: ccfapp.Request<void>,
-): ServiceResult<string | IKeyReleasePolicyProps> => {
+): ServiceResult<string | IKeyReleasePolicySnpProps> => {
   const name = "keyReleasePolicy";
   const serviceRequest = new ServiceRequest<void>(name, request);
 
@@ -25,6 +26,6 @@ export const keyReleasePolicy = (
   const [_, isValidIdentity] = serviceRequest.isAuthenticated();
   if (isValidIdentity.failure) return isValidIdentity;
 
-  const result = getKeyReleasePolicy(keyReleasePolicyMap);
-  return ServiceResult.Succeeded<IKeyReleasePolicyProps>(result);
+  const result = KeyReleasePolicy.getKeyReleasePolicyFromMap(keyReleasePolicyMap);
+  return ServiceResult.Succeeded<IKeyReleasePolicySnpProps>(result);
 };

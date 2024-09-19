@@ -4,12 +4,12 @@
 // Use the CCF polyfill to mock-up all key-value map functionality for unit-test
 import "@microsoft/ccf-app/polyfill.js";
 import { describe, expect, test } from "@jest/globals";
-import { IKeyReleasePolicyProps } from "../../../src";
+import { IKeyReleasePolicySnpProps } from "../../../src";
 
 describe("Test Key Release Policy properties", () => {
   test("Should get all data successfully", () => {
     // Arrange
-    const policy: IKeyReleasePolicyProps = {};
+    const policy: IKeyReleasePolicySnpProps = {};
 
     // Act
     policy["x-ms-attestation-type"] = ["sevsnpvm", "none"];

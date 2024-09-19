@@ -1,9 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { IKeyReleasePolicyProps } from "..";
+import { IKeyReleasePolicySnpProps } from "..";
 
 export interface IKeyReleasePolicy {
   type: string;
-  claims: IKeyReleasePolicyProps;
+  operators?: {
+    gt?: IKeyReleasePolicySnpProps;
+    gte?: IKeyReleasePolicySnpProps;
+  }
+  claims: IKeyReleasePolicySnpProps;
 }
