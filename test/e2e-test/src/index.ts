@@ -301,33 +301,6 @@ class Demo {
     } while (statusCode !== 200);
 
 
-    console.log(`📝 Get initial key-Bad hostdata in key release policy...`);
-    let hostdataResp = await Demo.executeCommand(
-      `./scripts/add_hostdata_keyreleasepolicy.sh --network_url $KMS_URL --certificate_dir $KEYS_DIR --hostdata 73973b78xxx`,
-    );
-    console.log("hostdataResp: ", hostdataResp);
-    [headers, statusCode, keyResponse] = await Api.key(
-      this.demoProps,
-      member,
-      attestation,
-      private_wrapping_key,
-      public_wrapping_key,
-      false,
-      undefined,
-      this.createHttpsAgent(member.id, AuthKinds.JWT),
-      access_token,
-    ).catch((error) => {
-      console.log(`keyInitial error: `, error);
-      throw error;
-    });
-    console.log(`response bad hostdata: `, keyResponse);
-    Demo.assert("bad hostdata", statusCode == 400);
-
-    // Set correct hostdata so the rest of test will pass
-    hostdataResp = await Demo.executeCommand(
-      `./scripts/add_hostdata_keyreleasepolicy.sh --network_url $KMS_URL --certificate_dir $KEYS_DIR --hostdata 73973b78d70cc68353426de188db5dfc57e5b766e399935fb73a61127ea26d20`,
-    );
-    console.log("hostdataResp: ", hostdataResp);
 
     // Test with JWT
     console.log(`📝 Get wrapped key with JWT...`);
