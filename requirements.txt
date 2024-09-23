@@ -1,4 +1,4 @@
-ccf==5.0.4
+ccf==5.0.5
 cryptography==43.0.1
 detect-secrets==1.5.0
 docker==7.1.0
