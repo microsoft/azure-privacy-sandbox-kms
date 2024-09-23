@@ -38,7 +38,7 @@
     "js-crypto-rsa": "1.0.7",
     "jsonwebtoken": "9.0.2",
     "node-fetch": "3.3.2",
-    "rollup": "4.21.2",
+    "rollup": "4.22.4",
     "ts-jest": "29.2.5",
     "ts-node": "10.9.2",
     "tslib": "2.7.0",
