@@ -117,14 +117,28 @@ actions.set(
       };
       const keyReleaseMapName = "public:ccf.gov.policies.key_release";
       // Function to add key release policy claims
-      const add = (claims) => {
-        let items = [];
+      const add = (type, claims) => {
+        let items = {};
         console.log(
-          `Add claims to key release policy: ${JSON.stringify(claims)}`,
+          `Add claims to key release policy for ${type}: ${JSON.stringify(claims)}`,
         );
+        // get all the claims for type from the KV
+        let keyBuf = ccf.strToBuf(type);
+        if (ccf.kv[keyReleaseMapName].has(keyBuf)) {
+          // type is already available
+          const itemsBuf = ccf.kv[keyReleaseMapName].get(keyBuf);
+          items = ccf.bufToStr(itemsBuf);
+          console.log(`KRP add ${type}=>key: ${type} already exist: ${items} in the key release policy`);
+          items = JSON.parse(items);
+        } else {
+          console.log(`KRP add ${type}=>key: ${type} is new in the key release policy`);
+        }
+
+
+        // iterate over every claim
         Object.keys(claims).forEach((key) => {
           if (CLAIMS[key] === undefined) {
-            throw new Error(`The claim ${key} is not an allowed claim`);
+            throw new Error(`KRP add ${type}=>The claim ${key} is not an allowed claim`);
           }
           let item = claims[key];
           // Make sure item is always an array
@@ -132,42 +146,30 @@ actions.set(
             item = [item];
           }
 
-          let keyBuf = ccf.strToBuf(key);
-          if (ccf.kv[keyReleaseMapName].has(keyBuf)) {
-            // Key is already available
-            const itemsBuf = ccf.kv[keyReleaseMapName].get(keyBuf);
-            items = ccf.bufToStr(itemsBuf);
-            console.log(`key: ${key} already exist: ${items}`);
-            items = JSON.parse(items);
-            if (typeof item[0] === "boolean") {
-              //booleans are single value arrays
-              items = item;
-            } else {
-              // loop through the input and add it to the existing set
-              item.forEach((i) => {
-                items.push(i);
-              });
-            }
+          if (items[key] !== undefined) {
+            item.forEach((i) => {
+              console.log(`KRP add ${type}=>Adding ${i} to ${key}`);
+              items[key].push(i);
+            })
           } else {
-            // set single value
-            items = item;
+            items[key] = item;
+            console.log(`KRP add ${type}=>currrent items: `, items);
           }
-
-          // prepare and store items
-          let jsonItems = JSON.stringify(items);
-          let jsonItemsBuf = ccf.strToBuf(jsonItems);
-          console.log(
-            `Voted key release policy item. Key: ${key}, value: ${jsonItems}`,
-          );
-          ccf.kv[keyReleaseMapName].set(keyBuf, jsonItemsBuf);
         });
+
+        // Safe into KV
+        console.log(`KRP add ${type}=>items: `, items);
+        let jsonItems = JSON.stringify(items);
+        console.log(`KRP add ${type}=>Add claims to key release policy for ${type}: ${jsonItems}`);
+        let jsonItemsBuf = ccf.strToBuf(jsonItems);
+        ccf.kv[keyReleaseMapName].set(keyBuf, jsonItemsBuf);
       };
 
       // Function to remove key release policy claims
-      const remove = (claims) => {
+      const remove = (type, claims) => {
         let items = [];
         console.log(
-          `Remove claims to key release policy: ${JSON.stringify(claims)}`,
+          `Remove claims to key release policy for ${type}: ${JSON.stringify(claims)}`,
         );
         Object.keys(claims).forEach((key) => {
           if (CLAIMS[key] === undefined) {
@@ -207,7 +209,7 @@ actions.set(
               if (items.length === 0) {
                 ccf.kv[keyReleaseMapName].delete(keyBuf);
               } else {
-                let jsonItems = JSON.stringify(items);
+                let jsonItems = JSON.stringify({ type, claims: items });
                 let jsonItemsBuf = ccf.strToBuf(jsonItems);
                 ccf.kv[keyReleaseMapName].set(keyBuf, jsonItemsBuf);
               }
@@ -223,10 +225,10 @@ actions.set(
       const type = args.type;
       switch (type) {
         case "add":
-          add(args.claims);
+          add("claims", args.claims);
           break;
         case "remove":
-          remove(args.claims);
+          remove("claims", args.claims);
           break;
         default:
           throw new Error(

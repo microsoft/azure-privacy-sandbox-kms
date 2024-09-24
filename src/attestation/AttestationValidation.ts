@@ -120,12 +120,11 @@ export const validateAttestation = (
     Logger.debug(
       `Key release policy: ${JSON.stringify(
         keyReleasePolicy,
-      )}, keys: ${Object.keys(keyReleasePolicy)}, keys: ${
-        Object.keys(keyReleasePolicy).length
+      )}, keys: ${Object.keys(keyReleasePolicy)}, keys: ${Object.keys(keyReleasePolicy).length
       }`,
     );
 
-    if (Object.keys(keyReleasePolicy).length === 0) {
+    if (Object.keys(keyReleasePolicy.claims).length === 0) {
       return ServiceResult.Failed<string>(
         {
           errorMessage:
@@ -134,39 +133,8 @@ export const validateAttestation = (
         400,
       );
     }
-
-    for (let inx = 0; inx < Object.keys(keyReleasePolicy).length; inx++) {
-      const key = Object.keys(keyReleasePolicy)[inx];
-
-      // check if key is in attestation
-      const attestationValue = attestationClaims[key];
-      const policyValue = keyReleasePolicy[key];
-      const isUndefined = typeof attestationValue === "undefined";
-      Logger.debug(
-        `Checking key ${key}, typeof attestationValue: ${typeof attestationValue}, isUndefined: ${isUndefined}, attestation value: ${attestationValue}, policyValue: ${policyValue}`,
-      );
-      if (isUndefined) {
-        return ServiceResult.Failed<string>(
-          { errorMessage: `Missing claim in attestation: ${key}` },
-          400,
-        );
-      }
-      if (
-        policyValue.filter((p) => {
-          Logger.debug(`Check if policy value ${p} === ${attestationValue}`);
-          return p === attestationValue;
-        }).length === 0
-      ) {
-        return ServiceResult.Failed<string>(
-          {
-            errorMessage: `Attestation claim ${key}, value ${attestationValue} does not match policy values: ${policyValue}`,
-          },
-          400,
-        );
-      }
-    }
-
-    return ServiceResult.Succeeded<IAttestationReport>(attestationClaims);
+    const policyValidationResult = KeyReleasePolicy.validateKeyReleasePolicy(keyReleasePolicy, attestationClaims);
+    return policyValidationResult;
   } catch (exception: any) {
     return ServiceResult.Failed<string>(
       { errorMessage: `Internal error: ${exception.message}` },
