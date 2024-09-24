@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT license.
+
+set -e
+export REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.."; pwd)
+cd $REPO_ROOT
+
+. ./scripts/setup_mCCF.sh
+
+TEST_WORKSPACE=$KMS_WORKSPACE/test-curl
+mkdir -p $TEST_WORKSPACE
+
+echo "Generate a new key item"
+curl ${KMS_URL}/app/refresh -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/member0_cert.pem --key ${KEYS_DIR}/member0_privk.pem -H "Content-Type: application/json" -i  -w '\n'
+
+
+echo "Getting the latest public key"
+echo "Waiting until receipt is ready"
+response_code=000
+while ! [[ $response_code -eq 200 ]]; do
+    sleep 1
+    response_code=$(curl ${KMS_URL}/app/pubkey --cacert ${KEYS_DIR}/service_cert.pem -s -o $TEST_WORKSPACE/pubkey_resp.json -w "%{http_code}")
+done
+cat $TEST_WORKSPACE/pubkey_resp.json
+echo ""
+
+echo "Get the latest private key (JWT)"
+echo "Waiting until receipt is ready"
+response_code=000
+while ! [[ $response_code -eq 200 ]]; do
+    sleep 1
+    response_code=$(curl $KMS_URL/app/key -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/member0_cert.pem --key ${KEYS_DIR}/member0_privk.pem -d "{\"attestation\":$ATTESTATION, \"wrappingKey\":$WRAPPING_KEY}" -s -o $TEST_WORKSPACE/key_resp.json -w "%{http_code}")
+done
+
+key_resp=$(cat $TEST_WORKSPACE/key_resp.json | jq)
+echo $key_resp
+kid=$(echo $key_resp | jq '.wrappedKid' -r)
+echo $kid
+wrapped=$(echo $key_resp | jq '.wrapped' -r)
+echo $wrapped
+
+echo "Unwrap key with attestation (JWT)"
+echo "Waiting until receipt is ready"
+response_code=000
+while ! [[ $response_code -eq 200 ]]; do
+    sleep 1
+    response_code=$(curl $KMS_URL/app/unwrapKey -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/member0_cert.pem --key ${KEYS_DIR}/member0_privk.pem -H "Content-Type: application/json" -d "{\"attestation\":$ATTESTATION, \"wrappingKey\":$WRAPPING_KEY, \"wrapped\":\"$wrapped\", \"wrappedKid\":\"$kid\"}" -s -o $TEST_WORKSPACE/unwrap_key_resp.json -w "%{http_code}")
+done
+
+echo "Result:"
+cat $TEST_WORKSPACE/unwrap_key_resp.json
+
+echo ""
+echo "OK"

@@ -4,7 +4,7 @@
 # Licensed under the MIT license.
 
 export AUTHORIZATION="Bearer $ACCESS"
-export CCF_NAME="acceu-..."
+export CCF_NAME="${CCF_NAME:-acceu-bingads-502-1}"
 export CCF_PLATFORM=virtual
 export MEMBER_COUNT=1
 export KMS_WORKSPACE=${PWD}/workspace
@@ -16,3 +16,16 @@ export PRIVATE_CERT=${KEYS_DIR}/member0_privk.pem
 export SERVICE_CERT=${KEYS_DIR}/service_cert.pem
 export WRAPPING_KEY=$(jq -Rs . < test/data-samples/publicWrapKey.pem)
 export ATTESTATION=$(<test/attestation-samples/snp.json)
+
+# if $KEYS_DIR doesn't exist, create it and
+# attempt to make contnts.
+ if ! [ -d "$KEYS_DIR" ]; then
+    mkdir -p $KEYS_DIR
+    make get-service-cert
+    if [ -n "$PUBLIC_CERT_PEM" ]; then
+        echo -n "$PUBLIC_CERT_PEM" > $PUBLIC_CERT
+    fi
+    if [ -n "$PRIVATE_CERT_PEM" ]; then
+        echo -n "$PRIVATE_CERT_PEM" > $PRIVATE_CERT
+    fi
+ fi
