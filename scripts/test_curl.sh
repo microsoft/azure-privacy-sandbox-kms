@@ -3,11 +3,12 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+# Usage: Set the common environment variables using `. ./scripts/setup_local.sh` or `. ./scripts/setup_mCCF.sh`,
+#        and then run this script.
+
 set -e
 export REPO_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.."; pwd)
 cd $REPO_ROOT
-
-. ./scripts/setup_mCCF.sh
 
 TEST_WORKSPACE=$KMS_WORKSPACE/test-curl
 mkdir -p $TEST_WORKSPACE
