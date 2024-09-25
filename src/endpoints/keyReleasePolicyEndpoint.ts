@@ -26,6 +26,7 @@ export const keyReleasePolicy = (
   const [_, isValidIdentity] = serviceRequest.isAuthenticated();
   if (isValidIdentity.failure) return isValidIdentity;
 
-  const result = KeyReleasePolicy.getKeyReleasePolicyFromMap(keyReleasePolicyMap);
+  const result =
+    KeyReleasePolicy.getKeyReleasePolicyFromMap(keyReleasePolicyMap);
   return ServiceResult.Succeeded<IKeyReleasePolicy>(result);
 };

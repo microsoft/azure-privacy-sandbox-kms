@@ -5,9 +5,7 @@ import { IKeyReleasePolicySnpProps } from "..";
 
 export interface IKeyReleasePolicy {
   type: string;
-  operators?: {
-    gt?: IKeyReleasePolicySnpProps;
-    gte?: IKeyReleasePolicySnpProps;
-  }
+  gt?: IKeyReleasePolicySnpProps;
+  gte?: IKeyReleasePolicySnpProps;
   claims: IKeyReleasePolicySnpProps;
 }

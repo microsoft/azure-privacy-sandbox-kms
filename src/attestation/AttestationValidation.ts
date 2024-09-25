@@ -116,11 +116,13 @@ export const validateAttestation = (
     );
 
     // Get the key release policy
-    const keyReleasePolicy = KeyReleasePolicy.getKeyReleasePolicyFromMap(keyReleasePolicyMap);
+    const keyReleasePolicy =
+      KeyReleasePolicy.getKeyReleasePolicyFromMap(keyReleasePolicyMap);
     Logger.debug(
       `Key release policy: ${JSON.stringify(
         keyReleasePolicy,
-      )}, keys: ${Object.keys(keyReleasePolicy)}, keys: ${Object.keys(keyReleasePolicy).length
+      )}, keys: ${Object.keys(keyReleasePolicy)}, keys: ${
+        Object.keys(keyReleasePolicy).length
       }`,
     );
 
@@ -133,7 +135,10 @@ export const validateAttestation = (
         400,
       );
     }
-    const policyValidationResult = KeyReleasePolicy.validateKeyReleasePolicy(keyReleasePolicy, attestationClaims);
+    const policyValidationResult = KeyReleasePolicy.validateKeyReleasePolicy(
+      keyReleasePolicy,
+      attestationClaims,
+    );
     return policyValidationResult;
   } catch (exception: any) {
     return ServiceResult.Failed<string>(

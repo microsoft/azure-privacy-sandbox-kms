@@ -5,7 +5,9 @@
 
 set -euo pipefail
 export AUTHORIZATION="Bearer $ACCESS"
-export CCF_NAME="acceu-..."
+export AUTHORIZATION=$(./scripts/authorization_header.sh)
+#export CCF_NAME="acceu-bingads-502-1"
+export CCF_NAME="trust-coordinator-na-504"
 export CCF_PLATFORM=virtual
 export MEMBER_COUNT=1
 export KMS_WORKSPACE=${PWD}/workspace
