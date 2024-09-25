@@ -41,6 +41,7 @@ jobs:
         env:
           PUBLIC_CERT_PEM: ${{ secrets.PUBLIC_CERT_PEM }}
           PRIVATE_CERT_PEM: ${{ secrets.PRIVATE_CERT_PEM }}
+          CCF_NAME: ${{ secrets.DEPLOYMENT_MCCF }}
 
   lint:
     runs-on: ubuntu-20.04

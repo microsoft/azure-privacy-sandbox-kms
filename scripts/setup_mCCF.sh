@@ -4,7 +4,7 @@
 # Licensed under the MIT license.
 
 export AUTHORIZATION="Bearer $ACCESS"
-export CCF_NAME="${CCF_NAME:-acceu-bingads-502-1}"
+export CCF_NAME="${CCF_NAME:-yourCcfName}"
 export CCF_PLATFORM=virtual
 export MEMBER_COUNT=1
 export KMS_WORKSPACE=${PWD}/workspace
