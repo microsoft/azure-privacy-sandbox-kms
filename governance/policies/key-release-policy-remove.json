@@ -7,6 +7,12 @@
         "type": "remove",
         "claims": {
           "x-ms-ver": ["2", "3"]
+        },
+        "gte": {
+          "x-ms-ver": "2"
+        },
+        "gt": {
+          "x-ms-ver": "1"
         }
       }
     }

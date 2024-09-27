@@ -170,7 +170,7 @@ echo $wrapped
 curl $KMS_URL/app/unwrapKey -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -d "{\"attestation\":$ATTESTATION, \"wrappingKey\":$WRAPPING_KEY, \"wrapped\":\"$wrapped\", \"wrappedKid\":\"$kid\"}" | jq
 
 # Get the latest private key (Tink)
-wrapped_resp=$(curl $KMS_URL/app/key?fmt=tink -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -d "{\"attestation\":$ATTESTATION, \"wrappingKey\":$WRAPPING_KEY}"  | jq)
+wrapped_resp=$(curl $KMS_URL/app/key?fmt=tink -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/member0_cert.pem --key ${KEYS_DIR}/member0_privk.pem -H "Content-Type: application/json" -d "{\"attestation\":$ATTESTATION, \"wrappingKey\":$WRAPPING_KEY}" | jq)
 echo $wrapped_resp
 key=$(echo $wrapped_resp | jq -r '.wrapped' | jq -R 'fromjson' | jq '.keys[0]')
 # It has a format of "azu-kms://<kid>" like "azu-kms://tGe-cVHzNyim2Z0PzHO4y0ClXCa5J6x-bh7GmGJTr3c".
@@ -182,10 +182,10 @@ wrapped=$(echo $keyMaterial | jq '.encryptedKeyset' -r)
 echo $wrapped
 
 # Unwrap key with attestation (Tink)
-curl $KMS_URL/app/unwrapKey?fmt=tink -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -d "{\"attestation\":$ATTESTATION, \"wrappingKey\":$WRAPPING_KEY, \"wrapped\":\"$wrapped\", \"wrappedKid\":\"$kid\"}" | jq
+curl $KMS_URL/app/unwrapKey?fmt=tink -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/member0_cert.pem --key ${KEYS_DIR}/member0_privk.pem -H "Content-Type: application/json" -d "{\"attestation\":$ATTESTATION, \"wrappingKey\":$WRAPPING_KEY, \"wrapped\":\"$wrapped\", \"wrappedKid\":\"$kid\"}" | jq
 
 # Get key release policy
-curl $KMS_URL/app/key_release_policy --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" | jq
+curl $KMS_URL/app/keyReleasePolicy --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/member0_cert.pem --key ${KEYS_DIR}/member0_privk.pem -H "Content-Type: application/json" | jq
 
 # Get receipt
 curl $KMS_URL/receipt?transaction_id=2.20 --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -i  -w '\n'
