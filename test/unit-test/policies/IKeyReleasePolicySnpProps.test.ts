@@ -35,7 +35,7 @@ describe("Test Key Release Policy properties", () => {
     // Arrange
     const policy: IKeyReleasePolicy = {
       type: KeyReleasePolicyType.ADD,
-      claims: { "x-ms-attestation-type": ["sevsnpvm"] },
+      claims: { "x-ms-attestation-type": ["sevsnpvm", "some claim"] },
     };
     const attestationClaims: IAttestationReport = {
       "x-ms-attestation-type": "sevsnpvm",
