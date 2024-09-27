@@ -35,9 +35,8 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
       );
     }
 
-    const claims = keyReleasePolicyClaims;
-    for (let inx = 0; inx < Object.keys(claims).length; inx++) {
-      const key = Object.keys(claims)[inx];
+    for (let inx = 0; inx < Object.keys(keyReleasePolicyClaims).length; inx++) {
+      const key = Object.keys(keyReleasePolicyClaims)[inx];
 
       // check if key is in attestation
       const attestationValue = attestationClaims[key];
@@ -90,9 +89,8 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
       );
     }
     const gte = type === "gte";
-    const claims = keyReleasePolicyClaims;
-    for (let inx = 0; inx < Object.keys(claims).length; inx++) {
-      const key = Object.keys(claims)[inx];
+    for (let inx = 0; inx < Object.keys(keyReleasePolicyClaims).length; inx++) {
+      const key = Object.keys(keyReleasePolicyClaims)[inx];
 
       // check if key is in attestation
       let attestationValue = attestationClaims[key];
