@@ -526,6 +526,14 @@ class Demo {
       `keyResponse.claims["x-ms-sevsnpvm-is-debuggable"][0] === false`,
       keyResponse.claims["x-ms-sevsnpvm-is-debuggable"][0] === false,
     );
+    Demo.assert(
+      `keyResponse.gte["x-ms-ver"] === "2"`,
+      keyResponse.gte["x-ms-ver"] === "2",
+    );
+    Demo.assert(
+      `keyResponse.gt["x-ms-ver"] === "1"`,
+      keyResponse.gt["x-ms-ver"] === "1",
+    );
 
     // JWT not allowed
     [statusCode, keyResponse] = await Api.keyReleasePolicy(

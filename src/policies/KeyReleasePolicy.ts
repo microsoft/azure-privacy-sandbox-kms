@@ -3,14 +3,14 @@
 
 import * as ccfapp from "@microsoft/ccf-app";
 import { ccf } from "@microsoft/ccf-app/global";
-import { IKeyReleasePolicy } from "./IKeyReleasePolicy";
+import { IKeyReleasePolicy, KeyReleasePolicyType } from "./IKeyReleasePolicy";
 import { IKeyReleasePolicySnpProps } from "./IKeyReleasePolicySnpProps";
 import { Logger } from "../utils/Logger";
 import { ServiceResult } from "../utils/ServiceResult";
 import { IAttestationReport } from "../attestation/ISnpAttestationReport";
 
 export class KeyReleasePolicy implements IKeyReleasePolicy {
-  public type = "add";
+  public type = KeyReleasePolicyType.ADD;
   public claims = {
     "x-ms-attestation-type": ["snp"],
   };
@@ -179,6 +179,17 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
     keyReleasePolicy: IKeyReleasePolicy,
     attestationClaims: IAttestationReport,
   ): ServiceResult<string | IAttestationReport> {
+    // claims are mandatory
+    if (Object.keys(keyReleasePolicy.claims).length === 0) {
+      return ServiceResult.Failed<string>(
+        {
+          errorMessage:
+            "The claims in the key release policy are missing. Please propose a new key release policy",
+        },
+        400,
+      );
+    }
+
     // Check claims
     let policyValidationResult =
       KeyReleasePolicy.validateKeyReleasePolicyClaims(
@@ -220,27 +231,36 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
   public static getKeyReleasePolicyFromMap = (
     keyReleasePolicyMap: ccfapp.KvMap,
   ): IKeyReleasePolicy => {
-    const keyReleasePolicy: IKeyReleasePolicy = { type: "", claims: {} };
+    const keyReleasePolicy: IKeyReleasePolicy = {
+      type: KeyReleasePolicyType.ADD,
+      claims: {},
+    };
 
     [
-      { kvkey: "claims", optinal: false },
-      { kvkey: "gte", optinal: true },
-      { kvkey: "gt", optinal: true },
+      { kvkey: "claims", optional: false },
+      { kvkey: "gte", optional: true },
+      { kvkey: "gt", optional: true },
     ].forEach((kv) => {
       const kvKey = kv.kvkey;
       const kvKeyBuf = ccf.strToBuf(kvKey);
       const kvValueBuf = keyReleasePolicyMap.get(kvKeyBuf);
       if (!kvValueBuf) {
-        if (!kv.optinal) {
+        if (!kv.optional) {
           throw new Error(
             `Key release policy ${kvKey} not found in the key release policy map`,
           );
         }
       } else {
         let kvValue = ccf.bufToStr(kvValueBuf!);
-        keyReleasePolicy[kvKey] = JSON.parse(
-          kvValue,
-        ) as IKeyReleasePolicySnpProps;
+        try {
+          keyReleasePolicy[kvKey] = JSON.parse(
+            kvValue,
+          ) as IKeyReleasePolicySnpProps;
+        } catch (error) {
+          throw new Error(
+            `Key release policy ${kvKey} is not a valid JSON object: ${kvValue}`,
+          );
+        }
       }
     });
 

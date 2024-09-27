@@ -131,7 +131,18 @@ actions.set(
           console.log(
             `KRP add ${type}=>key: ${type} already exist: ${items} in the key release policy`,
           );
-          items = JSON.parse(items);
+          try {
+            items = JSON.parse(items);
+          } catch (e) {
+            console.log(
+              `KRP add ${type}=>Error parsing ${items} from key release policy during add`,
+              e,
+            );
+            throw new Error(
+              `Error parsing ${items} from key release policy during add`,
+              e,
+            );
+          }
         } else {
           console.log(
             `KRP add ${type}=>key: ${type} is new in the key release policy`,
@@ -186,7 +197,18 @@ actions.set(
           console.log(
             `KRP add ${type}=>key: ${type} already exist: ${items} in the key release policy`,
           );
-          items = JSON.parse(items);
+          try {
+            items = JSON.parse(items);
+          } catch (e) {
+            console.log(
+              `KRP addOperator ${type}=>Error parsing ${items} from key release policy`,
+              e,
+            );
+            throw new Error(
+              `Error parsing ${items} from key release policy during addOperator`,
+              e,
+            );
+          }
         } else {
           console.log(
             `KRP add ${type}=>key: ${type} is new in the key release policy`,
@@ -234,7 +256,18 @@ actions.set(
           console.log(
             `KRP remove ${type}=>key: ${type} exist: ${items} in the key release policy`,
           );
-          items = JSON.parse(items);
+          try {
+            items = JSON.parse(items);
+          } catch (e) {
+            console.log(
+              `KRP remove ${type}=>Error parsing ${items} from key release policy`,
+              e,
+            );
+            throw new Error(
+              `Error parsing ${items} from key release policy during remove`,
+              e,
+            );
+          }
         } else {
           console.log(
             `KRP remove ${type}=>key: ${type} does not exists in the key release policy`,
@@ -299,7 +332,18 @@ actions.set(
           console.log(
             `KRP remove ${type}=>key: ${type} exist: ${items} in the key release policy`,
           );
-          items = JSON.parse(items);
+          try {
+            items = JSON.parse(items);
+          } catch (e) {
+            console.log(
+              `KRP removeOperator ${type}=>Error parsing ${items} from key release policy`,
+              e,
+            );
+            throw new Error(
+              `Error parsing ${items} from key release policy during removeOperator`,
+              e,
+            );
+          }
         } else {
           console.log(
             `KRP remove ${type}=>key: ${type} does not exists in the key release policy`,

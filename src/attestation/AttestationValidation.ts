@@ -126,15 +126,6 @@ export const validateAttestation = (
       }`,
     );
 
-    if (Object.keys(keyReleasePolicy.claims).length === 0) {
-      return ServiceResult.Failed<string>(
-        {
-          errorMessage:
-            "The key release policy is missing. Please propose a new key release policy",
-        },
-        400,
-      );
-    }
     const policyValidationResult = KeyReleasePolicy.validateKeyReleasePolicy(
       keyReleasePolicy,
       attestationClaims,

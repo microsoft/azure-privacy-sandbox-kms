@@ -3,8 +3,13 @@
 
 import { IKeyReleasePolicySnpProps } from "..";
 
+export enum KeyReleasePolicyType {
+  ADD = "add",
+  REMOVE = "remove",
+}
+
 export interface IKeyReleasePolicy {
-  type: string;
+  type: KeyReleasePolicyType;
   gt?: IKeyReleasePolicySnpProps;
   gte?: IKeyReleasePolicySnpProps;
   claims: IKeyReleasePolicySnpProps;

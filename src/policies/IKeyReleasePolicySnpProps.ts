@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 export interface IKeyReleasePolicySnpProps {
-  "x-ms-attestation-type"?: string[] | string | string;
+  "x-ms-attestation-type"?: string[] | string;
   "x-ms-compliance-status"?: string[] | string;
   "x-ms-policy-hash"?: string[] | string;
   "vm-configuration-secure-boot"?: boolean;
