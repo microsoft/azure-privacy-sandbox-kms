@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 import * as ccfapp from "@microsoft/ccf-app";
-import { IKeyReleasePolicyProps } from "../policies/IKeyReleasePolicyProps";
 import { ccf } from "@microsoft/ccf-app/global";
 import { Logger } from "./Logger";
 
@@ -66,29 +65,6 @@ export const isPemPublicKey = (key: string): boolean => {
   Logger.debug("isNewline:", isNewline);
 
   return isLiteralNewline || isNewline;
-};
-
-/**
- * Retrieves the key release policy from a key release policy map.
- * @param keyReleasePolicyMap - The key release policy map.
- * @returns The key release policy as an object.
- */
-export const getKeyReleasePolicy = (
-  keyReleasePolicyMap: ccfapp.KvMap,
-): IKeyReleasePolicyProps => {
-  const result: IKeyReleasePolicyProps = {};
-  keyReleasePolicyMap.forEach((values: ArrayBuffer, key: ArrayBuffer) => {
-    const kvKey = ccf.bufToStr(key);
-    const kvValue = JSON.parse(ccf.bufToStr(values));
-    result[kvKey] = kvValue;
-    Logger.debug(`key policy item with key: ${kvKey} and value: ${kvValue}`);
-  });
-  Logger.debug(
-    `Resulting key release policy: ${JSON.stringify(
-      result,
-    )}, keys: ${Object.keys(result)}, keys: ${Object.keys(result).length}`,
-  );
-  return result;
 };
 
 /**

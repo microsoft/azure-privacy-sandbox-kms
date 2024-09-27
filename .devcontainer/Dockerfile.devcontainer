@@ -1,12 +1,12 @@
 # Base container image which is built nightly
 # Used as a starting point to make building other containers fast
 
-ARG BASE_CCF_IMAGE=ccf-5.0.4
+ARG BASE_CCF_IMAGE=ghcr.io/microsoft/ccf/app/dev/virtual:ccf-5.0.4
 ARG ENVIRONMENT=devcontainer
 
 # ignore this hadolint error as BASE_IMAGE contains an image tag
 # hadolint ignore=DL3006
-FROM ghcr.io/microsoft/ccf/app/dev/virtual:${BASE_CCF_IMAGE} AS base
+FROM ${BASE_CCF_IMAGE} as base
 
 ENV NVM_DIR /root/.nvm
 ENV TINKEY_VERSION=tinkey-1.10.1

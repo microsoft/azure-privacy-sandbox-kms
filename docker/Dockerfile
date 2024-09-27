@@ -1,9 +1,9 @@
 ARG CCF_PLATFORM
-ARG CCF_VERSION=5.0.0-dev10
+ARG CCF_VERSION=ccf-5.0.4
 
 # Build Image ------------------------------------------------------------------
 
-FROM mcr.microsoft.com/ccf/app/dev:${CCF_VERSION}-virtual AS builder
+FROM ghcr.io/microsoft/ccf/app/dev/virtual:${CCF_VERSION} AS builder
 
 COPY .devcontainer/install_packages.sh /src/
 RUN /src/install_packages.sh
@@ -38,8 +38,8 @@ RUN make build
 # Run Image --------------------------------------------------------------------
 
 # While KMS relies on running on sandbox.sh we need to use dev image
-# FROM mcr.microsoft.com/ccf/app/run-js:${CCF_VERSION}-${CCF_PLATFORM}
-FROM mcr.microsoft.com/ccf/app/dev:${CCF_VERSION}-${CCF_PLATFORM}
+# FROM mcr.microsoft.com/ccf/app/run-js/${CCF_PLATFORM}:${CCF_VERSION}
+FROM ghcr.io/microsoft/ccf/app/dev/${CCF_PLATFORM}:${CCF_VERSION}
 
 COPY .devcontainer/install_nodejs.sh /src/
 RUN NVM_DIR=/root/.nvm /src/install_nodejs.sh
