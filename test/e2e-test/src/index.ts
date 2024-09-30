@@ -515,16 +515,24 @@ class Demo {
 
     console.log("keyReleasePolicy response: ", keyResponse);
     Demo.assert(
-      `keyResponse["x-ms-sevsnpvm-smt-allowed"][0] === true`,
-      keyResponse["x-ms-sevsnpvm-smt-allowed"][0] === true,
+      `keyResponse.claims["x-ms-sevsnpvm-smt-allowed"][0] === true`,
+      keyResponse.claims["x-ms-sevsnpvm-smt-allowed"][0] === true,
     );
     Demo.assert(
-      `keyResponse["x-ms-ver"][0] === '2'`,
-      keyResponse["x-ms-ver"][0] === "2",
+      `keyResponse.claims["x-ms-ver"][0] === '2'`,
+      keyResponse.claims["x-ms-ver"][0] === "2",
     );
     Demo.assert(
-      `keyResponse["x-ms-sevsnpvm-is-debuggable"][0] === false`,
-      keyResponse["x-ms-sevsnpvm-is-debuggable"][0] === false,
+      `keyResponse.claims["x-ms-sevsnpvm-is-debuggable"][0] === false`,
+      keyResponse.claims["x-ms-sevsnpvm-is-debuggable"][0] === false,
+    );
+    Demo.assert(
+      `keyResponse.gte["x-ms-ver"] === "2"`,
+      keyResponse.gte["x-ms-ver"] === "2",
+    );
+    Demo.assert(
+      `keyResponse.gt["x-ms-ver"] === "1"`,
+      keyResponse.gt["x-ms-ver"] === "1",
     );
 
     // JWT not allowed
