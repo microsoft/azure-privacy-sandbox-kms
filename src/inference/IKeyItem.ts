@@ -1,10 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import {
-  CryptoKeyPair,
-  JsonWebKeyECPublic,
-} from "@microsoft/ccf-app/global";
+import { CryptoKeyPair, JsonWebKeyECPublic } from "@microsoft/ccf-app/global";
 import { enableEndpoint } from "../utils/Tooling";
 
 // Enable the endpoint

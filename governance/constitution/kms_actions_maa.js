@@ -89,7 +89,7 @@ actions.set(
     },
     function (args) {
       const CLAIMS = {
-        "secureboot": "boolean",
+        secureboot: "boolean",
         "x-ms-attestation-type": "string",
         "x-ms-azurevm-attestation-protocol-ver": "string",
         "x-ms-azurevm-attested-pcrs": "number[]",
@@ -116,11 +116,11 @@ actions.set(
         "x-ms-policy-hash": "string",
         "x-ms-runtime": {
           "client-payload": {
-            "a": "string"
+            a: "string",
           },
-          "keys": "object",
+          keys: "object",
         },
-        "x-ms-ver": "string"
+        "x-ms-ver": "string",
       };
       const keyReleaseMapName = "public:ccf.gov.policies.key_release";
       // Function to add key release policy claims

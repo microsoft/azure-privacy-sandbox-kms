@@ -24,60 +24,65 @@ import { Logger } from "../utils/Logger";
     */
 
 export class OhttpPublicKey {
-    private messageCount = 0;
+  private messageCount = 0;
 
-    constructor(public keyItem: IKeyItem) {
-        Logger.debug(`KeyItem: `, keyItem);
+  constructor(public keyItem: IKeyItem) {
+    Logger.debug(`KeyItem: `, keyItem);
+  }
+
+  public get(): string {
+    if (this.keyItem.crv !== "P-384") {
+      throw new Error(`Curve: ${this.keyItem.crv} not supported`);
     }
 
-    public get(): string {
-        if (this.keyItem.crv !== "P-384") {
-            throw new Error(`Curve: ${this.keyItem.crv} not supported`);
-        }
-        
-        this.messageCount = 0;
-        const publicKey = this.keyId() + this.hpkeKemId() + this.publicKey() + this.hpkeAlgorithmsLength() + this.hpkeSymmetricAlgorithms();
-        Logger.debug(`Public key length: ${this.keyLength()}`);
-        return publicKey 
-    }
+    this.messageCount = 0;
+    const publicKey =
+      this.keyId() +
+      this.hpkeKemId() +
+      this.publicKey() +
+      this.hpkeAlgorithmsLength() +
+      this.hpkeSymmetricAlgorithms();
+    Logger.debug(`Public key length: ${this.keyLength()}`);
+    return publicKey;
+  }
 
-    private keyLength(): string {
-        return this.messageCount.toString(16).padStart(4, "0");
-    }
+  private keyLength(): string {
+    return this.messageCount.toString(16).padStart(4, "0");
+  }
 
-    private keyId(): string {
-        this.messageCount += 1;
-        return this.keyItem.id!.toString(16).padStart(2, "0");
-    }
+  private keyId(): string {
+    this.messageCount += 1;
+    return this.keyItem.id!.toString(16).padStart(2, "0");
+  }
 
-    // HPKE KEM ID
-    private hpkeKemId(): string {
-        this.messageCount += 2;
-        return "0011";
-    }
+  // HPKE KEM ID
+  private hpkeKemId(): string {
+    this.messageCount += 2;
+    return "0011";
+  }
 
-    // Public key
-    private publicKey(): string {
-        const x = Base64.toUint8Array(this.keyItem.x);
-        const xHex = aToHex(x.buffer);
-        Logger.info(`Public key X: ${xHex}`);
-        const y = Base64.toUint8Array(this.keyItem.y);
-        const yHex = aToHex(y.buffer);
-        Logger.info(`Public key Y: ${yHex}`);
-        const publicKey = "04" + xHex + yHex;
-        this.messageCount += (publicKey.length/2);
-        return publicKey;
-    }
+  // Public key
+  private publicKey(): string {
+    const x = Base64.toUint8Array(this.keyItem.x);
+    const xHex = aToHex(x.buffer);
+    Logger.info(`Public key X: ${xHex}`);
+    const y = Base64.toUint8Array(this.keyItem.y);
+    const yHex = aToHex(y.buffer);
+    Logger.info(`Public key Y: ${yHex}`);
+    const publicKey = "04" + xHex + yHex;
+    this.messageCount += publicKey.length / 2;
+    return publicKey;
+  }
 
-    // HPKE algorithms length
-    private hpkeAlgorithmsLength(): string {
-        this.messageCount += 2;
-        return  "0004";
-    }
+  // HPKE algorithms length
+  private hpkeAlgorithmsLength(): string {
+    this.messageCount += 2;
+    return "0004";
+  }
 
-    // HPKE Symmetric Algorithms 
-    private hpkeSymmetricAlgorithms(): string {
-        this.messageCount += 4;
-        return  "00020002";
-    }
+  // HPKE Symmetric Algorithms
+  private hpkeSymmetricAlgorithms(): string {
+    this.messageCount += 4;
+    return "00020002";
+  }
 }

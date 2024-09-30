@@ -30,7 +30,6 @@ export interface IKeyResponse {
 
 //#endregion
 
-
 //#region KMS Key endpoints
 // Get latest private key
 export const key = (
@@ -86,10 +85,12 @@ export const key = (
 
   Logger.info(`Policy: `, policy);
 
-  // check MAA attestation  
+  // check MAA attestation
   let validateAttestationResult: ServiceResult<string | IMaaAttestationReport>;
   try {
-    validateAttestationResult = new MaaAttestationValidation(policy! as ccfapp.JwtAuthnIdentity).validateAttestation();
+    validateAttestationResult = new MaaAttestationValidation(
+      policy! as ccfapp.JwtAuthnIdentity,
+    ).validateAttestation();
     if (!validateAttestationResult.success) {
       return ServiceResult.Failed<string>(
         validateAttestationResult.error!,
@@ -131,7 +132,10 @@ export const key = (
   // wrap the private key
   let wrappedKey: MaaWrappedKey;
   try {
-    wrappedKey = new MaaWrapping(keyItem!, MaaWrapping.getWrappingKey(policy! as ccfapp.JwtAuthnIdentity)).wrapKey(encrypted);
+    wrappedKey = new MaaWrapping(
+      keyItem!,
+      MaaWrapping.getWrappingKey(policy! as ccfapp.JwtAuthnIdentity),
+    ).wrapKey(encrypted);
   } catch (exception: any) {
     return ServiceResult.Failed<string>(
       {
@@ -139,12 +143,12 @@ export const key = (
       },
       500,
     );
-  } 
-  
+  }
+
   return ServiceResult.Succeeded({
     kid: kid,
     key: wrappedKey.wrappedKey,
-    receipt: receipt
+    receipt: receipt,
   });
 };
 

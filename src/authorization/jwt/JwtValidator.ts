@@ -20,22 +20,34 @@ export class JwtValidator implements IValidatorService {
       JwtIdentityProviderEnum.MAA_deus2,
       new MsJwtProvider("JwtMaaProvider"),
     );
-    console.log("JwtValidator: JwtIdentityProviderEnum.MAA_deus2", JwtIdentityProviderEnum.MAA_deus2);
+    console.log(
+      "JwtValidator: JwtIdentityProviderEnum.MAA_deus2",
+      JwtIdentityProviderEnum.MAA_deus2,
+    );
     this.identityProviders.set(
       JwtIdentityProviderEnum.MAA_NoSecureBoot,
       new MsJwtProvider("JwtMaaProvider"),
     );
-    console.log("JwtValidator: JwtIdentityProviderEnum.MAA_NoSecureBoot", JwtIdentityProviderEnum.MAA_NoSecureBoot);
+    console.log(
+      "JwtValidator: JwtIdentityProviderEnum.MAA_NoSecureBoot",
+      JwtIdentityProviderEnum.MAA_NoSecureBoot,
+    );
     this.identityProviders.set(
       JwtIdentityProviderEnum.MS_AAD,
       new MsJwtProvider("JwtProvider"),
     );
-    console.log("JwtValidator: JwtIdentityProviderEnum.MS_AAD", JwtIdentityProviderEnum.MS_AAD);
+    console.log(
+      "JwtValidator: JwtIdentityProviderEnum.MS_AAD",
+      JwtIdentityProviderEnum.MS_AAD,
+    );
     this.identityProviders.set(
       JwtIdentityProviderEnum.Demo,
       new DemoJwtProvider("DemoJwtProvider"),
     );
-    console.log("JwtValidator: JwtIdentityProviderEnum.Demo", JwtIdentityProviderEnum.Demo);
+    console.log(
+      "JwtValidator: JwtIdentityProviderEnum.Demo",
+      JwtIdentityProviderEnum.Demo,
+    );
   }
 
   validate(request: ccfapp.Request<any>): ServiceResult<string> {

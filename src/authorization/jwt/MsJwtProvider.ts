@@ -37,7 +37,9 @@ export const authorizeJwt = (
     );
   }
 
-  console.log(`Validate JWT policy for issuer ${issuer}: ${JSON.stringify(policy)}`);
+  console.log(
+    `Validate JWT policy for issuer ${issuer}: ${JSON.stringify(policy)}`,
+  );
   const keys = Object.keys(policy);
 
   for (let inx = 0; inx < keys.length; inx++) {

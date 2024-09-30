@@ -12,7 +12,6 @@ import { OhttpPublicKey } from "./OhttpPublicKey";
 // Enable the endpoint
 enableEndpoint();
 
-
 export interface IPublicKey {
   publicKey: string;
   receipt: string;
@@ -57,11 +56,13 @@ export const listpubkeys = (
     const headers: { [key: string]: string } = {
       "content-type": "application/json",
     };
-    const payload: IPublicKey[] = [{
-      publicKey,
-      receipt,
-    }];
-         
+    const payload: IPublicKey[] = [
+      {
+        publicKey,
+        receipt,
+      },
+    ];
+
     return ServiceResult.Succeeded<IPublicKey[]>(payload, headers);
   } catch (exception: any) {
     const errorMessage = `${name}: Error: ${exception.message}`;
