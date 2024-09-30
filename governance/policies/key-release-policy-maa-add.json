@@ -9,6 +9,12 @@
           "x-ms-ver": ["1.0"],
           "x-ms-azurevm-debuggersdisabled": true,
           "x-ms-azurevm-osversion-major": [22, 23]
+        },
+        "gte": {
+          "x-ms-azurevm-osversion-major": "23"
+        },
+        "gt": {
+          "x-ms-azurevm-osversion-major": 21
         }
       }
     }

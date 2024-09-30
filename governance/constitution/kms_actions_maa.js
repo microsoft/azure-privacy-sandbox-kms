@@ -124,14 +124,44 @@ actions.set(
       };
       const keyReleaseMapName = "public:ccf.gov.policies.key_release";
       // Function to add key release policy claims
-      const add = (claims) => {
-        let items = [];
+      const add = (type, claims) => {
+        let items = {};
         console.log(
-          `Add claims to key release policy: ${JSON.stringify(claims)}`,
+          `Add claims to key release policy for ${type}: ${JSON.stringify(claims)}`,
         );
+        // get all the claims for type from the KV
+        let keyBuf = ccf.strToBuf(type);
+        if (ccf.kv[keyReleaseMapName].has(keyBuf)) {
+          // type is already available
+          const itemsBuf = ccf.kv[keyReleaseMapName].get(keyBuf);
+          items = ccf.bufToStr(itemsBuf);
+          console.log(
+            `KRP add ${type}=>key: ${type} already exist: ${items} in the key release policy`,
+          );
+          try {
+            items = JSON.parse(items);
+          } catch (e) {
+            console.log(
+              `KRP add ${type}=>Error parsing ${items} from key release policy during add`,
+              e,
+            );
+            throw new Error(
+              `Error parsing ${items} from key release policy during add`,
+              e,
+            );
+          }
+        } else {
+          console.log(
+            `KRP add ${type}=>key: ${type} is new in the key release policy`,
+          );
+        }
+
+        // iterate over every claim
         Object.keys(claims).forEach((key) => {
           if (CLAIMS[key] === undefined) {
-            throw new Error(`The claim ${key} is not an allowed claim`);
+            throw new Error(
+              `KRP add ${type}=>The claim ${key} is not an allowed claim`,
+            );
           }
           let item = claims[key];
           // Make sure item is always an array
@@ -139,46 +169,127 @@ actions.set(
             item = [item];
           }
 
-          let keyBuf = ccf.strToBuf(key);
-          if (ccf.kv[keyReleaseMapName].has(keyBuf)) {
-            // Key is already available
-            const itemsBuf = ccf.kv[keyReleaseMapName].get(keyBuf);
-            items = ccf.bufToStr(itemsBuf);
-            console.log(`key: ${key} already exist: ${items}`);
-            items = JSON.parse(items);
-            if (typeof item[0] === "boolean") {
-              //booleans are single value arrays
-              items = item;
-            } else {
-              // loop through the input and add it to the existing set
-              item.forEach((i) => {
-                items.push(i);
-              });
-            }
+          if (items[key] !== undefined) {
+            item.forEach((i) => {
+              console.log(`KRP add ${type}=>Adding ${i} to ${key}`);
+              items[key].push(i);
+            });
           } else {
-            // set single value
-            items = item;
+            items[key] = item;
+            console.log(`KRP add ${type}=>currrent items: `, items);
+          }
+        });
+
+        // Safe into KV
+        console.log(`KRP add ${type}=>items: `, items);
+        let jsonItems = JSON.stringify(items);
+        console.log(
+          `KRP add ${type}=>Add claims to key release policy for ${type}: ${jsonItems}`,
+        );
+        let jsonItemsBuf = ccf.strToBuf(jsonItems);
+        ccf.kv[keyReleaseMapName].set(keyBuf, jsonItemsBuf);
+      };
+      // Function to add key release policy operator
+      const addOperator = (type, claims) => {
+        let items = {};
+        console.log(
+          `Add claims to key release policy for ${type}: ${JSON.stringify(claims)}`,
+        );
+        // get all the claims for type from the KV
+        let keyBuf = ccf.strToBuf(type);
+        if (ccf.kv[keyReleaseMapName].has(keyBuf)) {
+          // type is already available
+          const itemsBuf = ccf.kv[keyReleaseMapName].get(keyBuf);
+          items = ccf.bufToStr(itemsBuf);
+          console.log(
+            `KRP add ${type}=>key: ${type} already exist: ${items} in the key release policy`,
+          );
+          try {
+            items = JSON.parse(items);
+          } catch (e) {
+            console.log(
+              `KRP addOperator ${type}=>Error parsing ${items} from key release policy`,
+              e,
+            );
+            throw new Error(
+              `Error parsing ${items} from key release policy during addOperator`,
+              e,
+            );
+          }
+        } else {
+          console.log(
+            `KRP add ${type}=>key: ${type} is new in the key release policy`,
+          );
+        }
+
+        // iterate over every claim
+        Object.keys(claims).forEach((key) => {
+          if (CLAIMS[key] === undefined) {
+            throw new Error(
+              `KRP add ${type}=>The claim ${key} is not an allowed claim`,
+            );
+          }
+          let item = claims[key];
+          // Make sure item is always an array
+          if (Array.isArray(item)) {
+            throw new Error(`The operator claim ${key} cannot be an array`);
           }
 
-          // prepare and store items
-          let jsonItems = JSON.stringify(items);
-          let jsonItemsBuf = ccf.strToBuf(jsonItems);
-          console.log(
-            `Voted key release policy item. Key: ${key}, value: ${jsonItems}`,
-          );
-          ccf.kv[keyReleaseMapName].set(keyBuf, jsonItemsBuf);
+          items[key] = item;
         });
+
+        // Safe into KV
+        console.log(`KRP add ${type}=>items: `, items);
+        let jsonItems = JSON.stringify(items);
+        console.log(
+          `KRP add ${type}=>Add claims to key release policy for ${type}: ${jsonItems}`,
+        );
+        let jsonItemsBuf = ccf.strToBuf(jsonItems);
+        ccf.kv[keyReleaseMapName].set(keyBuf, jsonItemsBuf);
       };
 
       // Function to remove key release policy claims
-      const remove = (claims) => {
-        let items = [];
+      const remove = (type, claims) => {
+        let items = {};
         console.log(
-          `Remove claims to key release policy: ${JSON.stringify(claims)}`,
+          `Remove claims from key release policy for ${type}: ${JSON.stringify(claims)}`,
         );
+        // get all the claims for type from the KV
+        let keyBuf = ccf.strToBuf(type);
+        if (ccf.kv[keyReleaseMapName].has(keyBuf)) {
+          // type is available
+          const itemsBuf = ccf.kv[keyReleaseMapName].get(keyBuf);
+          items = ccf.bufToStr(itemsBuf);
+          console.log(
+            `KRP remove ${type}=>key: ${type} exist: ${items} in the key release policy`,
+          );
+          try {
+            items = JSON.parse(items);
+          } catch (e) {
+            console.log(
+              `KRP remove ${type}=>Error parsing ${items} from key release policy`,
+              e,
+            );
+            throw new Error(
+              `Error parsing ${items} from key release policy during remove`,
+              e,
+            );
+          }
+        } else {
+          console.log(
+            `KRP remove ${type}=>key: ${type} does not exists in the key release policy`,
+          );
+          throw new Error(
+            `The key ${type} does not exists in the key release policy`,
+          );
+        }
+
+        // iterate over every claim
         Object.keys(claims).forEach((key) => {
           if (CLAIMS[key] === undefined) {
-            throw new Error(`The claim ${key} is not an allowed claim`);
+            throw new Error(
+              `KRP remove ${type}=>The claim ${key} is not an allowed claim`,
+            );
           }
           let item = claims[key];
           // Make sure item is always an array
@@ -186,54 +297,125 @@ actions.set(
             item = [item];
           }
 
-          let keyBuf = ccf.strToBuf(key);
-          if (ccf.kv[keyReleaseMapName].has(keyBuf)) {
-            // Key must be available
-            const itemsBuf = ccf.kv[keyReleaseMapName].get(keyBuf);
-            items = ccf.bufToStr(itemsBuf);
-            console.log(`key: ${key} exist: ${items}`);
-            items = JSON.parse(items);
-            if (typeof item[0] === "boolean") {
-              //booleans are single value arrays, removing will remove the whole key
-              ccf.kv[keyReleaseMapName].delete(keyBuf);
-            } else {
-              // loop through the input and delete it from the existing set
-              item.forEach((i) => {
-                if (items.filter((ii) => ii === i).length === 0) {
-                  throw new Error(
-                    `Trying to remove value '${i}' from ${items} and it does not exist`,
-                  );
-                }
-                // Remove value from list
-                const index = items.indexOf(i);
-                if (index > -1) {
-                  items.splice(index, 1);
-                }
-              });
-              // update items
-              if (items.length === 0) {
-                ccf.kv[keyReleaseMapName].delete(keyBuf);
-              } else {
-                let jsonItems = JSON.stringify(items);
-                let jsonItemsBuf = ccf.strToBuf(jsonItems);
-                ccf.kv[keyReleaseMapName].set(keyBuf, jsonItemsBuf);
+          if (items[key] !== undefined) {
+            item.forEach((i) => {
+              console.log(`KRP remove ${type}=>Removing ${i} from ${key}`);
+              items[key] = items[key].filter((value) => value !== i);
+              if (items[key].length === 0) {
+                delete items[key];
               }
-            }
+            });
           } else {
+            console.log(
+              `KRP remove ${type}=>Claim ${key} not found in the key release policy`,
+            );
             throw new Error(
-              `Cannot remove values of ${key} because the key does not exist in the key release policy claims`,
+              `The claim ${key} does not exists in the key release policy`,
             );
           }
         });
+
+        // Safe into KV
+        console.log(`KRP remove ${type}=>items: `, items);
+        let jsonItems = JSON.stringify(items);
+        console.log(
+          `KRP remove ${type}=>Remove claims from key release policy for ${type}: ${jsonItems}`,
+        );
+        let jsonItemsBuf = ccf.strToBuf(jsonItems);
+        ccf.kv[keyReleaseMapName].set(keyBuf, jsonItemsBuf);
+      };
+
+      const removeOperator = (type, claims) => {
+        let items = {};
+        console.log(
+          `Remove claims from key release policy for ${type}: ${JSON.stringify(claims)}`,
+        );
+        // get all the claims for type from the KV
+        let keyBuf = ccf.strToBuf(type);
+        if (ccf.kv[keyReleaseMapName].has(keyBuf)) {
+          // type is available
+          const itemsBuf = ccf.kv[keyReleaseMapName].get(keyBuf);
+          items = ccf.bufToStr(itemsBuf);
+          console.log(
+            `KRP remove ${type}=>key: ${type} exist: ${items} in the key release policy`,
+          );
+          try {
+            items = JSON.parse(items);
+          } catch (e) {
+            console.log(
+              `KRP removeOperator ${type}=>Error parsing ${items} from key release policy`,
+              e,
+            );
+            throw new Error(
+              `Error parsing ${items} from key release policy during removeOperator`,
+              e,
+            );
+          }
+        } else {
+          console.log(
+            `KRP remove ${type}=>key: ${type} does not exists in the key release policy`,
+          );
+          throw new Error(
+            `The key ${type} does not exists in the key release policy`,
+          );
+        }
+
+        // iterate over every claim
+        Object.keys(claims).forEach((key) => {
+          if (CLAIMS[key] === undefined) {
+            throw new Error(
+              `KRP remove ${type}=>The claim ${key} is not an allowed claim`,
+            );
+          }
+          let item = claims[key];
+          // Make sure item is always an array
+          if (Array.isArray(item)) {
+            throw new Error(`The operator claim ${key} cannot be an array`);
+          }
+
+          if (items[key] !== undefined) {
+            console.log(`KRP remove ${type}=>Removing ${item} from ${key}`);
+            delete items[key];
+          } else {
+            console.log(
+              `KRP remove ${type}=>Claim ${key} not found in the key release policy`,
+            );
+            throw new Error(
+              `The claim ${key} does not exists in the key release policy`,
+            );
+          }
+        });
+
+        // Save into KV
+        console.log(`KRP remove ${type}=>items: `, items);
+        let jsonItems = JSON.stringify(items);
+        console.log(
+          `KRP remove ${type}=>Remove claims from key release policy for ${type}: ${jsonItems}`,
+        );
+        let jsonItemsBuf = ccf.strToBuf(jsonItems);
+        ccf.kv[keyReleaseMapName].set(keyBuf, jsonItemsBuf);
       };
 
       const type = args.type;
       switch (type) {
         case "add":
-          add(args.claims);
+          add("claims", args.claims);
+          if (args.gte !== undefined) {
+            addOperator("gte", args.gte);
+          }
+          if (args.gt !== undefined) {
+            addOperator("gt", args.gt);
+          }
+
           break;
         case "remove":
-          remove(args.claims);
+          remove("claims", args.claims);
+          if (args.gte !== undefined) {
+            removeOperator("gte", args.gte);
+          }
+          if (args.gt !== undefined) {
+            removeOperator("gt", args.gt);
+          }
           break;
         default:
           throw new Error(

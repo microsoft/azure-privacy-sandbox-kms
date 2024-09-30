@@ -4,9 +4,9 @@ import * as ccfapp from "@microsoft/ccf-app";
 import { IMaaAttestationReport } from "./IMaaAttestationReport";
 import { ServiceResult } from "../utils/ServiceResult";
 import { MaaAttestationClaims } from "./MaaAttestationClaims";
-import { getKeyReleasePolicy } from "../utils/Tooling";
 import { Logger } from "../utils/Logger";
 import { keyReleasePolicyMap } from "../repositories/Maps";
+import { KeyReleasePolicy } from "../policies/KeyReleasePolicy";
 
 export class MaaAttestationValidation {
     constructor(public jwtIdentity: ccfapp.JwtAuthnIdentity) { }
@@ -32,7 +32,7 @@ export class MaaAttestationValidation {
         }
 
         // Get the key release policy
-        const keyReleasePolicy = getKeyReleasePolicy(keyReleasePolicyMap);
+        const keyReleasePolicy = KeyReleasePolicy.getKeyReleasePolicyFromMap(keyReleasePolicyMap);
         Logger.debug(
             `Key release policy: ${JSON.stringify(
                 keyReleasePolicy,
