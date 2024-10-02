@@ -27,7 +27,7 @@ jobs:
             scripts/set_python_env.sh && pip install -r requirements.txt && make demo && npm run test
         env:
           KMS_WORKSPACE: ./workspace
-  
+
   test-mccf-kms:
     runs-on: ubuntu-20.04
     steps:

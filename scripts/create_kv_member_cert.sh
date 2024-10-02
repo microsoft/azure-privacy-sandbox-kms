@@ -1,13 +1,14 @@
 #!/bin/bash
 
-display_usage() {
+# Function to display usage
+ddisplay_usage() {
     echo "Create Azure Key Vault certificate script"
     echo "Usage:"
-    echo -e "$0 [-v | --vault] vault_name"
-    echo -e "$0 [-c | --create] identity_cert_name"
-    echo -e "$0 [-g | --resource-group] resource_group_name"
-    echo -e "$0 [-l | --location] location"
-    echo -e "$0 [-m | --managed-identity] managed_identity_name"
+    echo -e "$0 [-v | --vault] vault_name   name of the vault"
+    echo -e "$0 [-c | --create] identity_cert_name  name of the certificate"
+    echo -e "$0 [-g | --resource-group] resource_group_name name of the resource group"
+    echo -e "$0 [-l | --location] location  location of the vault"
+    echo -e "$0 [-m | --managed-identity] managed_identity_name name of the managed identity to access the ceritificate"
     echo -e "$0 -h | --help"
     echo ""
 }
@@ -21,44 +22,55 @@ fi
 # Parse command-line arguments
 while [[ "$#" -gt 0 ]]; do
     case $1 in
-        -v|--vault) VAULT_NAME="$2"; shift ;;
-        -c|--create) IDENTITY_CERT_NAME="$2"; shift ;;
-        -g|--resource-group) RESOURCE_GROUP="$2"; shift ;;
-        -l|--location) LOCATION="$2"; shift ;;
-        -m|--managed-identity) MANAGED_IDENTITY_NAME="$2"; shift ;;
+        -v|--vault) vault_name="$2"; shift ;;
+        -c|--create) cert_name="$2"; shift ;;
+        -g|--resource_group) resource_group="$2"; shift ;;
+        -l|--location) location="$2"; shift ;;
+        -m|--managed_identity) managed_identity_name="$2"; shift ;;
         -h|--help) display_usage; exit 0 ;;
         *) echo "Unknown parameter passed: $1"; display_usage; exit 1 ;;
     esac
     shift
 done
 
+echo "Vault Name: $vault_name"
+echo "Certificate Name: $cert_name"
+echo "Resource Group: $resource_group"
+echo "Location: $location"
+echo "Managed Identity Name: $managed_identity_name"
+
 # Check if required arguments are provided
-if [ -z "$VAULT_NAME" ] || [ -z "$IDENTITY_CERT_NAME" ] || [ -z "$RESOURCE_GROUP" ] || [ -z "$LOCATION" ] || [ -z "$MANAGED_IDENTITY_NAME" ]; then
+if [ -z "$vault_name" ] || [ -z "$cert_name" ] || [ -z "$resource_group" ] || [ -z "$location" ] || [ -z "$managed_identity_name" ]; then
     echo "Error: Vault name, certificate name, resource group, location, and managed identity name are required."
     display_usage
     exit 1
 fi
 
-# Check if the Key Vault exists
-VAULT_EXISTS=$(az keyvault list --query "[?name=='$VAULT_NAME'].name" -o tsv)
+# Check if the Key Vault exists and if it has '--enable-rbac-authorization' specified
+vault_properties=$(az keyvault show --name "$vault_name" --resource-group "$resource_group" --query "properties" -o json)
+if echo "$vault_properties" | grep -q '"enableRbacAuthorization": true'; then
+    echo "The Key Vault is configured with '--enable-rbac-authorization'."
+    echo "You cannot set access policies directly on this Key Vault."
+    echo "Ensuring that the necessary RBAC roles are assigned to the managed identity."
 
-if [ -z "$VAULT_EXISTS" ]; then
-    echo "Key Vault $VAULT_NAME does not exist. Creating Key Vault..."
-    az keyvault create --name $VAULT_NAME --resource-group $RESOURCE_GROUP --location $LOCATION
-else
-    echo "Key Vault $VAULT_NAME already exists."
+    # Get the managed identity principal ID
+    managed_identity_principal_id=$(az identity show --name "$managed_identity_name" --resource-group "$resource_group" --query "principalId" -o tsv)
+    if [ -z "$managed_identity_principal_id" ]; then
+        echo "Error: Failed to retrieve the managed identity principal ID."
+        exit 1
+    fi
+
+    # Assign the 'Key Vault Certificates Officer' role to the managed identity
+    az role assignment create --role "Key Vault Certificates Officer" --assignee "$managed_identity_principal_id" --scope "/subscriptions/$(az account show --query 'id' -o tsv)/resourceGroups/$resource_group/providers/Microsoft.KeyVault/vaults/$vault_name"
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to assign the 'Key Vault Certificates Officer' role to the managed identity."
+        exit 1
+    fi
+
+    echo "Successfully assigned the 'Key Vault Certificates Officer' role to the managed identity."
 fi
 
-# Get the object ID of the managed identity
-MANAGED_IDENTITY_OBJECT_ID=$(az identity show --name $MANAGED_IDENTITY_NAME --resource-group $RESOURCE_GROUP --query principalId -o tsv)
-if [ -z "$MANAGED_IDENTITY_OBJECT_ID" ]; then
-    echo "Error: Unable to retrieve the object ID of the managed identity."
-    exit 1
-fi
-echo "Managed Identity Object ID: $MANAGED_IDENTITY_OBJECT_ID"
-
-# Assign Key Vault access policies to the managed identity
-az keyvault set-policy --name $VAULT_NAME --object-id $MANAGED_IDENTITY_OBJECT_ID --certificate-permissions get list --key-permissions sign
+# Your script logic to create the certificate goes here
 
 # Create the JSON file dynamically
 JSON_FILE="/tmp/identity_cert_policy.json"
@@ -70,7 +82,7 @@ cat <<EOF > $JSON_FILE
   },
   "keyProperties": {
     "curve": "P-384",
-    "exportable": true,
+    "exportable": false,
     "keyType": "EC",
     "reuseKey": true
   },
@@ -96,5 +108,5 @@ cat <<EOF > $JSON_FILE
 EOF
 
 # Create the certificate in Azure Key Vault
-az keyvault certificate create --vault-name $VAULT_NAME -n $IDENTITY_CERT_NAME -p @$JSON_FILE
-az keyvault key show --vault-name $VAULT_NAME --name $IDENTITY_CERT_NAME
+az keyvault certificate create --vault-name $vault_name -n $cert_name -p @$JSON_FILE
+az keyvault key show --vault-name $vault_name --name $cert_name
