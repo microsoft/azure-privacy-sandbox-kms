@@ -2,7 +2,7 @@
 
 # Function to display usage
 usage() {
-    echo "Usage: $0 --network_url <network_url> --certificate_dir <certificate_dir> --akv_kid <akv_kid> --proposal_file <proposal_file> --akv_authorization <akv_authorization>"
+    echo "Usage: $0 --network_url <network_url> --certificate_dir <certificate_dir> --akv_kid <akv_kid> --akv_authorization <akv_authorization>"
 }
 
 # Parse parameters
@@ -17,7 +17,6 @@ do
         --network_url) network_url="$2"; shift 2;;
         --certificate_dir) certificate_dir="$2"; shift 2;;
         --akv_kid) akv_kid="$2"; shift 2;;
-        --proposal_file) proposal_file="$2"; shift 2;;
         --akv_authorization) akv_authorization="$2"; shift 2;;
         --help) usage; exit 0;;
         --) shift; break;;
@@ -37,9 +36,6 @@ elif [[ -z $akv_kid ]]; then
     exit 1
 elif [[ -z $akv_authorization ]]; then
     echo "Missing parameter --akv_authorization"
-    exit 1
-elif [[ -z $proposal_file ]]; then
-    echo "Missing parameter --proposal_file"
     exit 1
 fi
 
