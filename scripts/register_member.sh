@@ -43,7 +43,14 @@ elif [[ -z $proposal_file ]]; then
     exit 1
 fi
 
+# Check if 'certificates' is in the URL
+if [[ $akv_kid != *"certificates"* ]]; then
+    echo "Error: The URL does not contain 'certificates'."
+    exit 1
+fi
+
 # Variables
+akv_keys_url="${akv_kid/certificates/keys}"
 api_version="7.1"
 signature_file="vol/signature"
 created_at=`date -uIs`
@@ -55,6 +62,7 @@ tbs="/tmp/tbs"
 
 echo "Update ledget state digest"
 echo "create at: " $created_at
+echo "AKV Signing Url: " $akv_keys_url
 
 # Prepare signature
 ccf_cose_sign1_prepare --ccf-gov-msg-type proposal --ccf-gov-msg-created_at $created_at --content vol/empty_file --signing-cert $signing_cert >$tbs
@@ -62,8 +70,9 @@ echo "AKV update state digest signature prepared"
 cat $tbs | jq
 
 # Perform the curl request to sign the data
+
 rm -f $signature_file
-curl -s -X POST "$akv_kid/sign?api-version=$api_version" \
+curl -s -X POST "$akv_keys_url/sign?api-version=$api_version" \
   --data @$tbs \
   -w "\n" \
   -H "Authorization: $akv_authorization" \
@@ -108,7 +117,7 @@ cat $tbs | jq
 
 # Perform the curl request to sign the data
 rm -f $signature_file
-curl -s -X POST "$akv_kid/sign?api-version=$api_version" \
+curl -s -X POST "$akv_keys_url/sign?api-version=$api_version" \
   --data @$tbs \
   -w "\n" \
   -H "Authorization: $akv_authorization" \
@@ -138,3 +147,4 @@ ccf_cose_sign1_finish \
   -w "\n" \
   -H "content-type: application/cose" \
   | jq
+echo "member registered"

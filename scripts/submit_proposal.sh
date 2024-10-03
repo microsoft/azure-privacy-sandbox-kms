@@ -69,6 +69,14 @@ signing_key="$certificate_dir/member0_privk.pem"
 
 #cat $proposal_file
 
+# Check if signing needs to happen on AKV
+if [[ -n ${AKV_KID+x} && -n ${AKV_AUTHORIZATION+x} ]]; then
+    echo "Signing proposal with AKV"
+    $app_dir/scripts/sign_proposal.sh --network_url $network_url --certificate_dir $certificate_dir --akv_kid $AKV_KID --proposal_file $proposal_file --akv_authorization "$AKV_AUTHORIZATION"
+    exit 0
+fi
+
+# Sign with local keys
 proposal0_id=$( (ccf_cose_sign1 --content $proposal_file --signing-cert $signing_cert --signing-key $signing_key --ccf-gov-msg-type proposal --ccf-gov-msg-created_at $(date -Is)  | curl $network_url/gov/proposals -k -H "Content-Type: application/cose" --data-binary @- --cacert $service_cert -w '\n'| jq -r '.proposal_id') )
 
 # Check if proposal0_id is null or empty

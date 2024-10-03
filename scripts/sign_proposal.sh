@@ -43,7 +43,14 @@ elif [[ -z $proposal_file ]]; then
     exit 1
 fi
 
+# Check if 'certificates' is in the URL
+if [[ $akv_kid != *"certificates"* ]]; then
+    echo "Error: The URL does not contain 'certificates'."
+    exit 1
+fi
+
 # Variables
+akv_keys_url="${akv_kid/certificates/keys}"
 api_version="7.1"
 signature_file="vol/signature"
 created_at=$(date -u +"%Y-%m-%dT%H:%M:%S")
@@ -53,13 +60,18 @@ ccf_services_cert="$certificate_dir/service_cert.pem"
 proposal_url="$network_url/gov/members/proposals:create?api-version=2024-07-01"
 tbs="/tmp/tbs"
 
+# Get signing certificate
+curl -H "Authorization: $akv_authorization"  \
+     -H "Content-Type: application/json"  \
+      $akv_kid/?api-version=7.2
+
 # Prepare signature
 ccf_cose_sign1_prepare --ccf-gov-msg-type proposal --ccf-gov-msg-created_at $created_at --content $proposal_file --signing-cert $signing_cert >$tbs
 echo "AKV signature prepared"
 cat $tbs
 
 # Perform the curl request to sign the data
-curl -s -X POST "$akv_kid/sign?api-version=$api_version" \
+curl -s -X POST "$akv_keys_url/sign?api-version=$api_version" \
   --data @$tbs \
   -H "Authorization: $akv_authorization" \
   -H "Content-Type: application/json" > $signature_file
