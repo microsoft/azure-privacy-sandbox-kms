@@ -69,6 +69,10 @@ signing_key="$certificate_dir/member0_privk.pem"
 
 #cat $proposal_file
 
+# Use parameter expansion to provide default values if AKV_KID and AKV_AUTHORIZATION are undefined
+AKV_KID="${AKV_KID:-}"
+AKV_AUTHORIZATION="${AKV_AUTHORIZATION:-}"
+
 # Check if signing needs to happen on AKV
 if [[ -n "$AKV_KID" && -n "$AKV_AUTHORIZATION" ]]; then
     echo "Signing proposal with AKV"
