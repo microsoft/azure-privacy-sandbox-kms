@@ -60,14 +60,19 @@ if echo "$vault_properties" | grep -q '"enableRbacAuthorization": true'; then
         exit 1
     fi
 
-    # Assign the 'Key Vault Certificates Officer' role to the managed identity
-    az role assignment create --role "Key Vault Certificates Officer" --assignee "$managed_identity_principal_id" --scope "/subscriptions/$(az account show --query 'id' -o tsv)/resourceGroups/$resource_group/providers/Microsoft.KeyVault/vaults/$vault_name"
-    if [ $? -ne 0 ]; then
-        echo "Error: Failed to assign the 'Key Vault Certificates Officer' role to the managed identity."
-        exit 1
-    fi
+    # Array of roles to assign
+    roles=("Key Vault Certificate User" "Key Vault Crypto User" "Reader")
 
-    echo "Successfully assigned the 'Key Vault Certificates Officer' role to the managed identity."
+    # Loop through each role and assign it to the managed identity
+    for role in "${roles[@]}"; do
+        az role assignment create --role "$role" --assignee "$managed_identity_principal_id" --scope "/subscriptions/$(az account show --query 'id' -o tsv)/resourceGroups/$resource_group/providers/Microsoft.KeyVault/vaults/$vault_name"
+        if [ $? -ne 0 ]; then
+            echo "Error: Failed to assign the '$role' role to the managed identity."
+            exit 1
+        fi
+    done
+
+    echo "Successfully assigned the 'Key Vault Certificate User' role to the managed identity."
 fi
 
 # Your script logic to create the certificate goes here

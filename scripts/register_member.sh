@@ -54,17 +54,25 @@ akv_keys_url="${akv_kid/certificates/keys}"
 api_version="7.1"
 signature_file="vol/signature"
 created_at=`date -uIs`
-signing_cert="$certificate_dir/member1_cert.pem"
+member_name=$(echo "$AKV_KID" | awk -F'/' '{print $(NF-1)}')
+signing_cert="$certificate_dir/${member_name}_cert.pem"
 cose_sign1_file="vol/cose_sign1"
 ccf_services_cert="$certificate_dir/service_cert.pem"
-proposal_url="$network_url/gov/members/state-digests/385be3de9ae7d8874636f73f2d273ee44f83847f0e15a238c02345cf94b230a7:ack?api-version=2024-07-01"
+fingerprint=$(openssl x509 -noout -fingerprint -sha256 -inform pem -in "$signing_cert" | sed 's/://g' | awk -F= '{print $2}' | tr '[:upper:]' '[:lower:]')
+state_digest_url="$network_url/gov/members/state-digests/${fingerprint}"
+state_digest_update_url="$state_digest_url:update?api-version=2024-07-01"
+state_digest_ack_url="$state_digest_url:ack?api-version=2024-07-01"
 tbs="/tmp/tbs"
 
 echo "Update ledget state digest"
 echo "create at: " $created_at
+echo "State digest ack url: " $state_digest_ack_url
 echo "AKV Signing Url: " $akv_keys_url
+echo "Signing Cert: " $signing_cert
+echo "Fingerprint: " $fingerprint
 
 # Prepare signature
+rm -f $tbs
 ccf_cose_sign1_prepare --ccf-gov-msg-type proposal --ccf-gov-msg-created_at $created_at --content vol/empty_file --signing-cert $signing_cert >$tbs
 echo "AKV update state digest signature prepared"
 cat $tbs | jq
@@ -94,7 +102,7 @@ ccf_cose_sign1_finish \
   --content vol/empty_file \
   --signing-cert $signing_cert \
   --signature $signature_file \
-  | curl "$network_url/gov/members/state-digests/385be3de9ae7d8874636f73f2d273ee44f83847f0e15a238c02345cf94b230a7:update?api-version=2024-07-01" \
+  | curl $state_digest_update_url \
   -X POST \
   --cacert $ccf_services_cert  \
   --data-binary @- \
@@ -140,11 +148,13 @@ ccf_cose_sign1_finish \
   --content "$state_digest_file" \
   --signing-cert $signing_cert \
   --signature $signature_file \
-| curl $proposal_url \
+| curl $state_digest_ack_url \
   --cacert $ccf_services_cert \
   --data-binary @- \
   --silent \
   -w "\n" \
   -H "content-type: application/cose" \
   | jq
+
+rm -f $state_digest_file
 echo "member registered"
