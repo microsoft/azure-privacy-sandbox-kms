@@ -30,13 +30,9 @@ curl $KMS_URL/gov/members --cacert service_cert.pem | jq
 ```
 make deploy
 ```
-## Propose and vote new key release policy
+## Propose and vote new key release policy, settings, jwt policy and create first key
 ```
-make propose-add-key-release-policy
-```
-## Create a key
-```
-curl $KMS_URL/app/refresh -X POST --cacert $KEYS_DIR/service_cert.pem -H "Content-Type: application/json" -i  -w '\n'
+make setup
 ```
 # List public keys
 ```

@@ -1,15 +1,16 @@
 #!/bin/bash
 
 # Function to display usage
-ddisplay_usage() {
-    echo "Create Azure Key Vault certificate script"
+display_usage() {
+    echo "Create Azure Key Vault certificate with managed identity access policy."
+    echo ""
     echo "Usage:"
-    echo -e "$0 [-v | --vault] vault_name   name of the vault"
-    echo -e "$0 [-c | --create] identity_cert_name  name of the certificate"
-    echo -e "$0 [-g | --resource-group] resource_group_name name of the resource group"
-    echo -e "$0 [-l | --location] location  location of the vault"
-    echo -e "$0 [-m | --managed-identity] managed_identity_name name of the managed identity to access the ceritificate"
-    echo -e "$0 -h | --help"
+    echo -e "$0 [-v  | --vault] vault_name   name of the vault"
+    echo -e "$0 [-c  | --create] identity_cert_name  name of the certificate"
+    echo -e "$0 [-rg | --resource-group] resource_group_name name of the resource group"
+    echo -e "$0 [-l  | --location] location  location of the vault"
+    echo -e "$0 [-mi | --managed-identity] managed_identity_name name of the managed identity to access the ceritificate"
+    echo -e "$0 [-h  | --help"
     echo ""
 }
 
@@ -24,9 +25,9 @@ while [[ "$#" -gt 0 ]]; do
     case $1 in
         -v|--vault) vault_name="$2"; shift ;;
         -c|--create) cert_name="$2"; shift ;;
-        -g|--resource_group) resource_group="$2"; shift ;;
+        -rg|--resource_group) resource_group="$2"; shift ;;
         -l|--location) location="$2"; shift ;;
-        -m|--managed_identity) managed_identity_name="$2"; shift ;;
+        -mi|--managed_identity) managed_identity_name="$2"; shift ;;
         -h|--help) display_usage; exit 0 ;;
         *) echo "Unknown parameter passed: $1"; display_usage; exit 1 ;;
     esac

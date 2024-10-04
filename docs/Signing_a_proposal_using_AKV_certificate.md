@@ -21,8 +21,8 @@ If these two env variables are not set, submit_proposal will use a local key sto
 
 ## Submit proposal using AKV
 
-Set AKV_AUTHORIZATION as managed identity. Format "Bearer ey.."
-Set AKV_KID points to the AKV certificate
+export AKV_AUTHORIZATION as managed identity. Format "Bearer ey.."
+export AKV_KID points to the AKV certificate
 
 ```
 scripts/submit_proposal.sh  --network_url $KMS_URL --certificate_dir $KEYS_DIR --proposal_file governance/policies/settings-policy.json

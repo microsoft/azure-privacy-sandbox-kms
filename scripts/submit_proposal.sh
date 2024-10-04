@@ -76,7 +76,7 @@ AKV_AUTHORIZATION="${AKV_AUTHORIZATION:-}"
 # Check if signing needs to happen on AKV
 if [[ -n "$AKV_KID" && -n "$AKV_AUTHORIZATION" ]]; then
     echo "Signing proposal with AKV"
-    $app_dir/scripts/sign_proposal.sh --network_url $network_url --certificate_dir $certificate_dir --akv_kid $AKV_KID --proposal_file $proposal_file --akv_authorization "$AKV_AUTHORIZATION"
+    $app_dir/scripts/sign_proposal_akv.sh --network_url $network_url --certificate_dir $certificate_dir --akv_kid $AKV_KID --proposal_file $proposal_file --akv_authorization "$AKV_AUTHORIZATION"
     exit 0
 fi
 

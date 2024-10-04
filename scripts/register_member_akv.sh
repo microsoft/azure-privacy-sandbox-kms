@@ -2,6 +2,9 @@
 
 # Function to display usage
 usage() {
+    echo "Do the CCF procedure to register a new member using a key stored on AKV"
+    echo ""
+    echo "See https://microsoft.github.io/CCF/main/governance/adding_member.html"
     echo "Usage: $0 --network_url <network_url> --certificate_dir <certificate_dir> --akv_kid <akv_kid> --akv_authorization <akv_authorization>"
 }
 
@@ -48,11 +51,10 @@ fi
 # Variables
 akv_keys_url="${akv_kid/certificates/keys}"
 api_version="7.1"
-signature_file="vol/signature"
+signature_file="/tmp/signature"
 created_at=`date -uIs`
 member_name=$(echo "$AKV_KID" | awk -F'/' '{print $(NF-1)}')
 signing_cert="$certificate_dir/${member_name}_cert.pem"
-cose_sign1_file="vol/cose_sign1"
 ccf_services_cert="$certificate_dir/service_cert.pem"
 fingerprint=$(openssl x509 -noout -fingerprint -sha256 -inform pem -in "$signing_cert" | sed 's/://g' | awk -F= '{print $2}' | tr '[:upper:]' '[:lower:]')
 state_digest_url="$network_url/gov/members/state-digests/${fingerprint}"
@@ -67,9 +69,14 @@ echo "AKV Signing Url: " $akv_keys_url
 echo "Signing Cert: " $signing_cert
 echo "Fingerprint: " $fingerprint
 
+# Create an empty file called empty_file in /tmp
+empty_file="/tmp/empty_file"
+rm -f $empty_file
+touch $empty_file
+
 # Prepare signature
 rm -f $tbs
-ccf_cose_sign1_prepare --ccf-gov-msg-type proposal --ccf-gov-msg-created_at $created_at --content vol/empty_file --signing-cert $signing_cert >$tbs
+ccf_cose_sign1_prepare --ccf-gov-msg-type proposal --ccf-gov-msg-created_at $created_at --content $empty_file --signing-cert $signing_cert >$tbs
 echo "AKV update state digest signature prepared"
 cat $tbs | jq
 
@@ -95,7 +102,7 @@ echo "Start finishing the update state digest signature"
 ccf_cose_sign1_finish \
   --ccf-gov-msg-type state_digest  \
   --ccf-gov-msg-created_at $created_at \
-  --content vol/empty_file \
+  --content $empty_file \
   --signing-cert $signing_cert \
   --signature $signature_file \
   | curl $state_digest_update_url \

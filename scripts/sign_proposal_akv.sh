@@ -2,6 +2,8 @@
 
 # Function to display usage
 usage() {
+    echo "Sign a proposal with a key stored on AKV"
+    echo ""
     echo "Usage: $0 --network_url <network_url> --certificate_dir <certificate_dir> --akv_kid <akv_kid> --proposal_file <proposal_file> --akv_authorization <akv_authorization>"
 }
 
@@ -52,10 +54,10 @@ fi
 # Variables
 akv_keys_url="${akv_kid/certificates/keys}"
 api_version="7.1"
-signature_file="vol/signature"
+signature_file="/tmp/signature"
 created_at=$(date -u +"%Y-%m-%dT%H:%M:%S")
-signing_cert="$certificate_dir/member1_cert.pem"
-cose_sign1_file="vol/cose_sign1"
+member_name=$(echo "$AKV_KID" | awk -F'/' '{print $(NF-1)}')
+signing_cert="$certificate_dir/${member_name}_cert.pem"
 ccf_services_cert="$certificate_dir/service_cert.pem"
 proposal_url="$network_url/gov/members/proposals:create?api-version=2024-07-01"
 tbs="/tmp/tbs"
