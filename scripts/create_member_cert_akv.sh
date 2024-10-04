@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Function to display usage
 display_usage() {
@@ -116,3 +117,4 @@ EOF
 # Create the certificate in Azure Key Vault
 az keyvault certificate create --vault-name $vault_name -n $cert_name -p @$JSON_FILE
 az keyvault key show --vault-name $vault_name --name $cert_name
+rm $JSON_FILE

@@ -114,7 +114,7 @@ ccf_cose_sign1_finish \
    --silent \
   | jq
 
-state_digest=$(curl $KMS_URL/gov/members/state-digests/385be3de9ae7d8874636f73f2d273ee44f83847f0e15a238c02345cf94b230a7?api-version=2024-07-01 --cacert ${KEYS_DIR}/service_cert.pem | jq)
+state_digest=$(curl ${state_digest_url}?api-version=2024-07-01 --cacert ${KEYS_DIR}/service_cert.pem | jq)
 # Write the state digest to a temporary file
 state_digest_file=$(mktemp)
 echo "$state_digest" > "$state_digest_file"
