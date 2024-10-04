@@ -21,7 +21,7 @@ If these two env variables are not set, submit_proposal will use a local key sto
 
 ## Submit proposal using AKV
 
-Set AKV_AUTHORIZATION as managed identity
+Set AKV_AUTHORIZATION as managed identity. Format "Bearer ey.."
 Set AKV_KID points to the AKV certificate
 
 ```
