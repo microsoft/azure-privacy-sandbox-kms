@@ -104,7 +104,7 @@
         "js_module": "endpoints/keyEndpoint.js",
         "js_function": "unwrapKey",
         "forwarding_required": "sometimes",
-        "authn_policies": ["jwt", "member_cert", "user_cert"],
+        "authn_policies": [],
         "mode": "readonly",
         "openapi": {
           "requestBody": {
@@ -171,7 +171,7 @@
         "js_module": "endpoints/keyEndpoint.js",
         "js_function": "key",
         "forwarding_required": "sometimes",
-        "authn_policies": ["jwt", "member_cert", "user_cert"],
+        "authn_policies": [],
         "mode": "readonly",
         "parameters": [
           {
@@ -289,7 +289,7 @@
         "js_module": "endpoints/kms.js",
         "js_function": "hearthbeat",
         "forwarding_required": "sometimes",
-        "authn_policies": ["user_cert", "member_cert", "jwt"],
+        "authn_policies": [],
         "mode": "readwrite",
         "openapi": {
           "responses": {

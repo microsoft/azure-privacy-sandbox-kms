@@ -33,8 +33,9 @@ export const refresh = (
     // Get HPKE key pair id
     const id = hpkeKeyIdMap.size + 1;
 
-    // Generate HPKE key pair with a six digit id
-    const keyItem = KeyGeneration.generateKeyItem(100000 + id);
+    // Generate HPKE key pair with a two digit id since OHTTP is limited to 2 char ids.
+    // we can only have ids from 10 to 99 (90 ids) to adhere to the OHTTP id limit.
+    const keyItem = KeyGeneration.generateKeyItem(id % 90 + 10);
 
     // Store HPKE key pair kid
     keyItem.kid = `${keyItem.kid!}_${id}`;
