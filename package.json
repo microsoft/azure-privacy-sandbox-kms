@@ -4,7 +4,7 @@
     "build": "rm -rf ./dist/ && rollup --config && cp app.json dist/ && node build_bundle.js dist/",
     "bundle": "node build_bundle.js dist",
     "build-proto": "buf generate src/endpoints/proto",
-    "test": "node --import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./loader-register.js\", pathToFileURL(\"./\"));' ./test/e2e-test/src/index.ts",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "e2e-test": "node --import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./loader-register.js\", pathToFileURL(\"./\"));' ./test/e2e-test/src/index.ts"
   },
   "type": "module",
