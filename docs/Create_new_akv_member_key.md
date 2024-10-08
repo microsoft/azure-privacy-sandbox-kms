@@ -10,6 +10,19 @@ scripts/create_member_cert_akv.sh \
     -mi name of the managed identity to access the ceritificate
 ```
 The user needs to be owner of the subscription with role activated in order to create the key and the roles.
+## Register the new member key on the CCF network
+Use the script:
+```
+scripts/register_member_akv.sh \
+    --network_url $KMS_URL
+    --certificate_dir $KEYS_DIR \
+    --akv_kid $AKV_KID  \
+    --akv_authorization "$AKV_AUTHORIZATION"
+```
+KMS_URL should point to the main KMS endpoint.
+KMS_DIR Directory where to store the certificates used by KMS
+AKV_KID Url to the AKV certificate. See [Test the certificate](#test-the-certificate)
+AKV_AUTHORIZATION JWT used to access AKV
 ## Test the certificate
 Doing a signature proves that the managed identity has access to the AKV certificate
 ```
