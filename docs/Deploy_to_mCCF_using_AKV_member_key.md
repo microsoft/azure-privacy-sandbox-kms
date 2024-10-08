@@ -23,10 +23,9 @@ curl $KMS_URL/gov/members --cacert service_cert.pem | jq
 ```
 ## Set custom constitution
 ```
-./scripts/submit_constitution.sh --network-url $KMS_URL --certificate-dir  $KEYS_DIR --custom-constitution ./governance/constitution/kms_actions.js --member-count 1
+make set-constitution
 ```
 ## Deploy
-
 ```
 make deploy
 ```
@@ -37,4 +36,9 @@ make setup
 # List public keys
 ```
 curl ${KMS_URL}/app/listpubkeys  --cacert $KEYS_DIR/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
+```
+# Show key release policy
+```
+curl ${KMS_URL}/app/keyReleasePolicy --cacert ${KEYS_DIR}/service_cert.pem -H "Authorization:$AUTHORIZATION" -H "Content-Type: application/json" -w '\n' | jq
+AUTHORIZATION: Managed identity supported by KMS JWT policy
 ```
