@@ -172,7 +172,10 @@ actions.set(
           if (items[key] !== undefined) {
             item.forEach((i) => {
               console.log(`KRP add ${type}=>Adding ${i} to ${key}`);
-              items[key].push(i);
+              // Only push if the element is not already in the array
+              if (!items[key].includes(i)) {
+                items[key].push(i);
+              }
             });
           } else {
             items[key] = item;
