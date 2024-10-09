@@ -62,10 +62,6 @@ fi
 
 common_dir=$certificate_dir  # common folder
 
-service_cert="$certificate_dir/service_cert.pem"
-signing_cert="$certificate_dir/member0_cert.pem"
-signing_key="$certificate_dir/member0_privk.pem"
-
 # Create constitution
 cat "$common_dir/actions.js" > "$common_dir/constitution.js"
 cat "$common_dir/apply.js" >> "$common_dir/constitution.js"
@@ -98,3 +94,4 @@ echo -n '
 
 # propose and vote
 ./scripts/submit_proposal.sh --network-url  "${network_url}" --proposal-file "$common_dir/constitution_proposal.json" --certificate-dir  "${certificate_dir}" --member-count ${member_count}
+echo "New constitution is updated"

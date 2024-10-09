@@ -79,4 +79,4 @@ make propose-jwt-ms-validation-policy
 make propose-jwt-maa-validation-policy
 
 # Generate a new key item
-curl ${network_url}/app/refresh -X POST --cacert $service_cert --cert $signing_cert --key $signing_key -H "Content-Type: application/json" -i  -w '\n'
+curl ${network_url}/app/refresh -X POST --cacert $service_cert -H "Content-Type: application/json" -i  -w '\n'

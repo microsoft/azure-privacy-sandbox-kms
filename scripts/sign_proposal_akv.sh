@@ -54,13 +54,15 @@ fi
 # Variables
 akv_keys_url="${akv_kid/certificates/keys}"
 api_version="7.1"
-signature_file="/tmp/signature"
+signature_file="$certificate_dir/signature"
 created_at=$(date -u +"%Y-%m-%dT%H:%M:%S")
-member_name=$(echo "$AKV_KID" | awk -F'/' '{print $(NF-1)}')
+member_name=$(echo "$akv_kid" | awk -F'/' '{print $(NF-1)}')
 signing_cert="$certificate_dir/${member_name}_cert.pem"
 ccf_services_cert="$certificate_dir/service_cert.pem"
 proposal_url="$network_url/gov/members/proposals:create?api-version=2024-07-01"
-tbs="/tmp/tbs"
+tbs="$certificate_dir/tbs"
+ccf_output_file="$certificate_dir/ccf_output"
+headers_file="$certificate_dir/headers"
 
 # Get signing certificate
 curl -H "Authorization: $akv_authorization"  \
@@ -68,7 +70,12 @@ curl -H "Authorization: $akv_authorization"  \
       $akv_kid/?api-version=7.2
 
 # Prepare signature
-ccf_cose_sign1_prepare --ccf-gov-msg-type proposal --ccf-gov-msg-created_at $created_at --content $proposal_file --signing-cert $signing_cert >$tbs
+ccf_cose_sign1_prepare \
+    --ccf-gov-msg-type proposal \
+    --ccf-gov-msg-created_at $created_at \
+    --content $proposal_file \
+    --signing-cert $signing_cert >$tbs
+echo ""
 echo "AKV signature prepared"
 cat $tbs
 
@@ -77,6 +84,7 @@ curl -s -X POST "$akv_keys_url/sign?api-version=$api_version" \
   --data @$tbs \
   -H "Authorization: $akv_authorization" \
   -H "Content-Type: application/json" > $signature_file
+echo ""
 echo "AKV signature retrieved"
 cat $signature_file
 echo ""
@@ -87,16 +95,68 @@ if [ ! -s $signature_file ]; then
     exit 1
 fi
 
-# Perform the ccf_cose_sign1_finish command and pipe the output to curl
+# Perform the ccf_cose_sign1_finish command and capture its output to a file
 ccf_cose_sign1_finish \
   --ccf-gov-msg-type proposal \
   --ccf-gov-msg-created_at $created_at \
   --content $proposal_file \
   --signing-cert $signing_cert \
+  --signature $signature_file > $ccf_output_file
+
+# Debugging: Print the output from the ccf_cose_sign1_finish command
+echo "Output from ccf_cose_sign1_finish written to $ccf_output_file"
+cat $ccf_output_file
+
+# Perform the curl request with the captured output from the file
+response=$(curl -s -L -w "%{http_code}" -D $headers $proposal_url \
+  --cacert $ccf_services_cert \
+  --data-binary @$ccf_output_file \
+  -H "content-type: application/cose")
+
+# Debugging: Print the response from the curl command
+echo "Response from curl:"
+echo "$response"
+
+# Extract the HTTP status code from the headers
+http_code=$(grep HTTP $headers | awk '{print $2}')
+
+# Debugging: Print the HTTP status code and response body
+echo "HTTP status code: $http_code"
+
+# Extract the proposal ID from the response body
+proposal0_id=$(echo "$response" | jq -r '.proposalId')
+echo "Proposal submitted: Proposal ID: $proposal0_id"
+
+# Vote the proposal. Remark current restriction, only one member can vote
+# Prepare signature
+ccf_cose_sign1_prepare \
+    --content ./governance/vote/vote_accept.json \
+    --ccf-gov-msg-type ballot \
+    --ccf-gov-msg-created_at $created_at \
+    --ccf-gov-msg-proposal_id $proposal0_id \
+    --signing-cert $signing_cert >$tbs
+echo "AKV vote signature prepared for proposal $proposal0_id" 
+cat $tbs
+
+# Perform the curl request to sign the data
+curl -L -s -X POST "$akv_keys_url/sign?api-version=$api_version" \
+  --data @$tbs \
+  -H "Authorization: $akv_authorization" \
+  -H "Content-Type: application/json" > $signature_file
+echo "AKV signature retrieved"
+cat $signature_file
+
+# Perform the ccf_cose_sign1_finish command and pipe the output to curl
+ccf_cose_sign1_finish \
+    --content ./governance/vote/vote_accept.json \
+  --ccf-gov-msg-type ballot \
+  --ccf-gov-msg-created_at $created_at \
+  --ccf-gov-msg-proposal_id $proposal0_id \
+  --signing-cert $signing_cert \
   --signature $signature_file \
-| curl $proposal_url \
+| curl -L $network_url/gov/proposals/$proposal0_id/ballots \
   --cacert $ccf_services_cert \
   --data-binary @- \
   -H "content-type: application/cose"
 
-  echo ""
+echo "Vote completed for proposal $proposal0_id"
