@@ -109,15 +109,16 @@ refresh-key: ## 🚀 Refresh a key on the instance
 	$(call check_defined, KMS_URL)
 	@CCF_PLATFORM=${CCF_PLATFORM} sleep 20;curl "${KMS_URL}"/app/refresh -X POST --cacert "${KEYS_DIR}"/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
 
-set-constitution: start-host-idp ## Set new custom constitution
+set-constitution: ## Set new custom constitution
 	@echo -e "\e[34m$@\e[0m" || true
 	$(call check_defined, KMS_URL)
 	$(call check_defined, KEYS_DIR)
-	 if ! cmp -s ${KMS_WORKSPACE}/sandbox_common ${KEYS_DIR}; then \
-	 	@sleep 5
+	if [ "${KMS_WORKSPACE}/sandbox_common" != "${KEYS_DIR}" ]; then \
+		echo "Copying files for constitution"; \
+		@sleep 5; \
 		cp -r ${KMS_WORKSPACE}/sandbox_common/*.js ${KEYS_DIR}; \
 	fi
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_constitution.sh --network-url "${KMS_URL}" --certificate-dir  "${KEYS_DIR}" --custom-constitution ./governance/constitution/kms_actions.js --member-count ${MEMBER_COUNT}
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_constitution.sh --network-url "${KMS_URL}" --certificate-dir "${KEYS_DIR}" --custom-constitution ./governance/constitution/kms_actions.js --member-count ${MEMBER_COUNT}
 
 get-service-cert: # Get the mCCF service cert
 	@echo -e "\e[34m$@\e[0m" || true

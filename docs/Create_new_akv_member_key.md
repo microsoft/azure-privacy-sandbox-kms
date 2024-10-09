@@ -22,7 +22,7 @@ scripts/register_member_akv.sh \
 KMS_URL should point to the main KMS endpoint.
 KMS_DIR Directory where to store the certificates used by KMS
 AKV_KID Url to the AKV certificate. See [Test the certificate](#test-the-certificate)
-AKV_AUTHORIZATION JWT used to access AKV
+AKV_AUTHORIZATION JWT used to access AKV. Format Bearer ey...
 ## Test the certificate
 Doing a signature proves that the managed identity has access to the AKV certificate
 ```
