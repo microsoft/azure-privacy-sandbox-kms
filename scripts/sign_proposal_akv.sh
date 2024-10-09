@@ -106,9 +106,10 @@ ccf_cose_sign1_finish \
 # Debugging: Print the output from the ccf_cose_sign1_finish command
 echo "Output from ccf_cose_sign1_finish written to $ccf_output_file"
 cat $ccf_output_file
+echo 
 
 # Perform the curl request with the captured output from the file
-response=$(curl -s -L -w "%{http_code}" -D $headers $proposal_url \
+response=$(curl -s -L -w "%{http_code}" -D $headers_file $proposal_url \
   --cacert $ccf_services_cert \
   --data-binary @$ccf_output_file \
   -H "content-type: application/cose")
@@ -118,7 +119,7 @@ echo "Response from curl:"
 echo "$response"
 
 # Extract the HTTP status code from the headers
-http_code=$(grep HTTP $headers | awk '{print $2}')
+http_code=$(grep HTTP $headers_file | awk '{print $2}')
 
 # Debugging: Print the HTTP status code and response body
 echo "HTTP status code: $http_code"
