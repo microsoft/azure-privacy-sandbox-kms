@@ -5,7 +5,7 @@
         "js_module": "endpoints/keyReleasePolicyEndpoint.js",
         "js_function": "keyReleasePolicy",
         "forwarding_required": "sometimes",
-        "authn_policies": ["member_cert"],
+        "authn_policies": ["jwt"],
         "mode": "readonly",
         "openapi": {
           "responses": {
