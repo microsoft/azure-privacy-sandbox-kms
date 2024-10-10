@@ -72,6 +72,7 @@ signing_key="$certificate_dir/member0_privk.pem"
 # Use parameter expansion to provide default values if AKV_KID and AKV_AUTHORIZATION are undefined
 AKV_KID="${AKV_KID:-}"
 AKV_AUTHORIZATION="${AKV_AUTHORIZATION:-}"
+echo "AKV_KID: $AKV_KID"
 
 # Check if signing needs to happen on AKV
 if [[ -n "$AKV_KID" && -n "$AKV_AUTHORIZATION" ]]; then
