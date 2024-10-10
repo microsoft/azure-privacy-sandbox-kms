@@ -10,7 +10,15 @@ on:
       - main
       - beejones/ci-add-member-to-network
   workflow_dispatch:
-
+    inputs:
+      AKV_VAULT:
+        description: "The Azure Key Vault"
+        required: true
+        default: "kms-ci-vault"
+      AKV_RG:
+        description: "Resource group of the Azure Key Vault"
+        required: true
+        default: "kms"
 env:
   AKV_RG: "kms"
 
