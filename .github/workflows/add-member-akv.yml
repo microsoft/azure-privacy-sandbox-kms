@@ -1,0 +1,49 @@
+name: "KMS CI"
+
+permissions:
+   id-token: write
+   contents: read
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      AKV_VAULT:
+        description: "The Azure Key Vault"
+        required: true
+        default: "kms-ci-vault"
+      AKV_RG:
+        description: "Resource group of the Azure Key Vault"
+        required: true
+        default: "kms"
+
+jobs:
+  kms:
+    name: kms-add-member
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Log into Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
+          tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
+          subscription-id: ${{ vars.SUBSCRIPTION }}
+
+      - name: Build DevContainer
+        uses: devcontainers/ci@v0.3
+        with:
+          push: never
+          configFile: .devcontainer/devcontainer.json
+          runCmd: |
+            scripts/set_python_env.sh && pip install -r requirements.txt && make demo
+        env:
+          KMS_WORKSPACE: ./workspace
