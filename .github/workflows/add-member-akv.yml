@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - beejones/ci-add-member-to-network
   workflow_dispatch:
 
 env:
