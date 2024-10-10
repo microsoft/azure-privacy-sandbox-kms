@@ -1,5 +1,9 @@
 name: Add Member to AKV
 
+permissions:
+   id-token: write
+   contents: read
+
 on:
   push:
     branches:
