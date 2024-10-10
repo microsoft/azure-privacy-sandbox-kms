@@ -109,10 +109,11 @@ refresh-key: ## 🚀 Refresh a key on the instance
 	$(call check_defined, KMS_URL)
 	@CCF_PLATFORM=${CCF_PLATFORM} sleep 20;curl "${KMS_URL}"/app/refresh -X POST --cacert "${KEYS_DIR}"/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
 
-set-constitution: ## Set new custom constitution
+set-constitution: start-host-idp ## Set new custom constitution
 	@echo -e "\e[34m$@\e[0m" || true
 	$(call check_defined, KMS_URL)
 	$(call check_defined, KEYS_DIR)
+	# Copy the files to the KEYS_DIR to construct the full constitution
 	if [ "${KMS_WORKSPACE}/sandbox_common" != "${KEYS_DIR}" ]; then \
 		echo "Copying files for constitution"; \
 		@sleep 5; \
