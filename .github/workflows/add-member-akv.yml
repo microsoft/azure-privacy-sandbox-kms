@@ -1,4 +1,4 @@
-name: Add Member to AKV
+name: "Add Member to AKV"
 
 permissions:
    id-token: write
