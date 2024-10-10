@@ -1,24 +1,13 @@
-name: "KMS CI"
-
-permissions:
-   id-token: write
-   contents: read
+name: Add Member to AKV
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
-    inputs:
-      AKV_VAULT:
-        description: "The Azure Key Vault"
-        required: true
-        default: "kms-ci-vault"
-      AKV_RG:
-        description: "Resource group of the Azure Key Vault"
-        required: true
-        default: "kms"
+
+env:
+  AKV_RG: "kms"
 
 jobs:
   kms:
