@@ -42,6 +42,42 @@
           "iss": "https://maanosecureboottestyfu.eus.attest.azure.net"
         }
       }
+    },
+    {
+      "name": "set_jwt_issuer",
+      "args": {
+        "issuer": "https://accnosecurebootmaa.eus2.attest.azure.net",
+        "key_filter": "all",
+        "ca_cert_bundle_name": "jwt_maa",
+        "auto_refresh": true
+      }
+    },
+    {
+      "name": "set_jwt_validation_policy",
+      "args": {
+        "issuer": "https://accnosecurebootmaa.eus2.attest.azure.net",
+        "validation_policy": {
+          "iss": "https://accnosecurebootmaa.eus2.attest.azure.net"
+        }
+      }
+    },
+    {
+      "name": "set_jwt_issuer",
+      "args": {
+        "issuer": "https://accnosecurebootmaawesteu.weu.attest.azure.net",
+        "key_filter": "all",
+        "ca_cert_bundle_name": "jwt_maa",
+        "auto_refresh": true
+      }
+    },
+    {
+      "name": "set_jwt_validation_policy",
+      "args": {
+        "issuer": "https://accnosecurebootmaawesteu.weu.attest.azure.net",
+        "validation_policy": {
+          "iss": "https://accnosecurebootmaawesteu.weu.attest.azure.net"
+        }
+      }
     }
   ]
 }
