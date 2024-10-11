@@ -5,7 +5,10 @@
         "js_module": "endpoints/keyReleasePolicyEndpoint.js",
         "js_function": "keyReleasePolicy",
         "forwarding_required": "sometimes",
-        "authn_policies": ["jwt"],
+        "authn_policies": [
+          "jwt"
+        ],
+        "redirection_strategy": "none",
         "mode": "readonly",
         "openapi": {
           "responses": {
@@ -25,8 +28,9 @@
       "get": {
         "js_module": "inference/publickeyEndpoint.js",
         "js_function": "listpubkeys",
-        "forwarding_required": "sometimes",
+        "forwarding_required": "never",
         "authn_policies": [],
+        "redirection_strategy": "none",
         "mode": "readonly",
         "openapi": {
           "responses": {
@@ -50,8 +54,11 @@
       "post": {
         "js_module": "inference/keyEndpoint.js",
         "js_function": "key",
-        "forwarding_required": "sometimes",
-        "authn_policies": ["jwt"],
+        "forwarding_required": "never",
+        "authn_policies": [
+          "jwt"
+        ],
+        "redirection_strategy": "none",
         "mode": "readonly",
         "parameters": [
           {
@@ -132,6 +139,7 @@
         "js_function": "refresh",
         "forwarding_required": "always",
         "authn_policies": [],
+        "redirection_strategy": "to_primary",
         "mode": "readwrite",
         "openapi": {
           "responses": {
@@ -154,7 +162,12 @@
                         "type": "number"
                       }
                     },
-                    "required": ["publicKey", "kid", "keyType", "timeStamp"],
+                    "required": [
+                      "publicKey",
+                      "kid",
+                      "keyType",
+                      "timeStamp"
+                    ],
                     "type": "object"
                   }
                 }
@@ -168,9 +181,14 @@
       "get": {
         "js_module": "endpoints/kms.js",
         "js_function": "hearthbeat",
-        "forwarding_required": "sometimes",
-        "authn_policies": ["user_cert", "member_cert", "jwt"],
-        "mode": "readwrite",
+        "forwarding_required": "never",
+        "authn_policies": [
+          "user_cert",
+          "member_cert",
+          "jwt"
+        ],
+        "redirection_strategy": "none",
+        "mode": "readonly",
         "openapi": {
           "responses": {
             "200": {
