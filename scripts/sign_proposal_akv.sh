@@ -106,7 +106,7 @@ ccf_cose_sign1_finish \
 # Debugging: Print the output from the ccf_cose_sign1_finish command
 echo "Output from ccf_cose_sign1_finish written to $ccf_output_file"
 cat $ccf_output_file
-echo 
+echo
 
 # Perform the curl request with the captured output from the file
 response=$(curl -s -L -w "%{http_code}" -D $headers_file $proposal_url \
@@ -136,7 +136,7 @@ ccf_cose_sign1_prepare \
     --ccf-gov-msg-created_at $created_at \
     --ccf-gov-msg-proposal_id $proposal0_id \
     --signing-cert $signing_cert >$tbs
-echo "AKV vote signature prepared for proposal $proposal0_id" 
+echo "AKV vote signature prepared for proposal $proposal0_id"
 cat $tbs
 
 # Perform the curl request to sign the data
