@@ -6,7 +6,7 @@ import { ServiceResult } from "../../utils/ServiceResult";
 import { IValidatorService } from "../IValidationService";
 import { JwtIdentityProviderEnum } from "./JwtIdentityProviderEnum";
 import { IJwtIdentityProvider } from "./IJwtIdentityProvider";
-import { DemoJwtProvider } from "./DemoJwtProvider";
+//import { DemoJwtProvider } from "./DemoJwtProvider";
 import { MsJwtProvider } from "./MsJwtProvider";
 
 export class JwtValidator implements IValidatorService {
@@ -25,12 +25,28 @@ export class JwtValidator implements IValidatorService {
       JwtIdentityProviderEnum.MAA_deus2,
     );
     this.identityProviders.set(
-      JwtIdentityProviderEnum.MAA_NoSecureBoot,
+      JwtIdentityProviderEnum.MAA_NoSecureBootTyFu,
       new MsJwtProvider("JwtMaaProvider"),
     );
     console.log(
-      "JwtValidator: JwtIdentityProviderEnum.MAA_NoSecureBoot",
-      JwtIdentityProviderEnum.MAA_NoSecureBoot,
+      "JwtValidator: JwtIdentityProviderEnum.MAA_NoSecureBootTyFu",
+      JwtIdentityProviderEnum.MAA_NoSecureBootTyFu,
+    );
+    this.identityProviders.set(
+      JwtIdentityProviderEnum.MAA_NoSecureBootWeu,
+      new MsJwtProvider("JwtMaaProvider"),
+    );
+    console.log(
+      "JwtValidator: JwtIdentityProviderEnum.MAA_NoSecureBootWeu",
+      JwtIdentityProviderEnum.MAA_NoSecureBootWeu,
+    );
+    this.identityProviders.set(
+      JwtIdentityProviderEnum.MAA_NoSecureBootEus,
+      new MsJwtProvider("JwtMaaProvider"),
+    );
+    console.log(
+      "JwtValidator: JwtIdentityProviderEnum.MAA_NoSecureBootEus",
+      JwtIdentityProviderEnum.MAA_NoSecureBootEus,
     );
     this.identityProviders.set(
       JwtIdentityProviderEnum.MS_AAD,
@@ -40,6 +56,7 @@ export class JwtValidator implements IValidatorService {
       "JwtValidator: JwtIdentityProviderEnum.MS_AAD",
       JwtIdentityProviderEnum.MS_AAD,
     );
+    /* Remove demo provider
     this.identityProviders.set(
       JwtIdentityProviderEnum.Demo,
       new DemoJwtProvider("DemoJwtProvider"),
@@ -48,6 +65,7 @@ export class JwtValidator implements IValidatorService {
       "JwtValidator: JwtIdentityProviderEnum.Demo",
       JwtIdentityProviderEnum.Demo,
     );
+    */
   }
 
   validate(request: ccfapp.Request<any>): ServiceResult<string> {
