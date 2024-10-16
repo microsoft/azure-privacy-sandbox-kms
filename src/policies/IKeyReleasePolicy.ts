@@ -1,9 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { IKeyReleasePolicyProps } from "..";
+import { IKeyReleasePolicySnpProps } from "..";
+
+export enum KeyReleasePolicyType {
+  ADD = "add",
+  REMOVE = "remove",
+}
 
 export interface IKeyReleasePolicy {
-  type: string;
-  claims: IKeyReleasePolicyProps;
+  type: KeyReleasePolicyType;
+  gt?: IKeyReleasePolicySnpProps;
+  gte?: IKeyReleasePolicySnpProps;
+  claims: IKeyReleasePolicySnpProps;
 }
