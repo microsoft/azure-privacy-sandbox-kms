@@ -138,6 +138,18 @@ lint: ## 🔍 Lint the code base (but don't fix)
 	@echo -e "\e[34m$@\e[0m" || true
 	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/lint.sh --fix
 
+ccf-sandbox-up:
+	@CCF_WORKSPACE=${KMS_WORKSPACE} docker compose -f docker/ccf/docker-compose.yml up --wait
+
+ccf-sandbox-attach:
+	@docker compose -f docker/ccf/docker-compose.yml exec ccf_sandbox /bin/bash
+
+ccf-sandbox-down:
+	@docker compose -f docker/ccf/docker-compose.yml down --remove-orphans
+
+ccf-sandbox-logs:
+	@docker compose -f docker/ccf/docker-compose.yml logs
+
 # Keep this at the bottom.
 clean: ## 🧹 Clean the working folders created during build/demo
 	@rm -rf ${PYTHON_VENV}
