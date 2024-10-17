@@ -35,12 +35,12 @@ export const refresh = (
 
     // Generate HPKE key pair with the id
     const keyItem = KeyGeneration.generateKeyItem(id);
-    Logger.info(`Key generated with id ${id}`, keyItem);
+    Logger.info(`${name}: Key generated with id ${id}`, keyItem);
 
     // Store HPKE key pair using kid
     keyItem.kid = `${keyItem.kid!}`;
     hpkeKeyMap.storeItem(id, keyItem, keyItem.x + keyItem.y);
-    Logger.info(`Key item with id ${id} and kid ${keyItem.kid} stored`);
+    Logger.info(`${name}: Key item with id ${id} and kid ${keyItem.kid} stored`);
 
     delete keyItem.d;
     return ServiceResult.Succeeded<IKeyItem>(keyItem);
