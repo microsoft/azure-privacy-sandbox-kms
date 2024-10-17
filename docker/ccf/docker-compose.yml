@@ -1,0 +1,13 @@
+services:
+
+  ccf_sandbox:
+      image: ghcr.io/microsoft/ccf/app/dev/${CCF_PLATFORM:-virtual}:latest
+      command: /opt/ccf_${CCF_PLATFORM:-virtual}/bin/sandbox.sh --http2
+      network_mode: host
+      healthcheck:
+        test: ["CMD", "curl", "-k", "--fail", "https://localhost:8000/node/network"]
+        interval: 1s
+        retries: 120
+        start_period: 20s
+      volumes:
+        - ${CCF_WORKSPACE:-./}:/workspace
