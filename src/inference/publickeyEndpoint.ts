@@ -42,15 +42,21 @@ export const listpubkeys = (
     }
 
     // Get receipt if available
-    const receipt = hpkeKeyMap.receipt(keyItem.id!);
+    const kid = keyItem.id!;
+    const receipt = hpkeKeyMap.receipt(kid);
+    Logger.info(`${name}: Retrieved key id: ${kid}`, keyItem);
+
     if (receipt !== undefined) {
       keyItem.receipt = receipt;
-      Logger.debug(`pubkey->Receipt: ${receipt}`);
+      Logger.info(`${name}: Succesfully get key receipt for key id: ${kid}`);
+      Logger.debug(`${name}: pubkey->Receipt: ${receipt}`);
     } else {
+      Logger.warn(`${name}: Failed to get key receipt for key id: ${kid}, Retry later`);
       return ServiceResult.Accepted();
     }
 
     delete keyItem.d;
+    Logger.info(`${name}: Generate public key for key id: ${kid}`);
     const publicKey: string = new OhttpPublicKey(keyItem).get();
 
     const headers: { [key: string]: string } = {

@@ -27,12 +27,13 @@ export class OhttpPublicKey {
   private messageCount = 0;
 
   constructor(public keyItem: IKeyItem) {
-    Logger.debug(`KeyItem: `, keyItem);
+    Logger.info(`${OhttpPublicKey.name}: Public key generation for key id: ${this.keyItem.id}`);
+    Logger.debug(`${OhttpPublicKey.name}: KeyItem: `, keyItem);
   }
 
   public get(): string {
     if (this.keyItem.crv !== "P-384") {
-      throw new Error(`Curve: ${this.keyItem.crv} not supported`);
+      throw new Error(`${OhttpPublicKey.name}: Curve: ${this.keyItem.crv} not supported`);
     }
 
     this.messageCount = 0;
@@ -42,7 +43,7 @@ export class OhttpPublicKey {
       this.publicKey() +
       this.hpkeAlgorithmsLength() +
       this.hpkeSymmetricAlgorithms();
-    Logger.debug(`Public key length: ${this.keyLength()}`);
+    Logger.debug(`${OhttpPublicKey.name}: Public key length: ${this.keyLength()}`);
     return publicKey;
   }
 
@@ -65,10 +66,10 @@ export class OhttpPublicKey {
   private publicKey(): string {
     const x = Base64.toUint8Array(this.keyItem.x);
     const xHex = aToHex(x.buffer);
-    Logger.info(`Public key X: ${xHex}`);
+    Logger.info(`${OhttpPublicKey.name}: Public key X: ${xHex}`);
     const y = Base64.toUint8Array(this.keyItem.y);
     const yHex = aToHex(y.buffer);
-    Logger.info(`Public key Y: ${yHex}`);
+    Logger.info(`${OhttpPublicKey.name}: Public key Y: ${yHex}`);
     const publicKey = "04" + xHex + yHex;
     this.messageCount += publicKey.length / 2;
     return publicKey;
