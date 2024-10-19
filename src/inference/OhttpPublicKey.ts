@@ -28,7 +28,7 @@ export class OhttpPublicKey {
   private static readonly logContext = new LogContext().setScope("OhttpPublicKey");
 
   constructor(public keyItem: IKeyItem) {
-    Logger.info(`Public key generation for key id: ${this.keyItem.id}`, OhttpPublicKey.logContext);
+    Logger.info(`Generate OTTP public key for key id: ${this.keyItem.id}`, OhttpPublicKey.logContext);
     Logger.debug(`KeyItem: `, OhttpPublicKey.logContext, keyItem);
   }
 
@@ -67,10 +67,10 @@ export class OhttpPublicKey {
   private publicKey(): string {
     const x = Base64.toUint8Array(this.keyItem.x);
     const xHex = aToHex(x.buffer);
-    Logger.info(`${OhttpPublicKey.name}: Public key X: ${xHex}`, OhttpPublicKey.logContext);
+    Logger.info(`Public key X: ${xHex}`, OhttpPublicKey.logContext);
     const y = Base64.toUint8Array(this.keyItem.y);
     const yHex = aToHex(y.buffer);
-    Logger.info(`${OhttpPublicKey.name}: Public key Y: ${yHex}`, OhttpPublicKey.logContext);
+    Logger.info(`Public key Y: ${yHex}`, OhttpPublicKey.logContext);
     const publicKey = "04" + xHex + yHex;
     this.messageCount += publicKey.length / 2;
     return publicKey;
