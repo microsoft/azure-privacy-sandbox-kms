@@ -4,7 +4,7 @@ import * as ccfapp from "@microsoft/ccf-app";
 import { ErrorResponse, ServiceResult } from "./ServiceResult";
 import { queryParams } from "./Tooling";
 import { AuthenticationService } from "../authorization/AuthenticationService";
-import { Logger } from "./Logger";
+import { Logger, LogContext } from "./Logger";
 import { Settings } from "../policies/Settings";
 
 /**
@@ -18,18 +18,27 @@ export class ServiceRequest<T> {
   public readonly headers?: { [key: string]: string };
   public readonly query?: { [key: string]: string };
   public readonly error?: ErrorResponse;
+  private readonly logContext: LogContext;
 
   constructor(
-    public name: string,
+    public logcontext: LogContext | string,
     public request: ccfapp.Request<T>,
   ) {
+
+    // Set log context if passed in scope string
+    if (typeof logcontext === "string") {
+      this.logContext = new LogContext().setScope(logcontext);
+    } else {
+      this.logContext = logcontext;
+    }
+
     // Set the log level from the settings
     let settings: Settings;
     try {
       settings = Settings.loadSettings();
     } catch (error) {
-      const errorMessage = `${name} Error loading settings: ${error}`;
-      Logger.error(errorMessage);
+      const errorMessage = `Error loading settings: ${error}`;
+      Logger.error(errorMessage, this.logContext);
       this.error = {
         errorMessage,
       };
@@ -40,22 +49,22 @@ export class ServiceRequest<T> {
     Logger.setLogLevelFromSettings(settings);
     Settings.logSettings(settings.settings);
 
-    Logger.info(`${name} Request: `, request);
+    Logger.info(`${this.logContext.scope} Request: `, this.logContext, request);
     this.query = queryParams(request);
     if (this.query) {
-      Logger.info(`${name} query: `, this.query);
+      Logger.info(`${this.logContext.scope} query: `, this.logContext, this.query);
     }
 
     this.headers = request.headers;
     if (this.headers) {
-      Logger.debug(`${name} headers: `, this.headers);
+      Logger.debug(`${this.logContext.scope} headers: `, this.logContext, this.headers);
     }
 
     try {
       this.body = request.body.json();
     } catch (exception) {
       this.error = {
-        errorMessage: `No valid JSON request for ${name}`,
+        errorMessage: `No valid JSON request for ${this.logContext.scope}`,
       };
       this.success = false;
       return;
@@ -75,7 +84,7 @@ export class ServiceRequest<T> {
       new AuthenticationService().isAuthenticated(this.request);
 
     Logger.debug(
-      `${this.name} Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`,
+      `${this.logContext.scope} Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`, this.logContext
     );
     return [policy, isValidIdentity];
   }

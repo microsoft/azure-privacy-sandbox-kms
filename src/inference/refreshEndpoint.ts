@@ -8,7 +8,7 @@ import { hpkeKeyMap } from "./repositories/Maps";
 import { KeyGeneration } from "./KeyGeneration";
 import { enableEndpoint } from "../utils/Tooling";
 import { ServiceRequest } from "../utils/ServiceRequest";
-import { Logger } from "../utils/Logger";
+import { Logger, LogContext } from "../utils/Logger";
 
 // Enable the endpoint
 enableEndpoint();
@@ -22,8 +22,8 @@ enableEndpoint();
 export const refresh = (
   request: ccfapp.Request<void>,
 ): ServiceResult<string | IKeyItem> => {
-  const name = "refresh";
-  const serviceRequest = new ServiceRequest<void>(name, request);
+  const logContext = new LogContext().setScope("refresh");
+  const serviceRequest = new ServiceRequest<void>(logContext, request);
 
   // check if caller has a valid identity
   const [_, isValidIdentity] = serviceRequest.isAuthenticated();
@@ -35,18 +35,18 @@ export const refresh = (
 
     // Generate HPKE key pair with the id
     const keyItem = KeyGeneration.generateKeyItem(id);
-    Logger.info(`${name}: Key generated with id ${id}`, keyItem);
+    Logger.info(`Key generated with id ${id}`, logContext, keyItem);
 
     // Store HPKE key pair using kid
     keyItem.kid = `${keyItem.kid!}`;
     hpkeKeyMap.storeItem(id, keyItem, keyItem.x + keyItem.y);
-    Logger.info(`${name}: Key item with id ${id} and kid ${keyItem.kid} stored`);
+    Logger.info(`Key item with id ${id} and kid ${keyItem.kid} stored`, logContext);
 
     delete keyItem.d;
-    return ServiceResult.Succeeded<IKeyItem>(keyItem);
+    return ServiceResult.Succeeded<IKeyItem>(keyItem, undefined, logContext);
   } catch (exception: any) {
-    const errorMessage = `${name}: Error: ${exception.message}`;
+    const errorMessage = `${logContext.scope}: Error: ${exception.message}`;
     console.error(errorMessage);
-    return ServiceResult.Failed<string>({ errorMessage }, 500);
+    return ServiceResult.Failed<string>({ errorMessage }, 500, logContext);
   }
 };

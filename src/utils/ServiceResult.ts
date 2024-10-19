@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { Logger } from "./Logger";
+import { Logger, LogContext } from "./Logger";
 
 export interface ErrorResponse {
   errorMessage: string;
@@ -42,17 +42,18 @@ export class ServiceResult<T> {
   public static Succeeded<T>(
     body: T,
     headers?: { [key: string]: string | number },
+    logContext?: LogContext,
   ): ServiceResult<T> {
-    Logger.debug("Response Succeeded: ", body);
+    Logger.debug("Response Succeeded: ", logContext, body);
     if (headers) {
-      Logger.debug("Response headers: ", headers);
+      Logger.debug("Response headers: ", logContext, headers);
     }
 
     return new ServiceResult<T>(body, undefined, true, 200, headers);
   }
 
-  public static Accepted(): ServiceResult<string> {
-    Logger.debug("Response Accepted");
+  public static Accepted(logContext?: LogContext): ServiceResult<string> {
+    Logger.debug("Response Accepted", logContext);
     return new ServiceResult<string>(undefined, undefined, true, 202, {
       "retry-after": 3,
     });
@@ -61,8 +62,9 @@ export class ServiceResult<T> {
   public static Failed<T>(
     error: ErrorResponse,
     statusCode: number = 400,
+    logContext?: LogContext,
   ): ServiceResult<T> {
-    Logger.error(`Failed result: ${statusCode}, `, error);
+    Logger.error(`Failed result: ${statusCode}, `, logContext, error);
     return new ServiceResult<T>(undefined, error, false, statusCode);
   }
 }
