@@ -49,15 +49,15 @@ export class ServiceRequest<T> {
     Logger.setLogLevelFromSettings(settings);
     Settings.logSettings(settings.settings);
 
-    Logger.info(`${this.logContext.scope} Request: `, this.logContext, request);
+    Logger.info(`${this.logContext.scope} Request:`, this.logContext, request);
     this.query = queryParams(request);
     if (this.query) {
-      Logger.info(`${this.logContext.scope} query: `, this.logContext, this.query);
+      Logger.info(`${this.logContext.scope} Query:`, this.logContext, this.query);
     }
 
     this.headers = request.headers;
     if (this.headers) {
-      Logger.debug(`${this.logContext.scope} headers: `, this.logContext, this.headers);
+      Logger.debug(`${this.logContext.scope} Headers:`, this.logContext, this.headers);
     }
 
     try {

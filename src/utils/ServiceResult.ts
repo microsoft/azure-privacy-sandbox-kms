@@ -44,16 +44,16 @@ export class ServiceResult<T> {
     headers?: { [key: string]: string | number },
     logContext?: LogContext,
   ): ServiceResult<T> {
-    Logger.debug("Response Succeeded: ", logContext, body);
-    if (headers) {
-      Logger.debug("Response headers: ", logContext, headers);
-    }
-
+    const response = {
+      ...(headers && { headers }),
+      body,
+    };
+    Logger.info("Response Succeeded: 200", logContext, response);
     return new ServiceResult<T>(body, undefined, true, 200, headers);
   }
 
   public static Accepted(logContext?: LogContext): ServiceResult<string> {
-    Logger.debug("Response Accepted", logContext);
+    Logger.info("Response Accepted: 202", logContext);
     return new ServiceResult<string>(undefined, undefined, true, 202, {
       "retry-after": 3,
     });
@@ -64,7 +64,7 @@ export class ServiceResult<T> {
     statusCode: number = 400,
     logContext?: LogContext,
   ): ServiceResult<T> {
-    Logger.error(`Failed result: ${statusCode}, `, logContext, error);
+    Logger.error(`Failed result: ${statusCode},`, logContext, error);
     return new ServiceResult<T>(undefined, error, false, statusCode);
   }
 }
