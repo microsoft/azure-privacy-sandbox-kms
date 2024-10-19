@@ -8,7 +8,7 @@ import { JwtValidator } from "./jwt/JwtValidator";
 import { IValidatorService } from "./IValidationService";
 import { UserCertValidator } from "./certs/UserCertValidator";
 import { MemberCertValidator } from "./certs/MemberCertValidator";
-import { Logger } from "../utils/Logger";
+import { Logger, LogContext } from "../utils/Logger";
 
 /**
  * CCF authentication policies
@@ -29,6 +29,7 @@ export class AuthenticationService implements IAuthenticationService {
     CcfAuthenticationPolicyEnum,
     IValidatorService
   >();
+  private static readonly logContext = new LogContext().setScope("AuthenticationService");
 
   constructor() {
     this.validators.set(CcfAuthenticationPolicyEnum.Jwt, new JwtValidator());
@@ -53,10 +54,11 @@ export class AuthenticationService implements IAuthenticationService {
       const caller = request.caller as unknown as ccfapp.AuthnIdentityCommon;
       if (!caller) {
         // no caller policy
-        return [caller, ServiceResult.Succeeded("")];
+        return [caller, ServiceResult.Succeeded("", undefined, AuthenticationService.logContext)];
       }
       Logger.debug(
         `Authorization: isAuthenticated result (AuthenticationService)-> ${caller.policy},${JSON.stringify(caller)}`,
+        AuthenticationService.logContext,
       );
       const validator = this.validators.get(
         <CcfAuthenticationPolicyEnum>caller.policy,
@@ -68,7 +70,7 @@ export class AuthenticationService implements IAuthenticationService {
           ServiceResult.Failed({
             errorMessage: `Error: invalid caller identity (AuthenticationService)-> ${caller.policy}`,
             errorType: "AuthenticationError",
-          }),
+          }, 400, AuthenticationService.logContext),
         ];
       }
 
@@ -79,7 +81,7 @@ export class AuthenticationService implements IAuthenticationService {
         ServiceResult.Failed({
           errorMessage: `Error: invalid caller identity (AuthenticationService)-> ${ex}`,
           errorType: "AuthenticationError",
-        }),
+        }, 400, AuthenticationService.logContext),
       ];
     }
   }
