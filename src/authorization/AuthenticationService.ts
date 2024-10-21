@@ -60,7 +60,7 @@ export class AuthenticationService implements IAuthenticationService {
         return [caller, ServiceResult.Succeeded("", undefined, this.logContext)];
       }
       Logger.debug(
-        `Authorization: isAuthenticated result (AuthenticationService)-> ${caller.policy},${JSON.stringify(caller)}`,
+        `isAuthenticated result (AuthenticationService)-> ${caller.policy},${JSON.stringify(caller)}`,
         this.logContext,
       );
       const validator = this.validators.get(

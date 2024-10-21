@@ -49,7 +49,7 @@ export class ServiceRequest<T> {
     Logger.setLogLevelFromSettings(settings);
     Settings.logSettings(settings.settings);
 
-    Logger.info(`Request:`, this.logContext, request);
+    Logger.debug(`Request:`, this.logContext, request);
     this.query = queryParams(request);
     if (this.query) {
       Logger.info(`Query:`, this.logContext, this.query);
