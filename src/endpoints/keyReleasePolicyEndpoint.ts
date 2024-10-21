@@ -9,7 +9,6 @@ import { ServiceRequest } from "../utils/ServiceRequest";
 import { KeyReleasePolicy } from "../policies/KeyReleasePolicy";
 import { IKeyReleasePolicy } from "../policies/IKeyReleasePolicy";
 import { LogContext } from "../utils/Logger";
-import { log } from "console";
 
 // Enable the endpoint
 enableEndpoint();

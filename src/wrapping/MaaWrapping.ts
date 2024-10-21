@@ -15,11 +15,15 @@ export interface MaaWrappedKey {
 }
 
 export class MaaWrapping {
+  private logContext: LogContext;
+
   constructor(
     public keyItem: IKeyItem,
     public pubKey: JsonWebKeyRSAPublic,
-  ) {}
-  private static readonly logContext = new LogContext().appendScope("MaaWrapping");
+    logContext?: LogContext,
+  ) {
+    this.logContext = (logContext?.clone() || new LogContext()).appendScope("MaaWrapping");
+  }
 
   public wrapKey(encrypted: boolean): MaaWrappedKey {
     const pubRsa = ccfcrypto.pubRsaJwkToPem(this.pubKey);
@@ -71,7 +75,7 @@ export class MaaWrapping {
       kid,
     ]);
     // secret
-    Logger.info(`CBOR format: ${aToHex(cbor)}`, MaaWrapping.logContext);
+    Logger.info(`CBOR format: ${aToHex(cbor)}`, this.logContext);
     return cbor.buffer;
   }
 
@@ -125,7 +129,7 @@ export class MaaWrapping {
       concatenatedArray.set(array, offset);
       offset += array.length;
       Logger.info(
-        `Concatenated array (${offset}): ${aToHex(concatenatedArray)}`, MaaWrapping.logContext,
+        `Concatenated array (${offset}): ${aToHex(concatenatedArray)}`, this.logContext,
       );
     }
 

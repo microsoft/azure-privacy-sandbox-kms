@@ -151,6 +151,7 @@ export const key = (
     wrappedKey = new MaaWrapping(
       keyItem!,
       MaaWrapping.getWrappingKey(policy! as ccfapp.JwtAuthnIdentity),
+      logContext,
     ).wrapKey(encrypted);
   } catch (exception: any) {
     return ServiceResult.Failed<string>(
