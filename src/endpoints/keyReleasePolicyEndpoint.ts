@@ -9,6 +9,7 @@ import { ServiceRequest } from "../utils/ServiceRequest";
 import { KeyReleasePolicy } from "../policies/KeyReleasePolicy";
 import { IKeyReleasePolicy } from "../policies/IKeyReleasePolicy";
 import { LogContext } from "../utils/Logger";
+import { log } from "console";
 
 // Enable the endpoint
 enableEndpoint();
@@ -20,7 +21,7 @@ enableEndpoint();
 export const keyReleasePolicy = (
   request: ccfapp.Request<void>,
 ): ServiceResult<string | IKeyReleasePolicy> => {
-  const logContext = new LogContext().appendScope("keyReleasePolicy");
+  const logContext = new LogContext().appendScope("keyReleasePolicyEndpoint");
   const serviceRequest = new ServiceRequest<void>(logContext, request);
 
   // check if caller has a valid identity
@@ -29,7 +30,7 @@ export const keyReleasePolicy = (
 
   try {
     const result =
-      KeyReleasePolicy.getKeyReleasePolicyFromMap(keyReleasePolicyMap);
+      KeyReleasePolicy.getKeyReleasePolicyFromMap(keyReleasePolicyMap, logContext);
     return ServiceResult.Succeeded<IKeyReleasePolicy>(result, undefined, logContext);
   } catch (error: any) {
     return ServiceResult.Failed<string>({ errorMessage: error.message }, 500, logContext);

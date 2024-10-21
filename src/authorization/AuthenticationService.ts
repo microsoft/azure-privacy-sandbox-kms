@@ -33,14 +33,16 @@ export class AuthenticationService implements IAuthenticationService {
 
   constructor(logContext?: LogContext) {
     this.logContext = (logContext?.clone() || new LogContext()).appendScope("AuthenticationService");
-    this.validators.set(CcfAuthenticationPolicyEnum.Jwt, new JwtValidator());
+    this.validators.set(
+      CcfAuthenticationPolicyEnum.Jwt,
+      new JwtValidator(this.logContext));
     this.validators.set(
       CcfAuthenticationPolicyEnum.User_cert,
-      new UserCertValidator(),
+      new UserCertValidator(this.logContext),
     );
     this.validators.set(
       CcfAuthenticationPolicyEnum.Member_cert,
-      new MemberCertValidator(),
+      new MemberCertValidator(this.logContext),
     );
   }
 

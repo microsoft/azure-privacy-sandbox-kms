@@ -17,19 +17,23 @@ interface CCFMember {
 }
 
 export class MemberCertValidator implements IValidatorService {
-  private static readonly logContext = new LogContext().appendScope("MemberCertValidator");
+  private logContext: LogContext;
+
+  constructor(logContext?: LogContext) {
+    this.logContext = (logContext?.clone() || new LogContext()).appendScope("MemberCertValidator");
+  }
 
   validate(request: ccfapp.Request<any>): ServiceResult<string> {
     const memberCaller = request.caller as unknown as UserMemberAuthnIdentity;
     const identityId = memberCaller.id;
     const isValid = this.isActiveMember(identityId);
     if (isValid.success && isValid.body) {
-      return ServiceResult.Succeeded(identityId, undefined, MemberCertValidator.logContext);
+      return ServiceResult.Succeeded(identityId, undefined, this.logContext);
     }
     return ServiceResult.Failed({
       errorMessage: `Error: invalid caller identity (MemberCertValidator)->${JSON.stringify(isValid)}`,
       errorType: "AuthenticationError",
-    }, 400, MemberCertValidator.logContext);
+    }, 400, this.logContext);
   }
 
   /**
@@ -57,12 +61,12 @@ export class MemberCertValidator implements IValidatorService {
     if (memberInfoBuf !== undefined) {
       const memberInfo = ccf.bufToJsonCompatible(memberInfoBuf) as CCFMember;
       const isActiveMember = memberInfo && memberInfo.status === "Active";
-      return ServiceResult.Succeeded(isActiveMember && isMember, undefined, MemberCertValidator.logContext);
+      return ServiceResult.Succeeded(isActiveMember && isMember, undefined, this.logContext);
     } else {
       // memberInfoBuf is undefined
       return ServiceResult.Failed({
         errorMessage: "Member information is undefined.",
-      }, 400, MemberCertValidator.logContext);
+      }, 400, this.logContext);
     }
   }
 }

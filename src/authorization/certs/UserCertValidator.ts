@@ -32,19 +32,23 @@ export interface UserMemberAuthnIdentity extends ccfapp.AuthnIdentityCommon {
 }
 
 export class UserCertValidator implements IValidatorService {
-  private static readonly logContext = new LogContext().appendScope("UserCertValidator");
- 
+  private logContext: LogContext;
+
+  constructor(logContext?: LogContext) {
+    this.logContext = (logContext?.clone() || new LogContext()).appendScope("UserCertValidator");
+  }
+
   validate(request: ccfapp.Request<any>): ServiceResult<string> {
     const userCaller = request.caller as unknown as UserMemberAuthnIdentity;
     const identityId = userCaller.id;
     const isValid = this.isUser(identityId);
     if (isValid.success && isValid.body) {
-      return ServiceResult.Succeeded(identityId, undefined, UserCertValidator.logContext);
+      return ServiceResult.Succeeded(identityId, undefined, this.logContext);
     }
     return ServiceResult.Failed({
       errorMessage: `Error: invalid caller identity (UserCertValidator)->${JSON.stringify(isValid)}`,
       errorType: "AuthenticationError",
-    }, 400, UserCertValidator.logContext);
+    }, 400, this.logContext);
   }
 
   /**
@@ -60,6 +64,6 @@ export class UserCertValidator implements IValidatorService {
       ccfapp.arrayBuffer,
     );
     const result = usersCerts.has(ccf.strToBuf(userId));
-    return ServiceResult.Succeeded(result, undefined, UserCertValidator.logContext);
+    return ServiceResult.Succeeded(result, undefined, this.logContext);
   }
 }

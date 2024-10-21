@@ -24,9 +24,10 @@ export interface MSAccessToken {
 export const authorizeJwt = (
   issuer: string,
   identity: ccfapp.JwtAuthnIdentity,
+  logContextIn?: LogContext
 ): ServiceResult<string> => {
-  const logContext = new LogContext().appendScope("MsJwtProvider").appendScope("authorizeJwt");
-  const policy = JwtValidationPolicyMap.read(issuer);
+  const logContext = (logContextIn?.clone() || new LogContext()).appendScope("authorizeJwt");
+  const policy = JwtValidationPolicyMap.read(issuer, logContext);
   if (policy === undefined) {
     const errorMessage = `issuer ${issuer} is not defined in the policy`;
     Logger.error(errorMessage, logContext);
@@ -78,8 +79,11 @@ export const authorizeJwt = (
 };
 
 export class MsJwtProvider implements IJwtIdentityProvider {
-  private static readonly logContext = new LogContext().appendScope("MsJwtProvider");
-  constructor(public name) { }
+  private logContext: LogContext;
+
+  constructor(public name: string, logContext?: LogContext) {
+    this.logContext = (logContext?.clone() || new LogContext()).appendScope("MsJwtProvider");
+  }
 
   /**
    * Check if caller's access token is valid
@@ -97,16 +101,16 @@ export class MsJwtProvider implements IJwtIdentityProvider {
           errorType: "AuthenticationError",
         },
         400,
-        MsJwtProvider.logContext
+        this.logContext
       );
     }
 
-    const isAuthorized = authorizeJwt(issuer, identity);
+    const isAuthorized = authorizeJwt(issuer, identity, this.logContext);
     if (!isAuthorized.success) {
       return isAuthorized;
     }
 
     const identityId = identity?.jwt?.payload?.sub;
-    return ServiceResult.Succeeded(identityId, undefined, MsJwtProvider.logContext);
+    return ServiceResult.Succeeded(identityId, undefined, this.logContext);
   }
 }
