@@ -30,7 +30,7 @@ export const keyReleasePolicy = (
   try {
     const result =
       KeyReleasePolicy.getKeyReleasePolicyFromMap(keyReleasePolicyMap);
-    return ServiceResult.Succeeded<IKeyReleasePolicy>(result);
+    return ServiceResult.Succeeded<IKeyReleasePolicy>(result, undefined, logContext);
   } catch (error: any) {
     return ServiceResult.Failed<string>({ errorMessage: error.message }, 500, logContext);
   }

@@ -12,24 +12,27 @@ import {
 } from "@microsoft/ccf-app/global";
 import { SnpAttestationClaims } from "./SnpAttestationClaims";
 import { keyReleasePolicyMap } from "../repositories/Maps";
-import { Logger } from "../utils/Logger";
+import { Logger, LogContext } from "../utils/Logger";
 import { KeyReleasePolicy } from "../policies/KeyReleasePolicy";
 
 // Validate the attestation by means of the key release policy
 export const validateAttestation = (
   attestation: ISnpAttestation,
 ): ServiceResult<string | IAttestationReport> => {
-  Logger.debug(`Start attestation validation`);
+  const logContext = new LogContext({ scope: "validateAttestation" });
+  Logger.debug(`Start attestation validation`, logContext);
   if (!attestation) {
     return ServiceResult.Failed<string>(
       { errorMessage: "missing attestation" },
       400,
+      logContext
     );
   }
   if (!attestation.evidence && typeof attestation.evidence !== "string") {
     return ServiceResult.Failed<string>(
       { errorMessage: "missing or bad attestation.evidence" },
       400,
+      logContext
     );
   }
   if (
@@ -39,6 +42,7 @@ export const validateAttestation = (
     return ServiceResult.Failed<string>(
       { errorMessage: "missing or bad attestation.evidence" },
       400,
+      logContext
     );
   }
   if (
@@ -48,6 +52,7 @@ export const validateAttestation = (
     return ServiceResult.Failed<string>(
       { errorMessage: "missing or bad attestation.uvm_endorsements" },
       400,
+      logContext
     );
   }
   if (
@@ -57,6 +62,7 @@ export const validateAttestation = (
     return ServiceResult.Failed<string>(
       { errorMessage: "missing or bad attestation.endorsed_tcb" },
       400,
+      logContext
     );
   }
   let evidence: ArrayBuffer;
@@ -71,6 +77,7 @@ export const validateAttestation = (
     return ServiceResult.Failed<string>(
       { errorMessage: "Malformed attestation.evidence" },
       400,
+      logContext
     );
   }
   try {
@@ -81,6 +88,7 @@ export const validateAttestation = (
     return ServiceResult.Failed<string>(
       { errorMessage: "Malformed attestation.endorsements" },
       400,
+      logContext
     );
   }
   try {
@@ -91,6 +99,7 @@ export const validateAttestation = (
     return ServiceResult.Failed<string>(
       { errorMessage: "Malformed attestation.uvm_endorsements" },
       400,
+      logContext
     );
   }
   try {
@@ -104,14 +113,14 @@ export const validateAttestation = (
         endorsed_tcb,
       );
     Logger.debug(
-      `Attestation validation report: ${JSON.stringify(attestationReport)}`,
+      `Attestation validation report: ${JSON.stringify(attestationReport)}`, logContext
     );
 
     const claimsProvider = new SnpAttestationClaims(attestationReport);
     const attestationClaims = claimsProvider.getClaims();
-    Logger.debug(`Attestation claims: `, attestationClaims);
+    Logger.debug(`Attestation claims: `, logContext, attestationClaims);
     Logger.debug(
-      `Report Data: `,
+      `Report Data: `, logContext,
       attestationClaims["x-ms-sevsnpvm-reportdata"],
     );
 
@@ -121,9 +130,9 @@ export const validateAttestation = (
     Logger.debug(
       `Key release policy: ${JSON.stringify(
         keyReleasePolicy,
-      )}, keys: ${Object.keys(keyReleasePolicy)}, keys: ${
-        Object.keys(keyReleasePolicy).length
-      }`,
+      )}, keys: ${
+        Object.keys(keyReleasePolicy)}, keys: ${Object.keys(keyReleasePolicy).length
+      }`, logContext
     );
 
     const policyValidationResult = KeyReleasePolicy.validateKeyReleasePolicy(
@@ -135,6 +144,7 @@ export const validateAttestation = (
     return ServiceResult.Failed<string>(
       { errorMessage: `Internal error: ${exception.message}` },
       500,
+      logContext
     );
   }
 };

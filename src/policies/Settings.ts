@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 
 import { ccf } from "@microsoft/ccf-app/global";
-import { Logger } from "../utils/Logger";
+import { Logger, LogContext } from "../utils/Logger";
 
 export interface IService {
   name: string;
@@ -20,7 +20,8 @@ export class Settings {
   /**
    * Represents the settings for a policy.
    */
-  constructor(public settings: ISettings) {}
+  constructor(public settings: ISettings) { }
+  private static readonly logContext = new LogContext().setScope("Settings");
 
   /**
    * Returns the default settings for the Key Management Service.
@@ -42,9 +43,9 @@ export class Settings {
    * @param settings - The settings object containing service information.
    */
   public static logSettings(settings: ISettings): void {
-    Logger.debug(`Service Name: ${settings.service.name}`);
-    Logger.debug(`Service Description: ${settings.service.description}`);
-    Logger.debug(`Service Version: ${settings.service.version}`);
+    Logger.debug(`Service Name: ${settings.service.name}`, Settings.logContext);
+    Logger.debug(`Service Description: ${settings.service.description}`, Settings.logContext);
+    Logger.debug(`Service Version: ${settings.service.version}`, Settings.logContext);
   }
 
   /**
@@ -63,7 +64,7 @@ export class Settings {
     const settingsPolicyMap = ccf.kv[settingsPolicyMapName];
     if (!settingsPolicyMap) {
       const error = `Settings policy map not found: ${settingsPolicyMapName}`;
-      Logger.error(error);
+      Logger.error(error, Settings.logContext);
       throw new Error(error);
     }
 
@@ -72,12 +73,12 @@ export class Settings {
     if (!settingsPolicy) {
       settings = Settings.defaultSettings();
     } else {
-      Logger.info(`No settings policy found, using default settings`);
+      Logger.info(`No settings policy found, using default settings`, Settings.logContext);
       try {
         settings = JSON.parse(ccf.bufToStr(settingsPolicy)) as ISettings;
       } catch {
         const error = `Failed to parse settings policy: ${ccf.bufToStr(settingsPolicy)}`;
-        Logger.error(error);
+        Logger.error(error, Settings.logContext);
         throw new Error(error);
       }
     }

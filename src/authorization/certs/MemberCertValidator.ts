@@ -6,6 +6,7 @@ import { ccf } from "@microsoft/ccf-app/global";
 import { IValidatorService } from "../IValidationService";
 import { ServiceResult } from "../../utils/ServiceResult";
 import { UserMemberAuthnIdentity } from "./UserCertValidator";
+import { LogContext } from "../../utils/Logger";
 
 /**
  * CCF member information
@@ -16,17 +17,19 @@ interface CCFMember {
 }
 
 export class MemberCertValidator implements IValidatorService {
+  private static readonly logContext = new LogContext().setScope("MemberCertValidator");
+
   validate(request: ccfapp.Request<any>): ServiceResult<string> {
     const memberCaller = request.caller as unknown as UserMemberAuthnIdentity;
     const identityId = memberCaller.id;
     const isValid = this.isActiveMember(identityId);
     if (isValid.success && isValid.body) {
-      return ServiceResult.Succeeded(identityId);
+      return ServiceResult.Succeeded(identityId, undefined, MemberCertValidator.logContext);
     }
     return ServiceResult.Failed({
       errorMessage: `Error: invalid caller identity (MemberCertValidator)->${JSON.stringify(isValid)}`,
       errorType: "AuthenticationError",
-    });
+    }, 400, MemberCertValidator.logContext);
   }
 
   /**
@@ -54,12 +57,12 @@ export class MemberCertValidator implements IValidatorService {
     if (memberInfoBuf !== undefined) {
       const memberInfo = ccf.bufToJsonCompatible(memberInfoBuf) as CCFMember;
       const isActiveMember = memberInfo && memberInfo.status === "Active";
-      return ServiceResult.Succeeded(isActiveMember && isMember);
+      return ServiceResult.Succeeded(isActiveMember && isMember, undefined, MemberCertValidator.logContext);
     } else {
       // memberInfoBuf is undefined
       return ServiceResult.Failed({
         errorMessage: "Member information is undefined.",
-      });
+      }, 400, MemberCertValidator.logContext);
     }
   }
 }

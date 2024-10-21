@@ -13,7 +13,6 @@ import { Logger, LogContext } from "../utils/Logger";
 import { IMaaAttestationReport } from "../attestation/IMaaAttestationReport";
 import { MaaAttestationValidation } from "../attestation/MaaAttestationValidation";
 import { MaaWrappedKey, MaaWrapping } from "../wrapping/MaaWrapping";
-import { log } from "console";
 
 // Enable the endpoint
 enableEndpoint();
@@ -96,6 +95,7 @@ export const key = (
       return ServiceResult.Failed<string>(
         validateAttestationResult.error!,
         validateAttestationResult.statusCode,
+        logContext,
       );
     }
   } catch (exception: any) {
@@ -109,9 +109,10 @@ export const key = (
   }
 
   // Check kid
-  let kid = serviceRequest.body?.["kid"];
+  let kidString = serviceRequest.query?.["kid"];
+  let kid: number | undefined;
   let keyItem: IKeyItem | undefined;
-  if (kid === undefined) {
+  if (kidString === undefined) {
     [kid, keyItem] = hpkeKeyMap.latestItem();
     if (keyItem === undefined) {
       return ServiceResult.Failed<string>(
@@ -120,16 +121,28 @@ export const key = (
         logContext,
       );
     }
+  } else {
+    kid = parseInt(kidString, 10);
+    keyItem = hpkeKeyMap.store.get(kid) as IKeyItem;
+    if (keyItem === undefined) {
+      return ServiceResult.Failed<string>(
+        { errorMessage: `kid ${kid} not found in store` },
+        404,
+        logContext
+      );
+    }
   }
 
   const receipt = hpkeKeyMap.receipt(kid);
+  Logger.info(`Retrieved key id: ${kid}`, logContext, keyItem);
 
   // Get receipt if available
   if (receipt !== undefined) {
     keyItem!.receipt = receipt;
+    Logger.info(`Succesfully get key receipt for key id: ${kid}`, logContext);
     Logger.debug(`Key->Receipt: ${receipt}`, logContext);
   } else {
-    return ServiceResult.Accepted();
+    return ServiceResult.Accepted(logContext);
   }
 
   // wrap the private key

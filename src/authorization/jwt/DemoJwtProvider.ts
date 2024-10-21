@@ -5,12 +5,13 @@ import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../../utils/ServiceResult";
 import { IJwtIdentityProvider } from "./IJwtIdentityProvider";
 import { authorizeJwt } from "./MsJwtProvider";
-import { Logger } from "../../utils/Logger";
+import { Logger, LogContext } from "../../utils/Logger";
 
 const errorType = "AuthenticationError";
 
 export class DemoJwtProvider implements IJwtIdentityProvider {
   constructor(public name: string) {}
+  private static readonly logContext = new LogContext({ scope: "DemoJwtProvider" });
 
   /**
    * Check if caller's access token is valid
@@ -25,7 +26,7 @@ export class DemoJwtProvider implements IJwtIdentityProvider {
       return ServiceResult.Failed({
         errorMessage: "The JWT has no valid iss",
         errorType,
-      });
+      }, 400, DemoJwtProvider.logContext);
     }
 
     const isAuthorized = authorizeJwt(issuer, identity);
@@ -34,7 +35,7 @@ export class DemoJwtProvider implements IJwtIdentityProvider {
     }
 
     const identityId = identity?.jwt?.payload?.sub;
-    Logger.debug(`JWT validation succeeded: ${identityId}`);
-    return ServiceResult.Succeeded(identityId);
+    Logger.debug(`JWT validation succeeded: ${identityId}`, DemoJwtProvider.logContext);
+    return ServiceResult.Succeeded(identityId, undefined, DemoJwtProvider.logContext);
   }
 }

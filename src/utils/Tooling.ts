@@ -3,7 +3,7 @@
 
 import * as ccfapp from "@microsoft/ccf-app";
 import { ccf } from "@microsoft/ccf-app/global";
-import { Logger } from "./Logger";
+import { Logger, LogContext } from "./Logger";
 
 /**
  * Converts a Uint8Array to a string representation.
@@ -40,7 +40,7 @@ export const queryParams = (request: ccfapp.Request) => {
   for (let inx = 0; inx < elements.length; inx++) {
     const param = elements[inx].split("=");
     obj[param[0]] = param[1];
-    Logger.debug(`Query: ${param[0]} = ${param[1]}`);
+    Logger.debug(`Query: ${param[0]} = ${param[1]}`, new LogContext({ scope: "queryParams" }));
   }
   return obj;
 };
@@ -51,6 +51,7 @@ export const queryParams = (request: ccfapp.Request) => {
  * @returns A boolean indicating whether the string is a PEM public key.
  */
 export const isPemPublicKey = (key: string): boolean => {
+  const logContext = new LogContext({ scope: "isPemPublicKey" });
   const beginPatternLiteral = /-----BEGIN PUBLIC KEY-----\\n/;
   const endPatternLiteral = /\\n-----END PUBLIC KEY-----\\n$/;
   const beginPatternNewline = /-----BEGIN PUBLIC KEY-----\n/;
@@ -61,8 +62,8 @@ export const isPemPublicKey = (key: string): boolean => {
   const isNewline =
     beginPatternNewline.test(key) && endPatternNewline.test(key);
 
-  Logger.debug("isLiteralNewline:", isLiteralNewline);
-  Logger.debug("isNewline:", isNewline);
+  Logger.debug("isLiteralNewline:", logContext, isLiteralNewline);
+  Logger.debug("isNewline:", logContext, isNewline);
 
   return isLiteralNewline || isNewline;
 };

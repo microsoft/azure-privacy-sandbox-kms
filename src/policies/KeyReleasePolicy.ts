@@ -5,7 +5,7 @@ import * as ccfapp from "@microsoft/ccf-app";
 import { ccf } from "@microsoft/ccf-app/global";
 import { IKeyReleasePolicy, KeyReleasePolicyType } from "./IKeyReleasePolicy";
 import { IKeyReleasePolicySnpProps } from "./IKeyReleasePolicySnpProps";
-import { Logger } from "../utils/Logger";
+import { Logger, LogContext } from "../utils/Logger";
 import { ServiceResult } from "../utils/ServiceResult";
 import { IAttestationReport } from "../attestation/ISnpAttestationReport";
 
@@ -14,6 +14,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
   public claims = {
     "x-ms-attestation-type": ["snp"],
   };
+  private static readonly logContext = new LogContext().setScope("KeyReleasePolicy");
 
   private static validateKeyReleasePolicyClaims(
     keyReleasePolicyClaims: IKeyReleasePolicySnpProps,
@@ -26,12 +27,14 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
       return ServiceResult.Failed<string>(
         { errorMessage: "Missing key release policy" },
         500,
+        KeyReleasePolicy.logContext,
       );
     }
     if (attestationClaims === null || attestationClaims === undefined) {
       return ServiceResult.Failed<string>(
         { errorMessage: "Missing attestation claims" },
         500,
+        KeyReleasePolicy.logContext,
       );
     }
 
@@ -44,16 +47,18 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
       const isUndefined = typeof attestationValue === "undefined";
       Logger.debug(
         `Checking key ${key}, typeof attestationValue: ${typeof attestationValue}, isUndefined: ${isUndefined}, attestation value: ${attestationValue}, policyValue: ${policyValue}`,
+        KeyReleasePolicy.logContext
       );
       if (isUndefined) {
         return ServiceResult.Failed<string>(
           { errorMessage: `Missing claim in attestation: ${key}` },
           400,
+          KeyReleasePolicy.logContext,
         );
       }
       if (
         policyValue.filter((p) => {
-          Logger.debug(`Check if policy value ${p} === ${attestationValue}`);
+          Logger.debug(`Check if policy value ${p} === ${attestationValue}`, KeyReleasePolicy.logContext);
           return p.toString() === attestationValue.toString();
         }).length === 0
       ) {
@@ -62,10 +67,11 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
             errorMessage: `Attestation claim ${key}, value ${attestationValue} does not match policy values: ${policyValue}`,
           },
           400,
+          KeyReleasePolicy.logContext,
         );
       }
     }
-    return ServiceResult.Succeeded<IAttestationReport>(attestationClaims);
+    return ServiceResult.Succeeded<IAttestationReport>(attestationClaims, undefined, KeyReleasePolicy.logContext);
   }
 
   private static validateKeyReleasePolicyOperators(
@@ -80,12 +86,14 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
       return ServiceResult.Failed<string>(
         { errorMessage: "Missing key release policy" },
         500,
+        KeyReleasePolicy.logContext,
       );
     }
     if (attestationClaims === null || attestationClaims === undefined) {
       return ServiceResult.Failed<string>(
         { errorMessage: "Missing attestation claims" },
         500,
+        KeyReleasePolicy.logContext,
       );
     }
     const gte = type === "gte";
@@ -98,6 +106,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
       const isUndefined = typeof attestationValue === "undefined";
       Logger.debug(
         `Checking key ${key}, typeof attestationValue: ${typeof attestationValue}, isUndefined: ${isUndefined}, attestation value: ${attestationValue}, policyValue: ${policyValue}`,
+        KeyReleasePolicy.logContext
       );
       if (isUndefined) {
         return ServiceResult.Failed<string>(
@@ -105,6 +114,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
             errorMessage: `Missing claim in attestation: ${key} for operator type ${type}`,
           },
           400,
+          KeyReleasePolicy.logContext,
         );
       }
       if (policyValue === null || policyValue === undefined) {
@@ -113,6 +123,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
             errorMessage: `Missing policy value for claim ${key} for operator type ${type}`,
           },
           500,
+          KeyReleasePolicy.logContext
         );
       }
       if (
@@ -124,6 +135,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
             errorMessage: `Policy value for claim ${key} is not a number or a string representing a number for operator type ${type}`,
           },
           400,
+          KeyReleasePolicy.logContext,
         );
       }
 
@@ -137,6 +149,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
             errorMessage: `Policy value for claim ${key} is not a number or a string representing a number for operator type ${type} after conversion`,
           },
           400,
+          KeyReleasePolicy.logContext,
         );
       }
 
@@ -147,6 +160,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
       if (gte) {
         Logger.info(
           `Checking if attestation value ${attestationValue} is greater than or equal to policy value ${policyValue}`,
+          KeyReleasePolicy.logContext,
         );
         if (attestationValue >= policyValue === false) {
           return ServiceResult.Failed<string>(
@@ -154,11 +168,13 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
               errorMessage: `Attestation claim ${key}, value ${attestationValue} is not greater than or equal to policy value ${policyValue}`,
             },
             400,
+            KeyReleasePolicy.logContext,
           );
         }
       } else {
         Logger.info(
           `Checking if attestation value ${attestationValue} is greater than policy value ${policyValue}`,
+          KeyReleasePolicy.logContext,
         );
         if (attestationValue > policyValue === false) {
           return ServiceResult.Failed<string>(
@@ -166,11 +182,12 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
               errorMessage: `Attestation claim ${key}, value ${attestationValue} is not greater than policy value ${policyValue}`,
             },
             400,
+            KeyReleasePolicy.logContext,
           );
         }
       }
     }
-    return ServiceResult.Succeeded<IAttestationReport>(attestationClaims);
+    return ServiceResult.Succeeded<IAttestationReport>(attestationClaims, undefined, KeyReleasePolicy.logContext);
   }
 
   public static validateKeyReleasePolicy(
@@ -185,6 +202,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
             "The claims in the key release policy are missing. Please propose a new key release policy",
         },
         400,
+        KeyReleasePolicy.logContext,
       );
     }
 
@@ -200,7 +218,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
 
     // Check operators gte and gt
     if (keyReleasePolicy.gte !== null && keyReleasePolicy.gte !== undefined) {
-      Logger.info(`Validating gte operator`, keyReleasePolicy.gte);
+      Logger.info(`Validating gte operator`, KeyReleasePolicy.logContext, keyReleasePolicy.gte);
       policyValidationResult =
         KeyReleasePolicy.validateKeyReleasePolicyOperators(
           "gte",
@@ -209,7 +227,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
         );
     }
     if (keyReleasePolicy.gt !== null && keyReleasePolicy.gt !== undefined) {
-      Logger.info(`Validating gt operator`, keyReleasePolicy.gt);
+      Logger.info(`Validating gt operator`, KeyReleasePolicy.logContext, keyReleasePolicy.gt);
       policyValidationResult =
         KeyReleasePolicy.validateKeyReleasePolicyOperators(
           "gt",
@@ -262,7 +280,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
       }
     });
 
-    Logger.info(`Resulting key release policy: `, keyReleasePolicy);
+    Logger.info(`Resulting key release policy: `, KeyReleasePolicy.logContext, keyReleasePolicy);
     return keyReleasePolicy;
   };
 }
