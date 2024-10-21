@@ -11,4 +11,4 @@ paramiko==3.5.0
 pyasn1==0.6.1
 PyJWT==2.9.0
 pre-commit==3.5.0
-setuptools==72.0.0
+setuptools==75.2.0
