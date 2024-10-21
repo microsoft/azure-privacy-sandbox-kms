@@ -69,6 +69,27 @@ export class LogContext {
   getFormattedScopeString(): string {
     return this.scopeStack.join('->');
   }
+
+  /**
+   * Clears the scope stack and request ID.
+   */
+  clear(): void {
+    this.scopeStack = [];
+    this.requestId = undefined;
+  }
+
+  /**
+   * Clones the current LogContext instance.
+   * @returns A new instance of LogContext with the same scope stack and request ID as the current instance.
+   */
+  clone(): LogContext {
+    const clone = new LogContext();
+    clone.scopeStack = [...this.scopeStack];
+    if (this.requestId) {
+      clone.setRequestId(this.requestId);
+    }
+    return clone;
+  }
 }
 
 /**

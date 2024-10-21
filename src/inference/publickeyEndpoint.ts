@@ -58,7 +58,7 @@ export const listpubkeys = (
 
     delete keyItem.d;
     Logger.info(`Generate public key for key id: ${kid}`, logContext);
-    const publicKey: string = new OhttpPublicKey(keyItem).get();
+    const publicKey: string = new OhttpPublicKey(keyItem, logContext).get();
 
     const headers: { [key: string]: string } = {
       "content-type": "application/json",

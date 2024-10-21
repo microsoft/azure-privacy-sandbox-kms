@@ -37,7 +37,7 @@ export class ServiceRequest<T> {
     try {
       settings = Settings.loadSettings();
     } catch (error) {
-      const errorMessage = `Error loading settings: ${error}`;
+      const errorMessage = `${this.logContext.getBaseScope()}: Error loading settings: ${error}`;
       Logger.error(errorMessage, this.logContext);
       this.error = {
         errorMessage,
@@ -64,7 +64,7 @@ export class ServiceRequest<T> {
       this.body = request.body.json();
     } catch (exception) {
       this.error = {
-        errorMessage: `No valid JSON request for ${this.logContext.getFormattedScopeString()}`,
+        errorMessage: `${this.logContext.getBaseScope()}: No valid JSON request for ${this.logContext.getFormattedScopeString()}`,
       };
       this.success = false;
       return;
@@ -81,7 +81,7 @@ export class ServiceRequest<T> {
     ServiceResult<string>,
   ] {
     const [policy, isValidIdentity] =
-      new AuthenticationService().isAuthenticated(this.request);
+      new AuthenticationService(this.logContext).isAuthenticated(this.request);
 
     Logger.debug(
       `Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`, this.logContext

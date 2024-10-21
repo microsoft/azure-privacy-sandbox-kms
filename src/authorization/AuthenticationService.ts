@@ -29,9 +29,10 @@ export class AuthenticationService implements IAuthenticationService {
     CcfAuthenticationPolicyEnum,
     IValidatorService
   >();
-  private static readonly logContext = new LogContext().appendScope("AuthenticationService");
+  private logContext: LogContext;
 
-  constructor() {
+  constructor(logContext?: LogContext) {
+    this.logContext = (logContext?.clone() || new LogContext()).appendScope("AuthenticationService");
     this.validators.set(CcfAuthenticationPolicyEnum.Jwt, new JwtValidator());
     this.validators.set(
       CcfAuthenticationPolicyEnum.User_cert,
@@ -54,11 +55,11 @@ export class AuthenticationService implements IAuthenticationService {
       const caller = request.caller as unknown as ccfapp.AuthnIdentityCommon;
       if (!caller) {
         // no caller policy
-        return [caller, ServiceResult.Succeeded("", undefined, AuthenticationService.logContext)];
+        return [caller, ServiceResult.Succeeded("", undefined, this.logContext)];
       }
       Logger.debug(
         `Authorization: isAuthenticated result (AuthenticationService)-> ${caller.policy},${JSON.stringify(caller)}`,
-        AuthenticationService.logContext,
+        this.logContext,
       );
       const validator = this.validators.get(
         <CcfAuthenticationPolicyEnum>caller.policy,
@@ -70,7 +71,7 @@ export class AuthenticationService implements IAuthenticationService {
           ServiceResult.Failed({
             errorMessage: `Error: invalid caller identity (AuthenticationService)-> ${caller.policy}`,
             errorType: "AuthenticationError",
-          }, 400, AuthenticationService.logContext),
+          }, 400, this.logContext),
         ];
       }
 
@@ -81,7 +82,7 @@ export class AuthenticationService implements IAuthenticationService {
         ServiceResult.Failed({
           errorMessage: `Error: invalid caller identity (AuthenticationService)-> ${ex}`,
           errorType: "AuthenticationError",
-        }, 400, AuthenticationService.logContext),
+        }, 400, this.logContext),
       ];
     }
   }

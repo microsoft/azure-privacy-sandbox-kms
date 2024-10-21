@@ -25,11 +25,12 @@ import { Logger, LogContext } from "../utils/Logger";
 
 export class OhttpPublicKey {
   private messageCount = 0;
-  private static readonly logContext = new LogContext().appendScope("OhttpPublicKey");
+  private logContext: LogContext;
 
-  constructor(public keyItem: IKeyItem) {
-    Logger.info(`Generate OTTP public key for key id: ${this.keyItem.id}`, OhttpPublicKey.logContext);
-    Logger.debug(`KeyItem: `, OhttpPublicKey.logContext, keyItem);
+  constructor(public keyItem: IKeyItem, logContext?: LogContext) {
+    this.logContext = (logContext?.clone() || new LogContext()).appendScope("OhttpPublicKey");
+    Logger.info(`Generate OTTP public key for key id: ${this.keyItem.id}`, this.logContext);
+    Logger.debug(`KeyItem: `, this.logContext, keyItem);
   }
 
   public get(): string {
@@ -44,7 +45,7 @@ export class OhttpPublicKey {
       this.publicKey() +
       this.hpkeAlgorithmsLength() +
       this.hpkeSymmetricAlgorithms();
-    Logger.debug(`${OhttpPublicKey.name}: Public key length: ${this.keyLength()}`, OhttpPublicKey.logContext);
+    Logger.debug(`${OhttpPublicKey.name}: Public key length: ${this.keyLength()}`, this.logContext);
     return publicKey;
   }
 
@@ -67,10 +68,10 @@ export class OhttpPublicKey {
   private publicKey(): string {
     const x = Base64.toUint8Array(this.keyItem.x);
     const xHex = aToHex(x.buffer);
-    Logger.info(`Public key X: ${xHex}`, OhttpPublicKey.logContext);
+    Logger.info(`Public key X: ${xHex}`, this.logContext);
     const y = Base64.toUint8Array(this.keyItem.y);
     const yHex = aToHex(y.buffer);
-    Logger.info(`Public key Y: ${yHex}`, OhttpPublicKey.logContext);
+    Logger.info(`Public key Y: ${yHex}`, this.logContext);
     const publicKey = "04" + xHex + yHex;
     this.messageCount += publicKey.length / 2;
     return publicKey;
