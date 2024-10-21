@@ -21,7 +21,7 @@ export interface IPublicKey {
 export const listpubkeys = (
   request: ccfapp.Request<void>,
 ): ServiceResult<string | IPublicKey[]> => {
-  const logContext = new LogContext().setScope("listpubkeys");
+  const logContext = new LogContext().appendScope("listpubkeys");
   const serviceRequest = new ServiceRequest<void>(logContext, request);
   Logger.info(`Request received`, logContext);
 
@@ -35,7 +35,7 @@ export const listpubkeys = (
     if (keyItem === undefined) {
       return ServiceResult.Failed<string>(
         {
-          errorMessage: `${logContext.scope}: No keys in store`,
+          errorMessage: `${logContext.getBaseScope()}: No keys in store`,
         },
         400,
         logContext,
@@ -72,7 +72,7 @@ export const listpubkeys = (
 
     return ServiceResult.Succeeded<IPublicKey[]>(payload, headers, logContext);
   } catch (exception: any) {
-    const errorMessage = `${logContext.scope}: Error: ${exception.message}`;
+    const errorMessage = `${logContext.getBaseScope()}: Error: ${exception.message}`;
     console.error(errorMessage);
     return ServiceResult.Failed<string>({ errorMessage }, 500, logContext);
   }

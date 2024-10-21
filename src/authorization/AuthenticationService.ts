@@ -29,7 +29,7 @@ export class AuthenticationService implements IAuthenticationService {
     CcfAuthenticationPolicyEnum,
     IValidatorService
   >();
-  private static readonly logContext = new LogContext().setScope("AuthenticationService");
+  private static readonly logContext = new LogContext().appendScope("AuthenticationService");
 
   constructor() {
     this.validators.set(CcfAuthenticationPolicyEnum.Jwt, new JwtValidator());

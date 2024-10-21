@@ -27,7 +27,7 @@ export class ServiceRequest<T> {
 
     // Set log context if passed in scope string
     if (typeof logcontext === "string") {
-      this.logContext = new LogContext().setScope(logcontext);
+      this.logContext = new LogContext().appendScope(logcontext);
     } else {
       this.logContext = logcontext;
     }
@@ -49,22 +49,22 @@ export class ServiceRequest<T> {
     Logger.setLogLevelFromSettings(settings);
     Settings.logSettings(settings.settings);
 
-    Logger.info(`${this.logContext.scope} Request:`, this.logContext, request);
+    Logger.info(`Request:`, this.logContext, request);
     this.query = queryParams(request);
     if (this.query) {
-      Logger.info(`${this.logContext.scope} Query:`, this.logContext, this.query);
+      Logger.info(`Query:`, this.logContext, this.query);
     }
 
     this.headers = request.headers;
     if (this.headers) {
-      Logger.debug(`${this.logContext.scope} Headers:`, this.logContext, this.headers);
+      Logger.debug(`Headers:`, this.logContext, this.headers);
     }
 
     try {
       this.body = request.body.json();
     } catch (exception) {
       this.error = {
-        errorMessage: `No valid JSON request for ${this.logContext.scope}`,
+        errorMessage: `No valid JSON request for ${this.logContext.getFormattedScopeString()}`,
       };
       this.success = false;
       return;
@@ -84,7 +84,7 @@ export class ServiceRequest<T> {
       new AuthenticationService().isAuthenticated(this.request);
 
     Logger.debug(
-      `${this.logContext.scope} Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`, this.logContext
+      `Authorization: isAuthenticated-> ${JSON.stringify(isValidIdentity)}`, this.logContext
     );
     return [policy, isValidIdentity];
   }

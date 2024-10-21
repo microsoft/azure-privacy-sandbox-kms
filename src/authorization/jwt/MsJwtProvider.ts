@@ -25,7 +25,7 @@ export const authorizeJwt = (
   issuer: string,
   identity: ccfapp.JwtAuthnIdentity,
 ): ServiceResult<string> => {
-  const logContext = new LogContext({ scope: "MsJwtProvider->authorizeJwt" });
+  const logContext = new LogContext().appendScope("MsJwtProvider").appendScope("authorizeJwt");
   const policy = JwtValidationPolicyMap.read(issuer);
   if (policy === undefined) {
     const errorMessage = `issuer ${issuer} is not defined in the policy`;
@@ -78,7 +78,7 @@ export const authorizeJwt = (
 };
 
 export class MsJwtProvider implements IJwtIdentityProvider {
-  private static readonly logContext = new LogContext().setScope("MsJwtProvider");
+  private static readonly logContext = new LogContext().appendScope("MsJwtProvider");
   constructor(public name) { }
 
   /**

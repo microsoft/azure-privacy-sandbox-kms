@@ -17,7 +17,7 @@ interface CCFMember {
 }
 
 export class MemberCertValidator implements IValidatorService {
-  private static readonly logContext = new LogContext().setScope("MemberCertValidator");
+  private static readonly logContext = new LogContext().appendScope("MemberCertValidator");
 
   validate(request: ccfapp.Request<any>): ServiceResult<string> {
     const memberCaller = request.caller as unknown as UserMemberAuthnIdentity;

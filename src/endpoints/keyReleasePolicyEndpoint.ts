@@ -20,7 +20,7 @@ enableEndpoint();
 export const keyReleasePolicy = (
   request: ccfapp.Request<void>,
 ): ServiceResult<string | IKeyReleasePolicy> => {
-  const logContext = new LogContext({ scope: "keyReleasePolicy" });
+  const logContext = new LogContext().appendScope("keyReleasePolicy");
   const serviceRequest = new ServiceRequest<void>(logContext, request);
 
   // check if caller has a valid identity

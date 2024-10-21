@@ -17,27 +17,30 @@ export enum LogLevel {
  */
 export class LogContext {
   public readonly isLogContext: boolean = true;
-  scope?: string;
+  scopeStack: string[] = [];
   requestId?: string;
 
-  /**
-   * Constructor to initialize LogContext with optional scope and requestId.
-   * @param options - An object containing optional scope and requestId.
+  /** 
+   * Constructor to initialize a new instance of the LogContext class.
    */
-  constructor(options?: { scope?: string; requestId?: string }) {
-    if (options) {
-      this.scope = options.scope;
-      this.requestId = options.requestId;
-    }
-  }
+  constructor() { }
 
   /**
    * Sets the scope of the LogContext.
    * @param scope - The scope name (e.g., function or module name).
    * @returns The current instance of LogContext for method chaining.
    */
-  setScope(scope: string): LogContext {
-    this.scope = scope;
+  appendScope(scope: string): LogContext {
+    this.scopeStack.push(scope);
+    return this;
+  }
+
+  /**
+   * Removes the last scope from the scope stack.
+   * @returns The current instance of LogContext for method chaining.
+   */
+  popScope(): LogContext {
+    this.scopeStack.pop();
     return this;
   }
 
@@ -49,6 +52,22 @@ export class LogContext {
   setRequestId(requestId: string): LogContext {
     this.requestId = requestId;
     return this;
+  }
+
+  /**
+   * Gets the base (bottom) scope from the scope stack.
+   * @returns The base scope from the scope stack.
+   */
+  getBaseScope(): string | undefined {
+    return this.scopeStack.length > 0 ? this.scopeStack[0] : undefined;
+  }
+
+  /**
+   * Gets the formatted current scope string from the scope stack.
+   * @returns The formatted current scope string from the scope stack.
+   */
+  getFormattedScopeString(): string {
+    return this.scopeStack.join('->');
   }
 }
 
@@ -102,8 +121,8 @@ export class Logger {
 
     if (context) {
       const contextParts: string[] = [];
-      if (context.scope) {
-        contextParts.push(`scope=${context.scope}`);
+      if (context.scopeStack) {
+        contextParts.push(`scope=${context.getFormattedScopeString()}`);
       }
       if (context.requestId) {
         contextParts.push(`requestId=${context.requestId}`);

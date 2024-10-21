@@ -21,7 +21,7 @@ export class Settings {
    * Represents the settings for a policy.
    */
   constructor(public settings: ISettings) { }
-  private static readonly logContext = new LogContext().setScope("Settings");
+  private static readonly logContext = new LogContext().appendScope("Settings");
 
   /**
    * Returns the default settings for the Key Management Service.

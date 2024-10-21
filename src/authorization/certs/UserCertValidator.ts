@@ -32,7 +32,7 @@ export interface UserMemberAuthnIdentity extends ccfapp.AuthnIdentityCommon {
 }
 
 export class UserCertValidator implements IValidatorService {
-  private static readonly logContext = new LogContext().setScope("UserCertValidator");
+  private static readonly logContext = new LogContext().appendScope("UserCertValidator");
  
   validate(request: ccfapp.Request<any>): ServiceResult<string> {
     const userCaller = request.caller as unknown as UserMemberAuthnIdentity;

@@ -40,7 +40,7 @@ export const queryParams = (request: ccfapp.Request) => {
   for (let inx = 0; inx < elements.length; inx++) {
     const param = elements[inx].split("=");
     obj[param[0]] = param[1];
-    Logger.debug(`Query: ${param[0]} = ${param[1]}`, new LogContext({ scope: "queryParams" }));
+    Logger.debug(`Query: ${param[0]} = ${param[1]}`, new LogContext().appendScope("Tooling::queryParams"));
   }
   return obj;
 };
@@ -51,7 +51,7 @@ export const queryParams = (request: ccfapp.Request) => {
  * @returns A boolean indicating whether the string is a PEM public key.
  */
 export const isPemPublicKey = (key: string): boolean => {
-  const logContext = new LogContext({ scope: "isPemPublicKey" });
+  const logContext = new LogContext().appendScope("Tooling::isPemPublicKey");
   const beginPatternLiteral = /-----BEGIN PUBLIC KEY-----\\n/;
   const endPatternLiteral = /\\n-----END PUBLIC KEY-----\\n$/;
   const beginPatternNewline = /-----BEGIN PUBLIC KEY-----\n/;

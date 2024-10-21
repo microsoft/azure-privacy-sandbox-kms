@@ -4,7 +4,7 @@ import { Logger, LogContext } from "../../utils/Logger";
 const validationPolicyMapName = "public:ccf.gov.policies.jwt_validation";
 
 export class JwtValidationPolicyMap {
-  private static readonly logContext = new LogContext({ scope: "JwtValidationPolicyMap" });
+  private static readonly logContext = new LogContext().appendScope("JwtValidationPolicyMap");
   public static read(issuer: string): { [key: string]: string } | undefined {
     // For testing list all issuers
     const issuersMap = ccf.kv["public:ccf.gov.jwt.issuers"];

@@ -11,7 +11,7 @@ const errorType = "AuthenticationError";
 
 export class DemoJwtProvider implements IJwtIdentityProvider {
   constructor(public name: string) {}
-  private static readonly logContext = new LogContext({ scope: "DemoJwtProvider" });
+  private static readonly logContext = new LogContext().appendScope("DemoJwtProvider");
 
   /**
    * Check if caller's access token is valid

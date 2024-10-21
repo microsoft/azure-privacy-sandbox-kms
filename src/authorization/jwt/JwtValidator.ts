@@ -15,7 +15,7 @@ export class JwtValidator implements IValidatorService {
     JwtIdentityProviderEnum,
     IJwtIdentityProvider
   >();
-  private static readonly logContext = new LogContext({ scope: "JwtValidator" });
+  private static readonly logContext = new LogContext().appendScope("JwtValidator");
 
   constructor() {
     this.identityProviders.set(

@@ -10,7 +10,7 @@ import { KeyReleasePolicy } from "../policies/KeyReleasePolicy";
 
 export class MaaAttestationValidation {
   constructor(public jwtIdentity: ccfapp.JwtAuthnIdentity) {}
-  private static readonly logContext = new LogContext({ scope: "MaaAttestationValidation" });
+  private static readonly logContext = new LogContext().appendScope("MaaAttestationValidation");
 
   public validateAttestation(): ServiceResult<string | IMaaAttestationReport> {
     let errorMessage = "";

@@ -19,7 +19,7 @@ export class MaaWrapping {
     public keyItem: IKeyItem,
     public pubKey: JsonWebKeyRSAPublic,
   ) {}
-  private static readonly logContext = new LogContext().setScope("MaaWrapping");
+  private static readonly logContext = new LogContext().appendScope("MaaWrapping");
 
   public wrapKey(encrypted: boolean): MaaWrappedKey {
     const pubRsa = ccfcrypto.pubRsaJwkToPem(this.pubKey);

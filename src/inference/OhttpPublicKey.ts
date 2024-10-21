@@ -25,7 +25,7 @@ import { Logger, LogContext } from "../utils/Logger";
 
 export class OhttpPublicKey {
   private messageCount = 0;
-  private static readonly logContext = new LogContext().setScope("OhttpPublicKey");
+  private static readonly logContext = new LogContext().appendScope("OhttpPublicKey");
 
   constructor(public keyItem: IKeyItem) {
     Logger.info(`Generate OTTP public key for key id: ${this.keyItem.id}`, OhttpPublicKey.logContext);

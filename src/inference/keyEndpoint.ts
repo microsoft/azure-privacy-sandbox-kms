@@ -35,7 +35,7 @@ export interface IKeyResponse {
 export const key = (
   request: ccfapp.Request<IKeyRequest>,
 ): ServiceResult<string | IKeyResponse> => {
-  const logContext = new LogContext({ scope: "key" });
+  const logContext = new LogContext().appendScope("key");
   const serviceRequest = new ServiceRequest<IKeyRequest>(logContext, request);
 
   // check if caller has a valid identity

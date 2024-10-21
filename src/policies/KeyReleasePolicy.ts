@@ -14,7 +14,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
   public claims = {
     "x-ms-attestation-type": ["snp"],
   };
-  private static readonly logContext = new LogContext().setScope("KeyReleasePolicy");
+  private static readonly logContext = new LogContext().appendScope("KeyReleasePolicy");
 
   private static validateKeyReleasePolicyClaims(
     keyReleasePolicyClaims: IKeyReleasePolicySnpProps,

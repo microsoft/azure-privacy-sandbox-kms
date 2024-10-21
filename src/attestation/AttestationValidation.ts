@@ -19,7 +19,7 @@ import { KeyReleasePolicy } from "../policies/KeyReleasePolicy";
 export const validateAttestation = (
   attestation: ISnpAttestation,
 ): ServiceResult<string | IAttestationReport> => {
-  const logContext = new LogContext({ scope: "validateAttestation" });
+  const logContext = new LogContext().appendScope("validateAttestation");
   Logger.debug(`Start attestation validation`, logContext);
   if (!attestation) {
     return ServiceResult.Failed<string>(

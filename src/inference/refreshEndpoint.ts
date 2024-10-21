@@ -22,7 +22,7 @@ enableEndpoint();
 export const refresh = (
   request: ccfapp.Request<void>,
 ): ServiceResult<string | IKeyItem> => {
-  const logContext = new LogContext().setScope("refresh");
+  const logContext = new LogContext().appendScope("refresh");
   const serviceRequest = new ServiceRequest<void>(logContext, request);
 
   // check if caller has a valid identity
@@ -45,7 +45,7 @@ export const refresh = (
     delete keyItem.d;
     return ServiceResult.Succeeded<IKeyItem>(keyItem, undefined, logContext);
   } catch (exception: any) {
-    const errorMessage = `${logContext.scope}: Error: ${exception.message}`;
+    const errorMessage = `${logContext.getBaseScope()}: Error: ${exception.message}`;
     console.error(errorMessage);
     return ServiceResult.Failed<string>({ errorMessage }, 500, logContext);
   }
