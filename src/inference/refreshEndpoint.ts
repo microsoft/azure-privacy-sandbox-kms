@@ -22,7 +22,7 @@ enableEndpoint();
 export const refresh = (
   request: ccfapp.Request<void>,
 ): ServiceResult<string | IKeyItem> => {
-  const logContext = new LogContext().appendScope("refresh");
+  const logContext = new LogContext().appendScope("refreshEndpoint");
   const serviceRequest = new ServiceRequest<void>(logContext, request);
 
   // check if caller has a valid identity

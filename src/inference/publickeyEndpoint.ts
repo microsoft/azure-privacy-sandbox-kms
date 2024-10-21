@@ -21,7 +21,7 @@ export interface IPublicKey {
 export const listpubkeys = (
   request: ccfapp.Request<void>,
 ): ServiceResult<string | IPublicKey[]> => {
-  const logContext = new LogContext().appendScope("listpubkeys");
+  const logContext = new LogContext().appendScope("publickeyEndpoint");
   const serviceRequest = new ServiceRequest<void>(logContext, request);
   Logger.info(`Request received`, logContext);
 
