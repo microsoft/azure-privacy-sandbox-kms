@@ -180,7 +180,7 @@
     "/hearthbeat": {
       "get": {
         "js_module": "endpoints/kms.js",
-        "js_function": "hearthbeat",
+        "js_function": "heartbeat",
         "forwarding_required": "never",
         "authn_policies": [
           "user_cert",
@@ -192,7 +192,7 @@
         "openapi": {
           "responses": {
             "200": {
-              "description": "Generate a hearthbeat response"
+              "description": "Generate a heartbeat response"
             }
           }
         }

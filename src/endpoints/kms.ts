@@ -6,6 +6,7 @@ import { ServiceResult } from "../utils/ServiceResult";
 import { enableEndpoint } from "../utils/Tooling";
 import { ServiceRequest } from "../utils/ServiceRequest";
 import { Settings } from "../policies/Settings";
+import { LogContext } from "../utils/Logger";
 
 // Enable the endpoint
 enableEndpoint();
@@ -16,16 +17,16 @@ export interface IHeartbeatResponse {
 }
 
 /*
- * Hearthbeat endpoint currently used to test authorization
+ * Heartbeat endpoint currently used to test authorization
  *
  * @param request - The request object.
  * @returns A `ServiceResult` containing either a string or an `AuthnIdentityCommon` object.
  */
-export const hearthbeat = (
+export const heartbeat = (
   request: ccfapp.Request<void>,
 ): ServiceResult<string | IHeartbeatResponse> => {
-  const name = "hearthbeat";
-  const serviceRequest = new ServiceRequest<void>(name, request);
+  const logContext = new LogContext({ scope: "heartbeat" });
+  const serviceRequest = new ServiceRequest<void>(logContext, request);
 
   // check if caller has a valid identity
   const [policy, isValidIdentity] = serviceRequest.isAuthenticated();
@@ -42,5 +43,5 @@ export const hearthbeat = (
   return ServiceResult.Succeeded<IHeartbeatResponse>({
     auth: policy!,
     description,
-  });
+  }, undefined, logContext);
 };
