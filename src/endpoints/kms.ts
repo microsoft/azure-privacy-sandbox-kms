@@ -25,7 +25,7 @@ export interface IHeartbeatResponse {
 export const heartbeat = (
   request: ccfapp.Request<void>,
 ): ServiceResult<string | IHeartbeatResponse> => {
-  const logContext = new LogContext().appendScope("heartbeat");
+  const logContext = new LogContext().appendScope("heartbeatEndpoint");
   const serviceRequest = new ServiceRequest<void>(logContext, request);
 
   // check if caller has a valid identity
