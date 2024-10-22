@@ -51,7 +51,7 @@ export class ServiceRequest<T> {
 
     // Set request ID
     this.headers = request.headers;
-    const requestId = this.headers ? (this.headers['requestid'] || this.headers['request-id']) : undefined;
+    const requestId = this.headers ? this.headers['x-ms-request-id'] : undefined;
     if (requestId) {
       this.logContext.setRequestId(requestId);
     } else {
