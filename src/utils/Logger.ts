@@ -142,11 +142,11 @@ export class Logger {
 
     if (context) {
       const contextParts: string[] = [];
-      if (context.scopeStack) {
-        contextParts.push(`scope=${context.getFormattedScopeString()}`);
-      }
       if (context.requestId) {
         contextParts.push(`requestId=${context.requestId}`);
+      }
+      if (context.scopeStack) {
+        contextParts.push(`scope=${context.getFormattedScopeString()}`);
       }
       formattedMessage = `[${contextParts.join(',')}] ${formattedMessage}`;
     }

@@ -49,13 +49,24 @@ export class ServiceRequest<T> {
     Logger.setLogLevelFromSettings(settings);
     Settings.logSettings(settings.settings);
 
+    // Set request ID
+    this.headers = request.headers;
+    const requestId = this.headers ? (this.headers['requestid'] || this.headers['request-id']) : undefined;
+    if (requestId) {
+      this.logContext.setRequestId(requestId);
+    } else {
+      const requestId = Date.now().toString();
+      this.logContext.setRequestId(requestId);
+      Logger.warn(`Request ID not provided. Using current timestamp as request ID: ${requestId}`, this.logContext);
+    }
+
+    // Log request
     Logger.debug(`Request:`, this.logContext, request);
-    this.query = queryParams(request);
+    this.query = queryParams(request, this.logContext);
     if (this.query) {
       Logger.info(`Query:`, this.logContext, this.query);
     }
 
-    this.headers = request.headers;
     if (this.headers) {
       Logger.debug(`Headers:`, this.logContext, this.headers);
     }

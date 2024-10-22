@@ -4,6 +4,7 @@
 import * as ccfapp from "@microsoft/ccf-app";
 import { ccf } from "@microsoft/ccf-app/global";
 import { Logger, LogContext } from "./Logger";
+import { log } from "console";
 
 /**
  * Converts a Uint8Array to a string representation.
@@ -34,13 +35,14 @@ export const arrayBufferToHex = (buf: ArrayBuffer) => {
  * @param request - The request object containing the query parameters.
  * @returns An object representing the parsed query parameters.
  */
-export const queryParams = (request: ccfapp.Request) => {
+export const queryParams = (request: ccfapp.Request, logContextIn?: LogContext) => {
+  const logContext = (logContextIn?.clone() || new LogContext()).appendScope("queryParams");
   const elements = request.query.split("&");
   let obj = {};
   for (let inx = 0; inx < elements.length; inx++) {
     const param = elements[inx].split("=");
     obj[param[0]] = param[1];
-    Logger.debug(`Query: ${param[0]} = ${param[1]}`, new LogContext().appendScope("Tooling::queryParams"));
+    Logger.debug(`Query: ${param[0]} = ${param[1]}`, logContext);
   }
   return obj;
 };
@@ -50,8 +52,8 @@ export const queryParams = (request: ccfapp.Request) => {
  * @param key - The PEM key to be checked.
  * @returns A boolean indicating whether the string is a PEM public key.
  */
-export const isPemPublicKey = (key: string): boolean => {
-  const logContext = new LogContext().appendScope("Tooling::isPemPublicKey");
+export const isPemPublicKey = (key: string, logContextIn?: LogContext): boolean => {
+  const logContext = (logContextIn?.clone() || new LogContext()).appendScope("isPemPublicKey");
   const beginPatternLiteral = /-----BEGIN PUBLIC KEY-----\\n/;
   const endPatternLiteral = /\\n-----END PUBLIC KEY-----\\n$/;
   const beginPatternNewline = /-----BEGIN PUBLIC KEY-----\n/;
