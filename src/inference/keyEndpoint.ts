@@ -89,7 +89,7 @@ export const key = (
   let validateAttestationResult: ServiceResult<string | IMaaAttestationReport>;
   try {
     validateAttestationResult = new MaaAttestationValidation(
-      policy! as ccfapp.JwtAuthnIdentity,
+      policy! as ccfapp.JwtAuthnIdentity, logContext
     ).validateAttestation();
     if (!validateAttestationResult.success) {
       return ServiceResult.Failed<string>(
