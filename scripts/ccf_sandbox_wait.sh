@@ -5,6 +5,6 @@ response_code=000
 echo "Waiting for CCF to start at ${KMS_URL}..."
 while ! [[ $response_code -eq 400 || $response_code -eq 200 ]]; do
     sleep 1
-    response_code=$(curl $KMS_URL/node/network -k --cert ${KEYS_DIR}/member0_cert.pem --key ${KEYS_DIR}/member0_privk.pem -s -o /dev/null -w "%{http_code}")
+    response_code=$(curl $KMS_URL/node/network -k -s -o /dev/null -w "%{http_code}")
 done
 echo "CCF started"

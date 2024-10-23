@@ -40,3 +40,7 @@ def test_single_refresh(setup_kms):
 def test_multiple_refresh(setup_kms):
     refresh(setup_kms["url"])
     refresh(setup_kms["url"])
+
+if __name__ == "__main__":
+    import pytest
+    pytest.main([__file__, "-s"])

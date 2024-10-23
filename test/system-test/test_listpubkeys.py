@@ -42,3 +42,7 @@ def test_refresh_key_appears(setup_kms):
     refresh(setup_kms["url"])
     pubkeys = listpubkeys(setup_kms["url"])
     assert len(pubkeys) == 1
+
+if __name__ == "__main__":
+    import pytest
+    pytest.main([__file__, "-s"])

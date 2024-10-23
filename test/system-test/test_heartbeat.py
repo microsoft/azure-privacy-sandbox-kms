@@ -8,6 +8,7 @@ def heartbeat(kms_url):
     resp = subprocess.run(
         [
             "curl",
+            "-k",
             f"{kms_url}/app/heartbeat",
             "--cacert",
             f"{REPO_ROOT}/workspace/sandbox_common/service_cert.pem",
@@ -31,3 +32,7 @@ def heartbeat(kms_url):
 
 def test_heartbeat(setup_kms):  # Expected to fail because of typo in heartbeat
     heartbeat(setup_kms["url"])
+
+if __name__ == "__main__":
+    import pytest
+    pytest.main([__file__, '-s'])
