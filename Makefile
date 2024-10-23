@@ -159,6 +159,9 @@ ccf-sandbox-aci-down:
 ccf-sandbox-logs:
 	@docker compose -f ccf_sandbox/docker-compose.yml ccf_sandbox logs
 
+propose-constitution:
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_constitution.sh --network-url "${KMS_URL}" --certificate-dir "${KEYS_DIR}" --custom-constitution ./governance/constitution/kms_actions.js --member-count ${MEMBER_COUNT}
+
 # Keep this at the bottom.
 clean: ## 🧹 Clean the working folders created during build/demo
 	@rm -rf ${PYTHON_VENV}

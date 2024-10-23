@@ -4,6 +4,7 @@ import string
 import subprocess
 import pytest
 from dotenv import dotenv_values
+from utils import deploy_app_code
 
 REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 TEST_ENVIRONMENT = os.getenv("TEST_ENVIRONMENT", "local")
@@ -47,26 +48,7 @@ def teardown_cloud(kms_url):
     )
 
 
-def deploy_app_code(kms_url):
-    subprocess.run(
-        ["make", "deploy"],
-        env={
-            **os.environ,
-            "KMS_URL": kms_url,
-        },
-        cwd=REPO_ROOT,
-        check=True,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
-
-
-def apply_kms_constitution():
-    # This is a separate function so tests can decide if they need it or not
-    raise NotImplementedError("Todo")
-
-
-@pytest.fixture(scope="function" if TEST_ENVIRONMENT == "local" else "session")
+@pytest.fixture()
 def setup_kms():
 
     setup, teardown = {
