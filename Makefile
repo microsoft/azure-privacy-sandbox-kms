@@ -7,10 +7,12 @@ KEYS_DIR ?= ${KMS_WORKSPACE}/sandbox_common
 RUN_BACK ?= true
 CCF_PLATFORM ?= virtual
 
+ifndef MEMBER_COUNT
 ifeq ($(findstring https://127.0.0.1,$(KMS_URL)),https://127.0.0.1)
-    MEMBER_COUNT := 3
+	MEMBER_COUNT := 3
 else
-    MEMBER_COUNT := 1
+	MEMBER_COUNT := 1
+endif
 endif
 
 CCF_SANDBOX_EXTRA_ARGS ?=

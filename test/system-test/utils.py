@@ -25,6 +25,7 @@ def apply_kms_constitution(kms_url):
         env={
             **os.environ,
             "KMS_URL": kms_url,
+            "MEMBER_COUNT": "1",
         },
         cwd=REPO_ROOT,
         check=True,
@@ -36,6 +37,7 @@ def apply_key_release_policy(kms_url):
         env={
             **os.environ,
             "KMS_URL": kms_url,
+            "MEMBER_COUNT": "1",
         },
         cwd=REPO_ROOT,
         check=True,
@@ -47,6 +49,7 @@ def remove_key_release_policy(kms_url):
         env={
             **os.environ,
             "KMS_URL": kms_url,
+            "MEMBER_COUNT": "1",
         },
         cwd=REPO_ROOT,
         check=True,
