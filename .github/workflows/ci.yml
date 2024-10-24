@@ -1,5 +1,9 @@
 name: "KMS CI"
 
+permissions:
+   id-token: write
+   contents: read
+
 on:
   push:
     branches: [main]
