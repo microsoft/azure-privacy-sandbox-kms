@@ -23,6 +23,62 @@ jobs:
           pip install -r requirements.txt
           pytest -s test/system-test
 
+  aci-heartbeat:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install c_aci_testing package
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/install-c-aci-testing.sh
+
+      - name: Setup Docker
+        run: sudo usermod -aG docker $USER
+
+      - name: Log into Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
+          tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
+          subscription-id: ${{ vars.SUBSCRIPTION }}
+
+      - name: Test heartbeat in C-ACI
+        env:
+          TEST_ENVIRONMENT: cloud
+        run: |
+          pip install -r requirements.txt
+          pytest -s test/system-test/test_heartbeat.py
+
+  aci-keyReleasePolicy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install c_aci_testing package
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/install-c-aci-testing.sh
+
+      - name: Setup Docker
+        run: sudo usermod -aG docker $USER
+
+      - name: Log into Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
+          tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
+          subscription-id: ${{ vars.SUBSCRIPTION }}
+
+      - name: Test keyReleasePolicy in C-ACI
+        env:
+          TEST_ENVIRONMENT: cloud
+        run: |
+          pip install -r requirements.txt
+          pytest -s test/system-test/test_keyReleasePolicy.py
+
   aci-listpubkeys:
     runs-on: ubuntu-latest
     steps:
@@ -50,3 +106,59 @@ jobs:
         run: |
           pip install -r requirements.txt
           pytest -s test/system-test/test_listpubkeys.py
+
+  aci-pubkey:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install c_aci_testing package
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/install-c-aci-testing.sh
+
+      - name: Setup Docker
+        run: sudo usermod -aG docker $USER
+
+      - name: Log into Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
+          tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
+          subscription-id: ${{ vars.SUBSCRIPTION }}
+
+      - name: Test pubkey in C-ACI
+        env:
+          TEST_ENVIRONMENT: cloud
+        run: |
+          pip install -r requirements.txt
+          pytest -s test/system-test/test_pubkey.py
+
+  aci-refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install c_aci_testing package
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/install-c-aci-testing.sh
+
+      - name: Setup Docker
+        run: sudo usermod -aG docker $USER
+
+      - name: Log into Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
+          tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
+          subscription-id: ${{ vars.SUBSCRIPTION }}
+
+      - name: Test refresh in C-ACI
+        env:
+          TEST_ENVIRONMENT: cloud
+        run: |
+          pip install -r requirements.txt
+          pytest -s test/system-test/test_refresh.py
