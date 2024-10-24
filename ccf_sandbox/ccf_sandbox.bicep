@@ -1,5 +1,8 @@
+param registry string
 param location string
 param ccePolicies object
+param managedIDGroup string = resourceGroup().name
+param managedIDName string
 
 var kmsDnsName = deployment().name
 var kmsUrl = '${kmsDnsName}.${location}.azurecontainer.io'
@@ -18,10 +21,22 @@ var memberGetterPort = {
 resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2023-05-01' = {
   name: deployment().name
   location: location
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${resourceId(managedIDGroup, 'Microsoft.ManagedIdentity/userAssignedIdentities', managedIDName)}': {}
+    }
+  }
   properties: {
     osType: 'Linux'
     sku: 'Confidential'
     restartPolicy: 'Never'
+    imageRegistryCredentials: [
+      {
+        server: registry
+        identity: resourceId(managedIDGroup, 'Microsoft.ManagedIdentity/userAssignedIdentities', managedIDName)
+      }
+    ]
     ipAddress: {
       ports: [
         ccfSandboxPort
@@ -43,7 +58,7 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2023-05-01'
       {
         name: 'ccfsandbox'
         properties: {
-          image: 'ghcr.io/microsoft/ccf/app/dev/snp:latest'
+          image: '${registry}/ccf_sandbox/snp:latest'
           command: [
             '/bin/bash', '-c'
             join([

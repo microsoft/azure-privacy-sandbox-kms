@@ -144,7 +144,7 @@ ccf-sandbox-up:
 	@CCF_WORKSPACE=${KMS_WORKSPACE} docker compose -f ccf_sandbox/docker-compose.yml up ccf_sandbox --wait
 
 ccf-sandbox-aci-up:
-	@source ccf_sandbox/.env && c-aci-testing target run ccf_sandbox --no-cleanup --deployment-name $(deployment-name) --policy-type 'allow_all'
+	@source ccf_sandbox/.env && CCF_PLATFORM=snp c-aci-testing target run ccf_sandbox --no-cleanup --deployment-name $(deployment-name) --policy-type 'allow_all'
 	@source ccf_sandbox/.env && KMS_URL="https://$(deployment-name).$${LOCATION}.azurecontainer.io:8000" ./scripts/ccf_sandbox_wait.sh
 	@source ccf_sandbox/.env && rm -rf ${KMS_WORKSPACE} && wget -nv -r -np -nH --cut-dirs=0 -P ${KMS_WORKSPACE} http://$(deployment-name).$${LOCATION}.azurecontainer.io:8001
 	@source ccf_sandbox/.env && echo KMS_URL="https://$(deployment-name).$${LOCATION}.azurecontainer.io:8000"
