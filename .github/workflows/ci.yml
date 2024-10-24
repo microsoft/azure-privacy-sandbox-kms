@@ -61,5 +61,6 @@ jobs:
       - name: Run Local System Tests
         run: |
           pip install -r requirements.txt
-          pytest -s test/system-test/test_refresh.py
+          make ccf-sandbox-up
+          make deploy
 
