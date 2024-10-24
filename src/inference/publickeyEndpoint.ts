@@ -39,6 +39,7 @@ export const listpubkeys = (
         },
         400,
         logContext,
+        serviceRequest.requestId,
       );
     }
 
@@ -53,7 +54,7 @@ export const listpubkeys = (
       Logger.debug(`pubkey->Receipt: ${receipt}`, logContext);
     } else {
       Logger.warn(`Failed to get key receipt for key id: ${kid}, Retry later`, logContext);
-      return ServiceResult.Accepted(logContext);
+      return ServiceResult.Accepted(logContext, serviceRequest.requestId);
     }
 
     delete keyItem.d;
@@ -70,10 +71,10 @@ export const listpubkeys = (
       },
     ];
 
-    return ServiceResult.Succeeded<IPublicKey[]>(payload, headers, logContext);
+    return ServiceResult.Succeeded<IPublicKey[]>(payload, headers, logContext, serviceRequest.requestId);
   } catch (exception: any) {
     const errorMessage = `${logContext.getBaseScope()}: Error: ${exception.message}`;
     console.error(errorMessage);
-    return ServiceResult.Failed<string>({ errorMessage }, 500, logContext);
+    return ServiceResult.Failed<string>({ errorMessage }, 500, logContext, serviceRequest.requestId);
   }
 };

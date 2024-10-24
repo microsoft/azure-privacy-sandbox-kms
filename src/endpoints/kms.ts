@@ -43,5 +43,5 @@ export const heartbeat = (
   return ServiceResult.Succeeded<IHeartbeatResponse>({
     auth: policy!,
     description,
-  }, undefined, logContext);
+  }, undefined, logContext, serviceRequest.requestId);
 };

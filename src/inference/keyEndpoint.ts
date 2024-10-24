@@ -96,6 +96,7 @@ export const key = (
         validateAttestationResult.error!,
         validateAttestationResult.statusCode,
         logContext,
+        serviceRequest.requestId,
       );
     }
   } catch (exception: any) {
@@ -105,6 +106,7 @@ export const key = (
       },
       500,
       logContext,
+      serviceRequest.requestId,
     );
   }
 
@@ -119,6 +121,7 @@ export const key = (
         { errorMessage: `No keys in store` },
         400,
         logContext,
+        serviceRequest.requestId,
       );
     }
   } else {
@@ -128,7 +131,8 @@ export const key = (
       return ServiceResult.Failed<string>(
         { errorMessage: `kid ${kid} not found in store` },
         404,
-        logContext
+        logContext,
+        serviceRequest.requestId,
       );
     }
   }
@@ -142,7 +146,7 @@ export const key = (
     Logger.info(`Succesfully get key receipt for key id: ${kid}`, logContext);
     Logger.debug(`Key->Receipt: ${receipt}`, logContext);
   } else {
-    return ServiceResult.Accepted(logContext);
+    return ServiceResult.Accepted(logContext, serviceRequest.requestId);
   }
 
   // wrap the private key
@@ -159,7 +163,8 @@ export const key = (
         errorMessage: `Error in wrapping key (${JSON.stringify(policy)}): ${exception.message}`,
       },
       500,
-      logContext
+      logContext,
+      serviceRequest.requestId,
     );
   }
 
@@ -167,7 +172,7 @@ export const key = (
     kid: kid,
     key: wrappedKey.wrappedKey,
     receipt: receipt,
-  }, undefined, logContext);
+  }, undefined, logContext, serviceRequest.requestId);
 };
 
 //#endregion

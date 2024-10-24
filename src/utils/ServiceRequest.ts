@@ -18,6 +18,7 @@ export class ServiceRequest<T> {
   public readonly headers?: { [key: string]: string };
   public readonly query?: { [key: string]: string };
   public readonly error?: ErrorResponse;
+  public readonly requestId?: string;
   private readonly logContext: LogContext;
 
   constructor(
@@ -51,14 +52,23 @@ export class ServiceRequest<T> {
 
     // Set request ID
     this.headers = request.headers;
-    const requestId = this.headers ? this.headers['x-ms-request-id'] : undefined;
-    if (requestId) {
-      this.logContext.setRequestId(requestId);
+    const requestIdHeaderList = [
+      'x-ms-kms-request-id',
+      'x-ms-request-id',
+      'x-request-id',
+      'request-id',
+      'requestid',
+    ]
+    const requestIdFromHeader = requestIdHeaderList
+      .map((header) => this.headers ? this.headers[header] : undefined)
+      .find((header) => header !== undefined);
+    if (!requestIdFromHeader) {
+      this.requestId = Date.now().toString();
+      Logger.warn(`Request ID not provided. Using current timestamp as request ID: ${this.requestId}`, this.logContext);
     } else {
-      const requestId = Date.now().toString();
-      this.logContext.setRequestId(requestId);
-      Logger.warn(`Request ID not provided. Using current timestamp as request ID: ${requestId}`, this.logContext);
+      this.requestId = requestIdFromHeader;
     }
+    this.logContext.setRequestId(this.requestId);
 
     // Log request
     Logger.debug(`Request:`, this.logContext, request);
