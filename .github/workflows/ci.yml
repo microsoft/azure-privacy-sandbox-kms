@@ -52,14 +52,6 @@ jobs:
       - name: KMS Lint
         run: make lint
 
-  system-tests-local:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Run Local System Tests
-        run: |
-          pip install -r requirements.txt
-          pytest -s test/system-test
+  system-tests:
+    uses: ./.github/workflows/system_tests.yml
 

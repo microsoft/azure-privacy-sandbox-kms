@@ -1,0 +1,33 @@
+name: System Tests
+
+on:
+  workflow_dispatch:
+  workflow_call:
+  # push: # Run from ci.yml
+  # pull_request: # Run from ci.yml
+
+jobs:
+
+  local-all: # Since KMS deployment time is fast, run all tests sequentially
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Local System Tests
+        run: |
+          pip install -r requirements.txt
+          pytest -s test/system-test
+
+  aci-listpubkeys:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test listpubkeys in C-ACI
+        env:
+          TEST_ENVIRONMENT: cloud
+        run: |
+          pip install -r requirements.txt
+          pytest -s test/system-test/test_listpubkeys.py
