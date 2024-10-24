@@ -4,7 +4,6 @@
 import * as ccfapp from "@microsoft/ccf-app";
 import { ccf } from "@microsoft/ccf-app/global";
 import { Logger, LogContext } from "./Logger";
-import { log } from "console";
 
 /**
  * Converts a Uint8Array to a string representation.
