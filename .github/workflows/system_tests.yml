@@ -28,6 +28,7 @@ jobs:
       - name: Test listpubkeys in C-ACI
         env:
           TEST_ENVIRONMENT: cloud
+          GH_TOKEN: ${{ github.token }}
         run: |
           pip install -r requirements.txt
           ./scripts/install-c-aci-testing.sh
