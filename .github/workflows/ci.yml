@@ -62,5 +62,7 @@ jobs:
         run: |
           pip install -r requirements.txt
           make ccf-sandbox-up
+          tree workspace
+          chmod +r -R workspace
           make deploy
 
