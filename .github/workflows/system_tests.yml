@@ -30,11 +30,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: ./scripts/install-c-aci-testing.sh
 
-      - name: Install Azure CLI
-        env:
-          AZ_CLI_VERSION: 2.61.0
-        run: ./scripts/install-az-cli.sh
-
       - name: Setup Docker
         run: sudo usermod -aG docker $USER
 
