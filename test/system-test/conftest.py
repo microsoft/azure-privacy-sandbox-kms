@@ -16,6 +16,11 @@ def setup_local():
         cwd=REPO_ROOT,
         check=True,
     )
+    subprocess.run(
+        ["sudo", "chmod", "777", "-R", "workspace"],
+        cwd=REPO_ROOT,
+        check=True,
+    )
     return "https://127.0.0.1:8000"
 
 
