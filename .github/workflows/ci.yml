@@ -1,5 +1,9 @@
 name: "KMS CI"
 
+permissions:
+   id-token: write
+   contents: read
+
 on:
   push:
     branches: [main]
@@ -51,3 +55,7 @@ jobs:
 
       - name: KMS Lint
         run: make lint
+
+  system-tests:
+    secrets: inherit # pragma: allowlist secret
+    uses: ./.github/workflows/system_tests.yml

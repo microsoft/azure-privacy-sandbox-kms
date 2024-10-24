@@ -7,10 +7,12 @@ KEYS_DIR ?= ${KMS_WORKSPACE}/sandbox_common
 RUN_BACK ?= true
 CCF_PLATFORM ?= virtual
 
+ifndef MEMBER_COUNT
 ifeq ($(findstring https://127.0.0.1,$(KMS_URL)),https://127.0.0.1)
-    MEMBER_COUNT := 3
+	MEMBER_COUNT := 3
 else
-    MEMBER_COUNT := 1
+	MEMBER_COUNT := 1
+endif
 endif
 
 CCF_SANDBOX_EXTRA_ARGS ?=
@@ -107,7 +109,7 @@ propose-key-rotation-policy: ## 🚀 Deploy the key rotation policy to the sandb
 refresh-key: ## 🚀 Refresh a key on the instance
 	@echo -e "\e[34m$@\e[0m" || true
 	$(call check_defined, KMS_URL)
-	@CCF_PLATFORM=${CCF_PLATFORM} sleep 20;curl "${KMS_URL}"/app/refresh -X POST --cacert "${KEYS_DIR}"/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
+	@CCF_PLATFORM=${CCF_PLATFORM};curl "${KMS_URL}"/app/refresh -X POST --cacert "${KEYS_DIR}"/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
 
 set-constitution: start-host-idp ## Set new custom constitution
 	@echo -e "\e[34m$@\e[0m" || true
@@ -137,6 +139,30 @@ deploy: build ## 🚀 Deploy Managed CCF or local
 lint: ## 🔍 Lint the code base (but don't fix)
 	@echo -e "\e[34m$@\e[0m" || true
 	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/lint.sh --fix
+
+ccf-sandbox-up:
+	@CCF_WORKSPACE=${KMS_WORKSPACE} docker compose -f ccf_sandbox/docker-compose.yml up ccf_sandbox --wait
+
+ccf-sandbox-aci-up:
+	@source ccf_sandbox/.env && CCF_PLATFORM=snp c-aci-testing target run ccf_sandbox --no-cleanup --deployment-name $(deployment-name) --policy-type 'allow_all'
+	@source ccf_sandbox/.env && KMS_URL="https://$(deployment-name).$${LOCATION}.azurecontainer.io:8000" ./scripts/ccf_sandbox_wait.sh
+	@source ccf_sandbox/.env && rm -rf ${KMS_WORKSPACE} && wget -nv -r -np -nH --cut-dirs=0 -P ${KMS_WORKSPACE} http://$(deployment-name).$${LOCATION}.azurecontainer.io:8001
+	@source ccf_sandbox/.env && echo KMS_URL="https://$(deployment-name).$${LOCATION}.azurecontainer.io:8000"
+
+ccf-sandbox-attach:
+	@docker compose -f ccf_sandbox/docker-compose.yml exec ccf_sandbox /bin/bash
+
+ccf-sandbox-down:
+	@docker compose -f ccf_sandbox/docker-compose.yml down ccf_sandbox --remove-orphans
+
+ccf-sandbox-aci-down:
+	@source ccf_sandbox/.env && c-aci-testing aci remove --deployment-name $(deployment-name)
+
+ccf-sandbox-logs:
+	@docker compose -f ccf_sandbox/docker-compose.yml ccf_sandbox logs
+
+propose-constitution:
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_constitution.sh --network-url "${KMS_URL}" --certificate-dir "${KEYS_DIR}" --custom-constitution ./governance/constitution/kms_actions.js --member-count ${MEMBER_COUNT}
 
 # Keep this at the bottom.
 clean: ## 🧹 Clean the working folders created during build/demo
