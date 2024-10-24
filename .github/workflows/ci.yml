@@ -61,9 +61,10 @@ jobs:
       - name: Run Local System Tests
         run: |
           pip install -r requirements.txt
-          mkdir workspace && chown runner:runner -R workspace
+          mkdir workspace
           make ccf-sandbox-up
           ls -la workspace
           ls -la workspace/sandbox_common
+          sudo chmod 777 -R workspace
           make deploy
 
