@@ -4,8 +4,11 @@ import subprocess
 
 REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
-def kms_request(endpoint, method="GET"):
+def kms_request(endpoint, method="GET", headers=[], body=None):
     delimiter = "\n___END___"
+    header_arg = []
+    for header in headers:
+        header_arg.extend(["-H", f'"{header}"'])
     resp = subprocess.run(
         [
             "curl",
@@ -18,6 +21,8 @@ def kms_request(endpoint, method="GET"):
             f"{REPO_ROOT}/workspace/sandbox_common/member0_cert.pem",
             "--key",
             f"{REPO_ROOT}/workspace/sandbox_common/member0_privk.pem",
+            *header_arg,
+            *(["-d", body] if body is not None else []),
             "-s",
             "-w", f"{delimiter}%{{http_code}}\n"
         ],
@@ -37,6 +42,14 @@ def kms_request(endpoint, method="GET"):
 
 def heartbeat(kms_url):
     return kms_request(f"{kms_url}/app/heartbeat")
+
+
+def key(kms_url, attestation, wrapping_key):
+    return kms_request(
+        endpoint=f"{kms_url}/app/key",
+        method="POST",
+        body=f'{{\"attestation\": {attestation}, \"wrappingKey\": {wrapping_key}}}',
+    )
 
 
 def listpubkeys(kms_url):
