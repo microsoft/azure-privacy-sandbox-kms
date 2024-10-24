@@ -51,3 +51,13 @@ jobs:
 
       - name: KMS Lint
         run: make lint
+
+  system-tests-local:
+    runs-on: ubuntu
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Local System Tests
+        run: pytest -s test/system_test
+
