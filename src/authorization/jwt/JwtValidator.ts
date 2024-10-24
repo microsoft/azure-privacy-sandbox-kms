@@ -21,7 +21,7 @@ export class JwtValidator implements IValidatorService {
     this.logContext = (logContext?.clone() || new LogContext()).appendScope("JwtValidator");
     this.identityProviders.set(
       JwtIdentityProviderEnum.MAA_deus2,
-      new MsJwtProvider("JwtMaaProvider"),
+      new MsJwtProvider("JwtMaaProvider", this.logContext),
     );
     Logger.debug(
       "JwtIdentityProviderEnum.MAA_deus2",
