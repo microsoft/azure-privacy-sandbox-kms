@@ -53,5 +53,5 @@ jobs:
         run: make lint
 
   system-tests:
+    secrets: inherit # pragma: allowlist secret
     uses: ./.github/workflows/system_tests.yml
-
