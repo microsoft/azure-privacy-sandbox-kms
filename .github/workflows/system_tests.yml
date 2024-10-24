@@ -30,4 +30,5 @@ jobs:
           TEST_ENVIRONMENT: cloud
         run: |
           pip install -r requirements.txt
+          ./scripts/install-c-aci-testing.sh
           pytest -s test/system-test/test_listpubkeys.py
