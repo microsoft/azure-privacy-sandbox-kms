@@ -44,4 +44,4 @@ jobs:
           TEST_ENVIRONMENT: cloud
         run: |
           pip install -r requirements.txt
-          pytest -s test/system-test/${{ inputs.pytest_path }}
+          pytest -sv test/system-test/${{ inputs.pytest_path }}

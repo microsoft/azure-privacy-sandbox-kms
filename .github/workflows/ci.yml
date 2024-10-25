@@ -57,7 +57,7 @@ jobs:
         run: make lint
 
 
-  system-tests-local: # Since KMS deployment time is fast, run all tests sequentially
+  local: # Since KMS deployment time is fast, run all tests sequentially
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -66,10 +66,46 @@ jobs:
       - name: Run Local System Tests
         run: |
           pip install -r requirements.txt
-          pytest -s test/system-test
+          pytest -sv test/system-test
 
-  system-tests-c-aci-heartbeat:
+  c-aci-heartbeat:
+    name: c-aci
     secrets: inherit # pragma: allowlist secret
     uses: ./.github/workflows/c_aci_system_tests.yml
     with:
       pytest_path: test_heartbeat.py
+
+  c-aci-key:
+    name: c-aci
+    secrets: inherit # pragma: allowlist secret
+    uses: ./.github/workflows/c_aci_system_tests.yml
+    with:
+      pytest_path: test_key.py
+
+  c-aci-keyReleasePolicy:
+    name: c-aci
+    secrets: inherit # pragma: allowlist secret
+    uses: ./.github/workflows/c_aci_system_tests.yml
+    with:
+      pytest_path: test_keyReleasePolicy.py
+
+  c-aci-listpubkeys:
+    name: c-aci
+    secrets: inherit # pragma: allowlist secret
+    uses: ./.github/workflows/c_aci_system_tests.yml
+    with:
+      pytest_path: test_listpubkeys.py
+
+  c-aci-pubkey:
+    name: c-aci
+    secrets: inherit # pragma: allowlist secret
+    uses: ./.github/workflows/c_aci_system_tests.yml
+    with:
+      pytest_path: test_pubkey.py
+
+  c-aci-refresh:
+    name: c-aci
+    secrets: inherit # pragma: allowlist secret
+    uses: ./.github/workflows/c_aci_system_tests.yml
+    with:
+      pytest_path: test_refresh.py
