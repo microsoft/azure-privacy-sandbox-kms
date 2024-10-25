@@ -56,6 +56,20 @@ jobs:
       - name: KMS Lint
         run: make lint
 
-  system-tests:
+
+  system-tests-local: # Since KMS deployment time is fast, run all tests sequentially
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Local System Tests
+        run: |
+          pip install -r requirements.txt
+          pytest -s test/system-test
+
+  system-tests-c-aci-heartbeat:
     secrets: inherit # pragma: allowlist secret
-    uses: ./.github/workflows/system_tests.yml
+    uses: ./.github/workflows/c_aci_system_tests.yml
+    with:
+      pytest_path: test_heartbeat.py
