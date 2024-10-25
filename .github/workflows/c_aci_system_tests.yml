@@ -18,7 +18,7 @@ on:
 
 jobs:
   aci-system-test:
-    name: "test-${{ inputs.pytest_path }}"
+    name: ${{ inputs.pytest_path }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
