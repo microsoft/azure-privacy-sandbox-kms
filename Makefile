@@ -141,22 +141,22 @@ lint: ## 🔍 Lint the code base (but don't fix)
 	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/lint.sh --fix
 
 ccf-sandbox-up:
-	@CCF_WORKSPACE=${KMS_WORKSPACE} docker compose -f ccf_sandbox/docker-compose.yml up ccf_sandbox --wait
+	@echo "" && CCF_WORKSPACE=${KMS_WORKSPACE} docker compose -f ccf_sandbox/docker-compose.yml up ccf_sandbox --wait
 
 ccf-sandbox-aci-up:
-	@source ccf_sandbox/.env && CCF_PLATFORM=snp c-aci-testing target run ccf_sandbox --no-cleanup --deployment-name $(deployment-name) --policy-type 'allow_all'
-	@source ccf_sandbox/.env && KMS_URL="https://$(deployment-name).$${LOCATION}.azurecontainer.io:8000" ./scripts/ccf_sandbox_wait.sh
-	@source ccf_sandbox/.env && rm -rf ${KMS_WORKSPACE} && wget -nv -r -np -nH --cut-dirs=0 -P ${KMS_WORKSPACE} http://$(deployment-name).$${LOCATION}.azurecontainer.io:8001
-	@source ccf_sandbox/.env && echo KMS_URL="https://$(deployment-name).$${LOCATION}.azurecontainer.io:8000"
+	@echo "" && source ccf_sandbox/.env && CCF_PLATFORM=snp c-aci-testing target run ccf_sandbox --no-cleanup --deployment-name $(deployment-name) --policy-type 'allow_all'
+	@echo "" && source ccf_sandbox/.env && KMS_URL="https://$(deployment-name).$${LOCATION}.azurecontainer.io:8000" ./scripts/ccf_sandbox_wait.sh
+	@echo "" && source ccf_sandbox/.env && rm -rf ${KMS_WORKSPACE} && wget -nv -r -np -nH --cut-dirs=0 -P ${KMS_WORKSPACE} http://$(deployment-name).$${LOCATION}.azurecontainer.io:8001
+	@echo "" && source ccf_sandbox/.env && echo KMS_URL="https://$(deployment-name).$${LOCATION}.azurecontainer.io:8000"
 
 ccf-sandbox-attach:
 	@docker compose -f ccf_sandbox/docker-compose.yml exec ccf_sandbox /bin/bash
 
 ccf-sandbox-down:
-	@docker compose -f ccf_sandbox/docker-compose.yml down ccf_sandbox --remove-orphans
+	@echo "" && docker compose -f ccf_sandbox/docker-compose.yml down ccf_sandbox --remove-orphans
 
 ccf-sandbox-aci-down:
-	@source ccf_sandbox/.env && c-aci-testing aci remove --deployment-name $(deployment-name)
+	@echo "" && source ccf_sandbox/.env && c-aci-testing aci remove --deployment-name $(deployment-name)
 
 ccf-sandbox-logs:
 	@docker compose -f ccf_sandbox/docker-compose.yml ccf_sandbox logs
