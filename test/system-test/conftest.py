@@ -11,6 +11,7 @@ TEST_ENVIRONMENT = os.getenv("TEST_ENVIRONMENT", "local")
 
 
 def setup_local():
+    print("") # Stop this squashing other logs
     subprocess.run(
         ["make", "ccf-sandbox-up"],
         cwd=REPO_ROOT,
@@ -29,6 +30,7 @@ def setup_local():
 
 
 def teardown_local(kms_url):
+    print("") # Stop this squashing other logs
     subprocess.run(
         ["make", "ccf-sandbox-down"],
         cwd=REPO_ROOT,
