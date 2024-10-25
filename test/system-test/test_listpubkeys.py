@@ -2,7 +2,7 @@ import pytest
 from endpoints import listpubkeys, refresh
 
 
-@pytest.mark.xfail # TODO: Fix, see #167
+@pytest.mark.xfail(strict=True) # TODO: Fix, see #167
 def test_no_keys_initially(setup_kms):
     status_code, pubkeys = listpubkeys(setup_kms["url"])
     assert status_code == 200

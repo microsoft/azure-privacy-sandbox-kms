@@ -5,7 +5,7 @@ from endpoints import keyReleasePolicy
 # TODO: Assert what we would expect the key release policy to be for all tests
 
 
-@pytest.mark.xfail # TODO: Fix #175
+@pytest.mark.xfail(strict=True) # TODO: Fix #175
 def test_keyReleasePolicy_with_no_policy(setup_kms):
     status_code, key_release_json = keyReleasePolicy(setup_kms["url"])
     assert status_code == 200

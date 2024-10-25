@@ -2,13 +2,13 @@ import pytest
 from endpoints import pubkey, refresh
 
 
-@pytest.mark.xfail # TODO: Fix #167
+@pytest.mark.xfail(strict=True) # TODO: Fix #167
 def test_no_params_no_keys(setup_kms):
     status_code, key_json = pubkey(setup_kms["url"])
     assert status_code == 200
 
 
-def test_no_params_with_keys(setup_kms):
+def test_no_params_with_single_key(setup_kms):
     refresh(setup_kms["url"])
     while True:
         status_code, key_json = pubkey(setup_kms["url"])
@@ -16,6 +16,17 @@ def test_no_params_with_keys(setup_kms):
             break
     assert status_code == 200
     assert key_json["id"] == 100001
+
+
+def test_no_params_with_multiple_keys(setup_kms):
+    refresh(setup_kms["url"])
+    refresh(setup_kms["url"])
+    while True:
+        status_code, key_json = pubkey(setup_kms["url"])
+        if status_code != 202:
+            break
+    assert status_code == 200
+    assert key_json["id"] == 100002
 
 
 def test_kid_not_present_with_other_keys(setup_kms):

@@ -2,7 +2,7 @@ import pytest
 from endpoints import heartbeat
 
 
-@pytest.mark.xfail # TODO: Fix #168
+@pytest.mark.xfail(strict=True) # TODO: Fix #168
 def test_heartbeat(setup_kms):
     status_code, heartbeat_json = heartbeat(setup_kms["url"])
     assert status_code == 200

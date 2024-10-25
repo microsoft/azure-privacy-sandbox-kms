@@ -44,9 +44,16 @@ def heartbeat(kms_url):
     return kms_request(f"{kms_url}/app/heartbeat")
 
 
-def key(kms_url, attestation, wrapping_key):
+def key(kms_url, attestation, wrapping_key, kid=None, fmt=None):
+    query_string = ""
+    if kid is not None or fmt is not None:
+        query_string = "?"
+    query_string += "&".join([
+        *([f"kid={kid}"] if kid is not None else []),
+        *([f"fmt={fmt}"] if fmt is not None else []),
+    ])
     return kms_request(
-        endpoint=f"{kms_url}/app/key",
+        endpoint=f"{kms_url}/app/key{query_string}",
         method="POST",
         body=f'{{\"attestation\": {attestation}, \"wrappingKey\": {wrapping_key}}}',
     )
