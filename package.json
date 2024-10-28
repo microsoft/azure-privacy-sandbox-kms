@@ -22,7 +22,7 @@
     "pem-jwk": "2.0.0"
   },
   "devDependencies": {
-    "@babel/core": "7.25.7",
+    "@babel/core": "7.26.0",
     "@babel/preset-env": "7.25.7",
     "@babel/preset-typescript": "7.25.7",
     "@jest/globals": "29.7.0",
