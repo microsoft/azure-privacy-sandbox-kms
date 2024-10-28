@@ -93,12 +93,12 @@ fi
 echo Proposal ID: $proposal0_id
 
 # proposal submitter vote for proposal
-ccf_cose_sign1 --content ${app_dir}/governance/vote/vote_accept.json --signing-cert $signing_cert --signing-key $signing_key --ccf-gov-msg-type ballot --ccf-gov-msg-created_at $(date -Is) --ccf-gov-msg-proposal_id $proposal0_id | curl $network_url/gov/proposals/$proposal0_id/ballots -k -H "Content-Type: application/cose" --data-binary @- --cacert $service_cert -w '\n'
+# ccf_cose_sign1 --content ${app_dir}/governance/vote/vote_accept.json --signing-cert $signing_cert --signing-key $signing_key --ccf-gov-msg-type ballot --ccf-gov-msg-created_at $(date -Is) --ccf-gov-msg-proposal_id $proposal0_id | curl $network_url/gov/proposals/$proposal0_id/ballots -k -H "Content-Type: application/cose" --data-binary @- --cacert $service_cert -w '\n'
 
-for ((i = 1 ; i < $member_count ; i++)); do
-  signing_cert="$certificate_dir/member${i}_cert.pem"
-  signing_key="$certificate_dir/member${i}_privk.pem"
-  ccf_cose_sign1 --content ${app_dir}/governance/vote/vote_accept.json --signing-cert $signing_cert --signing-key $signing_key --ccf-gov-msg-type ballot --ccf-gov-msg-created_at $(date -Is) --ccf-gov-msg-proposal_id $proposal0_id | curl $network_url/gov/proposals/$proposal0_id/ballots -k -H "Content-Type: application/cose" --data-binary @- --cacert $service_cert  -w '\n'
-done
+# for ((i = 1 ; i < $member_count ; i++)); do
+#   signing_cert="$certificate_dir/member${i}_cert.pem"
+#   signing_key="$certificate_dir/member${i}_privk.pem"
+#   ccf_cose_sign1 --content ${app_dir}/governance/vote/vote_accept.json --signing-cert $signing_cert --signing-key $signing_key --ccf-gov-msg-type ballot --ccf-gov-msg-created_at $(date -Is) --ccf-gov-msg-proposal_id $proposal0_id | curl $network_url/gov/proposals/$proposal0_id/ballots -k -H "Content-Type: application/cose" --data-binary @- --cacert $service_cert  -w '\n'
+# done
 
-curl $network_url/gov/proposals/$proposal0_id -k -H "Content-Type: application/json" --cacert $service_cert | jq
+# curl $network_url/gov/proposals/$proposal0_id -k -H "Content-Type: application/json" --cacert $service_cert | jq

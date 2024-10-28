@@ -1,0 +1,32 @@
+services:
+
+  ccf-sandbox:
+    image: azurekms.azurecr.io/ccf_sandbox/${CCF_PLATFORM:-virtual}:latest
+    build:
+      context: ./ccf-sandbox
+      dockerfile: Dockerfile
+      args:
+        - CCF_PLATFORM=${CCF_PLATFORM:-virtual}
+    command: /opt/ccf_${CCF_PLATFORM:-virtual}/bin/sandbox.sh --http2
+    network_mode: host
+    healthcheck:
+      test: ["CMD", "curl", "-k", "--fail", "https://localhost:8000/node/network"]
+      interval: 1s
+      retries: 120
+    volumes:
+      - ${WORKSPACE:-./}:/workspace
+
+  jwt-issuer:
+    image: azurekms.azurecr.io/jwt_issuer:latest
+    build:
+      context: ./jwt-issuer
+      dockerfile: Dockerfile
+    network_mode: host
+    environment:
+      - KMS_WORKSPACE=/workspace
+    healthcheck:
+      test: ["CMD", "curl", "-k", "--fail", "-X", "POST", "http://localhost:3000/token"]
+      interval: 1s
+      retries: 120
+    volumes:
+      - ${WORKSPACE:-./}:/workspace

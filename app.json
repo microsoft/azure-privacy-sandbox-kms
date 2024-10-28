@@ -38,7 +38,7 @@
             "in": "query",
             "name": "fmt",
             "required": false
-          }
+        }
         ],
         "openapi": {
           "responses": {
