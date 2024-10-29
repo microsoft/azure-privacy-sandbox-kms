@@ -138,14 +138,14 @@ make setup
 ## Manual tests
 
 ```
-# Testing with hearthbeat: Use user certs
-curl ${KMS_URL}/app/hearthbeat --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -w '\n' | jq
+# Testing with heartbeat: Use user certs
+curl ${KMS_URL}/app/heartbeat --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -w '\n' | jq
 
-# Testing with hearthbeat: Use member certs
-curl ${KMS_URL}/app/hearthbeat --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/member0_cert.pem --key ${KEYS_DIR}/member0_privk.pem -H "Content-Type: application/json" -w '\n' | jq
+# Testing with heartbeat: Use member certs
+curl ${KMS_URL}/app/heartbeat --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/member0_cert.pem --key ${KEYS_DIR}/member0_privk.pem -H "Content-Type: application/json" -w '\n' | jq
 
-# Testing with hearthbeat: Use JWT
-curl ${KMS_URL}/app/hearthbeat --cacert ${KEYS_DIR}/service_cert.pem  -H "Content-Type: application/json" -H "Authorization:$AUTHORIZATION"  -w '\n' | jq
+# Testing with heartbeat: Use JWT
+curl ${KMS_URL}/app/heartbeat --cacert ${KEYS_DIR}/service_cert.pem  -H "Content-Type: application/json" -H "Authorization:$AUTHORIZATION"  -w '\n' | jq
 
 # Generate a new key item
 curl ${KMS_URL}/app/refresh -X POST --cacert ${KEYS_DIR}/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'

@@ -30,7 +30,7 @@ export interface DemoProps {
   proposalPath: string;
   keyPath: string;
   unwrapPath: string;
-  hearthbeatPath: string;
+  heartbeatPath: string;
   keyReleasePolicyPath: string;
   pubkeyPath: string;
   listpubkeysPath: string;
@@ -57,7 +57,7 @@ class Demo {
     proposalPath: `/gov/proposals`,
     keyPath: `/app/key`,
     unwrapPath: `/app/unwrapKey`,
-    hearthbeatPath: `/app/hearthbeat`,
+    heartbeatPath: `/app/heartbeat`,
     keyReleasePolicyPath: `/app/keyReleasePolicy`,
     pubkeyPath: `/app/pubkey`,
     listpubkeysPath: `/app/listpubkeys`,
@@ -141,11 +141,11 @@ class Demo {
       return !Number.isNaN(toTest) && toTest > 0;
     };
 
-    //#region hearthbeat
-    // authorization on hearthbeat
+    //#region heartbeat
+    // authorization on heartbeat
     const member = this.members[0];
     console.log(`📝 Heartbeat...`);
-    let [statusCode, hearthBeatResponse] = await Api.hearthbeat(
+    let [statusCode, hearthBeatResponse] = await Api.heartbeat(
       this.demoProps,
       member,
       this.createHttpsAgent("", AuthKinds.JWT),

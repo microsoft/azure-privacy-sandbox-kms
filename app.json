@@ -294,7 +294,7 @@
         "openapi": {
           "responses": {
             "200": {
-              "description": "Generate a hearthbeat response"
+              "description": "Generate a heartbeat response"
             }
           }
         }
@@ -310,7 +310,7 @@
         "openapi": {
           "responses": {
             "200": {
-              "description": "Generate a hearthbeat response"
+              "description": "Generate a heartbeat response"
             }
           }
         }
