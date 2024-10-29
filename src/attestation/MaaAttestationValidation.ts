@@ -22,7 +22,7 @@ export class MaaAttestationValidation {
       return ServiceResult.Failed<string>({ errorMessage }, 400, this.logContext);
     }
 
-    const attestation = new MaaAttestationClaims(this.jwtIdentity).getClaims();
+    const attestation = new MaaAttestationClaims(this.jwtIdentity, this.logContext).getClaims();
 
     if (attestation === undefined) {
       errorMessage = "Authentication Policy must be set";
