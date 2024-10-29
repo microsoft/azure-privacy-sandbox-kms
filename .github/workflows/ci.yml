@@ -1,4 +1,4 @@
-name: "KMS CI"
+name: CI
 
 permissions:
    id-token: write
@@ -12,75 +12,80 @@ on:
   workflow_dispatch:
 
 jobs:
-  kms:
-    name: kms
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          persist-credentials: false
 
-      - name: Build DevContainer
-        uses: devcontainers/ci@v0.3
-        with:
-          push: never
-          configFile: .devcontainer/devcontainer.json
-          runCmd: |
-            scripts/set_python_env.sh && pip install -r requirements.txt && make demo && npm run test
-        env:
-          KMS_WORKSPACE: ./workspace
+  system:
+    secrets: inherit # pragma: allowlist secret
+    uses: ./.github/workflows/system-tests.yml
 
-  test-mccf-kms:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  # kms:
+  #   name: kms
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 0
+  #         persist-credentials: false
 
-      - name: Test mCCF KMS
-        run: |
-          . ./scripts/setup_mCCF.sh
-          ./scripts/test_curl.sh
-        env:
-          PUBLIC_CERT_PEM: ${{ secrets.PUBLIC_CERT_PEM }}
-          PRIVATE_CERT_PEM: ${{ secrets.PRIVATE_CERT_PEM }}
-          CCF_NAME: ${{ secrets.DEPLOYMENT_MCCF }}
+  #     - name: Build DevContainer
+  #       uses: devcontainers/ci@v0.3
+  #       with:
+  #         push: never
+  #         configFile: .devcontainer/devcontainer.json
+  #         runCmd: |
+  #           scripts/set_python_env.sh && pip install -r requirements.txt && make demo && npm run test
+  #       env:
+  #         KMS_WORKSPACE: ./workspace
 
-  lint:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  # test-mccf-kms:
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
 
-      - name: KMS Lint
-        run: make lint
+  #     - name: Test mCCF KMS
+  #       run: |
+  #         . ./scripts/setup_mCCF.sh
+  #         ./scripts/test_curl.sh
+  #       env:
+  #         PUBLIC_CERT_PEM: ${{ secrets.PUBLIC_CERT_PEM }}
+  #         PRIVATE_CERT_PEM: ${{ secrets.PRIVATE_CERT_PEM }}
+  #         CCF_NAME: ${{ secrets.DEPLOYMENT_MCCF }}
+
+  # lint:
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: KMS Lint
+  #       run: make lint
 
 
-  local: # Since KMS deployment time is fast, run all tests sequentially
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  # local: # Since KMS deployment time is fast, run all tests sequentially
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
 
-      - name: Log into Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
-          tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
-          subscription-id: ${{ vars.SUBSCRIPTION }}
+  #     - name: Log into Azure
+  #       uses: azure/login@v2
+  #       with:
+  #         client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
+  #         tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
+  #         subscription-id: ${{ vars.SUBSCRIPTION }}
 
-      - name: Install Requirements
-        run: pip install -r requirements.txt
+  #     - name: Install Requirements
+  #       run: pip install -r requirements.txt
 
-      - name: Test setup steps (temp)
-        run: |
-          make ccf-sandbox-up
-          make jwt-issuer-up
-          make js-app-set
+  #     - name: Test setup steps (temp)
+  #       run: |
+  #         make ccf-sandbox-up
+  #         make jwt-issuer-up
+  #         make js-app-set
 
-      - name: Run Local System Tests
-        run: pytest -sv test/system-test
+  #     - name: Run Local System Tests
+  #       run: pytest -sv test/system-test
 
   # c-aci-heartbeat:
   #   name: c-aci
