@@ -90,6 +90,21 @@ export class LogContext {
     }
     return clone;
   }
+
+  /**
+   * Returns a string representation of the LogContext instance.
+   * @returns A string representation of the LogContext instance.
+   */
+  public toString(): string {
+    const contextParts: string[] = [];
+    if (this.requestId) {
+      contextParts.push(`requestId=${this.requestId}`);
+    }
+    if (this.scopeStack) {
+      contextParts.push(`scope=${this.getFormattedScopeString()}`);
+    }
+    return `[${contextParts.join(',')}]`;
+  }
 }
 
 /**
@@ -138,20 +153,10 @@ export class Logger {
    * @param message - The main log message.
    */
   private static formatMessageWithContext(context: LogContext | undefined, message: string): string {
-    let formattedMessage = message;
-
-    if (context) {
-      const contextParts: string[] = [];
-      if (context.requestId) {
-        contextParts.push(`requestId=${context.requestId}`);
-      }
-      if (context.scopeStack) {
-        contextParts.push(`scope=${context.getFormattedScopeString()}`);
-      }
-      formattedMessage = `[${contextParts.join(',')}] ${formattedMessage}`;
+    if (!context) {
+      return message;
     }
-
-    return formattedMessage;
+    return `[${context.toString()}] ${message}`;
   }
 
   /**
