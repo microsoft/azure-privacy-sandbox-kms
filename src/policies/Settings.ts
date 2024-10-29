@@ -3,6 +3,7 @@
 
 import { ccf } from "@microsoft/ccf-app/global";
 import { Logger, LogContext } from "../utils/Logger";
+import { KmsError } from "../utils/KmsError";
 
 export interface IService {
   name: string;
@@ -65,7 +66,7 @@ export class Settings {
     if (!settingsPolicyMap) {
       const error = `Settings policy map not found: ${settingsPolicyMapName}`;
       Logger.error(error, Settings.logContext);
-      throw new Error(error);
+      throw new KmsError(error, Settings.logContext);
     }
 
     const settingsPolicy = settingsPolicyMap.get(keyBuf);
@@ -79,7 +80,7 @@ export class Settings {
       } catch {
         const error = `Failed to parse settings policy: ${ccf.bufToStr(settingsPolicy)}`;
         Logger.error(error, Settings.logContext);
-        throw new Error(error);
+        throw new KmsError(error, Settings.logContext);
       }
     }
 

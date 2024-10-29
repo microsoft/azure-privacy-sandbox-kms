@@ -154,7 +154,7 @@ export const key = (
   try {
     wrappedKey = new MaaWrapping(
       keyItem!,
-      MaaWrapping.getWrappingKey(policy! as ccfapp.JwtAuthnIdentity),
+      MaaWrapping.getWrappingKey(policy! as ccfapp.JwtAuthnIdentity, logContext),
       logContext,
     ).wrapKey(encrypted);
   } catch (exception: any) {

@@ -8,6 +8,7 @@ import { IKeyReleasePolicySnpProps } from "./IKeyReleasePolicySnpProps";
 import { Logger, LogContext } from "../utils/Logger";
 import { ServiceResult } from "../utils/ServiceResult";
 import { IAttestationReport } from "../attestation/ISnpAttestationReport";
+import { KmsError } from "../utils/KmsError";
 
 export class KeyReleasePolicy implements IKeyReleasePolicy {
   public type = KeyReleasePolicyType.ADD;
@@ -270,9 +271,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
       const kvValueBuf = keyReleasePolicyMap.get(kvKeyBuf);
       if (!kvValueBuf) {
         if (!kv.optional) {
-          throw new Error(
-            `Key release policy ${kvKey} not found in the key release policy map`,
-          );
+          throw new KmsError(`Key release policy ${kvKey} not found in the key release policy map`, logContext);
         }
       } else {
         let kvValue = ccf.bufToStr(kvValueBuf!);
@@ -281,9 +280,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
             kvValue,
           ) as IKeyReleasePolicySnpProps;
         } catch (error) {
-          throw new Error(
-            `Key release policy ${kvKey} is not a valid JSON object: ${kvValue}`,
-          );
+          throw new KmsError(`Key release policy ${kvKey} is not a valid JSON object: ${kvValue}`, logContext);
         }
       }
     });

@@ -8,6 +8,7 @@ import { IKeyItem } from "../inference/IKeyItem";
 import { Base64 } from "js-base64";
 import { Logger, LogContext } from "../utils/Logger";
 import { arrayBufferToHex, aToHex } from "../utils/Tooling";
+import { KmsError } from "../utils/KmsError";
 
 export interface MaaWrappedKey {
   kid: string;
@@ -81,38 +82,40 @@ export class MaaWrapping {
 
   public static getWrappingKey(
     jwtIdentity: ccfapp.JwtAuthnIdentity,
+    logContextIn?: LogContext,
   ): JsonWebKeyRSAPublic {
+    const logContext = (logContextIn?.clone() || new LogContext()).appendScope("getWrappingKey");
     if (!jwtIdentity) {
-      throw new Error("Authentication Policy is not set");
+      throw new KmsError(`Authentication Policy is not set`, logContext);
     }
 
     if (jwtIdentity.policy !== "jwt") {
-      throw new Error("Authentication Policy must be jwt");
+      throw new KmsError("Authentication Policy must be jwt", logContext);
     }
 
     if (!jwtIdentity.jwt) {
-      throw new Error("Authentication Policy jwt is not set");
+      throw new KmsError("Authentication Policy jwt is not set", logContext);
     }
 
     if (!jwtIdentity.jwt.payload) {
-      throw new Error("Authentication Policy jwt payload is not set");
+      throw new KmsError("Authentication Policy jwt payload is not set", logContext);
     }
 
     if (!jwtIdentity.jwt.payload["x-ms-runtime"]) {
-      throw new Error("Authentication Policy jwt x-ms-runtime is not set");
+      throw new KmsError("Authentication Policy jwt x-ms-runtime is not set", logContext);
     }
 
     const keys: JsonWebKeyRSAPublic[] =
       jwtIdentity.jwt.payload["x-ms-runtime"]["keys"];
     if (!keys) {
-      throw new Error("Authentication Policy jwt keys is not set");
+      throw new KmsError("Authentication Policy jwt keys is not set", logContext);
     }
     const pubKey = keys.filter(
       (key: JsonWebKeyRSAPublic) => key.kid === "TpmEphemeralEncryptionKey",
     );
     if (pubKey.length === 0) {
-      throw new Error(
-        "Authentication Policy does not contain public key TpmEphemeralEncryptionKey",
+      throw new KmsError(
+        "Authentication Policy does not contain public key TpmEphemeralEncryptionKey", logContext
       );
     }
 

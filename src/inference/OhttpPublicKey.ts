@@ -5,6 +5,7 @@ import { Base64 } from "js-base64";
 import { IKeyItem } from "./IKeyItem";
 import { aToHex } from "../utils/Tooling";
 import { Logger, LogContext } from "../utils/Logger";
+import { KmsError } from "../utils/KmsError";
 
 /*
     * This class is responsible for creating the public key
@@ -35,7 +36,7 @@ export class OhttpPublicKey {
 
   public get(): string {
     if (this.keyItem.crv !== "P-384") {
-      throw new Error(`${OhttpPublicKey.name}: Curve: ${this.keyItem.crv} not supported`);
+      throw new KmsError(`Curve: ${this.keyItem.crv} not supported`, this.logContext);
     }
 
     this.messageCount = 0;
