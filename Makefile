@@ -42,7 +42,10 @@ jwt-issuer-down:
 		./scripts/jwt-issuer-down.sh
 
 jwt-issuer-trust:
-	@echo "TODO"
+	@WORKSPACE=${WORKSPACE} \
+	KMS_URL=${KMS_URL} \
+	DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
+		./scripts/jwt-issuer-trust.sh
 
 # Manage KMS -------------------------------------------------------------------
 

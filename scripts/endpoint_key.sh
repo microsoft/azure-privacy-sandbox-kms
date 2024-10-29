@@ -5,7 +5,8 @@ set -e
 REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/..")"
 source $REPO_ROOT/scripts/tools/endpoint_retry.sh
 
-ATTESTATION=$(<old/test/attestation-samples/snp.json)
+ATTESTATION=$(<$REPO_ROOT/scripts/data/sample_attestation.json)
+TOKEN=$(curl -k -X POST http://localhost:3000/token | jq -r '.access_token')
 
 QUERY_STRING=""
 if [ -n "$KID" ]; then
@@ -14,9 +15,8 @@ fi
 
 curl "$KMS_URL/app/key${QUERY_STRING}" \
     -X POST \
-    --cacert ${KEYS_DIR}/service_cert.pem \
-    --cert ${KEYS_DIR}/member0_cert.pem \
-    --key ${KEYS_DIR}/member0_privk.pem \
+    --cacert ${WORKSPACE}/sandbox_common/service_cert.pem \
     -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $TOKEN" \
     -d "{\"attestation\":$ATTESTATION}" \
     | jq
