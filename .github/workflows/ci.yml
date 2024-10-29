@@ -73,6 +73,12 @@ jobs:
       - name: Install Requirements
         run: pip install -r requirements.txt
 
+      - name: Test setup steps (temp)
+        run: |
+          make ccf-sandbox-up
+          make jwt-issuer-up
+          make js-app-set
+
       - name: Run Local System Tests
         run: pytest -sv test/system-test
 
