@@ -3,7 +3,6 @@
 set -e
 
 ccf_propose() {
-    sudo chown $USER:$USER $1
     echo "Proposing: $1"
     ccf_cose_sign1 \
         --content $1 \

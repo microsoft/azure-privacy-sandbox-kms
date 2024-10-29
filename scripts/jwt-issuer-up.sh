@@ -10,3 +10,5 @@ else
     echo "DEPLOYMENT_ENV should be local or cloud, not ${DEPLOYMENT_ENV}"
     exit 1
 fi
+
+sudo chown $USER:$USER -R $WORKSPACE
