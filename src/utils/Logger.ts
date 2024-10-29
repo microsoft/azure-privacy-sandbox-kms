@@ -156,7 +156,7 @@ export class Logger {
     if (!context) {
       return message;
     }
-    return `[${context.toString()}] ${message}`;
+    return `${context.toString()} ${message}`;
   }
 
   /**
