@@ -18,7 +18,6 @@ while IFS= read -r line; do
     echo "$line" >> "$temp_file"
   fi
 done < $REPO_ROOT/governance/proposals/set_js_app.json
-echo "}" >> "$temp_file"
 mkdir -p $WORKSPACE/proposals
 mv "$temp_file" $WORKSPACE/proposals/set_js_app.json
 
