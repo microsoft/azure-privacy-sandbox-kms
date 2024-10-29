@@ -42,6 +42,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: ./scripts/tools/install-deps.sh
 
+      - name: Run initial steps to debug (temp)
+        run: |
+          make ccf-sandbox-up
+          make jwt-issuer-up
+          make js-app-set
+
       - name: Run Local System Tests
         run: pytest -sv test/system-test/test_${{ matrix.test }}.py
 
