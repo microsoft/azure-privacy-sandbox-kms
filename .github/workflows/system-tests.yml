@@ -28,7 +28,7 @@ jobs:
         run: |
           TEST_FILES=$(find test/system-test -name 'test_*.py')
           JSON_ARRAY=$(printf '%s\n' $TEST_FILES | jq -R . | jq -s .)
-          echo "$JSON_ARRAY" >> $GITHUB_OUTPUT
+          echo "tests=$JSON_ARRAY" >> $GITHUB_OUTPUT
 
   local:
     runs-on: ubuntu-latest
