@@ -45,80 +45,23 @@ jobs:
       - name: Run Local System Tests
         run: pytest -sv test/system-test/test_${{ matrix.test }}.py
 
-  # c-aci:
-  #   runs-on: ubuntu-latest
-  #   needs: discover-tests
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       test: ${{ fromJson(needs.discover-tests.outputs.tests) }}
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
+  c-aci:
+    runs-on: ubuntu-latest
+    needs: discover-tests
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJson(needs.discover-tests.outputs.tests) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  #     - name: Install Dependencies
-  #       env:
-  #         GH_TOKEN: ${{ github.token }}
-  #       run: ./scripts/tools/install-deps.sh
+      - name: Install Dependencies
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/tools/install-deps.sh
 
-  #     - name: Run Local System Tests
-  #       run: pytest -sv test/system-test/test_${{ matrix.test }}.py
-
-  # c-aci:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-
-  #     - name: Install Dependencies
-  #       env:
-  #         GH_TOKEN: ${{ github.token }}
-  #       run: ./scripts/tools/install-deps.sh
-
-  #     - name: Run C-ACI System Tests
-  #       env:
-  #         TEST_ENVIRONMENT: cloud
-  #       run: pytest -sv test/system-test/test-refresh.py
-
-  # c-aci-heartbeat:
-  #   name: c-aci
-  #   secrets: inherit # pragma: allowlist secret
-  #   uses: ./.github/workflows/c_aci_system_tests.yml
-  #   with:
-  #     pytest_path: test_heartbeat.py
-
-  # c-aci-key:
-  #   name: c-aci
-  #   secrets: inherit # pragma: allowlist secret
-  #   uses: ./.github/workflows/c_aci_system_tests.yml
-  #   with:
-  #     pytest_path: test_key.py
-
-  # c-aci-keyReleasePolicy:
-  #   name: c-aci
-  #   secrets: inherit # pragma: allowlist secret
-  #   uses: ./.github/workflows/c_aci_system_tests.yml
-  #   with:
-  #     pytest_path: test_keyReleasePolicy.py
-
-  # c-aci-listpubkeys:
-  #   name: c-aci
-  #   secrets: inherit # pragma: allowlist secret
-  #   uses: ./.github/workflows/c_aci_system_tests.yml
-  #   with:
-  #     pytest_path: test_listpubkeys.py
-
-  # c-aci-pubkey:
-  #   name: c-aci
-  #   secrets: inherit # pragma: allowlist secret
-  #   uses: ./.github/workflows/c_aci_system_tests.yml
-  #   with:
-  #     pytest_path: test_pubkey.py
-
-  # c-aci-refresh:
-  #   name: c-aci
-  #   secrets: inherit # pragma: allowlist secret
-  #   uses: ./.github/workflows/c_aci_system_tests.yml
-  #   with:
-
-  #     pytest_path: test_refresh.py
+      - name: Run C-ACI System Tests
+        env:
+          TEST_ENVIRONMENT: cloud
+        run: pytest -sv test/system-test/test_${{ matrix.test }}.py

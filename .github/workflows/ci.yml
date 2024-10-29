@@ -13,118 +13,29 @@ on:
 
 jobs:
 
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Lint
+        run: make lint
+
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/tools/install-deps.sh
+
+      - name: Run Unit tests
+        run: npm run test
+
   system:
     secrets: inherit # pragma: allowlist secret
     uses: ./.github/workflows/system-tests.yml
-
-  # kms:
-  #   name: kms
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v3
-  #       with:
-  #         fetch-depth: 0
-  #         persist-credentials: false
-
-  #     - name: Build DevContainer
-  #       uses: devcontainers/ci@v0.3
-  #       with:
-  #         push: never
-  #         configFile: .devcontainer/devcontainer.json
-  #         runCmd: |
-  #           scripts/set_python_env.sh && pip install -r requirements.txt && make demo && npm run test
-  #       env:
-  #         KMS_WORKSPACE: ./workspace
-
-  # test-mccf-kms:
-  #   runs-on: ubuntu-20.04
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-
-  #     - name: Test mCCF KMS
-  #       run: |
-  #         . ./scripts/setup_mCCF.sh
-  #         ./scripts/test_curl.sh
-  #       env:
-  #         PUBLIC_CERT_PEM: ${{ secrets.PUBLIC_CERT_PEM }}
-  #         PRIVATE_CERT_PEM: ${{ secrets.PRIVATE_CERT_PEM }}
-  #         CCF_NAME: ${{ secrets.DEPLOYMENT_MCCF }}
-
-  # lint:
-  #   runs-on: ubuntu-20.04
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-
-  #     - name: KMS Lint
-  #       run: make lint
-
-
-  # local: # Since KMS deployment time is fast, run all tests sequentially
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-
-  #     - name: Log into Azure
-  #       uses: azure/login@v2
-  #       with:
-  #         client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
-  #         tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
-  #         subscription-id: ${{ vars.SUBSCRIPTION }}
-
-  #     - name: Install Requirements
-  #       run: pip install -r requirements.txt
-
-  #     - name: Test setup steps (temp)
-  #       run: |
-  #         make ccf-sandbox-up
-  #         make jwt-issuer-up
-  #         make js-app-set
-
-  #     - name: Run Local System Tests
-  #       run: pytest -sv test/system-test
-
-  # c-aci-heartbeat:
-  #   name: c-aci
-  #   secrets: inherit # pragma: allowlist secret
-  #   uses: ./.github/workflows/c_aci_system_tests.yml
-  #   with:
-  #     pytest_path: test_heartbeat.py
-
-  # c-aci-key:
-  #   name: c-aci
-  #   secrets: inherit # pragma: allowlist secret
-  #   uses: ./.github/workflows/c_aci_system_tests.yml
-  #   with:
-  #     pytest_path: test_key.py
-
-  # c-aci-keyReleasePolicy:
-  #   name: c-aci
-  #   secrets: inherit # pragma: allowlist secret
-  #   uses: ./.github/workflows/c_aci_system_tests.yml
-  #   with:
-  #     pytest_path: test_keyReleasePolicy.py
-
-  # c-aci-listpubkeys:
-  #   name: c-aci
-  #   secrets: inherit # pragma: allowlist secret
-  #   uses: ./.github/workflows/c_aci_system_tests.yml
-  #   with:
-  #     pytest_path: test_listpubkeys.py
-
-  # c-aci-pubkey:
-  #   name: c-aci
-  #   secrets: inherit # pragma: allowlist secret
-  #   uses: ./.github/workflows/c_aci_system_tests.yml
-  #   with:
-  #     pytest_path: test_pubkey.py
-
-  # c-aci-refresh:
-  #   name: c-aci
-  #   secrets: inherit # pragma: allowlist secret
-  #   uses: ./.github/workflows/c_aci_system_tests.yml
-  #   with:
-  #     pytest_path: test_refresh.py
