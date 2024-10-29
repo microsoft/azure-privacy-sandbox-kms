@@ -36,4 +36,4 @@ else
 
 fi
 
-sudo chmod 777 -R $WORKSPACE
+sudo chown $USER:$USER -R $WORKSPACE
