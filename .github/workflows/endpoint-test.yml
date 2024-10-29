@@ -1,0 +1,36 @@
+name: Endpoint Test
+
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      endpoint:
+        type: string
+  workflow_call:
+    inputs:
+      endpoint:
+        type: string
+
+jobs:
+
+  endpoint:
+    name: ${{ inputs.endpoint }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        env: [local, cloud]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/tools/install-deps.sh
+
+      - name: Run Local System Tests
+        run: pytest -sv test/system-test/test_${{ inputs.endpoint }}.py
