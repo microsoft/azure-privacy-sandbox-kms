@@ -16,6 +16,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Requirements
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: ./scripts/tools/install-deps.sh
 
       - name: Run Local System Tests
