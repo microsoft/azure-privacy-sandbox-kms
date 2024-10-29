@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        env: [local]
+        env: [local, cloud]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
