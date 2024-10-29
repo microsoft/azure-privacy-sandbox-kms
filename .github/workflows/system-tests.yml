@@ -13,7 +13,7 @@ jobs:
   discover-tests:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix: ${{ steps.find_tests.outputs.matrix }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,15 +26,9 @@ jobs:
       - name: Find Test Files
         id: find_tests
         run: |
-          # Find all test files matching pattern, e.g., tests/test_*.py
           TEST_FILES=$(find test/system-test -name 'test_*.py')
-
-          # Convert list of files to JSON array
           JSON_ARRAY=$(printf '%s\n' $TEST_FILES | jq -R . | jq -s .)
-
-          # Prepare the matrix JSON
           MATRIX=$(jq -n --argjson files "$JSON_ARRAY" '{file: $files}')
-
           echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
 
   local:
