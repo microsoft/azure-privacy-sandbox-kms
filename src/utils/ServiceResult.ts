@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import { log } from "console";
 import { Logger, LogContext } from "./Logger";
 
 export interface ErrorResponse {
@@ -78,6 +79,7 @@ export class ServiceResult<T> {
     Logger.error(`Failed result: ${statusCode},`, logContext, error);
     const headers = {};
     if (requestId) headers[ServiceResult.KMS_REQUEST_ID_HEADER] = requestId;
+    if (logContext) error.errorMessage = `${logContext.toString()} ${error.errorMessage}`;
     return new ServiceResult<T>(undefined, error, false, statusCode, headers);
   }
 }
