@@ -10,21 +10,25 @@ import { Settings } from "../policies/Settings";
 // Enable the endpoint
 enableEndpoint();
 
-export interface IHeartbeatResponse {
+export interface IAuthResponse {
   auth: ccfapp.AuthnIdentityCommon;
   description: string[];
 }
 
+export interface IHeartbeatResponse {
+  description: string[];
+}
+
 /*
- * Hearthbeat endpoint currently used to test authorization
+ * auth endpoint used to test authorization
  *
  * @param request - The request object.
  * @returns A `ServiceResult` containing either a string or an `AuthnIdentityCommon` object.
  */
-export const hearthbeat = (
+export const auth = (
   request: ccfapp.Request<void>,
-): ServiceResult<string | IHeartbeatResponse> => {
-  const name = "hearthbeat";
+): ServiceResult<string | IAuthResponse> => {
+  const name = "auth";
   const serviceRequest = new ServiceRequest<void>(name, request);
 
   // check if caller has a valid identity
@@ -39,8 +43,33 @@ export const hearthbeat = (
     settings.settings.service.debug.toString(),
   ];
 
-  return ServiceResult.Succeeded<IHeartbeatResponse>({
+  return ServiceResult.Succeeded<IAuthResponse>({
     auth: policy!,
+    description,
+  });
+};
+
+/*
+ * Hearthbeat returns 200 when running
+ *
+ * @param request - The request object.
+ * @returns A `ServiceResult` containing either a string or an `AuthnIdentityCommon` object.
+ */
+export const heartbeat = (
+  request: ccfapp.Request<void>,
+): ServiceResult<string | IHeartbeatResponse> => {
+  const name = "heartbeat";
+  new ServiceRequest<void>(name, request);
+
+  const settings = Settings.loadSettings();
+  const description = [
+    settings.settings.service.name,
+    settings.settings.service.description,
+    settings.settings.service.version,
+    settings.settings.service.debug.toString(),
+  ];
+
+  return ServiceResult.Succeeded<IHeartbeatResponse>({
     description,
   });
 };

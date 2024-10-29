@@ -11,11 +11,16 @@ def kms_request(endpoint, auth, method="GET", headers=[], body=None):
     header_arg = []
     for header in headers:
         header_arg.extend(["-H", f'"{header}"'])
+    cert = ""
     if auth == "jwt":
         res = requests.post(
             url="http://localhost:3000/token",
         )
         header_arg.extend(["-H", f'Authorization: Bearer {json.loads(res.content)["access_token"]}'])
+    elif auth == "member_cert":
+        cert = f"{REPO_ROOT}/workspace/sandbox_common/member0_cert.pem"
+    else:
+        cert = f"{REPO_ROOT}/workspace/sandbox_common/user0_cert.pem"
     resp = subprocess.run(
         [
             "curl",
@@ -29,7 +34,7 @@ def kms_request(endpoint, auth, method="GET", headers=[], body=None):
                 f"{REPO_ROOT}/workspace/sandbox_common/member0_cert.pem",
                 "--key",
                 f"{REPO_ROOT}/workspace/sandbox_common/member0_privk.pem",
-            ] if auth == "ccf" else []),
+            ] if cert != "" else []),
             *header_arg,
             *(["-d", body] if body is not None else []),
             "-s",
@@ -49,11 +54,11 @@ def kms_request(endpoint, auth, method="GET", headers=[], body=None):
         return (status_code, json.loads(body))
 
 
-def heartbeat(kms_url, auth="ccf"):
+def heartbeat(kms_url, auth="member_cert"):
     return kms_request(f"{kms_url}/app/heartbeat", auth=auth)
 
 
-def key(kms_url, attestation, wrapping_key, kid=None, fmt=None, auth="ccf"):
+def key(kms_url, attestation, wrapping_key, kid=None, fmt=None, auth="member_cert"):
     query_string = ""
     if kid is not None or fmt is not None:
         query_string = "?"
@@ -69,11 +74,11 @@ def key(kms_url, attestation, wrapping_key, kid=None, fmt=None, auth="ccf"):
     )
 
 
-def listpubkeys(kms_url, auth="ccf"):
+def listpubkeys(kms_url, auth="member_cert"):
     return kms_request(f"{kms_url}/app/listpubkeys", auth=auth)
 
 
-def pubkey(kms_url, kid=None, fmt=None, auth="ccf"):
+def pubkey(kms_url, kid=None, fmt=None, auth="member_cert"):
     query_string = ""
     if kid is not None or fmt is not None:
         query_string = "?"
@@ -84,9 +89,9 @@ def pubkey(kms_url, kid=None, fmt=None, auth="ccf"):
     return kms_request(f"{kms_url}/app/pubkey{query_string}", auth=auth)
 
 
-def refresh(kms_url, auth="ccf"):
+def refresh(kms_url, auth="member_cert"):
     return kms_request(f"{kms_url}/app/refresh", method="POST", auth=auth)
 
 
-def keyReleasePolicy(kms_url, auth="ccf"):
+def keyReleasePolicy(kms_url, auth="member_cert"):
     return kms_request(f"{kms_url}/app/keyReleasePolicy", auth=auth)

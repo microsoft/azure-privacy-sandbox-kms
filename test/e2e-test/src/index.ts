@@ -144,7 +144,7 @@ class Demo {
     //#region hearthbeat
     // authorization on hearthbeat
     const member = this.members[0];
-    console.log(`📝 Heartbeat JWT...`);
+    console.log(`📝 Heartbeat...`);
     let [statusCode, hearthBeatResponse] = await Api.hearthbeat(
       this.demoProps,
       member,
@@ -152,34 +152,6 @@ class Demo {
       access_token,
     );
     Demo.assert("OK statusCode", statusCode == 200);
-
-    Demo.assertField(member.name, hearthBeatResponse.auth, "policy", "jwt");
-    Demo.assertField(member.name, hearthBeatResponse.auth, "cert", undefined);
-    Demo.assert(
-      "response.description.length > 0",
-      hearthBeatResponse.description.length > 0,
-    );
-
-    console.log(`📝 Heartbeat member certs...`);
-    [statusCode, hearthBeatResponse] = await Api.hearthbeat(
-      this.demoProps,
-      member,
-      this.createHttpsAgent(member.id, AuthKinds.MemberCerts),
-    );
-    Demo.assert("OK statusCode", statusCode == 200);
-
-    Demo.assertField(
-      member.name,
-      hearthBeatResponse.auth,
-      "policy",
-      "member_cert",
-    );
-    Demo.assertField(
-      member.name,
-      hearthBeatResponse.auth,
-      "cert",
-      notUndefinedString,
-    );
     Demo.assert(
       "response.description.length > 0",
       hearthBeatResponse.description.length > 0,
