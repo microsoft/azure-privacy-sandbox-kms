@@ -199,6 +199,9 @@ release-policy-set:
 	RELEASE_POLICY_PROPOSAL=$(release-policy-proposal) \
 		./scripts/release-policy-set.sh
 
+test-system:
+	@pytest test/system-test/
+
 # Keep this at the bottom.
 clean: ## 🧹 Clean the working folders created during build/demo
 	@rm -rf ${PYTHON_VENV}
