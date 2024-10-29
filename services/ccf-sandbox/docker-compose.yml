@@ -3,6 +3,7 @@ services:
   ccf-sandbox:
     image: azurekms.azurecr.io/ccf_sandbox/${CCF_PLATFORM:-virtual}:latest
     build:
+      context: .
       dockerfile: Dockerfile
       args:
         - CCF_PLATFORM=${CCF_PLATFORM:-virtual}
