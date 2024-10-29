@@ -272,8 +272,6 @@ class Demo {
       }
     } while (statusCode !== 200);
 
-
-
     // Test with JWT
     console.log(`📝 Get wrapped key with JWT...`);
     [headers, statusCode, keyResponse] = (await Api.key(

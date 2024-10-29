@@ -1,15 +1,14 @@
 name: System Tests
 
 permissions:
-   id-token: write
-   contents: read
+  id-token: write
+  contents: read
 
 on:
   workflow_dispatch:
   workflow_call:
 
 jobs:
-
   discover-tests:
     runs-on: ubuntu-latest
     outputs:

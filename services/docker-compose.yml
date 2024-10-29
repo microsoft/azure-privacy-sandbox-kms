@@ -1,5 +1,4 @@
 services:
-
   ccf-sandbox:
     image: azurekms.azurecr.io/ccf_sandbox/${CCF_PLATFORM:-virtual}:latest
     extends:
@@ -15,7 +14,16 @@ services:
     environment:
       - KMS_WORKSPACE=/workspace
     healthcheck:
-      test: ["CMD", "curl", "-k", "--fail", "-X", "POST", "http://localhost:3000/token"]
+      test:
+        [
+          "CMD",
+          "curl",
+          "-k",
+          "--fail",
+          "-X",
+          "POST",
+          "http://localhost:3000/token",
+        ]
       interval: 1s
       retries: 120
     volumes:

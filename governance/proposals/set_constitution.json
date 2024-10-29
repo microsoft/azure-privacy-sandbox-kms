@@ -1,10 +1,10 @@
 {
-    "actions": [
-        {
-            "name": "set_constitution",
-            "args": {
-                "constitution": "${CONSTITUTION}"
-            }
-        }
-    ]
+  "actions": [
+    {
+      "name": "set_constitution",
+      "args": {
+        "constitution": "${CONSTITUTION}"
+      }
+    }
+  ]
 }

@@ -1,5 +1,7 @@
 # Using mCCF with AKV member key
+
 ## Set env variables
+
 ```
 # AKV_KID
 export CCF_NAME="<your mCCF instance>"
@@ -13,11 +15,15 @@ echo $AKV_KID
 # AKV_AUTHORIZATION
 export AKV_AUTHORIZATION="Bearer ey..."
 ```
+
 ## Test signing and access to signing certificate
+
 ```
 curl "$AKV_KID/sign?api-version=7.4" -H "Authorization: $AKV_AUTHORIZATION" -H "Content-type: application/json" -d '{"alg": "ES384",  "value": "AQIDBAUGBwgJCgECAwQFBgcICQoBAgMEBQYHCAkKAQIDBAUGBwgJCgECAwQFBgcI"}'
 ```
+
 ## Test AKV key by signing a proposal
+
 ```
 scripts/submit_proposal.sh  --network_url $KMS_URL --certificate_dir $KEYS_DIR --proposal_file governance/policies/settings-policy.json
 ```
