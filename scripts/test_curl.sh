@@ -19,10 +19,20 @@ curl ${KMS_URL}/app/refresh -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert
 
 echo "Getting the latest public key"
 echo "Waiting until receipt is ready"
+
+timeout=180
+
 response_code=000
+start_time=$(date +%s)
 while ! [[ $response_code -eq 200 ]]; do
-    sleep 1
     response_code=$(curl ${KMS_URL}/app/pubkey --cacert ${KEYS_DIR}/service_cert.pem -s -o $TEST_WORKSPACE/pubkey_resp.json -w "%{http_code}")
+
+    elapsed_time=$(($(date +%s) - start_time))
+    if [ "$elapsed_time" -ge "$timeout" ]; then
+        echo "Total timeout of $timeout seconds exceeded. Exiting..."
+        exit 1
+    fi
+    sleep 1
 done
 cat $TEST_WORKSPACE/pubkey_resp.json
 echo ""
@@ -30,9 +40,16 @@ echo ""
 echo "Get the latest private key (JWT)"
 echo "Waiting until receipt is ready"
 response_code=000
+start_time=$(date +%s)
 while ! [[ $response_code -eq 200 ]]; do
-    sleep 1
     response_code=$(curl $KMS_URL/app/key -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/member0_cert.pem --key ${KEYS_DIR}/member0_privk.pem -d "{\"attestation\":$ATTESTATION, \"wrappingKey\":$WRAPPING_KEY}" -s -o $TEST_WORKSPACE/key_resp.json -w "%{http_code}")
+
+    elapsed_time=$(($(date +%s) - start_time))
+    if [ "$elapsed_time" -ge "$timeout" ]; then
+        echo "Total timeout of $timeout seconds exceeded. Exiting..."
+        exit 1
+    fi
+    sleep 1
 done
 
 key_resp=$(cat $TEST_WORKSPACE/key_resp.json | jq)
@@ -45,9 +62,16 @@ echo $wrapped
 echo "Unwrap key with attestation (JWT)"
 echo "Waiting until receipt is ready"
 response_code=000
+start_time=$(date +%s)
 while ! [[ $response_code -eq 200 ]]; do
-    sleep 1
     response_code=$(curl $KMS_URL/app/unwrapKey -X POST --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/member0_cert.pem --key ${KEYS_DIR}/member0_privk.pem -H "Content-Type: application/json" -d "{\"attestation\":$ATTESTATION, \"wrappingKey\":$WRAPPING_KEY, \"wrapped\":\"$wrapped\", \"wrappedKid\":\"$kid\"}" -s -o $TEST_WORKSPACE/unwrap_key_resp.json -w "%{http_code}")
+
+    elapsed_time=$(($(date +%s) - start_time))
+    if [ "$elapsed_time" -ge "$timeout" ]; then
+        echo "Total timeout of $timeout seconds exceeded. Exiting..."
+        exit 1
+    fi
+    sleep 1
 done
 
 echo "Result:"
