@@ -7,6 +7,8 @@ KEYS_DIR ?= ${KMS_WORKSPACE}/sandbox_common
 RUN_BACK ?= true
 CCF_PLATFORM ?= virtual
 
+DEPLOYMENT_ENV ?= $(if $(shell echo $(KMS_URL) | grep -E '127.0.0.1|localhost'),local,cloud)
+
 ifndef MEMBER_COUNT
 ifeq ($(findstring https://127.0.0.1,$(KMS_URL)),https://127.0.0.1)
 	MEMBER_COUNT := 3
@@ -140,29 +142,62 @@ lint: ## 🔍 Lint the code base (but don't fix)
 	@echo -e "\e[34m$@\e[0m" || true
 	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/lint.sh --fix
 
+# Manage Infra -----------------------------------------------------------------
+
 ccf-sandbox-up:
-	@echo "" && CCF_WORKSPACE=${KMS_WORKSPACE} docker compose -f ccf_sandbox/docker-compose.yml up ccf_sandbox --wait
-
-ccf-sandbox-aci-up:
-	@echo "" && source ccf_sandbox/.env && CCF_PLATFORM=snp c-aci-testing target run ccf_sandbox --no-cleanup --deployment-name $(deployment-name) --policy-type 'allow_all'
-	@echo "" && source ccf_sandbox/.env && KMS_URL="https://$(deployment-name).$${LOCATION}.azurecontainer.io:8000" ./scripts/ccf_sandbox_wait.sh
-	@echo "" && source ccf_sandbox/.env && rm -rf ${KMS_WORKSPACE} && wget -nv -r -np -nH --cut-dirs=0 -P ${KMS_WORKSPACE} http://$(deployment-name).$${LOCATION}.azurecontainer.io:8001
-	@echo "" && source ccf_sandbox/.env && echo KMS_URL="https://$(deployment-name).$${LOCATION}.azurecontainer.io:8000"
-
-ccf-sandbox-attach:
-	@docker compose -f ccf_sandbox/docker-compose.yml exec ccf_sandbox /bin/bash
+	@WORKSPACE=${KMS_WORKSPACE} \
+	DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
+	IMAGE_TAG=${IMAGE_TAG} \
+	DEPLOYMENT_NAME=$(deployment-name) \
+		./scripts/ccf-sandbox-up.sh
 
 ccf-sandbox-down:
-	@echo "" && docker compose -f ccf_sandbox/docker-compose.yml down ccf_sandbox --remove-orphans
+	@DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
+	DEPLOYMENT_NAME=$(deployment-name) \
+		./scripts/ccf-sandbox-down.sh
 
-ccf-sandbox-aci-down:
-	@echo "" && source ccf_sandbox/.env && c-aci-testing aci remove --deployment-name $(deployment-name)
+ccf-sandbox-attach:
+	@DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
+		./scripts/ccf-sandbox-attach.sh
 
 ccf-sandbox-logs:
-	@docker compose -f ccf_sandbox/docker-compose.yml ccf_sandbox logs
+	@DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
+		./scripts/ccf-sandbox-logs.sh
 
-propose-constitution:
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_constitution.sh --network-url "${KMS_URL}" --certificate-dir "${KEYS_DIR}" --custom-constitution ./governance/constitution/kms_actions.js --member-count ${MEMBER_COUNT}
+jwt-issuer-up:
+	@WORKSPACE=${KMS_WORKSPACE} \
+	DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
+	IMAGE_TAG=${IMAGE_TAG} \
+		./scripts/jwt-issuer-up.sh
+
+jwt-issuer-down:
+	@DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
+		./scripts/jwt-issuer-down.sh
+
+jwt-issuer-trust:
+	@WORKSPACE=${KMS_WORKSPACE} \
+	KMS_URL=${KMS_URL} \
+	DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
+		./scripts/jwt-issuer-trust.sh
+
+# Manage KMS -------------------------------------------------------------------
+
+js-app-set:
+	@WORKSPACE=${KMS_WORKSPACE} \
+	KMS_URL=${KMS_URL} \
+		./scripts/js-app-set.sh
+
+constitution-set:
+	@WORKSPACE=${KMS_WORKSPACE} \
+	KMS_URL=${KMS_URL} \
+	CONSTITUTION_PATH=./governance/constitution/kms_actions.js \
+		./scripts/constitution-set.sh
+
+release-policy-set:
+	@WORKSPACE=${KMS_WORKSPACE} \
+	KMS_URL=${KMS_URL} \
+	RELEASE_POLICY_PROPOSAL=$(release-policy-proposal) \
+		./scripts/release-policy-set.sh
 
 # Keep this at the bottom.
 clean: ## 🧹 Clean the working folders created during build/demo

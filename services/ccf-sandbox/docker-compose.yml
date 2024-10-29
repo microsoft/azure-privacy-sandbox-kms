@@ -1,6 +1,6 @@
 services:
 
-  ccf_sandbox:
+  ccf-sandbox:
     image: azurekms.azurecr.io/ccf_sandbox/${CCF_PLATFORM:-virtual}:latest
     build:
       dockerfile: Dockerfile
@@ -13,4 +13,4 @@ services:
       interval: 1s
       retries: 120
     volumes:
-      - ${CCF_WORKSPACE:-./}:/workspace
+      - ${WORKSPACE:-./}:/workspace

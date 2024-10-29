@@ -2,13 +2,20 @@ import json
 import os
 import subprocess
 
+import requests
+
 REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
-def kms_request(endpoint, method="GET", headers=[], body=None):
+def kms_request(endpoint, auth, method="GET", headers=[], body=None):
     delimiter = "\n___END___"
     header_arg = []
     for header in headers:
         header_arg.extend(["-H", f'"{header}"'])
+    if auth == "jwt":
+        res = requests.post(
+            url="http://localhost:3000/token",
+        )
+        header_arg.extend(["-H", f'Authorization: Bearer {json.loads(res.content)["access_token"]}'])
     resp = subprocess.run(
         [
             "curl",
@@ -17,10 +24,12 @@ def kms_request(endpoint, method="GET", headers=[], body=None):
             "-X", method,
             "--cacert",
             f"{REPO_ROOT}/workspace/sandbox_common/service_cert.pem",
-            "--cert",
-            f"{REPO_ROOT}/workspace/sandbox_common/member0_cert.pem",
-            "--key",
-            f"{REPO_ROOT}/workspace/sandbox_common/member0_privk.pem",
+            *([
+                "--cert",
+                f"{REPO_ROOT}/workspace/sandbox_common/member0_cert.pem",
+                "--key",
+                f"{REPO_ROOT}/workspace/sandbox_common/member0_privk.pem",
+            ] if auth == "ccf" else []),
             *header_arg,
             *(["-d", body] if body is not None else []),
             "-s",
@@ -40,11 +49,11 @@ def kms_request(endpoint, method="GET", headers=[], body=None):
         return (status_code, json.loads(body))
 
 
-def heartbeat(kms_url):
-    return kms_request(f"{kms_url}/app/heartbeat")
+def heartbeat(kms_url, auth="ccf"):
+    return kms_request(f"{kms_url}/app/heartbeat", auth=auth)
 
 
-def key(kms_url, attestation, wrapping_key, kid=None, fmt=None):
+def key(kms_url, attestation, wrapping_key, kid=None, fmt=None, auth="ccf"):
     query_string = ""
     if kid is not None or fmt is not None:
         query_string = "?"
@@ -56,14 +65,15 @@ def key(kms_url, attestation, wrapping_key, kid=None, fmt=None):
         endpoint=f"{kms_url}/app/key{query_string}",
         method="POST",
         body=f'{{\"attestation\": {attestation}, \"wrappingKey\": {wrapping_key}}}',
+        auth=auth,
     )
 
 
-def listpubkeys(kms_url):
-    return kms_request(f"{kms_url}/app/listpubkeys")
+def listpubkeys(kms_url, auth="ccf"):
+    return kms_request(f"{kms_url}/app/listpubkeys", auth=auth)
 
 
-def pubkey(kms_url, kid=None, fmt=None):
+def pubkey(kms_url, kid=None, fmt=None, auth="ccf"):
     query_string = ""
     if kid is not None or fmt is not None:
         query_string = "?"
@@ -71,12 +81,12 @@ def pubkey(kms_url, kid=None, fmt=None):
         *([f"kid={kid}"] if kid is not None else []),
         *([f"fmt={fmt}"] if fmt is not None else []),
     ])
-    return kms_request(f"{kms_url}/app/pubkey{query_string}")
+    return kms_request(f"{kms_url}/app/pubkey{query_string}", auth=auth)
 
 
-def refresh(kms_url):
-    return kms_request(f"{kms_url}/app/refresh", method="POST")
+def refresh(kms_url, auth="ccf"):
+    return kms_request(f"{kms_url}/app/refresh", method="POST", auth=auth)
 
 
-def keyReleasePolicy(kms_url):
-    return kms_request(f"{kms_url}/app/keyReleasePolicy")
+def keyReleasePolicy(kms_url, auth="ccf"):
+    return kms_request(f"{kms_url}/app/keyReleasePolicy", auth=auth)

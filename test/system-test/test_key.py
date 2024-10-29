@@ -1,6 +1,6 @@
 import pytest
 from endpoints import key, refresh
-from utils import apply_kms_constitution, apply_key_release_policy
+from utils import apply_kms_constitution, apply_key_release_policy, trust_jwt_issuer
 
 @pytest.mark.xfail(strict=True)
 def test_no_keys(setup_kms):
@@ -40,6 +40,27 @@ def test_with_keys_and_policy(setup_kms):
             kms_url=setup_kms["url"],
             attestation=setup_kms["attestation"],
             wrapping_key=setup_kms["wrappingKey"],
+        )
+        if status_code != 202:
+            break
+    assert status_code == 200
+
+    # Key isn't actually returned here, just the id of a key
+    assert key_json["wrappedKid"] != ""
+    assert key_json["wrapped"] == ""
+
+
+def test_with_keys_and_policy_jwt_auth(setup_kms):
+    apply_kms_constitution(setup_kms["url"])
+    apply_key_release_policy(setup_kms["url"])
+    trust_jwt_issuer(setup_kms["url"])
+    refresh(setup_kms["url"])
+    while True:
+        status_code, key_json = key(
+            kms_url=setup_kms["url"],
+            attestation=setup_kms["attestation"],
+            wrapping_key=setup_kms["wrappingKey"],
+            auth="jwt"
         )
         if status_code != 202:
             break

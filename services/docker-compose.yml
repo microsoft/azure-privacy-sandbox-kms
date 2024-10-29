@@ -1,0 +1,22 @@
+services:
+
+  ccf-sandbox:
+    image: azurekms.azurecr.io/ccf_sandbox/${CCF_PLATFORM:-virtual}:latest
+    extends:
+      file: ./ccf-sandbox/docker-compose.yml
+      service: ccf-sandbox
+
+  jwt-issuer:
+    image: azurekms.azurecr.io/jwt_issuer:latest
+    build:
+      context: ../test/utils/jwt
+      dockerfile: Dockerfile
+    network_mode: host
+    environment:
+      - KMS_WORKSPACE=/workspace
+    healthcheck:
+      test: ["CMD", "curl", "-k", "--fail", "-X", "POST", "http://localhost:3000/token"]
+      interval: 1s
+      retries: 120
+    volumes:
+      - ${WORKSPACE:-./}:/workspace

@@ -6,8 +6,9 @@ REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "..")
 
 
 def deploy_app_code(kms_url):
+    print("")
     subprocess.run(
-        ["make", "deploy"],
+        ["make", "js-app-set"],
         env={
             **os.environ,
             "KMS_URL": kms_url,
@@ -21,11 +22,10 @@ def deploy_app_code(kms_url):
 
 def apply_kms_constitution(kms_url):
     subprocess.run(
-        ["make", "propose-constitution"],
+        ["make", "constitution-set", "constitution=governance/constitution/kms_actions.js"],
         env={
             **os.environ,
             "KMS_URL": kms_url,
-            "MEMBER_COUNT": "1",
         },
         cwd=REPO_ROOT,
         check=True,
@@ -33,11 +33,11 @@ def apply_kms_constitution(kms_url):
 
 def apply_key_release_policy(kms_url):
     subprocess.run(
-        ["make", "propose-add-key-release-policy"],
+        ["make", "release-policy-set",
+        "release-policy-proposal=governance/proposals/set_key_release_policy_add.json"],
         env={
             **os.environ,
             "KMS_URL": kms_url,
-            "MEMBER_COUNT": "1",
         },
         cwd=REPO_ROOT,
         check=True,
@@ -45,12 +45,24 @@ def apply_key_release_policy(kms_url):
 
 def remove_key_release_policy(kms_url):
     subprocess.run(
-        ["make", "propose-rm-key-release-policy"],
+        ["make", "release-policy-set",
+        "release-policy-proposal=governance/proposals/set_key_release_policy_add.json"],
         env={
             **os.environ,
             "KMS_URL": kms_url,
-            "MEMBER_COUNT": "1",
         },
         cwd=REPO_ROOT,
         check=True,
     )
+
+def trust_jwt_issuer(kms_url):
+    subprocess.run(
+        ["make", "jwt-issuer-trust"],
+        env={
+            **os.environ,
+            "KMS_URL": kms_url,
+        },
+        cwd=REPO_ROOT,
+        check=True,
+    )
+
