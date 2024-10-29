@@ -46,8 +46,16 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: ./scripts/tools/install-deps.sh
 
-      - name: Run e2e Tests
-        run: make demo
+      - name: Build DevContainer
+        uses: devcontainers/ci@v0.3
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          push: never
+          configFile: .devcontainer/devcontainer.json
+          runCmd: |
+             ./scripts/tools/install-deps.sh
+             make demo
 
   system:
     secrets: inherit # pragma: allowlist secret
