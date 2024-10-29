@@ -33,8 +33,22 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: ./scripts/tools/install-deps.sh
 
-      - name: Run Unit tests
+      - name: Run Unit Tests
         run: npm run test
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/tools/install-deps.sh
+
+      - name: Run e2e Tests
+        run: make demo
 
   system:
     secrets: inherit # pragma: allowlist secret
