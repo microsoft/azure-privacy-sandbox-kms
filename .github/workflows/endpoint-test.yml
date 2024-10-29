@@ -17,12 +17,12 @@ on:
 jobs:
 
   endpoint:
-    name: ${{ inputs.endpoint }}
+    name: ${{ inputs.endpoint }} (${{ matrix.env }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        env: [local, cloud]
+        env: [local]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,5 +32,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: ./scripts/tools/install-deps.sh
 
-      - name: Run Local System Tests
+      - name: Run System Tests
+        env:
+            TEST_ENVIRONMENT: ${{ matrix.env }}
         run: pytest -sv test/system-test/test_${{ inputs.endpoint }}.py
