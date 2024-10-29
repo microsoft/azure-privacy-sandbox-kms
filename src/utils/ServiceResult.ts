@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { log } from "console";
 import { Logger, LogContext } from "./Logger";
 
 export interface ErrorResponse {
