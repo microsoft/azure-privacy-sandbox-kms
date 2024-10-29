@@ -54,7 +54,7 @@ jobs:
           push: never
           configFile: .devcontainer/devcontainer.json
           runCmd: |
-             ./scripts/tools/install-deps.sh
+             scripts/set_python_env.sh && pip install -r requirements.txt
              make demo
 
   system:
