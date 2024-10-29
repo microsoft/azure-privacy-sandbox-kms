@@ -35,4 +35,9 @@ jobs:
       - name: Run System Tests
         env:
             TEST_ENVIRONMENT: ${{ matrix.env }}
-        run: pytest -sv test/system-test/test_${{ inputs.endpoint }}.py
+        run: |
+          if [[ "$TEST_ENVIRONMENT" == "cloud" ]]; then
+            pytest -sv -n auto test/system-test/test_${{ inputs.endpoint }}.py
+          else
+            pytest -sv test/system-test/test_${{ inputs.endpoint }}.py
+          fi
