@@ -12,16 +12,16 @@ def test_keyReleasePolicy_with_no_policy(setup_kms):
 
 
 def test_keyReleasePolicy_with_policy_added(setup_kms):
-    apply_kms_constitution(setup_kms["url"])
-    apply_key_release_policy(setup_kms["url"])
+    apply_kms_constitution(setup_kms["url"], setup_kms["workspace"])
+    apply_key_release_policy(setup_kms["url"], setup_kms["workspace"])
     status_code, key_release_json = keyReleasePolicy(setup_kms["url"])
     assert status_code == 200
 
 
 def test_keyReleasePolicy_with_policy_added_then_removed(setup_kms):
-    apply_kms_constitution(setup_kms["url"])
-    apply_key_release_policy(setup_kms["url"])
-    remove_key_release_policy(setup_kms["url"])
+    apply_kms_constitution(setup_kms["url"], setup_kms["workspace"])
+    apply_key_release_policy(setup_kms["url"], setup_kms["workspace"])
+    remove_key_release_policy(setup_kms["url"], setup_kms["workspace"])
     status_code, key_release_json = keyReleasePolicy(setup_kms["url"])
     assert status_code == 200
 

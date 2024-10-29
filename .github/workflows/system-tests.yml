@@ -9,19 +9,66 @@ on:
   workflow_call:
 
 jobs:
-  local:
+
+  discover-tests:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Requirements
+      - name: Install Dependencies
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/tools/install-deps.sh
+
+      - name: Find Test Files
+        id: find_tests
+        run: |
+          # Find all test files matching pattern, e.g., tests/test_*.py
+          TEST_FILES=$(find test/system-test -name 'test_*.py')
+
+          # Convert list of files to JSON array
+          JSON_ARRAY=$(printf '%s\n' $TEST_FILES | jq -R . | jq -s .)
+
+          # Prepare the matrix JSON
+          MATRIX=$(jq -n --argjson files "$JSON_ARRAY" '{file: $files}')
+
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+
+  local:
+    runs-on: ubuntu-latest
+    needs: discover-tests
+    strategy:
+      matrix: ${{ fromJson(needs.discover-tests.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
         env:
           GH_TOKEN: ${{ github.token }}
         run: ./scripts/tools/install-deps.sh
 
       - name: Run Local System Tests
-        run: pytest -sv test/system-test
+        run: pytest -sv ${{ matrix.file }}
+
+  # c-aci:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Install Dependencies
+  #       env:
+  #         GH_TOKEN: ${{ github.token }}
+  #       run: ./scripts/tools/install-deps.sh
+
+  #     - name: Run C-ACI System Tests
+  #       env:
+  #         TEST_ENVIRONMENT: cloud
+  #       run: pytest -sv test/system-test/test-refresh.py
 
   # c-aci-heartbeat:
   #   name: c-aci

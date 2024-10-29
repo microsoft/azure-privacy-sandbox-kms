@@ -4,6 +4,7 @@ set -e
 
 echo ""
 REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/..")"
+mkdir -p $WORKSPACE
 
 if [ "$DEPLOYMENT_ENV" == "local" ]; then
     docker compose -f services/docker-compose.yml up ccf-sandbox --wait
@@ -22,7 +23,13 @@ elif [ "$DEPLOYMENT_ENV" == "cloud" ]; then
     ./scripts/ccf_sandbox_wait.sh
 
     # Clean the workspace and pull in from the Azure container
-    rm -rf ${WORKSPACE} && wget -nv -r -np -nH --cut-dirs=0 -P ${WORKSPACE} http://$DEPLOYMENT_NAME.$LOCATION.azurecontainer.io:8001
+    rm -rf ${WORKSPACE}
+
+    until [ -e "$WORKSPACE/sandbox_common/service_cert.pem" ] && \
+          [ -e "$WORKSPACE/sandbox_common/member0_cert.pem" ] && \
+          [ -e "$WORKSPACE/sandbox_common/member0_privk.pem" ]; do
+        wget -nv -r -np -nH --cut-dirs=0 -P ${WORKSPACE} http://$DEPLOYMENT_NAME.$LOCATION.azurecontainer.io:8001
+    done
 else
     echo "DEPLOYMENT_ENV should be local or cloud, not ${DEPLOYMENT_ENV}"
     exit 1

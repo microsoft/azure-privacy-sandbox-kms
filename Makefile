@@ -200,7 +200,7 @@ release-policy-set:
 		./scripts/release-policy-set.sh
 
 test-system:
-	@pytest test/system-test/
+	@pytest -s test/system-test/$(filter-out $@,$(MAKECMDGOALS))
 
 # Keep this at the bottom.
 clean: ## 🧹 Clean the working folders created during build/demo
