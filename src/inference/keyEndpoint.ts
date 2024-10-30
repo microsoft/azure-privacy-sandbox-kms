@@ -9,7 +9,7 @@ import { enableEndpoint } from "../utils/Tooling";
 import { IKeyItem } from "./IKeyItem";
 import { hpkeKeyMap } from "./repositories/Maps";
 import { ServiceRequest } from "../utils/ServiceRequest";
-import { Logger } from "../utils/Logger";
+import { Logger, LogContext } from "../utils/Logger";
 import { IMaaAttestationReport } from "../attestation/IMaaAttestationReport";
 import { MaaAttestationValidation } from "../attestation/MaaAttestationValidation";
 import { MaaWrappedKey, MaaWrapping } from "../wrapping/MaaWrapping";
@@ -35,8 +35,8 @@ export interface IKeyResponse {
 export const key = (
   request: ccfapp.Request<IKeyRequest>,
 ): ServiceResult<string | IKeyResponse> => {
-  const name = "key";
-  const serviceRequest = new ServiceRequest<IKeyRequest>(name, request);
+  const logContext = new LogContext().appendScope("keyEndpoint");
+  const serviceRequest = new ServiceRequest<IKeyRequest>(logContext, request);
 
   // check if caller has a valid identity
   let [policy, isValidIdentity] = serviceRequest.isAuthenticated();
@@ -83,50 +83,70 @@ export const key = (
   } as unknown as ccfapp.JwtAuthnIdentity;
   **********************************************/
 
-  Logger.info(`Policy: `, policy);
+  Logger.info(`Policy: `, logContext, policy);
 
   // check MAA attestation
   let validateAttestationResult: ServiceResult<string | IMaaAttestationReport>;
   try {
     validateAttestationResult = new MaaAttestationValidation(
-      policy! as ccfapp.JwtAuthnIdentity,
+      policy! as ccfapp.JwtAuthnIdentity, logContext
     ).validateAttestation();
     if (!validateAttestationResult.success) {
       return ServiceResult.Failed<string>(
         validateAttestationResult.error!,
         validateAttestationResult.statusCode,
+        logContext,
+        serviceRequest.requestId,
       );
     }
   } catch (exception: any) {
     return ServiceResult.Failed<string>(
       {
-        errorMessage: `${name}: Error in validating attestation (${JSON.stringify(policy)}): ${exception.message}`,
+        errorMessage: `Error in validating attestation (${JSON.stringify(policy)}): ${exception.message}`,
       },
       500,
+      logContext,
+      serviceRequest.requestId,
     );
   }
 
   // Check kid
-  let kid = serviceRequest.body?.["kid"];
+  let kidString = serviceRequest.query?.["kid"];
+  let kid: number | undefined;
   let keyItem: IKeyItem | undefined;
-  if (kid === undefined) {
+  if (kidString === undefined) {
     [kid, keyItem] = hpkeKeyMap.latestItem();
     if (keyItem === undefined) {
       return ServiceResult.Failed<string>(
-        { errorMessage: `${name}: No keys in store` },
+        { errorMessage: `No keys in store` },
         400,
+        logContext,
+        serviceRequest.requestId,
+      );
+    }
+  } else {
+    kid = parseInt(kidString, 10);
+    keyItem = hpkeKeyMap.store.get(kid) as IKeyItem;
+    if (keyItem === undefined) {
+      return ServiceResult.Failed<string>(
+        { errorMessage: `kid ${kid} not found in store` },
+        404,
+        logContext,
+        serviceRequest.requestId,
       );
     }
   }
 
   const receipt = hpkeKeyMap.receipt(kid);
+  Logger.info(`Retrieved key id: ${kid}`, logContext, keyItem);
 
   // Get receipt if available
   if (receipt !== undefined) {
     keyItem!.receipt = receipt;
-    Logger.debug(`Key->Receipt: ${receipt}`);
+    Logger.info(`Succesfully get key receipt for key id: ${kid}`, logContext);
+    Logger.debug(`Key->Receipt: ${receipt}`, logContext);
   } else {
-    return ServiceResult.Accepted();
+    return ServiceResult.Accepted(logContext, serviceRequest.requestId);
   }
 
   // wrap the private key
@@ -134,14 +154,17 @@ export const key = (
   try {
     wrappedKey = new MaaWrapping(
       keyItem!,
-      MaaWrapping.getWrappingKey(policy! as ccfapp.JwtAuthnIdentity),
+      MaaWrapping.getWrappingKey(policy! as ccfapp.JwtAuthnIdentity, logContext),
+      logContext,
     ).wrapKey(encrypted);
   } catch (exception: any) {
     return ServiceResult.Failed<string>(
       {
-        errorMessage: `${name}: Error in wrapping key (${JSON.stringify(policy)}): ${exception.message}`,
+        errorMessage: `Error in wrapping key (${JSON.stringify(policy)}): ${exception.message}`,
       },
       500,
+      logContext,
+      serviceRequest.requestId,
     );
   }
 
@@ -149,7 +172,7 @@ export const key = (
     kid: kid,
     key: wrappedKey.wrappedKey,
     receipt: receipt,
-  });
+  }, undefined, logContext, serviceRequest.requestId);
 };
 
 //#endregion

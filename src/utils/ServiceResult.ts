@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { Logger } from "./Logger";
+import { Logger, LogContext } from "./Logger";
 
 export interface ErrorResponse {
   errorMessage: string;
@@ -22,6 +22,7 @@ export class ServiceResult<T> {
   public readonly body: T | undefined;
   public readonly error: ErrorResponse | undefined;
   public readonly headers?: { [key: string]: string | number };
+  public static readonly KMS_REQUEST_ID_HEADER: string = "x-ms-kms-request-id";
 
   private constructor(
     body: T | undefined,
@@ -42,27 +43,42 @@ export class ServiceResult<T> {
   public static Succeeded<T>(
     body: T,
     headers?: { [key: string]: string | number },
+    logContext?: LogContext,
+    requestId?: string,
   ): ServiceResult<T> {
-    Logger.debug("Response Succeeded: ", body);
-    if (headers) {
-      Logger.debug("Response headers: ", headers);
+    if (requestId) {
+      headers = headers ? headers : {};
+      headers[ServiceResult.KMS_REQUEST_ID_HEADER] = requestId;
     }
 
+    const response = {
+      ...(headers && { headers }),
+      body,
+    };
+    Logger.info("Response Succeeded: 200", logContext, response);
     return new ServiceResult<T>(body, undefined, true, 200, headers);
   }
 
-  public static Accepted(): ServiceResult<string> {
-    Logger.debug("Response Accepted");
-    return new ServiceResult<string>(undefined, undefined, true, 202, {
-      "retry-after": 3,
-    });
+  public static Accepted(
+    logContext?: LogContext,
+    requestId?: string,
+  ): ServiceResult<string> {
+    Logger.info("Response Accepted: 202", logContext);
+    const headers = { "retry-after": 3 };
+    if (requestId) headers[ServiceResult.KMS_REQUEST_ID_HEADER] = requestId;
+    return new ServiceResult<string>(undefined, undefined, true, 202, headers);
   }
 
   public static Failed<T>(
     error: ErrorResponse,
     statusCode: number = 400,
+    logContext?: LogContext,
+    requestId?: string,
   ): ServiceResult<T> {
-    Logger.error(`Failed result: ${statusCode}, `, error);
-    return new ServiceResult<T>(undefined, error, false, statusCode);
+    Logger.error(`Failed result: ${statusCode},`, logContext, error);
+    const headers = {};
+    if (requestId) headers[ServiceResult.KMS_REQUEST_ID_HEADER] = requestId;
+    if (logContext) error.errorMessage = `${logContext.toString()} ${error.errorMessage}`;
+    return new ServiceResult<T>(undefined, error, false, statusCode, headers);
   }
 }

@@ -6,7 +6,7 @@ import { ServiceResult } from "../utils/ServiceResult";
 import { hpkeKeyMap } from "./repositories/Maps";
 import { enableEndpoint } from "../utils/Tooling";
 import { ServiceRequest } from "../utils/ServiceRequest";
-import { Logger } from "../utils/Logger";
+import { Logger, LogContext } from "../utils/Logger";
 import { OhttpPublicKey } from "./OhttpPublicKey";
 
 // Enable the endpoint
@@ -21,9 +21,9 @@ export interface IPublicKey {
 export const listpubkeys = (
   request: ccfapp.Request<void>,
 ): ServiceResult<string | IPublicKey[]> => {
-  const name = "listpubkeys";
-  const serviceRequest = new ServiceRequest<void>(name, request);
-  Logger.info(`${name}: Request received`);
+  const logContext = new LogContext().appendScope("publickeyEndpoint");
+  const serviceRequest = new ServiceRequest<void>(logContext, request);
+  Logger.info(`Request received`, logContext);
 
   // check if caller has a valid identity
   const [_, isValidIdentity] = serviceRequest.isAuthenticated();
@@ -35,23 +35,31 @@ export const listpubkeys = (
     if (keyItem === undefined) {
       return ServiceResult.Failed<string>(
         {
-          errorMessage: `${name}: No keys in store`,
+          errorMessage: `${logContext.getBaseScope()}: No keys in store`,
         },
         400,
+        logContext,
+        serviceRequest.requestId,
       );
     }
 
     // Get receipt if available
-    const receipt = hpkeKeyMap.receipt(keyItem.id!);
+    const kid = keyItem.id!;
+    const receipt = hpkeKeyMap.receipt(kid);
+    Logger.info(`Retrieved key id: ${kid}`, logContext, keyItem);
+
     if (receipt !== undefined) {
       keyItem.receipt = receipt;
-      Logger.debug(`pubkey->Receipt: ${receipt}`);
+      Logger.info(`Succesfully get key receipt for key id: ${kid}`, logContext);
+      Logger.debug(`pubkey->Receipt: ${receipt}`, logContext);
     } else {
-      return ServiceResult.Accepted();
+      Logger.warn(`Failed to get key receipt for key id: ${kid}, Retry later`, logContext);
+      return ServiceResult.Accepted(logContext, serviceRequest.requestId);
     }
 
     delete keyItem.d;
-    const publicKey: string = new OhttpPublicKey(keyItem).get();
+    Logger.info(`Generate public key for key id: ${kid}`, logContext);
+    const publicKey: string = new OhttpPublicKey(keyItem, logContext).get();
 
     const headers: { [key: string]: string } = {
       "content-type": "application/json",
@@ -63,10 +71,10 @@ export const listpubkeys = (
       },
     ];
 
-    return ServiceResult.Succeeded<IPublicKey[]>(payload, headers);
+    return ServiceResult.Succeeded<IPublicKey[]>(payload, headers, logContext, serviceRequest.requestId);
   } catch (exception: any) {
-    const errorMessage = `${name}: Error: ${exception.message}`;
+    const errorMessage = `${logContext.getBaseScope()}: Error: ${exception.message}`;
     console.error(errorMessage);
-    return ServiceResult.Failed<string>({ errorMessage }, 500);
+    return ServiceResult.Failed<string>({ errorMessage }, 500, logContext, serviceRequest.requestId);
   }
 };

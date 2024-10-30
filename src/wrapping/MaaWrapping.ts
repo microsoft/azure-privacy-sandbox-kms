@@ -6,8 +6,9 @@ import * as ccfcrypto from "@microsoft/ccf-app/crypto";
 import * as ccfapp from "@microsoft/ccf-app";
 import { IKeyItem } from "../inference/IKeyItem";
 import { Base64 } from "js-base64";
-import { Logger } from "../utils/Logger";
+import { Logger, LogContext } from "../utils/Logger";
 import { arrayBufferToHex, aToHex } from "../utils/Tooling";
+import { KmsError } from "../utils/KmsError";
 
 export interface MaaWrappedKey {
   kid: string;
@@ -15,10 +16,15 @@ export interface MaaWrappedKey {
 }
 
 export class MaaWrapping {
+  private logContext: LogContext;
+
   constructor(
     public keyItem: IKeyItem,
     public pubKey: JsonWebKeyRSAPublic,
-  ) {}
+    logContext?: LogContext,
+  ) {
+    this.logContext = (logContext?.clone() || new LogContext()).appendScope("MaaWrapping");
+  }
 
   public wrapKey(encrypted: boolean): MaaWrappedKey {
     const pubRsa = ccfcrypto.pubRsaJwkToPem(this.pubKey);
@@ -70,44 +76,46 @@ export class MaaWrapping {
       kid,
     ]);
     // secret
-    Logger.info(`CBOR format: ${aToHex(cbor)}`);
+    Logger.info(`CBOR format: ${aToHex(cbor)}`, this.logContext);
     return cbor.buffer;
   }
 
   public static getWrappingKey(
     jwtIdentity: ccfapp.JwtAuthnIdentity,
+    logContextIn?: LogContext,
   ): JsonWebKeyRSAPublic {
+    const logContext = (logContextIn?.clone() || new LogContext()).appendScope("getWrappingKey");
     if (!jwtIdentity) {
-      throw new Error("Authentication Policy is not set");
+      throw new KmsError(`Authentication Policy is not set`, logContext);
     }
 
     if (jwtIdentity.policy !== "jwt") {
-      throw new Error("Authentication Policy must be jwt");
+      throw new KmsError("Authentication Policy must be jwt", logContext);
     }
 
     if (!jwtIdentity.jwt) {
-      throw new Error("Authentication Policy jwt is not set");
+      throw new KmsError("Authentication Policy jwt is not set", logContext);
     }
 
     if (!jwtIdentity.jwt.payload) {
-      throw new Error("Authentication Policy jwt payload is not set");
+      throw new KmsError("Authentication Policy jwt payload is not set", logContext);
     }
 
     if (!jwtIdentity.jwt.payload["x-ms-runtime"]) {
-      throw new Error("Authentication Policy jwt x-ms-runtime is not set");
+      throw new KmsError("Authentication Policy jwt x-ms-runtime is not set", logContext);
     }
 
     const keys: JsonWebKeyRSAPublic[] =
       jwtIdentity.jwt.payload["x-ms-runtime"]["keys"];
     if (!keys) {
-      throw new Error("Authentication Policy jwt keys is not set");
+      throw new KmsError("Authentication Policy jwt keys is not set", logContext);
     }
     const pubKey = keys.filter(
       (key: JsonWebKeyRSAPublic) => key.kid === "TpmEphemeralEncryptionKey",
     );
     if (pubKey.length === 0) {
-      throw new Error(
-        "Authentication Policy does not contain public key TpmEphemeralEncryptionKey",
+      throw new KmsError(
+        "Authentication Policy does not contain public key TpmEphemeralEncryptionKey", logContext
       );
     }
 
@@ -124,7 +132,7 @@ export class MaaWrapping {
       concatenatedArray.set(array, offset);
       offset += array.length;
       Logger.info(
-        `Concatenated array (${offset}): ${aToHex(concatenatedArray)}`,
+        `Concatenated array (${offset}): ${aToHex(concatenatedArray)}`, this.logContext,
       );
     }
 

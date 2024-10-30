@@ -4,7 +4,8 @@
 import { Base64 } from "js-base64";
 import { IKeyItem } from "./IKeyItem";
 import { aToHex } from "../utils/Tooling";
-import { Logger } from "../utils/Logger";
+import { Logger, LogContext } from "../utils/Logger";
+import { KmsError } from "../utils/KmsError";
 
 /*
     * This class is responsible for creating the public key
@@ -25,14 +26,17 @@ import { Logger } from "../utils/Logger";
 
 export class OhttpPublicKey {
   private messageCount = 0;
+  private logContext: LogContext;
 
-  constructor(public keyItem: IKeyItem) {
-    Logger.debug(`KeyItem: `, keyItem);
+  constructor(public keyItem: IKeyItem, logContext?: LogContext) {
+    this.logContext = (logContext?.clone() || new LogContext()).appendScope("OhttpPublicKey");
+    Logger.info(`Generate OTTP public key for key id: ${this.keyItem.id}`, this.logContext);
+    Logger.debug(`KeyItem: `, this.logContext, keyItem);
   }
 
   public get(): string {
     if (this.keyItem.crv !== "P-384") {
-      throw new Error(`Curve: ${this.keyItem.crv} not supported`);
+      throw new KmsError(`Curve: ${this.keyItem.crv} not supported`, this.logContext);
     }
 
     this.messageCount = 0;
@@ -42,7 +46,7 @@ export class OhttpPublicKey {
       this.publicKey() +
       this.hpkeAlgorithmsLength() +
       this.hpkeSymmetricAlgorithms();
-    Logger.debug(`Public key length: ${this.keyLength()}`);
+    Logger.debug(`${OhttpPublicKey.name}: Public key length: ${this.keyLength()}`, this.logContext);
     return publicKey;
   }
 
@@ -65,10 +69,10 @@ export class OhttpPublicKey {
   private publicKey(): string {
     const x = Base64.toUint8Array(this.keyItem.x);
     const xHex = aToHex(x.buffer);
-    Logger.info(`Public key X: ${xHex}`);
+    Logger.info(`Public key X: ${xHex}`, this.logContext);
     const y = Base64.toUint8Array(this.keyItem.y);
     const yHex = aToHex(y.buffer);
-    Logger.info(`Public key Y: ${yHex}`);
+    Logger.info(`Public key Y: ${yHex}`, this.logContext);
     const publicKey = "04" + xHex + yHex;
     this.messageCount += publicKey.length / 2;
     return publicKey;

@@ -8,6 +8,7 @@ import { keyReleasePolicyMap } from "../repositories/Maps";
 import { ServiceRequest } from "../utils/ServiceRequest";
 import { KeyReleasePolicy } from "../policies/KeyReleasePolicy";
 import { IKeyReleasePolicy } from "../policies/IKeyReleasePolicy";
+import { LogContext } from "../utils/Logger";
 
 // Enable the endpoint
 enableEndpoint();
@@ -19,8 +20,8 @@ enableEndpoint();
 export const keyReleasePolicy = (
   request: ccfapp.Request<void>,
 ): ServiceResult<string | IKeyReleasePolicy> => {
-  const name = "keyReleasePolicy";
-  const serviceRequest = new ServiceRequest<void>(name, request);
+  const logContext = new LogContext().appendScope("keyReleasePolicyEndpoint");
+  const serviceRequest = new ServiceRequest<void>(logContext, request);
 
   // check if caller has a valid identity
   const [_, isValidIdentity] = serviceRequest.isAuthenticated();
@@ -28,9 +29,9 @@ export const keyReleasePolicy = (
 
   try {
     const result =
-      KeyReleasePolicy.getKeyReleasePolicyFromMap(keyReleasePolicyMap);
-    return ServiceResult.Succeeded<IKeyReleasePolicy>(result);
+      KeyReleasePolicy.getKeyReleasePolicyFromMap(keyReleasePolicyMap, logContext);
+    return ServiceResult.Succeeded<IKeyReleasePolicy>(result, undefined, logContext, serviceRequest.requestId);
   } catch (error: any) {
-    return ServiceResult.Failed<string>({ errorMessage: error.message }, 500);
+    return ServiceResult.Failed<string>({ errorMessage: error.message }, 500, logContext, serviceRequest.requestId);
   }
 };
