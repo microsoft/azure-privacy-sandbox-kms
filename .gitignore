@@ -3,10 +3,11 @@ node_modules
 package-lock.json
 vol
 .venv_ccf_sandbox
-workspace
+workspace*
 .env
 hello/
 ccf-app/
 nohup.out
 aad.env
 *.log
+__pycache__/

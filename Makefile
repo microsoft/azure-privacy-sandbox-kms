@@ -7,10 +7,14 @@ KEYS_DIR ?= ${KMS_WORKSPACE}/sandbox_common
 RUN_BACK ?= true
 CCF_PLATFORM ?= virtual
 
+DEPLOYMENT_ENV ?= $(if $(shell echo $(KMS_URL) | grep -E '127.0.0.1|localhost'),local,cloud)
+
+ifndef MEMBER_COUNT
 ifeq ($(findstring https://127.0.0.1,$(KMS_URL)),https://127.0.0.1)
-    MEMBER_COUNT := 3
+	MEMBER_COUNT := 3
 else
-    MEMBER_COUNT := 1
+	MEMBER_COUNT := 1
+endif
 endif
 
 CCF_SANDBOX_EXTRA_ARGS ?=
@@ -107,7 +111,7 @@ propose-key-rotation-policy: ## 🚀 Deploy the key rotation policy to the sandb
 refresh-key: ## 🚀 Refresh a key on the instance
 	@echo -e "\e[34m$@\e[0m" || true
 	$(call check_defined, KMS_URL)
-	@CCF_PLATFORM=${CCF_PLATFORM} sleep 20;curl "${KMS_URL}"/app/refresh -X POST --cacert "${KEYS_DIR}"/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
+	@CCF_PLATFORM=${CCF_PLATFORM};curl "${KMS_URL}"/app/refresh -X POST --cacert "${KEYS_DIR}"/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
 
 set-constitution: start-host-idp ## Set new custom constitution
 	@echo -e "\e[34m$@\e[0m" || true
@@ -137,6 +141,66 @@ deploy: build ## 🚀 Deploy Managed CCF or local
 lint: ## 🔍 Lint the code base (but don't fix)
 	@echo -e "\e[34m$@\e[0m" || true
 	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/lint.sh --fix
+
+# Manage Infra -----------------------------------------------------------------
+
+ccf-sandbox-up:
+	@WORKSPACE=${KMS_WORKSPACE} \
+	DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
+	IMAGE_TAG=${IMAGE_TAG} \
+	DEPLOYMENT_NAME=$(deployment-name) \
+		./scripts/ccf-sandbox-up.sh
+
+ccf-sandbox-down:
+	@DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
+	DEPLOYMENT_NAME=$(deployment-name) \
+		./scripts/ccf-sandbox-down.sh
+
+ccf-sandbox-attach:
+	@DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
+		./scripts/ccf-sandbox-attach.sh
+
+ccf-sandbox-logs:
+	@DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
+		./scripts/ccf-sandbox-logs.sh
+
+jwt-issuer-up:
+	@WORKSPACE=${KMS_WORKSPACE} \
+	DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
+	IMAGE_TAG=${IMAGE_TAG} \
+		./scripts/jwt-issuer-up.sh
+
+jwt-issuer-down:
+	@DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
+		./scripts/jwt-issuer-down.sh
+
+jwt-issuer-trust:
+	@WORKSPACE=${KMS_WORKSPACE} \
+	KMS_URL=${KMS_URL} \
+	DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
+		./scripts/jwt-issuer-trust.sh
+
+# Manage KMS -------------------------------------------------------------------
+
+js-app-set:
+	@WORKSPACE=${KMS_WORKSPACE} \
+	KMS_URL=${KMS_URL} \
+		./scripts/js-app-set.sh
+
+constitution-set:
+	@WORKSPACE=${KMS_WORKSPACE} \
+	KMS_URL=${KMS_URL} \
+	CONSTITUTION_PATH=./governance/constitution/kms_actions.js \
+		./scripts/constitution-set.sh
+
+release-policy-set:
+	@WORKSPACE=${KMS_WORKSPACE} \
+	KMS_URL=${KMS_URL} \
+	RELEASE_POLICY_PROPOSAL=$(release-policy-proposal) \
+		./scripts/release-policy-set.sh
+
+test-system:
+	@pytest -s test/system-test/$(filter-out $@,$(MAKECMDGOALS))
 
 # Keep this at the bottom.
 clean: ## 🧹 Clean the working folders created during build/demo

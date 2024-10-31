@@ -30,7 +30,7 @@ export interface DemoProps {
   proposalPath: string;
   keyPath: string;
   unwrapPath: string;
-  hearthbeatPath: string;
+  heartbeatPath: string;
   keyReleasePolicyPath: string;
   pubkeyPath: string;
   listpubkeysPath: string;
@@ -57,7 +57,7 @@ class Demo {
     proposalPath: `/gov/proposals`,
     keyPath: `/app/key`,
     unwrapPath: `/app/unwrapKey`,
-    hearthbeatPath: `/app/hearthbeat`,
+    heartbeatPath: `/app/heartbeat`,
     keyReleasePolicyPath: `/app/keyReleasePolicy`,
     pubkeyPath: `/app/pubkey`,
     listpubkeysPath: `/app/listpubkeys`,
@@ -141,45 +141,17 @@ class Demo {
       return !Number.isNaN(toTest) && toTest > 0;
     };
 
-    //#region hearthbeat
-    // authorization on hearthbeat
+    //#region heartbeat
+    // authorization on heartbeat
     const member = this.members[0];
-    console.log(`📝 Heartbeat JWT...`);
-    let [statusCode, hearthBeatResponse] = await Api.hearthbeat(
+    console.log(`📝 Heartbeat...`);
+    let [statusCode, hearthBeatResponse] = await Api.heartbeat(
       this.demoProps,
       member,
       this.createHttpsAgent("", AuthKinds.JWT),
       access_token,
     );
     Demo.assert("OK statusCode", statusCode == 200);
-
-    Demo.assertField(member.name, hearthBeatResponse.auth, "policy", "jwt");
-    Demo.assertField(member.name, hearthBeatResponse.auth, "cert", undefined);
-    Demo.assert(
-      "response.description.length > 0",
-      hearthBeatResponse.description.length > 0,
-    );
-
-    console.log(`📝 Heartbeat member certs...`);
-    [statusCode, hearthBeatResponse] = await Api.hearthbeat(
-      this.demoProps,
-      member,
-      this.createHttpsAgent(member.id, AuthKinds.MemberCerts),
-    );
-    Demo.assert("OK statusCode", statusCode == 200);
-
-    Demo.assertField(
-      member.name,
-      hearthBeatResponse.auth,
-      "policy",
-      "member_cert",
-    );
-    Demo.assertField(
-      member.name,
-      hearthBeatResponse.auth,
-      "cert",
-      notUndefinedString,
-    );
     Demo.assert(
       "response.description.length > 0",
       hearthBeatResponse.description.length > 0,
@@ -299,8 +271,6 @@ class Demo {
         throw new Error(`🛑 [TEST FAILURE]: Expected ${statusCode} to be 200`);
       }
     } while (statusCode !== 200);
-
-
 
     // Test with JWT
     console.log(`📝 Get wrapped key with JWT...`);

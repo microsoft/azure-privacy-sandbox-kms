@@ -284,17 +284,33 @@
         }
       }
     },
-    "/hearthbeat": {
+    "/auth": {
       "get": {
         "js_module": "endpoints/kms.js",
-        "js_function": "hearthbeat",
-        "forwarding_required": "sometimes",
+        "js_function": "auth",
+        "forwarding_required": "never",
         "authn_policies": ["user_cert", "member_cert", "jwt"],
-        "mode": "readwrite",
+        "mode": "readonly",
         "openapi": {
           "responses": {
             "200": {
-              "description": "Generate a hearthbeat response"
+              "description": "Generate a heartbeat response"
+            }
+          }
+        }
+      }
+    },
+    "/heartbeat": {
+      "get": {
+        "js_module": "endpoints/kms.js",
+        "js_function": "heartbeat",
+        "forwarding_required": "sometimes",
+        "authn_policies": [],
+        "mode": "readonly",
+        "openapi": {
+          "responses": {
+            "200": {
+              "description": "Generate a heartbeat response"
             }
           }
         }

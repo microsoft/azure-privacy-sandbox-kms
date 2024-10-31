@@ -1,0 +1,17 @@
+services:
+  ccf-sandbox:
+    image: azurekms.azurecr.io/ccf_sandbox/${CCF_PLATFORM:-virtual}:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - CCF_PLATFORM=${CCF_PLATFORM:-virtual}
+    command: /opt/ccf_${CCF_PLATFORM:-virtual}/bin/sandbox.sh --http2
+    network_mode: host
+    healthcheck:
+      test:
+        ["CMD", "curl", "-k", "--fail", "https://localhost:8000/node/network"]
+      interval: 1s
+      retries: 120
+    volumes:
+      - ${WORKSPACE:-./}:/workspace
