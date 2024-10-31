@@ -42,12 +42,13 @@ export const key = (
   let [policy, isValidIdentity] = serviceRequest.isAuthenticated();
   if (isValidIdentity.failure) return isValidIdentity;
 
-  // Check for encrypted key
+  // Check for encrypted key, leave the code in case we need to switch back. Always true 
   let encrypted = false;
 
   if (serviceRequest.query) {
     encrypted = serviceRequest.query["encrypted"] === "true";
   }
+  encrypted = true;
 
   /**********************************************
   Logger.info(`headers: `, serviceRequest.headers);
