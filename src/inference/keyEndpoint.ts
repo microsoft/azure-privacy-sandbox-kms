@@ -48,7 +48,7 @@ export const key = (
   if (serviceRequest.query) {
     encrypted = serviceRequest.query["encrypted"] === "true";
   }
-  encrypted = true;
+  // encrypted = true;
 
   /**********************************************
   Logger.info(`headers: `, serviceRequest.headers);
