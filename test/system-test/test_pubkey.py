@@ -15,7 +15,7 @@ def test_no_params_with_single_key(setup_kms):
         if status_code != 202:
             break
     assert status_code == 200
-    assert key_json["id"] == 100001
+    assert key_json["id"] == 11
 
 
 def test_no_params_with_multiple_keys(setup_kms):
@@ -26,7 +26,7 @@ def test_no_params_with_multiple_keys(setup_kms):
         if status_code != 202:
             break
     assert status_code == 200
-    assert key_json["id"] == 100002
+    assert key_json["id"] == 12
 
 
 def test_kid_not_present_with_other_keys(setup_kms):
