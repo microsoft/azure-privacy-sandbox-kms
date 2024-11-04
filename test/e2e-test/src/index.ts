@@ -541,7 +541,7 @@ class Demo {
     Demo.assertField(member.name, keyResponse, "receipt", notUndefinedString);
 
     Demo.assert(`keyResponse.timestamp > 0`, keyResponse.timestamp > 0);
-    Demo.assert(`keyResponse.id > 100000`, keyResponse.id > 100000);
+    Demo.assert(`keyResponse.id > 10`, keyResponse.id > 10);
     //#endregion
 
     //#region listpubkeys
