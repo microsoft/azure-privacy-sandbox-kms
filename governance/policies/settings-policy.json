@@ -9,6 +9,10 @@
             "description": "Key Management Service",
             "version": "1.0.0",
             "debug": true
+          },
+          "keyRotation": {
+            "gracePeriodDays": 2,
+            "ttlDays": 7
           }
         }
       }
