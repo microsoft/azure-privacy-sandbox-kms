@@ -9,6 +9,7 @@ import { KeyGeneration } from "./KeyGeneration";
 import { enableEndpoint } from "../utils/Tooling";
 import { ServiceRequest } from "../utils/ServiceRequest";
 import { Logger } from "../utils/Logger";
+import { Settings } from "../policies/Settings";
 
 // Enable the endpoint
 enableEndpoint();
@@ -37,8 +38,16 @@ export const refresh = (
     // So the current logic is to have ids rotate from 10 to 99
     const keyItem = KeyGeneration.generateKeyItem(id % 90 + 10);
     
+    const settings = Settings.loadSettings().settings;
+    const ttlDays = settings.keyRotation.ttlDays;
+    const creationDate = new Date();
+    const expiryDate = new Date(creationDate);
+    expiryDate.setDate(creationDate.getDate() + ttlDays);
+
     // Store HPKE key pair kid
     keyItem.kid = `${keyItem.kid!}_${id}`;
+    keyItem.creationDate = creationDate.toISOString();
+    keyItem.expiryDate = expiryDate.toISOString();
     hpkeKeyIdMap.storeItem(id, keyItem.kid);
 
     // Store HPKE key pair
