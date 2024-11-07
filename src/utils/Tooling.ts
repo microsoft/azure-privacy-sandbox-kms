@@ -2,9 +2,8 @@
 // Licensed under the MIT license.
 
 import * as ccfapp from "@microsoft/ccf-app";
-import { IKeyReleasePolicyProps } from "../policies/IKeyReleasePolicyProps";
 import { ccf } from "@microsoft/ccf-app/global";
-import { Logger } from "./Logger";
+import { Logger, LogContext } from "./Logger";
 
 /**
  * Converts a Uint8Array to a string representation.
@@ -35,13 +34,14 @@ export const arrayBufferToHex = (buf: ArrayBuffer) => {
  * @param request - The request object containing the query parameters.
  * @returns An object representing the parsed query parameters.
  */
-export const queryParams = (request: ccfapp.Request) => {
+export const queryParams = (request: ccfapp.Request, logContextIn?: LogContext) => {
+  const logContext = (logContextIn?.clone() || new LogContext()).appendScope("queryParams");
   const elements = request.query.split("&");
   let obj = {};
   for (let inx = 0; inx < elements.length; inx++) {
     const param = elements[inx].split("=");
     obj[param[0]] = param[1];
-    Logger.debug(`Query: ${param[0]} = ${param[1]}`);
+    Logger.debug(`Query: ${param[0]} = ${param[1]}`, logContext);
   }
   return obj;
 };
@@ -51,7 +51,8 @@ export const queryParams = (request: ccfapp.Request) => {
  * @param key - The PEM key to be checked.
  * @returns A boolean indicating whether the string is a PEM public key.
  */
-export const isPemPublicKey = (key: string): boolean => {
+export const isPemPublicKey = (key: string, logContextIn?: LogContext): boolean => {
+  const logContext = (logContextIn?.clone() || new LogContext()).appendScope("isPemPublicKey");
   const beginPatternLiteral = /-----BEGIN PUBLIC KEY-----\\n/;
   const endPatternLiteral = /\\n-----END PUBLIC KEY-----\\n$/;
   const beginPatternNewline = /-----BEGIN PUBLIC KEY-----\n/;
@@ -62,33 +63,10 @@ export const isPemPublicKey = (key: string): boolean => {
   const isNewline =
     beginPatternNewline.test(key) && endPatternNewline.test(key);
 
-  Logger.debug("isLiteralNewline:", isLiteralNewline);
-  Logger.debug("isNewline:", isNewline);
+  Logger.debug("isLiteralNewline:", logContext, isLiteralNewline);
+  Logger.debug("isNewline:", logContext, isNewline);
 
   return isLiteralNewline || isNewline;
-};
-
-/**
- * Retrieves the key release policy from a key release policy map.
- * @param keyReleasePolicyMap - The key release policy map.
- * @returns The key release policy as an object.
- */
-export const getKeyReleasePolicy = (
-  keyReleasePolicyMap: ccfapp.KvMap,
-): IKeyReleasePolicyProps => {
-  const result: IKeyReleasePolicyProps = {};
-  keyReleasePolicyMap.forEach((values: ArrayBuffer, key: ArrayBuffer) => {
-    const kvKey = ccf.bufToStr(key);
-    const kvValue = JSON.parse(ccf.bufToStr(values));
-    result[kvKey] = kvValue;
-    Logger.debug(`key policy item with key: ${kvKey} and value: ${kvValue}`);
-  });
-  Logger.debug(
-    `Resulting key release policy: ${JSON.stringify(
-      result,
-    )}, keys: ${Object.keys(result)}, keys: ${Object.keys(result).length}`,
-  );
-  return result;
 };
 
 /**

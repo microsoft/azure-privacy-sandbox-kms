@@ -12,24 +12,27 @@ import {
 } from "@microsoft/ccf-app/global";
 import { SnpAttestationClaims } from "./SnpAttestationClaims";
 import { keyReleasePolicyMap } from "../repositories/Maps";
-import { getKeyReleasePolicy } from "../utils/Tooling";
-import { Logger } from "../utils/Logger";
+import { Logger, LogContext } from "../utils/Logger";
+import { KeyReleasePolicy } from "../policies/KeyReleasePolicy";
 
 // Validate the attestation by means of the key release policy
 export const validateAttestation = (
   attestation: ISnpAttestation,
 ): ServiceResult<string | IAttestationReport> => {
-  Logger.debug(`Start attestation validation`);
+  const logContext = new LogContext().appendScope("validateAttestation");
+  Logger.debug(`Start attestation validation`, logContext);
   if (!attestation) {
     return ServiceResult.Failed<string>(
       { errorMessage: "missing attestation" },
       400,
+      logContext
     );
   }
   if (!attestation.evidence && typeof attestation.evidence !== "string") {
     return ServiceResult.Failed<string>(
       { errorMessage: "missing or bad attestation.evidence" },
       400,
+      logContext
     );
   }
   if (
@@ -39,6 +42,7 @@ export const validateAttestation = (
     return ServiceResult.Failed<string>(
       { errorMessage: "missing or bad attestation.evidence" },
       400,
+      logContext
     );
   }
   if (
@@ -48,6 +52,7 @@ export const validateAttestation = (
     return ServiceResult.Failed<string>(
       { errorMessage: "missing or bad attestation.uvm_endorsements" },
       400,
+      logContext
     );
   }
   if (
@@ -57,6 +62,7 @@ export const validateAttestation = (
     return ServiceResult.Failed<string>(
       { errorMessage: "missing or bad attestation.endorsed_tcb" },
       400,
+      logContext
     );
   }
   let evidence: ArrayBuffer;
@@ -71,6 +77,7 @@ export const validateAttestation = (
     return ServiceResult.Failed<string>(
       { errorMessage: "Malformed attestation.evidence" },
       400,
+      logContext
     );
   }
   try {
@@ -81,6 +88,7 @@ export const validateAttestation = (
     return ServiceResult.Failed<string>(
       { errorMessage: "Malformed attestation.endorsements" },
       400,
+      logContext
     );
   }
   try {
@@ -91,6 +99,7 @@ export const validateAttestation = (
     return ServiceResult.Failed<string>(
       { errorMessage: "Malformed attestation.uvm_endorsements" },
       400,
+      logContext
     );
   }
   try {
@@ -104,73 +113,38 @@ export const validateAttestation = (
         endorsed_tcb,
       );
     Logger.debug(
-      `Attestation validation report: ${JSON.stringify(attestationReport)}`,
+      `Attestation validation report: ${JSON.stringify(attestationReport)}`, logContext
     );
 
     const claimsProvider = new SnpAttestationClaims(attestationReport);
     const attestationClaims = claimsProvider.getClaims();
-    Logger.debug(`Attestation claims: `, attestationClaims);
+    Logger.debug(`Attestation claims: `, logContext, attestationClaims);
     Logger.debug(
-      `Report Data: `,
+      `Report Data: `, logContext,
       attestationClaims["x-ms-sevsnpvm-reportdata"],
     );
 
     // Get the key release policy
-    const keyReleasePolicy = getKeyReleasePolicy(keyReleasePolicyMap);
+    const keyReleasePolicy =
+      KeyReleasePolicy.getKeyReleasePolicyFromMap(keyReleasePolicyMap);
     Logger.debug(
       `Key release policy: ${JSON.stringify(
         keyReleasePolicy,
-      )}, keys: ${Object.keys(keyReleasePolicy)}, keys: ${
-        Object.keys(keyReleasePolicy).length
-      }`,
+      )}, keys: ${
+        Object.keys(keyReleasePolicy)}, keys: ${Object.keys(keyReleasePolicy).length
+      }`, logContext
     );
 
-    if (Object.keys(keyReleasePolicy).length === 0) {
-      return ServiceResult.Failed<string>(
-        {
-          errorMessage:
-            "The key release policy is missing. Please propose a new key release policy",
-        },
-        400,
-      );
-    }
-
-    for (let inx = 0; inx < Object.keys(keyReleasePolicy).length; inx++) {
-      const key = Object.keys(keyReleasePolicy)[inx];
-
-      // check if key is in attestation
-      const attestationValue = attestationClaims[key];
-      const policyValue = keyReleasePolicy[key];
-      const isUndefined = typeof attestationValue === "undefined";
-      Logger.debug(
-        `Checking key ${key}, typeof attestationValue: ${typeof attestationValue}, isUndefined: ${isUndefined}, attestation value: ${attestationValue}, policyValue: ${policyValue}`,
-      );
-      if (isUndefined) {
-        return ServiceResult.Failed<string>(
-          { errorMessage: `Missing claim in attestation: ${key}` },
-          400,
-        );
-      }
-      if (
-        policyValue.filter((p) => {
-          Logger.debug(`Check if policy value ${p} === ${attestationValue}`);
-          return p === attestationValue;
-        }).length === 0
-      ) {
-        return ServiceResult.Failed<string>(
-          {
-            errorMessage: `Attestation claim ${key}, value ${attestationValue} does not match policy values: ${policyValue}`,
-          },
-          400,
-        );
-      }
-    }
-
-    return ServiceResult.Succeeded<IAttestationReport>(attestationClaims);
+    const policyValidationResult = KeyReleasePolicy.validateKeyReleasePolicy(
+      keyReleasePolicy,
+      attestationClaims,
+    );
+    return policyValidationResult;
   } catch (exception: any) {
     return ServiceResult.Failed<string>(
       { errorMessage: `Internal error: ${exception.message}` },
       500,
+      logContext
     );
   }
 };

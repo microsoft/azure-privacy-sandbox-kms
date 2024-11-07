@@ -6,7 +6,7 @@ import axios from "axios";
 import {
   IHeartbeatResponse,
   IKeyItem,
-  IKeyReleasePolicyProps,
+  IKeyReleasePolicySnpProps,
   ITinkPublicKeySet,
 } from "../../../src";
 import { IWrapped } from "../../../src/endpoints/KeyWrapper";
@@ -400,7 +400,7 @@ export default class Api {
     httpsAgent: https.Agent,
     authorizationHeader?: string,
   ): Promise<
-    [number, IKeyReleasePolicyProps, { [key: string]: string | number }]
+    [number, IKeyReleasePolicySnpProps, { [key: string]: string | number }]
   > {
     console.log(`${member.name} Get key release policy`);
     console.log(`Get key release policy props:`, props);
@@ -444,7 +444,7 @@ export default class Api {
     }
     return [
       response.statusCode,
-      <IKeyReleasePolicyProps>JSON.parse(response.data),
+      <IKeyReleasePolicySnpProps>JSON.parse(response.data),
       response.headers,
     ];
   }

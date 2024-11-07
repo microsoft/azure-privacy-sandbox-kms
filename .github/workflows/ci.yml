@@ -24,9 +24,24 @@ jobs:
           push: never
           configFile: .devcontainer/devcontainer.json
           runCmd: |
-            make demo && npm run test
+            scripts/set_python_env.sh && pip install -r requirements.txt && make demo && npm run test
         env:
           KMS_WORKSPACE: ./workspace
+
+  test-mccf-kms:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test mCCF KMS
+        run: |
+          . ./scripts/setup_mCCF.sh
+          ./scripts/test_curl.sh
+        env:
+          PUBLIC_CERT_PEM: ${{ secrets.PUBLIC_CERT_PEM }}
+          PRIVATE_CERT_PEM: ${{ secrets.PRIVATE_CERT_PEM }}
+          CCF_NAME: ${{ secrets.DEPLOYMENT_MCCF }}
 
   lint:
     runs-on: ubuntu-20.04
