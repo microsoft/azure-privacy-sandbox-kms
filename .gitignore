@@ -10,4 +10,5 @@ ccf-app/
 nohup.out
 aad.env
 *.log
+temp*/
 __pycache__/

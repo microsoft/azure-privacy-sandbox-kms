@@ -2,7 +2,7 @@ import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../../utils/ServiceResult";
 import { IJwtIdentityProvider } from "./IJwtIdentityProvider";
 import { JwtValidationPolicyMap } from "./JwtValidationPolicyMap";
-import { Logger } from "../../utils/Logger";
+import { Logger, LogContext } from "../../utils/Logger";
 
 /**
  * MS Access Token
@@ -24,17 +24,25 @@ export interface MSAccessToken {
 export const authorizeJwt = (
   issuer: string,
   identity: ccfapp.JwtAuthnIdentity,
+  logContextIn?: LogContext
 ): ServiceResult<string> => {
-  const policy = JwtValidationPolicyMap.read(issuer);
+  const logContext = (logContextIn?.clone() || new LogContext()).appendScope("authorizeJwt");
+  const policy = JwtValidationPolicyMap.read(issuer, logContext);
   if (policy === undefined) {
+    const errorMessage = `issuer ${issuer} is not defined in the policy`;
+    Logger.error(errorMessage, logContext);
     return ServiceResult.Failed(
       {
-        errorMessage: `issuer ${issuer} is not defined in the policy`,
+        errorMessage,
         errorType: "AuthenticationError",
       },
       500,
+      logContext
     );
   }
+  Logger.info(
+    `Validate JWT policy for issuer ${issuer}: ${JSON.stringify(policy)}`, logContext
+  );
 
   const keys = Object.keys(policy);
 
@@ -52,24 +60,30 @@ export const authorizeJwt = (
       compliant = jwtProp === policy[key];
     }
 
-    Logger.debug(
-      `isValidJwtToken: ${key}, expected: ${policy[key]}, found: ${jwtProp}, ${compliant}`,
+    Logger.info(
+      `isValidJwtToken: ${key}, expected: ${policy[key]}, found: ${jwtProp}, ${compliant}`, logContext
     );
 
     if (!compliant) {
       const errorMessage = `The JWT has no valid ${key}, expected: ${policy[key]}, found: ${jwtProp}`;
+      Logger.error(errorMessage, logContext);
       return ServiceResult.Failed(
         { errorMessage, errorType: "AuthenticationError" },
         401,
+        logContext
       );
     }
   }
 
-  return ServiceResult.Succeeded("");
+  return ServiceResult.Succeeded("", undefined, logContext);
 };
 
 export class MsJwtProvider implements IJwtIdentityProvider {
-  constructor(public name) {}
+  private logContext: LogContext;
+
+  constructor(public name: string, logContext?: LogContext) {
+    this.logContext = (logContext?.clone() || new LogContext()).appendScope("MsJwtProvider");
+  }
 
   /**
    * Check if caller's access token is valid
@@ -87,15 +101,16 @@ export class MsJwtProvider implements IJwtIdentityProvider {
           errorType: "AuthenticationError",
         },
         400,
+        this.logContext
       );
     }
 
-    const isAuthorized = authorizeJwt(issuer, identity);
+    const isAuthorized = authorizeJwt(issuer, identity, this.logContext);
     if (!isAuthorized.success) {
       return isAuthorized;
     }
 
     const identityId = identity?.jwt?.payload?.sub;
-    return ServiceResult.Succeeded(identityId);
+    return ServiceResult.Succeeded(identityId, undefined, this.logContext);
   }
 }
