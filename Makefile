@@ -129,7 +129,7 @@ set-constitution: ## Set new custom constitution
 		@sleep 5; \
 		cp -r ${KMS_WORKSPACE}/sandbox_common/*.js ${KEYS_DIR}; \
 	fi
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_constitution.sh --network-url "${KMS_URL}" --certificate-dir "${KEYS_DIR}" --custom-constitution ./governance/constitution/kms_actions.js --member-count ${MEMBER_COUNT}
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_constitution.sh --network-url "${KMS_URL}" --certificate-dir "${KEYS_DIR}" --custom-constitution ./governance/constitution/kms_actions_maa.js --member-count ${MEMBER_COUNT}
 
 get-service-cert: # Get the mCCF service cert
 	@echo -e "\e[34m$@\e[0m" || true
