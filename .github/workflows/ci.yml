@@ -57,7 +57,9 @@ jobs:
           configFile: .devcontainer/devcontainer.json
           runCmd: |
              scripts/set_python_env.sh && pip install -r requirements.txt
-             make demo
+
+      - name: KMS E2E tests
+        run: make demo
 
       - name: Print CCF logs
         run: cat workspace/sandbox_0/out
