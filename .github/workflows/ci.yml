@@ -48,7 +48,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: ./scripts/tools/install-deps.sh
 
-      - name: Build DevContainer
+      - name: Build DevContainer and run E2E tests
         uses: devcontainers/ci@v0.3
         env:
           GH_TOKEN: ${{ github.token }}
@@ -57,9 +57,7 @@ jobs:
           configFile: .devcontainer/devcontainer.json
           runCmd: |
              scripts/set_python_env.sh && pip install -r requirements.txt
-
-      - name: KMS E2E tests
-        run: make demo
+             make demo
 
       - name: Print CCF logs
         run: cat workspace/sandbox_0/out
