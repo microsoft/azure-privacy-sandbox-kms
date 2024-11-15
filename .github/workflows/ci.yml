@@ -10,6 +10,8 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: "0 23 * * *"
 
 jobs:
   lint:
@@ -46,7 +48,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: ./scripts/tools/install-deps.sh
 
-      - name: Build DevContainer
+      - name: Build DevContainer and run E2E tests
         uses: devcontainers/ci@v0.3
         env:
           GH_TOKEN: ${{ github.token }}
@@ -56,6 +58,9 @@ jobs:
           runCmd: |
              scripts/set_python_env.sh && pip install -r requirements.txt
              make demo
+
+      - name: Print CCF logs
+        run: cat workspace/sandbox_0/out
 
   system:
     secrets: inherit # pragma: allowlist secret
