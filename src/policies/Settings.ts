@@ -11,16 +11,9 @@ export interface IService {
   debug: boolean;
 }
 
-export interface IKeyRotation {
-  gracePeriodDays: number;
-  ttlDays: number;
-}
-
-
 // Define the ISettings interface
 export interface ISettings {
   service: IService;
-  keyRotation: IKeyRotation;
 }
 
 export class Settings {
@@ -40,10 +33,6 @@ export class Settings {
         description: "Key Management Service",
         version: "1.0.0",
         debug: false,
-      },
-      keyRotation: {
-        gracePeriodDays: 2,
-        ttlDays: 7,
       },
     };
   }
