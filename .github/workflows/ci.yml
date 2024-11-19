@@ -1,4 +1,8 @@
-name: "KMS CI"
+name: CI
+
+permissions:
+  id-token: write
+  contents: read
 
 on:
   push:
@@ -6,48 +10,58 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: "0 23 * * *"
 
 jobs:
-  kms:
-    name: kms
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          persist-credentials: false
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Build DevContainer
+      - name: Run Lint
+        run: make lint
+
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/tools/install-deps.sh
+
+      - name: Run Unit Tests
+        run: npm run test
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/tools/install-deps.sh
+
+      - name: Build DevContainer and run E2E tests
         uses: devcontainers/ci@v0.3
+        env:
+          GH_TOKEN: ${{ github.token }}
         with:
           push: never
           configFile: .devcontainer/devcontainer.json
           runCmd: |
-            scripts/set_python_env.sh && pip install -r requirements.txt && make demo && npm run test
-        env:
-          KMS_WORKSPACE: ./workspace
+             scripts/set_python_env.sh && pip install -r requirements.txt
+             make demo
 
-  test-mccf-kms:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Print CCF logs
+        run: cat workspace/sandbox_0/out
 
-      - name: Test mCCF KMS
-        run: |
-          . ./scripts/setup_mCCF.sh
-          ./scripts/test_curl.sh
-        env:
-          PUBLIC_CERT_PEM: ${{ secrets.PUBLIC_CERT_PEM }}
-          PRIVATE_CERT_PEM: ${{ secrets.PRIVATE_CERT_PEM }}
-          CCF_NAME: ${{ secrets.DEPLOYMENT_MCCF }}
-
-  lint:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: KMS Lint
-        run: make lint
+  system:
+    secrets: inherit # pragma: allowlist secret
+    uses: ./.github/workflows/system-tests.yml

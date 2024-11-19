@@ -33,9 +33,7 @@ export class AuthenticationService implements IAuthenticationService {
 
   constructor(logContext?: LogContext) {
     this.logContext = (logContext?.clone() || new LogContext()).appendScope("AuthenticationService");
-    this.validators.set(
-      CcfAuthenticationPolicyEnum.Jwt,
-      new JwtValidator(this.logContext));
+    this.validators.set(CcfAuthenticationPolicyEnum.Jwt, new JwtValidator());
     this.validators.set(
       CcfAuthenticationPolicyEnum.User_cert,
       new UserCertValidator(this.logContext),
@@ -60,8 +58,8 @@ export class AuthenticationService implements IAuthenticationService {
         return [caller, ServiceResult.Succeeded("", undefined, this.logContext)];
       }
       Logger.debug(
-        `isAuthenticated result (AuthenticationService)-> ${caller.policy},${JSON.stringify(caller)}`,
-        this.logContext,
+        `Authorization: isAuthenticated result (AuthenticationService)-> ${caller.policy},${JSON.stringify(caller)}`,
+        this.logContext
       );
       const validator = this.validators.get(
         <CcfAuthenticationPolicyEnum>caller.policy,

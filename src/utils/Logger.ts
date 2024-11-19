@@ -20,7 +20,7 @@ export class LogContext {
   scopeStack: string[] = [];
   requestId?: string;
 
-  /** 
+  /**
    * Constructor to initialize a new instance of the LogContext class.
    */
   constructor() { }
@@ -159,6 +159,10 @@ export class Logger {
     return `${context.toString()} ${message}`;
   }
 
+  private static getRemainingArgsString(remainingArgs: any[]): string {
+    return remainingArgs ? remainingArgs.filter(arg => arg !== undefined).join(' ') : '';
+  }
+
   /**
    * Logs an error message to the console.
    * @param message - The error message to log.
@@ -169,7 +173,12 @@ export class Logger {
     const [context, remainingArgs] = this.extractContextAndArgs(contextOrArg, args);
     const formattedMessage = this.formatMessageWithContext(context, message);
     if (Logger.logLevel >= LogLevel.ERROR) {
-      console.error(`[ERROR] ${formattedMessage}`, ...remainingArgs);
+      const remainingArgsString = this.getRemainingArgsString(remainingArgs);
+      if (remainingArgsString) {
+          console.error(`[ERROR] ${formattedMessage} ${remainingArgsString}`);
+      } else {
+          console.error(`[ERROR] ${formattedMessage}`);
+      }
       return true;
     }
     return false;
@@ -185,7 +194,12 @@ export class Logger {
     const [context, remainingArgs] = this.extractContextAndArgs(contextOrArg, args);
     const formattedMessage = this.formatMessageWithContext(context, message);
     if (Logger.logLevel >= LogLevel.WARN) {
-      console.warn(`[WARN] ${formattedMessage}`, ...remainingArgs);
+      const remainingArgsString = this.getRemainingArgsString(remainingArgs);
+      if (remainingArgsString) {
+          console.warn(`[WARN] ${formattedMessage} ${remainingArgsString}`);
+      } else {
+          console.warn(`[WARN] ${formattedMessage}`);
+      }
       return true;
     }
     return false;
@@ -201,7 +215,12 @@ export class Logger {
     const [context, remainingArgs] = this.extractContextAndArgs(contextOrArg, args);
     const formattedMessage = this.formatMessageWithContext(context, message);
     if (Logger.logLevel >= LogLevel.INFO) {
-      console.log(`[INFO] ${formattedMessage}`, ...remainingArgs);
+      const remainingArgsString = this.getRemainingArgsString(remainingArgs);
+      if (remainingArgsString) {
+          console.log(`[INFO] ${formattedMessage} ${remainingArgsString}`);
+      } else {
+          console.log(`[INFO] ${formattedMessage}`);
+      }
       return true;
     }
     return false;
@@ -217,8 +236,13 @@ export class Logger {
     const [context, remainingArgs] = this.extractContextAndArgs(contextOrArg, args);
     const formattedMessage = this.formatMessageWithContext(context, message);
     if (Logger.logLevel >= LogLevel.DEBUG) {
-      console.log(`[DEBUG] ${formattedMessage}`, ...remainingArgs);
-      return true;
+      const remainingArgsString = this.getRemainingArgsString(remainingArgs);
+      if (remainingArgsString) {
+        console.log(`[DEBUG] ${formattedMessage} ${remainingArgsString}`);
+    } else {
+        console.log(`[DEBUG] ${formattedMessage}`);
+    }
+    return true;
     }
     return false;
   }

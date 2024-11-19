@@ -1,5 +1,5 @@
 ARG CCF_PLATFORM
-ARG CCF_VERSION=ccf-5.0.4
+ARG CCF_VERSION=ccf-5.0.8
 
 # Build Image ------------------------------------------------------------------
 
@@ -49,4 +49,4 @@ WORKDIR /kms
 
 ARG CCF_PLATFORM
 ENV CCF_PLATFORM=${CCF_PLATFORM}
-CMD ["/bin/bash", "-c", "make start-host-idp & (./scripts/kms_wait.sh && make setup && tail -f /dev/null)"]
+CMD ["/bin/bash", "-c", "make start-host-idp & (./scripts/kms_wait.sh && make setup && tail -f /kms/workspace/sandbox_0/out)"]

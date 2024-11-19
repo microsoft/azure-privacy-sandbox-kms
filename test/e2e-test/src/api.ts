@@ -96,24 +96,24 @@ export default class Api {
     });
   }
 
-  public static async hearthbeat(
+  public static async heartbeat(
     props: DemoProps,
     member: DemoMemberProps,
     httpsAgent: https.Agent,
     authorizationHeader?: string,
   ): Promise<[number, IHeartbeatResponse]> {
-    console.log(`hearthbeat authorization header: ${authorizationHeader}`);
+    console.log(`heartbeat authorization header: ${authorizationHeader}`);
 
     const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
       ? {
           ":method": "GET",
-          ":path": `${props.hearthbeatPath}`,
+          ":path": `${props.heartbeatPath}`,
           "Content-Type": "application/json",
           Authorization: authorizationHeader,
         }
       : {
           ":method": "GET",
-          ":path": `${props.hearthbeatPath}`,
+          ":path": `${props.heartbeatPath}`,
           "Content-Type": "application/json",
         };
 

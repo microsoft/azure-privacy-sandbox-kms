@@ -130,8 +130,7 @@ export const validateAttestation = (
     Logger.debug(
       `Key release policy: ${JSON.stringify(
         keyReleasePolicy,
-      )}, keys: ${
-        Object.keys(keyReleasePolicy)}, keys: ${Object.keys(keyReleasePolicy).length
+      )}, keys: ${Object.keys(keyReleasePolicy)}, keys: ${Object.keys(keyReleasePolicy).length
       }`, logContext
     );
 

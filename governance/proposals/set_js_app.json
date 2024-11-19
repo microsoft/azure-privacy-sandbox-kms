@@ -1,0 +1,11 @@
+{
+  "actions": [
+    {
+      "name": "set_js_app",
+      "args": {
+        "bundle": "${BUNDLE}",
+        "disable_bytecode_cache": false
+      }
+    }
+  ]
+}

@@ -125,7 +125,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
             errorMessage: `Missing policy value for claim ${key} for operator type ${type}`,
           },
           500,
-          logContext
+          logContext,
         );
       }
       if (
@@ -271,8 +271,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
       const kvValueBuf = keyReleasePolicyMap.get(kvKeyBuf);
       if (!kvValueBuf) {
         if (!kv.optional) {
-          throw new KmsError(`Key release policy ${kvKey} not found in the key release policy map`, logContext);
-        }
+          throw new KmsError(`Key release policy ${kvKey} not found in the key release policy map`, logContext);        }
       } else {
         let kvValue = ccf.bufToStr(kvValueBuf!);
         try {
@@ -280,8 +279,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
             kvValue,
           ) as IKeyReleasePolicySnpProps;
         } catch (error) {
-          throw new KmsError(`Key release policy ${kvKey} is not a valid JSON object: ${kvValue}`, logContext);
-        }
+          throw new KmsError(`Key release policy ${kvKey} is not a valid JSON object: ${kvValue}`, logContext);        }
       }
     });
 

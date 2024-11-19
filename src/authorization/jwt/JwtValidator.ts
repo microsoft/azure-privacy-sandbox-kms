@@ -20,42 +20,6 @@ export class JwtValidator implements IValidatorService {
   constructor(logContext?: LogContext) {
     this.logContext = (logContext?.clone() || new LogContext()).appendScope("JwtValidator");
     this.identityProviders.set(
-      JwtIdentityProviderEnum.MAA_deus2,
-      new MsJwtProvider("JwtMaaProvider", this.logContext),
-    );
-    Logger.debug(
-      "JwtIdentityProviderEnum.MAA_deus2",
-      JwtIdentityProviderEnum.MAA_deus2,
-      this.logContext
-    );
-    this.identityProviders.set(
-      JwtIdentityProviderEnum.MAA_NoSecureBootTyFu,
-      new MsJwtProvider("JwtMaaProvider", this.logContext),
-    );
-    Logger.debug(
-      "JwtIdentityProviderEnum.MAA_NoSecureBootTyFu",
-      JwtIdentityProviderEnum.MAA_NoSecureBootTyFu,
-      this.logContext
-    );
-    this.identityProviders.set(
-      JwtIdentityProviderEnum.MAA_NoSecureBootWeu,
-      new MsJwtProvider("JwtMaaProvider", this.logContext),
-    );
-    Logger.debug(
-      "JwtIdentityProviderEnum.MAA_NoSecureBootWeu",
-      JwtIdentityProviderEnum.MAA_NoSecureBootWeu,
-      this.logContext
-    );
-    this.identityProviders.set(
-      JwtIdentityProviderEnum.MAA_NoSecureBootEus,
-      new MsJwtProvider("JwtMaaProvider", this.logContext),
-    );
-    Logger.debug(
-      "JwtIdentityProviderEnum.MAA_NoSecureBootEus",
-      JwtIdentityProviderEnum.MAA_NoSecureBootEus,
-      this.logContext
-    );
-    this.identityProviders.set(
       JwtIdentityProviderEnum.MS_AAD,
       new MsJwtProvider("JwtProvider", this.logContext),
     );
@@ -78,8 +42,8 @@ export class JwtValidator implements IValidatorService {
 
   validate(request: ccfapp.Request<any>): ServiceResult<string> {
     const jwtCaller = request.caller as unknown as ccfapp.JwtAuthnIdentity;
-    Logger.info(
-      `JWT jwtCaller (JwtValidator)-> ${<JwtIdentityProviderEnum>jwtCaller.jwt.keyIssuer}`,
+    Logger.debug(
+      `Authorization: JWT jwtCaller (JwtValidator)-> ${<JwtIdentityProviderEnum>jwtCaller.jwt.keyIssuer}`,
       this.logContext
     );
     Logger.info(`JWT content: ${JSON.stringify(jwtCaller.jwt)}`, this.logContext);
@@ -88,7 +52,7 @@ export class JwtValidator implements IValidatorService {
     );
 
     if (!provider) {
-      const error = `JWT validation provider is undefined (JwtValidator) for ${<JwtIdentityProviderEnum>jwtCaller.jwt.keyIssuer}`;
+      const error = `Authorization: JWT validation provider is undefined (JwtValidator) for ${<JwtIdentityProviderEnum>jwtCaller.jwt.keyIssuer}`;
       Logger.error(error, this.logContext);
       return ServiceResult.Failed(
         { errorMessage: error, errorType: "caller error" },
@@ -97,8 +61,8 @@ export class JwtValidator implements IValidatorService {
       );
     }
     const isValidJwtToken = provider.isValidJwtToken(jwtCaller);
-    Logger.info(
-      `JWT validation result (JwtValidator) for provider ${provider.name}-> ${JSON.stringify(isValidJwtToken)}`,
+    Logger.debug(
+      `Authorization: JWT validation result (JwtValidator) for provider ${provider.name}-> ${JSON.stringify(isValidJwtToken)}`,
       this.logContext
     );
     return isValidJwtToken;

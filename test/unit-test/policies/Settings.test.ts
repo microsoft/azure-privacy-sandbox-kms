@@ -35,13 +35,13 @@ describe("Test Settings Policy properties", () => {
 
     // Assert
     expect(debugSpy).toHaveBeenCalledWith(
-      `[DEBUG] Service Name: ${settings.service.name}`,
+      `[DEBUG] [scope=Settings] Service Name: ${settings.service.name}`,
     );
     expect(debugSpy).toHaveBeenCalledWith(
-      `[DEBUG] Service Description: ${settings.service.description}`,
+      `[DEBUG] [scope=Settings] Service Description: ${settings.service.description}`,
     );
     expect(debugSpy).toHaveBeenCalledWith(
-      `[DEBUG] Service Version: ${settings.service.version}`,
+      `[DEBUG] [scope=Settings] Service Version: ${settings.service.version}`,
     );
 
     // Clean up

@@ -40,6 +40,9 @@ export const authorizeJwt = (
       logContext
     );
   }
+  Logger.info(
+    `Validate JWT policy for issuer ${issuer}: ${JSON.stringify(policy)}`, logContext
+  );
 
   Logger.info(
     `Validate JWT policy for issuer ${issuer}: ${JSON.stringify(policy)}`, logContext
