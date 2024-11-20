@@ -7,6 +7,7 @@ import { enableEndpoint } from "../utils/Tooling";
 import { ServiceRequest } from "../utils/ServiceRequest";
 import { Settings } from "../policies/Settings";
 import { LogContext } from "../utils/Logger";
+import { settingsPolicyMap } from "../repositories/Maps";
 
 // Enable the endpoint
 enableEndpoint();
@@ -36,7 +37,7 @@ export const auth = (
   const [policy, isValidIdentity] = serviceRequest.isAuthenticated();
   if (isValidIdentity.failure) return isValidIdentity;
 
-  const settings = Settings.loadSettings();
+  const settings = Settings.loadSettingsFromMap(settingsPolicyMap, logContext);
   const description = [
     settings.settings.service.name,
     settings.settings.service.description,
@@ -62,7 +63,7 @@ export const heartbeat = (
   const logContext = new LogContext().appendScope("heartbeatEndpoint");
   new ServiceRequest<void>(logContext, request);
 
-  const settings = Settings.loadSettings();
+  const settings = Settings.loadSettingsFromMap(settingsPolicyMap, logContext);
   const description = [
     settings.settings.service.name,
     settings.settings.service.description,

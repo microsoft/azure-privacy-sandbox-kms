@@ -6,6 +6,7 @@ import { queryParams } from "./Tooling";
 import { AuthenticationService } from "../authorization/AuthenticationService";
 import { Logger, LogContext } from "./Logger";
 import { Settings } from "../policies/Settings";
+import { settingsPolicyMap } from "../repositories/Maps";
 
 /**
  * A generic request.
@@ -36,7 +37,7 @@ export class ServiceRequest<T> {
     // Set the log level from the settings
     let settings: Settings;
     try {
-      settings = Settings.loadSettings();
+      settings = Settings.loadSettingsFromMap(settingsPolicyMap, this.logContext);
     } catch (error) {
       const errorMessage = `${this.logContext.getBaseScope()}: Error loading settings: ${error}`;
       Logger.error(errorMessage, this.logContext);
