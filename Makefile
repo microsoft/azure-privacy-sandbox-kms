@@ -198,6 +198,8 @@ release-policy-set:
 	KMS_URL=${KMS_URL} \
 	RELEASE_POLICY_PROPOSAL=$(release-policy-proposal) \
 		./scripts/release-policy-set.sh
+test-unit:
+	npm run test
 
 test-system:
 	@pytest -s test/system-test/$(filter-out $@,$(MAKECMDGOALS))
