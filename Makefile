@@ -168,24 +168,24 @@ jwt-issuer-up:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
 	IMAGE_TAG=${IMAGE_TAG} \
-		./scripts/jwt-issuer-up.sh
+		./scripts/jwt-issuer/up.sh
 
 jwt-issuer-down:
 	@DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
-		./scripts/jwt-issuer-down.sh
+		./scripts/jwt-issuer/down.sh
 
 jwt-issuer-trust:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	KMS_URL=${KMS_URL} \
 	DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
-		./scripts/jwt-issuer-trust.sh
+		./scripts/jwt-issuer/trust.sh
 
 # Manage KMS -------------------------------------------------------------------
 
 js-app-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	KMS_URL=${KMS_URL} \
-		./scripts/js-app-set.sh
+		./scripts/kms/js-app-set.sh
 
 constitution-set:
 	@WORKSPACE=${KMS_WORKSPACE} \

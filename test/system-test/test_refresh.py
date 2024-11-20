@@ -2,16 +2,16 @@ from endpoints import refresh
 
 
 def test_single_refresh(setup_kms):
-    status_code, refresh_json = refresh(setup_kms["url"])
+    status_code, refresh_json = refresh()
     assert status_code == 200
 
 
 def test_multiple_refresh(setup_kms):
-    status_code, refresh_json = refresh(setup_kms["url"])
+    status_code, refresh_json = refresh()
     assert status_code == 200
     first_kid = refresh_json["kid"]
 
-    status_code, refresh_json = refresh(setup_kms["url"])
+    status_code, refresh_json = refresh()
     assert status_code == 200
     second_kid = refresh_json["kid"]
 
