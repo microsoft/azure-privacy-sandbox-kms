@@ -8,7 +8,7 @@ def call_endpoint(endpoint, **kwargs):
 
     command = [f"scripts/kms/endpoints/{endpoint}.sh"]
     for k, v in kwargs.items():
-        command.extend([f"--{k.replace("_", "-")}", v])
+        command.extend([f'--{k.replace("_", "-")}', v])
 
     *response, status_code = subprocess.run(
         command,
