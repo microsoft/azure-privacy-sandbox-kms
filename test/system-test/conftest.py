@@ -20,7 +20,6 @@ def setup_kms():
             stdout=subprocess.PIPE,
         ).stdout.decode()
     )
-    print(setup_vars)
     os.environ.update(setup_vars)
 
     subprocess.run(
