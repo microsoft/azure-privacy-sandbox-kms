@@ -12,14 +12,14 @@ TEST_ENVIRONMENT = os.getenv("TEST_ENVIRONMENT", "ccf/sandbox-local")
 def setup_kms():
 
     # Setup the CCF backend and set the environment accordingly
-    setup_vars = json.loads(
-        subprocess.run(
+    up_output = subprocess.run(
             f"scripts/{TEST_ENVIRONMENT}/up.sh",
             cwd=REPO_ROOT,
             check=True,
             stdout=subprocess.PIPE,
         ).stdout.decode()
-    )
+    print(up_output)
+    setup_vars = json.loads(up_output)
     os.environ.update(setup_vars)
 
     subprocess.run(
