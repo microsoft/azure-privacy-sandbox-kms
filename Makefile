@@ -60,7 +60,7 @@ start-idp:  ## 🏃 Start the idp for testing jwt
 # Start hosting the application using `sandbox.sh` and enable custom JWT authentication
 start-host: stop-host  ## 🏃 Start the CCF network using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
-	source ./scripts/ccf/sandbox-local/up.sh && \
+	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox-local/up.sh && \
 	source ./scripts/kms/js-app-set.sh && \
 	source ./scripts/kms/constitution-set.sh ./governance/constitution/kms_actions.js
 
