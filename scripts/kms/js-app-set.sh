@@ -9,7 +9,7 @@ js-app-set() {
   REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../..")"
 
   # Build the KMS bundle
-  npm install && npn run build
+  npm install && npm run build
 
   # Adapt template line by line since bundle.json is too big for sed or awk
   temp_file=$(mktemp)
