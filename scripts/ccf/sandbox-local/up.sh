@@ -9,8 +9,8 @@ ccf-sandbox-local-up() {
     REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../../..")"
 
     docker compose -f $REPO_ROOT/services/docker-compose.yml up ccf-sandbox --wait
-    sudo chmod 777 -R $WORKSPACE
 
+    export WORKSPACE="$(realpath ${WORKSPACE:-./workspace})"
     export KMS_URL="https://127.0.0.1:8000"
     export KMS_SERVICE_CERT_PATH="$WORKSPACE/sandbox_common/service_cert.pem"
     export KMS_MEMBER_CERT_PATH="$WORKSPACE/sandbox_common/member0_cert.pem"
