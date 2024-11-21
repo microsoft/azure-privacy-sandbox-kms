@@ -18,10 +18,11 @@ def setup_kms():
             check=True,
             stdout=subprocess.PIPE,
         ).stdout.decode()
-    print(f"{up_output=}")
-    setup_vars = json.loads(up_output)
-    print(f"{setup_vars=}")
-    os.environ.update(setup_vars)
+    try:
+        setup_vars = json.loads(up_output)
+        os.environ.update(setup_vars)
+    except json.decoder.JSONDecodeError:
+        print(f"Failed to parse output of up.sh: {up_output}")
 
     subprocess.run(
         ["make", "jwt-issuer-up"],
