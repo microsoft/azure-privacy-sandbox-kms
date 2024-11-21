@@ -42,11 +42,4 @@ jobs:
       - name: Run System Tests
         env:
             TEST_ENVIRONMENT: ${{ matrix.env }}
-        run: |
-          if [ "${{ inputs.endpoint }}" == "heartbeat" ]; then
-            source ./scripts/ccf/sandbox-local/up.sh
-            source ./scripts/kms/js-app-set.sh
-            source ./scripts/kms/endpoints/heartbeat.sh
-            source ./scripts/ccf/sandbox-local/down.sh
-          fi
-          pytest -sv test/system-test/test_${{ inputs.endpoint }}.py
+        run: pytest -sv test/system-test/test_${{ inputs.endpoint }}.py

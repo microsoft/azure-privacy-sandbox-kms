@@ -12,17 +12,13 @@ TEST_ENVIRONMENT = os.getenv("TEST_ENVIRONMENT", "ccf/sandbox-local")
 def setup_kms():
 
     # Setup the CCF backend and set the environment accordingly
-    up_output = subprocess.run(
+    setup_vars = json.loads(subprocess.run(
             f"scripts/{TEST_ENVIRONMENT}/up.sh",
             cwd=REPO_ROOT,
             check=True,
             stdout=subprocess.PIPE,
-        ).stdout.decode()
-    try:
-        setup_vars = json.loads(up_output)
-        os.environ.update(setup_vars)
-    except json.decoder.JSONDecodeError:
-        print(f"Failed to parse output of up.sh: {up_output}")
+        ).stdout.decode())
+    os.environ.update(setup_vars)
 
     subprocess.run(
         ["make", "jwt-issuer-up"],
