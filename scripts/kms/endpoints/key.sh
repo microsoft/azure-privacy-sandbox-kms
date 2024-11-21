@@ -52,7 +52,7 @@ key() {
         auth_arg=(-H "Authorization: Bearer $(curl -X POST $JWT_ISSUER | jq -r '.access_token')")
     fi
 
-    curl $KMS_URL/app/key${query_string} \
+    curl -k $KMS_URL/app/key${query_string} \
         -X POST \
         --cacert $KMS_SERVICE_CERT_PATH \
         "${auth_arg[@]}" \

@@ -16,7 +16,7 @@ ccf-propose() {
         --signing-key ${KMS_MEMBER_PRIVK_PATH} \
         --ccf-gov-msg-type proposal \
         --ccf-gov-msg-created_at $(date -Is) \
-            | curl $KMS_URL/gov/proposals -k -H "Content-Type: application/cose" \
+            | curl -k $KMS_URL/gov/proposals -k -H "Content-Type: application/cose" \
             --data-binary @- \
             -s \
             --cacert $KMS_SERVICE_CERT_PATH -w '\n' \
