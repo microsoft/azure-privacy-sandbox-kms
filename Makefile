@@ -186,13 +186,13 @@ constitution-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	KMS_URL=${KMS_URL} \
 	CONSTITUTION_PATH=./governance/constitution/kms_actions.js \
-		./scripts/constitution-set.sh
+		./scripts/kms/constitution-set.sh
 
 release-policy-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	KMS_URL=${KMS_URL} \
 	RELEASE_POLICY_PROPOSAL=$(release-policy-proposal) \
-		./scripts/release-policy-set.sh
+		./scripts/kms/release-policy-set.sh
 
 test-system:
 	@pytest -s test/system-test/$(filter-out $@,$(MAKECMDGOALS))
