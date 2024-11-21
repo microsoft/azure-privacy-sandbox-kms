@@ -68,7 +68,7 @@ start-host-idp: stop-host stop-idp start-idp start-host ## 🏃 Start the CCF ne
 	@echo -e "\e[34m$@\e[0m" || true
 	@echo "Executing: $(COMMAND)"
 	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox-local/up.sh > /dev/null 2>&1 && \
-	source ./scripts/jwt-issuer/trust.sh
+	source ./scripts/kms/jwt-issuer-trust.sh
 
 demo: stop-all start-host-idp ## 🎬 Demo the KMS Application in the Sandbox
 	@echo -e "\e[34m$@\e[0m" || true
