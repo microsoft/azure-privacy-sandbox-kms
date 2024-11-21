@@ -8,8 +8,6 @@ ccf-sandbox-local-up() {
 
     REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../../..")"
 
-    export WORKSPACE="$(realpath ${WORKSPACE:-./workspace})"
-    mkdir -p $WORKSPACE
     docker compose -f $REPO_ROOT/services/docker-compose.yml up ccf-sandbox --wait
     sudo chmod 777 -R $WORKSPACE
 
