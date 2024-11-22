@@ -11,7 +11,7 @@ ccf-sandbox-local-up() {
     export WORKSPACE="$(realpath ${WORKSPACE:-$REPO_ROOT/workspace})"
     mkdir -p $WORKSPACE
     docker compose -f $REPO_ROOT/services/docker-compose.yml build ccf-sandbox > /dev/null 2>&1
-    docker compose -f $REPO_ROOT/services/docker-compose.yml up ccf-sandbox --wait
+    docker compose -f $REPO_ROOT/services/docker-compose.yml up ccf-sandbox --wait "$@"
     sudo chown $USER:$USER -R $WORKSPACE
 
     export KMS_URL="https://127.0.0.1:8000"
@@ -22,7 +22,7 @@ ccf-sandbox-local-up() {
     set +e
 }
 
-ccf-sandbox-local-up
+ccf-sandbox-local-up "$@"
 
 jq -n '{
     WORKSPACE: env.WORKSPACE,

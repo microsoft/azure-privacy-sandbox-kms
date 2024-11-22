@@ -13,7 +13,7 @@ def setup_kms():
 
     # Setup the CCF backend and set the environment accordingly
     setup_vars = json.loads(subprocess.run(
-            f"scripts/{TEST_ENVIRONMENT}/up.sh",
+            [f"scripts/{TEST_ENVIRONMENT}/up.sh", "--force-recreate"],
             cwd=REPO_ROOT,
             check=True,
             stdout=subprocess.PIPE,
