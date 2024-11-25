@@ -5,16 +5,13 @@ import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../utils/ServiceResult";
 import { enableEndpoint } from "../utils/Tooling";
 import { ServiceRequest } from "../utils/ServiceRequest";
-import { Settings } from "../policies/Settings";
 import { LogContext } from "../utils/Logger";
-import { settingsPolicyMap } from "../repositories/Maps";
 
 // Enable the endpoint
 enableEndpoint();
 
 export interface IAuthResponse {
   auth: ccfapp.AuthnIdentityCommon;
-  description: string[];
 }
 
 export interface IHeartbeatResponse {
@@ -37,17 +34,8 @@ export const auth = (
   const [policy, isValidIdentity] = serviceRequest.isAuthenticated();
   if (isValidIdentity.failure) return isValidIdentity;
 
-  const settings = Settings.loadSettingsFromMap(settingsPolicyMap, logContext);
-  const description = [
-    settings.settings.service.name,
-    settings.settings.service.description,
-    settings.settings.service.version,
-    settings.settings.service.debug.toString(),
-  ];
-
   return ServiceResult.Succeeded<IAuthResponse>({
-    auth: policy!,
-    description,
+    auth: policy!
   }, undefined, logContext, serviceRequest.requestId);
 };
 
