@@ -198,6 +198,13 @@ release-policy-set:
 	KMS_URL=${KMS_URL} \
 	RELEASE_POLICY_PROPOSAL=$(release-policy-proposal) \
 		./scripts/release-policy-set.sh
+
+settings-policy-set:
+	@WORKSPACE=${KMS_WORKSPACE} \
+	KMS_URL=${KMS_URL} \
+	SETTINGS_POLICY_PROPOSAL=$(settings-policy-proposal) \
+		./scripts/settings-policy-set.sh
+
 test-unit:
 	npm run test
 

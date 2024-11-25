@@ -33,6 +33,20 @@ def apply_kms_constitution(kms_url, workspace):
         check=True,
     )
 
+
+def apply_settings_policy(kms_url, workspace):
+    subprocess.run(
+        ["make", "settings-policy-set",
+        "settings-policy-proposal=governance/policies/settings-policy.json"],
+        env={
+            **os.environ,
+            "KMS_URL": kms_url,
+            "KMS_WORKSPACE": workspace,
+        },
+        cwd=REPO_ROOT,
+        check=True,
+    )
+
 def apply_key_release_policy(kms_url, workspace):
     subprocess.run(
         ["make", "release-policy-set",

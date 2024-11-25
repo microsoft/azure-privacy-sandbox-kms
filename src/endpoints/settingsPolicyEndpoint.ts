@@ -17,10 +17,9 @@ enableEndpoint();
  * @returns A ServiceResult containing the settings policy properties.
  */
 export const settingsPolicy = (
-  request: ccfapp.Request<void>,
-  logContextIn: LogContext,
+  request: ccfapp.Request<void>
 ): ServiceResult<string | ISettings> => {
-  const logContext = logContextIn.appendScope("settingsPolicyEndpoint");
+  const logContext = new LogContext().appendScope("settingsPolicyEndpoint");
   const serviceRequest = new ServiceRequest<void>(logContext, request);
 
   // check if caller has a valid identity
