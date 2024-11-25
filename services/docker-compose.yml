@@ -27,4 +27,4 @@ services:
       interval: 1s
       retries: 120
     volumes:
-      - ${WORKSPACE:-./}:/workspace
+      - ${JWT_ISSUER_WORKSPACE:-./}:/workspace
