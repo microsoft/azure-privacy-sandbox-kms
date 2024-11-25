@@ -66,7 +66,22 @@ def test_settingsPolicy_with_custom_policy(setup_kms):
     status_code, settings_json = settingsPolicy(setup_kms["url"])
     assert status_code == 200
     assert settings_json == settings_policy
-
+    # change policy
+    settings_policy["service"]["debug"] = False
+    proposal = {
+        "actions": [
+            {
+                "name": "set_settings_policy",
+                "args": {
+                    "settings_policy":  settings_policy
+                }
+            }
+        ]
+    }
+    apply_settings_policy(setup_kms["url"], setup_kms["workspace"], proposal)
+    status_code, settings_json = settingsPolicy(setup_kms["url"])
+    assert status_code == 200
+    assert settings_json.get("service").get("debug") == False
 
 if __name__ == "__main__":
     import pytest
