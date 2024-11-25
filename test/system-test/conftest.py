@@ -15,7 +15,7 @@ def setup_kms():
 
     os.environ["DEPLOYMENT_NAME"] = os.getenv(
         "DEPLOYMENT_NAME",
-        f"kms-{''.join(random.choices(string.ascii_letters + string.digits, k=8))}"
+        f"kms-{''.join(random.choices(string.ascii_letters + string.digits, k=8))}".lower()
     )
 
     # Setup the CCF backend and set the environment accordingly
