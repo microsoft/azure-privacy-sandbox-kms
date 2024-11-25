@@ -22,7 +22,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        env: [ccf/sandbox_local]
+        config:
+          - env: ccf/sandbox-local
+            threads: 1
+          - env: ccf/az-cleanroom-aci
+            threads: auto
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,5 +45,8 @@ jobs:
 
       - name: Run System Tests
         env:
-            TEST_ENVIRONMENT: ${{ matrix.env }}
-        run: pytest -sv test/system-test/test_${{ inputs.endpoint }}.py
+          TEST_ENVIRONMENT: ${{ matrix.config.env }}
+        run: |
+          pytest -sv \
+            test/system-test/test_${{ inputs.endpoint }}.py \
+            -n ${{ matrix.config.threads }}
