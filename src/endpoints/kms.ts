@@ -18,7 +18,7 @@ export interface IAuthResponse {
 }
 
 export interface IHeartbeatResponse {
-  description: string[];
+  status: string;
 }
 
 /*
@@ -63,15 +63,9 @@ export const heartbeat = (
   const logContext = new LogContext().appendScope("heartbeatEndpoint");
   new ServiceRequest<void>(logContext, request);
 
-  const settings = Settings.loadSettingsFromMap(settingsPolicyMap, logContext);
-  const description = [
-    settings.settings.service.name,
-    settings.settings.service.description,
-    settings.settings.service.version,
-    settings.settings.service.debug.toString(),
-  ];
+  const description = {
+    status: "Service is running",
+  };
 
-  return ServiceResult.Succeeded<IHeartbeatResponse>({
-    description,
-  });
+  return ServiceResult.Succeeded<IHeartbeatResponse>(description, undefined, logContext);
 };
