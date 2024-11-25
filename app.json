@@ -21,6 +21,27 @@
         }
       }
     },
+    "/settingsPolicy": {
+      "get": {
+        "js_module": "endpoints/settingsPolicyEndpoint.js",
+        "js_function": "settingsPolicy",
+        "forwarding_required": "sometimes",
+        "authn_policies": ["member_cert"],
+        "mode": "readonly",
+        "openapi": {
+          "responses": {
+            "200": {
+              "description": "Settings policy",
+              "content": {
+                "application/json": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/pubkey": {
       "get": {
         "js_module": "endpoints/publickeyEndpoint.js",
