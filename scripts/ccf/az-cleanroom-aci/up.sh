@@ -19,7 +19,7 @@ az-cleanroom-aci-up() {
     az cleanroom ccf network up \
         --subscription $SUBSCRIPTION \
         --resource-group $RESOURCE_GROUP \
-        --name $DEPLOYMENT_NAME
+        --name $DEPLOYMENT_NAME \
 
     export WORKSPACE=~/$DEPLOYMENT_NAME.ccfworkspace
     export KMS_URL=$( \

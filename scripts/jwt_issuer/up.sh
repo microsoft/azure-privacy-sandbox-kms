@@ -3,11 +3,25 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-set -e
+jwt-issuer-up() {
+    set -e
 
-REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../..")"
-export WORKSPACE=$(realpath ${WORKSPACE:-$REPO_ROOT/workspace})
+    REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../..")"
+    export JWT_ISSUER_WORKSPACE=$(realpath ${JWT_ISSUER_WORKSPACE:-$REPO_ROOT/jwt_issuer_workspace})
+    mkdir -p $JWT_ISSUER_WORKSPACE
 
-docker compose -f services/docker-compose.yml up jwt-issuer --wait
+    docker compose -f services/docker-compose.yml up jwt-issuer --wait
 
-sudo chown $USER:$USER -R $WORKSPACE
+    sudo chown $USER:$USER -R $JWT_ISSUER_WORKSPACE
+
+    export JWT_ISSUER="http://localhost:3000/token"
+
+    set +e
+}
+
+jwt-issuer-up
+
+jq -n '{
+    JWT_ISSUER_WORKSPACE: env.JWT_ISSUER_WORKSPACE,
+    JWT_ISSUER: env.JWT_ISSUER,
+}'

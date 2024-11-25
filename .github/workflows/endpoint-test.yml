@@ -17,16 +17,16 @@ on:
 jobs:
 
   endpoint:
-    name: ${{ inputs.endpoint }} (${{ matrix.env }})
+    name: ${{ inputs.endpoint }} (${{ matrix.config.env }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         config:
-          - env: ccf/sandbox-local
+          - env: sandbox-local
             threads: 1
-          - env: ccf/az-cleanroom-aci
-            threads: auto
+          - env: az-cleanroom-aci
+            threads: 1
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,7 +36,7 @@ jobs:
         with:
           client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
           tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
-          subscription-id: ${{ vars.SUBSCRIPTION }}
+          subscription-id: 7ca35580-fc67-469c-91a7-68b38569ca6e
 
       - name: Install Dependencies
         env:
@@ -45,7 +45,7 @@ jobs:
 
       - name: Run System Tests
         env:
-          TEST_ENVIRONMENT: ${{ matrix.config.env }}
+          TEST_ENVIRONMENT: ccf/${{ matrix.config.env }}
         run: |
           pytest -sv \
             test/system-test/test_${{ inputs.endpoint }}.py \

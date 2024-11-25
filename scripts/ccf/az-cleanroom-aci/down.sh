@@ -14,9 +14,12 @@ az-cleanroom-aci-down() {
     export WORKSPACE=~/$DEPLOYMENT_NAME.ccfworkspace
 
     az cleanroom ccf network delete \
-            --name ${DEPLOYMENT_NAME} \
-            --provider-config $WORKSPACE/providerConfig.json \
-            --delete-option delete-storage
+        --name ${DEPLOYMENT_NAME} \
+        --provider-config $WORKSPACE/providerConfig.json \
+        --delete-option delete-storage
+
+    docker compose -p ${DEPLOYMENT_NAME}-operator-governance down || true
+    docker compose -p ${DEPLOYMENT_NAME}-provider down || true
 
     unset WORKSPACE
     unset DEPLOYMENT_NAME
@@ -26,6 +29,8 @@ az-cleanroom-aci-down() {
     unset KMS_MEMBER_PRIVK_PATH
 
     set +e
+
+    exit 0
 }
 
 az-cleanroom-aci-down
