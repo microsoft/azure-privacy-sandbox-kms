@@ -11,6 +11,11 @@ az-cleanroom-aci-up() {
 
     source $REPO_ROOT/services/cacitesting.env
     DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-$1}
+    if [ -z "$DEPLOYMENT_NAME" ]; then
+        read -p "Enter deployment name: " DEPLOYMENT_NAME
+        export DEPLOYMENT_NAME
+    fi
+
     az cleanroom ccf network up \
         --subscription $SUBSCRIPTION \
         --resource-group $RESOURCE_GROUP \
