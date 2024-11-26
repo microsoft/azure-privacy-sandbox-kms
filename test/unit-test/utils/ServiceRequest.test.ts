@@ -109,9 +109,9 @@ describe("Test ServiceRequest properties", () => {
             `[DEBUG] [scope=Settings] Debug: true`,
         );
         expect(debugSpy).toHaveBeenCalledWith(
-            `[INFO] [requestId=req,scope=ServiceRequest->loadSettingsFromMap] ServiceRequest`,
+            `[INFO] [requestId=req,scope=ServiceRequest] ServiceRequest`,
         );
-        const expectedLogMessageWithoutBearer = `[DEBUG] [requestId=req,scope=ServiceRequest->loadSettingsFromMap] Request: {\n` +
+        const expectedLogMessageWithoutBearer = `[DEBUG] [requestId=req,scope=ServiceRequest] Request: {\n` +
         '  "headers": {\n' +
         '    ":authority": "127.0.0.1:8000",\n' +
         '    ":method": "POST",\n' +

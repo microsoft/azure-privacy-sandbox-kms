@@ -51,7 +51,7 @@ const requestHasWrappingKey = (
   body: IUnwrapRequest,
   logContextIn?: LogContext,
 ): ServiceResult<{ wrappingKey: ArrayBuffer; wrappingKeyHash: string }> => {
-  const logContext = logContextIn || new LogContext().appendScope("requestHasWrappingKey");
+  const logContext = (logContextIn?.clone() || new LogContext()).appendScope("requestHasWrappingKey");
   let wrappingKey = body.wrappingKey;
   let wrappingKeyBuf: ArrayBuffer;
   let wrappingKeyHash: string;

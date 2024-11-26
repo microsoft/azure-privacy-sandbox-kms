@@ -62,7 +62,7 @@ export class Settings {
     settingsPolicyMap: ccfapp.KvMap,
     logContextIn: LogContext,
   ): Settings {
-    const logContext = logContextIn.appendScope("loadSettingsFromMap");
+    const logContext = (logContextIn?.clone() || new LogContext()).appendScope("loadSettingsFromMap");
 
     Logger.info(`Loading settings from map: ${settingsPolicyMap === undefined ? "undefined" : JSON.stringify(settingsPolicyMap)}`, logContext);
 
