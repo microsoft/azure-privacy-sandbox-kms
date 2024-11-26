@@ -16,7 +16,7 @@ def deploy_app_code():
 def apply_kms_constitution():
     subprocess.run(
         [
-            "./scripts/kms/constitution-set.sh",
+            "./scripts/kms/constitution_set.sh",
             "./governance/constitution/kms_actions.js",
         ],
         cwd=REPO_ROOT,
