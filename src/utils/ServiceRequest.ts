@@ -71,16 +71,18 @@ export class ServiceRequest<T> {
     }
     this.logContext.setRequestId(this.requestId);
 
-    // Log request
-    Logger.debug(`Request:`, this.logContext, request);
-    this.query = queryParams(request, this.logContext);
-    if (this.query) {
-      Logger.info(`Query:`, this.logContext, this.query);
-    }
+    Logger.info(`ServiceRequest`, this.logContext);
 
-    if (this.headers) {
-      Logger.debug(`Headers:`, this.logContext, this.headers);
-    }
+    // Log request
+    // Create a shallow copy of the request object without the Authorization header
+    const { Authorization, authorization, ...otherHeaders } = request.headers;
+    const requestWithoutAuth = {
+      ...request,
+      headers: otherHeaders,
+    };
+
+    Logger.debug(`Request:`, this.logContext, JSON.stringify(requestWithoutAuth, null, 2));
+    this.query = queryParams(request, this.logContext);
 
     try {
       this.body = request.body.json();

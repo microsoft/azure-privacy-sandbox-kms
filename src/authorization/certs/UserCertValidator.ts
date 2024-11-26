@@ -43,7 +43,7 @@ export class UserCertValidator implements IValidatorService {
     const identityId = userCaller.id;
     const isValid = this.isUser(identityId);
     if (isValid.success && isValid.body) {
-      return ServiceResult.Succeeded(identityId, undefined, this.logContext);
+      return ServiceResult.Succeeded(identityId, this.logContext);
     }
     return ServiceResult.Failed({
       errorMessage: `Error: invalid caller identity (UserCertValidator)->${JSON.stringify(isValid)}`,
@@ -64,6 +64,6 @@ export class UserCertValidator implements IValidatorService {
       ccfapp.arrayBuffer,
     );
     const result = usersCerts.has(ccf.strToBuf(userId));
-    return ServiceResult.Succeeded(result, undefined, this.logContext);
+    return ServiceResult.Succeeded(result, this.logContext);
   }
 }

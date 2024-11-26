@@ -64,7 +64,6 @@ export class Settings {
     const logContext = logContextIn.appendScope("loadSettingsFromMap");
 
     Logger.info(`Loading settings from map: ${settingsPolicyMap === undefined ? "undefined" : JSON.stringify(settingsPolicyMap)}`, logContext);
-    Logger.info(`Map size: ${settingsPolicyMap.size}`, logContext);
 
     // Load the settings from the map
     const key = "settings_policy"; // Ensure the key matches the stored key in governance
@@ -72,7 +71,7 @@ export class Settings {
 
     const settingsPolicy = settingsPolicyMap.get(keyBuf);
     const settingsPolicyStr = settingsPolicy ? ccf.bufToStr(settingsPolicy) : undefined;
-    Logger.info(`Loading settings: ${settingsPolicyStr}`, logContext);
+    Logger.debug(`Loading settings: ${settingsPolicyStr}`, logContext);
 
 
     let settings: ISettings;

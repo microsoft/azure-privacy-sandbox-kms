@@ -29,8 +29,8 @@ export const settingsPolicy = (
   try {
     const result =
       Settings.loadSettingsFromMap(settingsPolicyMap, logContext).settings;
-    return ServiceResult.Succeeded<ISettings>(result, undefined, logContext, serviceRequest.requestId);
+    return ServiceResult.Succeeded<ISettings>(result, logContext);
   } catch (error: any) {
-    return ServiceResult.Failed<string>({ errorMessage: error.message }, 500, logContext, serviceRequest.requestId);
+    return ServiceResult.Failed<string>({ errorMessage: error.message }, 500, logContext);
   }
 };

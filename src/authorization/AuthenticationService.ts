@@ -55,7 +55,7 @@ export class AuthenticationService implements IAuthenticationService {
       const caller = request.caller as unknown as ccfapp.AuthnIdentityCommon;
       if (!caller) {
         // no caller policy
-        return [caller, ServiceResult.Succeeded("", undefined, this.logContext)];
+        return [caller, ServiceResult.Succeeded("", this.logContext)];
       }
       Logger.debug(
         `Authorization: isAuthenticated result (AuthenticationService)-> ${caller.policy},${JSON.stringify(caller)}`,

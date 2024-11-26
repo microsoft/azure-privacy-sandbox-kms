@@ -36,6 +36,6 @@ export class DemoJwtProvider implements IJwtIdentityProvider {
 
     const identityId = identity?.jwt?.payload?.sub;
     Logger.debug(`JWT validation succeeded: ${identityId}`, DemoJwtProvider.logContext);
-    return ServiceResult.Succeeded(identityId, undefined, DemoJwtProvider.logContext);
+    return ServiceResult.Succeeded(identityId, DemoJwtProvider.logContext);
   }
 }
