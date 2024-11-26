@@ -47,7 +47,7 @@ stop-host:  ## 🏃 Stop the host
 
 stop-idp:  ## 🏃 Stop the idp
 	@echo -e "\e[34m$@\e[0m" || true
-	source ./scripts/jwt-issuer/down.sh
+	source ./scripts/jwt_issuer/down.sh
 
 stop-all: stop-host stop-idp # Stop all services
 	@echo -e "\e[34m$@\e[0m" || true
@@ -55,7 +55,7 @@ stop-all: stop-host stop-idp # Stop all services
 # idp commands to issue JWT
 start-idp:  ## 🏃 Start the idp for testing jwt
 	@echo -e "\e[34m$@\e[0m" || true
-	source ./scripts/jwt-issuer/up.sh
+	source ./scripts/jwt_issuer/up.sh
 
 # Start hosting the application using `sandbox.sh` and enable custom JWT authentication
 start-host: stop-host  ## 🏃 Start the CCF network using Sandbox.sh
@@ -163,11 +163,11 @@ jwt-issuer-up:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
 	IMAGE_TAG=${IMAGE_TAG} \
-		./scripts/jwt-issuer/up.sh
+		./scripts/jwt_issuer/up.sh
 
 jwt-issuer-down:
 	@DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
-		./scripts/jwt-issuer/down.sh
+		./scripts/jwt_issuer/down.sh
 
 jwt-issuer-trust:
 	@WORKSPACE=${KMS_WORKSPACE} \

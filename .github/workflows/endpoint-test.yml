@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        env: [ccf/sandbox-local]
+        env: [ccf/sandbox_local]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
