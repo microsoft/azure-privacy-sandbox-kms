@@ -138,7 +138,7 @@ export class Logger {
    * - context is either a LogContext instance or undefined
    * - args is an array of additional arguments (with contextOrArg prepended if it's not a LogContext)
    */
-  private static extractContextAndArgs(contextOrArg?: LogContext | any, args: any[] = []): [LogContext | undefined, any[]] {
+  private static extractContextAndArgs(contextOrArg: LogContext | any, args: any[]): [LogContext | undefined, any[]] {
     if (contextOrArg instanceof LogContext) {
       return [contextOrArg, args];
     }
@@ -153,7 +153,7 @@ export class Logger {
    */
   private static formatMessageWithContext(context: LogContext | undefined, message: string): string {
     if (context) {
-      return `[${context.toString()}] ${message}`;
+      return `${context.toString()} ${message}`;
     }
     return message;
   }
