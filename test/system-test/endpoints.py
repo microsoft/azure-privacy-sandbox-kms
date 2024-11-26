@@ -19,7 +19,7 @@ def kms_request(endpoint, auth, method="GET", headers=[], body=None):
         header_arg.extend(["-H", f'Authorization: Bearer {json.loads(res.content)["access_token"]}'])
     elif auth == "member_cert":
         cert = f"{REPO_ROOT}/workspace/sandbox_common/member0_cert.pem"
-    else:
+    elif auth == "user_cert":
         cert = f"{REPO_ROOT}/workspace/sandbox_common/user0_cert.pem"
     resp = subprocess.run(
         [
@@ -95,3 +95,7 @@ def refresh(kms_url, auth="member_cert"):
 
 def keyReleasePolicy(kms_url, auth="member_cert"):
     return kms_request(f"{kms_url}/app/keyReleasePolicy", auth=auth)
+
+
+def settingsPolicy(kms_url, auth="member_cert"):
+    return kms_request(f"{kms_url}/app/settingsPolicy", auth=auth)
