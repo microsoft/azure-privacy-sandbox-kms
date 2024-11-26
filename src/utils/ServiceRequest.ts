@@ -60,7 +60,7 @@ export class ServiceRequest<T> {
       'request-id',
       'requestid',
     ]
-    const requestIdFromHeader = requestIdHeaderList
+    const requestIdFromHeader = (logcontext as LogContext).requestId || requestIdHeaderList
       .map((header) => this.headers ? this.headers[header] : undefined)
       .find((header) => header !== undefined);
     if (!requestIdFromHeader) {
