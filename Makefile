@@ -198,7 +198,7 @@ settings-policy-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	KMS_URL=${KMS_URL} \
 	SETTINGS_POLICY_PROPOSAL=$(settings-policy-proposal) \
-		./scripts/settings-policy-set.sh
+		./scripts/kms/settings_policy_set.sh
 
 test-unit:
 	npm run test

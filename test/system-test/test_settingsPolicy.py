@@ -1,3 +1,4 @@
+import os
 import pytest
 from utils import (
     apply_kms_constitution,
@@ -8,7 +9,7 @@ from endpoints import settingsPolicy
 
 
 def test_settingsPolicy_with_no_policy(setup_kms):
-    status_code, settings_json = settingsPolicy(setup_kms["url"])
+    status_code, settings_json = settingsPolicy()
     assert status_code == 200
     assert settings_json == {
         "service": {
@@ -21,29 +22,14 @@ def test_settingsPolicy_with_no_policy(setup_kms):
 
 
 def test_settingsPolicy_with_no_auth(setup_kms):
-    status_code, settings_json = settingsPolicy(setup_kms["url"], auth=None)
+    status_code, settings_json = settingsPolicy(auth=None)
     assert status_code == 401
 
 
 def test_settingsPolicy_with_policy(setup_kms):
-    apply_kms_constitution(setup_kms["url"], setup_kms["workspace"])
-    apply_settings_policy(setup_kms["url"], setup_kms["workspace"])
-    status_code, settings_json = settingsPolicy(setup_kms["url"])
-    assert status_code == 200
-    assert settings_json == {
-        "service": {
-            "name": "azure-privacy-sandbox-kms",
-            "description": "Key Management Service",
-            "version": "1.0.0",
-            "debug": True,
-        }
-    }
+    apply_kms_constitution()
 
-
-def test_settingsPolicy_with_custom_policy(setup_kms):
-    apply_kms_constitution(setup_kms["url"], setup_kms["workspace"])
-
-    settings_policy = {
+    policy = {
         "service": {
             "name": "custom-kms",
             "description": "Custom Key Management Service",
@@ -51,37 +37,41 @@ def test_settingsPolicy_with_custom_policy(setup_kms):
             "debug": True,
         }
     }
-    proposal = {
-        "actions": [
-            {
-                "name": "set_settings_policy",
-                "args": {
-                    "settings_policy":  settings_policy
-                }
-            }
-        ]
-    }
-    apply_settings_policy(setup_kms["url"], setup_kms["workspace"], proposal)
+    apply_settings_policy(policy)
 
-    status_code, settings_json = settingsPolicy(setup_kms["url"])
+    status_code, settings_json = settingsPolicy()
     assert status_code == 200
-    assert settings_json == settings_policy
-    # change policy
-    settings_policy["service"]["debug"] = False
-    proposal = {
-        "actions": [
-            {
-                "name": "set_settings_policy",
-                "args": {
-                    "settings_policy":  settings_policy
-                }
-            }
-        ]
+    assert settings_json == policy
+
+
+def test_settingsPolicy_with_multiple_policy_sets(setup_kms):
+    apply_kms_constitution()
+
+    policy = {
+        "service": {
+            "name": "custom-kms",
+            "description": "Custom Key Management Service",
+            "version": "2.0.0",
+            "debug": True,
+        }
     }
-    apply_settings_policy(setup_kms["url"], setup_kms["workspace"], proposal)
-    status_code, settings_json = settingsPolicy(setup_kms["url"])
+    apply_settings_policy(policy)
+    status_code, settings_json = settingsPolicy()
     assert status_code == 200
-    assert settings_json.get("service").get("debug") == False
+    assert settings_json == policy
+
+    different_policy = {
+        "service": {
+            "name": "custom-kms-2",
+            "description": "Custom Key Management Service 2",
+            "version": "2.0.1",
+            "debug": False,
+        }
+    }
+    apply_settings_policy(different_policy)
+    status_code, settings_json = settingsPolicy()
+    assert status_code == 200
+    assert settings_json == different_policy
 
 if __name__ == "__main__":
     import pytest
