@@ -7,7 +7,7 @@ REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "..")
 
 def deploy_app_code():
     subprocess.run(
-        "scripts/kms/js-app-set.sh",
+        "scripts/kms/js_app_set.sh",
         cwd=REPO_ROOT,
         check=True,
     )

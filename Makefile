@@ -61,7 +61,7 @@ start-idp:  ## 🏃 Start the idp for testing jwt
 start-host: stop-host  ## 🏃 Start the CCF network using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
 	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh && \
-	source ./scripts/kms/js-app-set.sh && \
+	source ./scripts/kms/js_app_set.sh && \
 	source ./scripts/kms/constitution_set.sh ./governance/constitution/kms_actions.js
 
 start-host-idp: stop-host stop-idp start-idp start-host ## 🏃 Start the CCF network && idp using Sandbox.sh
@@ -180,7 +180,7 @@ jwt-issuer-trust:
 js-app-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	KMS_URL=${KMS_URL} \
-		./scripts/kms/js-app-set.sh
+		./scripts/kms/js_app_set.sh
 
 constitution-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
