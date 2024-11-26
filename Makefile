@@ -43,7 +43,7 @@ setup: ## Setup proposals and generate an initial key
 
 stop-host:  ## 🏃 Stop the host
 	@echo -e "\e[34m$@\e[0m" || true
-	source ./scripts/ccf/sandbox-local/down.sh
+	source ./scripts/ccf/sandbox_local/down.sh
 
 stop-idp:  ## 🏃 Stop the idp
 	@echo -e "\e[34m$@\e[0m" || true
@@ -60,14 +60,14 @@ start-idp:  ## 🏃 Start the idp for testing jwt
 # Start hosting the application using `sandbox.sh` and enable custom JWT authentication
 start-host: stop-host  ## 🏃 Start the CCF network using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
-	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox-local/up.sh && \
+	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh && \
 	source ./scripts/kms/js-app-set.sh && \
 	source ./scripts/kms/constitution-set.sh ./governance/constitution/kms_actions.js
 
 start-host-idp: stop-host stop-idp start-idp start-host ## 🏃 Start the CCF network && idp using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
 	@echo "Executing: $(COMMAND)"
-	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox-local/up.sh > /dev/null 2>&1 && \
+	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh > /dev/null 2>&1 && \
 	source ./scripts/kms/jwt-issuer-trust.sh
 
 demo: stop-all start-host-idp ## 🎬 Demo the KMS Application in the Sandbox

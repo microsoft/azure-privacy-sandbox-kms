@@ -5,7 +5,7 @@ import pytest
 from utils import deploy_app_code
 
 REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
-TEST_ENVIRONMENT = os.getenv("TEST_ENVIRONMENT", "ccf/sandbox-local")
+TEST_ENVIRONMENT = os.getenv("TEST_ENVIRONMENT", "ccf/sandbox_local")
 
 
 @pytest.fixture()
