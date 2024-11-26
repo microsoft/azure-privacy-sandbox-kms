@@ -78,17 +78,6 @@ def listpubkeys(kms_url, auth="member_cert"):
     return kms_request(f"{kms_url}/app/listpubkeys", auth=auth)
 
 
-def pubkey(kms_url, kid=None, fmt=None, auth="member_cert"):
-    query_string = ""
-    if kid is not None or fmt is not None:
-        query_string = "?"
-    query_string += "&".join([
-        *([f"kid={kid}"] if kid is not None else []),
-        *([f"fmt={fmt}"] if fmt is not None else []),
-    ])
-    return kms_request(f"{kms_url}/app/pubkey{query_string}", auth=auth)
-
-
 def refresh(kms_url, auth="member_cert"):
     return kms_request(f"{kms_url}/app/refresh", method="POST", auth=auth)
 

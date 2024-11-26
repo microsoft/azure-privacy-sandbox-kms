@@ -200,8 +200,8 @@ release-policy-set:
 	RELEASE_POLICY_PROPOSAL=$(release-policy-proposal) \
 		./scripts/release-policy-set.sh
 
-test-system:
-	@pytest -s test/system-test/$(filter-out $@,$(MAKECMDGOALS))
+test-system-ai:
+	@pytest -s test/inference-system-test/$(filter-out $@,$(MAKECMDGOALS))
 
 # Keep this at the bottom.
 clean: ## 🧹 Clean the working folders created during build/demo
