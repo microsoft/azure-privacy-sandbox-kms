@@ -4,14 +4,14 @@ from endpoints import pubkey, refresh
 
 @pytest.mark.xfail(strict=True) # TODO: Fix #167
 def test_no_params_no_keys(setup_kms):
-    status_code, key_json = pubkey(setup_kms["url"])
+    status_code, key_json = pubkey()
     assert status_code == 200
 
 
 def test_no_params_with_single_key(setup_kms):
-    refresh(setup_kms["url"])
+    refresh()
     while True:
-        status_code, key_json = pubkey(setup_kms["url"])
+        status_code, key_json = pubkey()
         if status_code != 202:
             break
     assert status_code == 200
@@ -19,10 +19,10 @@ def test_no_params_with_single_key(setup_kms):
 
 
 def test_no_params_with_multiple_keys(setup_kms):
-    refresh(setup_kms["url"])
-    refresh(setup_kms["url"])
+    refresh()
+    refresh()
     while True:
-        status_code, key_json = pubkey(setup_kms["url"])
+        status_code, key_json = pubkey()
         if status_code != 202:
             break
     assert status_code == 200
@@ -30,9 +30,9 @@ def test_no_params_with_multiple_keys(setup_kms):
 
 
 def test_kid_not_present_with_other_keys(setup_kms):
-    refresh(setup_kms["url"])
+    refresh()
     while True:
-        status_code, key_json = pubkey(setup_kms["url"], kid = "doesntexist")
+        status_code, key_json = pubkey(kid = "doesntexist")
         if status_code != 202:
             break
     assert status_code == 404
@@ -40,25 +40,25 @@ def test_kid_not_present_with_other_keys(setup_kms):
 
 def test_kid_not_present_without_other_keys(setup_kms):
     while True:
-        status_code, key_json = pubkey(setup_kms["url"], kid = "doesntexist")
+        status_code, key_json = pubkey(kid = "doesntexist")
         if status_code != 202:
             break
     assert status_code == 404
 
 
 def test_kid_present(setup_kms):
-    _, refresh_json = refresh(setup_kms["url"])
+    _, refresh_json = refresh()
     while True:
-        status_code, key_json = pubkey(setup_kms["url"], kid = refresh_json["kid"])
+        status_code, key_json = pubkey(kid = refresh_json["kid"])
         if status_code != 202:
             break
     assert status_code == 200
 
 
 def test_fmt_tink(setup_kms):
-    refresh(setup_kms["url"])
+    refresh()
     while True:
-        status_code, key_json = pubkey(setup_kms["url"], fmt="tink")
+        status_code, key_json = pubkey(fmt="tink")
         if status_code != 202:
             break
     try:
@@ -78,9 +78,9 @@ def test_fmt_tink(setup_kms):
 
 
 def test_fmt_jwk(setup_kms):
-    refresh(setup_kms["url"])
+    refresh()
     while True:
-        status_code, key_json = pubkey(setup_kms["url"], fmt="jwk")
+        status_code, key_json = pubkey(fmt="jwk")
         if status_code != 202:
             break
     assert status_code == 200
@@ -90,9 +90,9 @@ def test_fmt_jwk(setup_kms):
 
 
 def test_fmt_invalid(setup_kms):
-    refresh(setup_kms["url"])
+    refresh()
     while True:
-        status_code, key_json = pubkey(setup_kms["url"], fmt="invalid_fmt")
+        status_code, key_json = pubkey(fmt="invalid_fmt")
         if status_code != 202:
             break
     assert status_code == 400

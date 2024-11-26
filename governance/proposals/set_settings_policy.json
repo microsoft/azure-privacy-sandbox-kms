@@ -1,0 +1,10 @@
+{
+    "actions": [
+      {
+        "name": "set_settings_policy",
+        "args": {
+          "settings_policy": $SETTINGS_POLICY
+        }
+      }
+    ]
+  }
