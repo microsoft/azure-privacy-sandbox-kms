@@ -1,5 +1,7 @@
+import json
 import os
 import subprocess
+import tempfile
 
 
 REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -11,6 +13,37 @@ def deploy_app_code():
         cwd=REPO_ROOT,
         check=True,
     )
+
+
+def apply_settings_policy(kms_url, workspace, settings_policy_proposal_json=None):
+    if settings_policy_proposal_json:
+        print("Creating temporary settings policy file: ", settings_policy_proposal_json)
+
+        # Create a temporary file for the settings policy JSON
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as temp_file:
+            temp_file.write(json.dumps(settings_policy_proposal_json).encode())
+            proposal_path = temp_file.name
+    else:
+        # Use the default settings policy file
+        proposal_path = os.path.join(REPO_ROOT, "governance/policies/settings-policy.json")
+
+    try:
+        subprocess.run(
+            ["make", "settings-policy-set",
+            f"settings-policy-proposal={proposal_path}"],
+            env={
+                **os.environ,
+                "KMS_URL": kms_url,
+                "KMS_WORKSPACE": workspace,
+            },
+            cwd=REPO_ROOT,
+            check=True,
+        )
+    finally:
+        # Clean up the temporary file if it was created
+        if settings_policy_proposal_json:
+            print(f"Removing temporary file: {proposal_path}")
+            os.remove(proposal_path)
 
 
 def apply_kms_constitution():
