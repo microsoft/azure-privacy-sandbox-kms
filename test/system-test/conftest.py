@@ -31,7 +31,7 @@ def setup_kms():
     )
     try:
         if res.returncode != 0:
-            raise Exception(f"HERE: {res.stdout.decode()} - {res.stderr.decode()}")
+            raise Exception(f"{res.stdout.decode()} - {res.stderr.decode()}")
 
         stdout = res.stdout.decode()
         setup_vars = json.loads(stdout[stdout.rfind("{"):])
