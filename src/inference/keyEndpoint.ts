@@ -97,7 +97,6 @@ export const key = (
         validateAttestationResult.error!,
         validateAttestationResult.statusCode,
         logContext,
-        serviceRequest.requestId,
       );
     }
   } catch (exception: any) {
@@ -107,7 +106,6 @@ export const key = (
       },
       500,
       logContext,
-      serviceRequest.requestId,
     );
   }
 
@@ -122,7 +120,6 @@ export const key = (
         { errorMessage: `No keys in store` },
         400,
         logContext,
-        serviceRequest.requestId,
       );
     }
   } else {
@@ -133,7 +130,6 @@ export const key = (
         { errorMessage: `kid ${kid} not found in store` },
         404,
         logContext,
-        serviceRequest.requestId,
       );
     }
   }
@@ -147,7 +143,7 @@ export const key = (
     Logger.info(`Succesfully get key receipt for key id: ${kid}`, logContext);
     Logger.debug(`Key->Receipt: ${receipt}`, logContext);
   } else {
-    return ServiceResult.Accepted(logContext, serviceRequest.requestId);
+    return ServiceResult.Accepted(logContext);
   }
 
   // wrap the private key
@@ -165,7 +161,6 @@ export const key = (
       },
       500,
       logContext,
-      serviceRequest.requestId,
     );
   }
 
@@ -173,7 +168,7 @@ export const key = (
     kid: kid,
     key: wrappedKey.wrappedKey,
     receipt: receipt,
-  }, undefined, logContext, serviceRequest.requestId);
+  }, logContext);
 };
 
 //#endregion
