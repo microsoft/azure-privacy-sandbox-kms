@@ -45,7 +45,7 @@ export const refresh = (
 
     // Store HPKE key pair
     hpkeKeysMap.storeItem(keyItem.kid, keyItem, keyItem.x);
-    Logger.secret(`Key item with id ${id} and kid ${keyItem.kid} stored`);
+    Logger.info(`Key item with id ${id} and kid ${keyItem.kid} stored`);
 
     delete keyItem.d;
     const ret = keyItem;
