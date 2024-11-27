@@ -111,24 +111,25 @@ describe("Test ServiceRequest properties", () => {
         expect(debugSpy).toHaveBeenCalledWith(
             `[INFO] [requestId=req,scope=ServiceRequest] ServiceRequest`,
         );
-        const expectedLogMessageWithoutBearer = `[DEBUG] [requestId=req,scope=ServiceRequest] Request: {\n` +
-        '  "headers": {\n' +
-        '    ":authority": "127.0.0.1:8000",\n' +
-        '    ":method": "POST",\n' +
-        '    ":path": "/app/key",\n' +
-        '    ":scheme": "https",\n' +
-        '    "content-type": "application/json"\n' +
-        '  },\n' +
-        '  "query": "",\n' +
-        '  "path": "/app/key",\n' +
-        '  "method": "POST",\n' +
-        '  "hostname": null,\n' +
-        '  "route": "/app/key",\n' +
-        '  "url": "/app/key",\n' +
-        '  "params": {},\n' +
-        '  "body": {}\n' +
-        '}';
 
+        const expectedLogMessageWithoutBearer = `[DEBUG] [requestId=req,scope=ServiceRequest] Request: {\n` +
+            '  "headers": {\n' +
+            '    ":authority": "127.0.0.1:8000",\n' +
+            '    ":method": "POST",\n' +
+            '    ":path": "/app/key",\n' +
+            '    ":scheme": "https",\n' +
+            '    "content-type": "application/json",\n' +
+            '    "authorization": "token deleted for logging"\n' +
+            '  },\n' +
+            '  "query": "",\n' +
+            '  "path": "/app/key",\n' +
+            '  "method": "POST",\n' +
+            '  "hostname": null,\n' +
+            '  "route": "/app/key",\n' +
+            '  "url": "/app/key",\n' +
+            '  "params": {},\n' +
+            '  "body": {}\n' +
+            '}';
         expect(debugSpy).toHaveBeenCalledWith(expectedLogMessageWithoutBearer);
 
         // Clean up

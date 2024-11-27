@@ -76,10 +76,24 @@ export class ServiceRequest<T> {
     // Log request
     // Create a shallow copy of the request object without the Authorization header
     const { Authorization, authorization, ...otherHeaders } = request.headers;
-    const requestWithoutAuth = {
-      ...request,
-      headers: otherHeaders,
-    };
+    let requestWithoutAuth;
+    if (Authorization || authorization) {
+      requestWithoutAuth = {
+        ...request,
+        headers: {
+          ...otherHeaders,
+          authorization: "token deleted for logging",
+        }
+      }
+    }
+    else {
+      requestWithoutAuth = {
+        ...request,
+        headers: {
+          ...otherHeaders,
+        },
+      }
+    }
 
     Logger.debug(`Request:`, this.logContext, JSON.stringify(requestWithoutAuth, null, 2));
     this.query = queryParams(request, this.logContext);
