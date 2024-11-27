@@ -138,14 +138,17 @@ make setup
 ## Manual tests
 
 ```
-# Testing with heartbeat: Use user certs
-curl ${KMS_URL}/app/heartbeat --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -w '\n' | jq
+# Heartbeat endpoint
+curl ${KMS_URL}/app/heartbeat --cacert ${KEYS_DIR}/service_cert.pem  -H "Content-Type: application/json"  -w '\n' | jq
 
-# Testing with heartbeat: Use member certs
-curl ${KMS_URL}/app/heartbeat --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/member0_cert.pem --key ${KEYS_DIR}/member0_privk.pem -H "Content-Type: application/json" -w '\n' | jq
+# Testing with auth: Use user certs
+curl ${KMS_URL}/app/auth --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -w '\n' | jq
 
-# Testing with heartbeat: Use JWT
-curl ${KMS_URL}/app/heartbeat --cacert ${KEYS_DIR}/service_cert.pem  -H "Content-Type: application/json" -H "Authorization:$AUTHORIZATION"  -w '\n' | jq
+# Testing with auth: Use member certs
+curl ${KMS_URL}/app/auth --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/member0_cert.pem --key ${KEYS_DIR}/member0_privk.pem -H "Content-Type: application/json" -w '\n' | jq
+
+# Testing with auth: Use JWT
+curl ${KMS_URL}/app/auth --cacert ${KEYS_DIR}/service_cert.pem  -H "Content-Type: application/json" -H "Authorization:$AUTHORIZATION"  -w '\n' | jq
 
 # Generate a new key item
 curl ${KMS_URL}/app/refresh -X POST --cacert ${KEYS_DIR}/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
@@ -186,6 +189,9 @@ curl $KMS_URL/app/unwrapKey?fmt=tink -X POST --cacert ${KEYS_DIR}/service_cert.p
 
 # Get key release policy
 curl $KMS_URL/app/keyReleasePolicy --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/member0_cert.pem --key ${KEYS_DIR}/member0_privk.pem -H "Content-Type: application/json" | jq
+
+# Get settings policy
+curl $KMS_URL/app/settingsPolicy --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/member0_cert.pem --key ${KEYS_DIR}/member0_privk.pem -H "Content-Type: application/json" | jq
 
 # Get receipt
 curl $KMS_URL/receipt?transaction_id=2.20 --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -i  -w '\n'
