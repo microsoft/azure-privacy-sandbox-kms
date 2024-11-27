@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - env: sandbox-local
+          - env: sandbox_local
             threads: 1
           - env: az-cleanroom-aci
             threads: 1
