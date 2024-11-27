@@ -255,6 +255,7 @@ export class Logger {
    * @param args - Additional arguments to include in the log message.
    */
   static secret(message: string, contextOrArg?: LogContext | any, ...args: any[]): boolean {
-    return this.debug(message, contextOrArg, ...args);
+    // return this.debug(message, contextOrArg, ...args);
+    return false;
   }
 }
