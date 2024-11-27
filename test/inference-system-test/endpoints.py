@@ -58,18 +58,17 @@ def heartbeat(kms_url, auth="member_cert"):
     return kms_request(f"{kms_url}/app/heartbeat", auth=auth)
 
 
-def key(kms_url, attestation, wrapping_key, kid=None, fmt=None, auth="member_cert"):
+def key(kms_url, kid=None, auth="jwt"):
     query_string = ""
-    if kid is not None or fmt is not None:
+    if kid is not None:
         query_string = "?"
     query_string += "&".join([
         *([f"kid={kid}"] if kid is not None else []),
-        *([f"fmt={fmt}"] if fmt is not None else []),
     ])
     return kms_request(
         endpoint=f"{kms_url}/app/key{query_string}",
         method="POST",
-        body=f'{{\"attestation\": {attestation}, \"wrappingKey\": {wrapping_key}}}',
+        body='{}',
         auth=auth,
     )
 

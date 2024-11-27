@@ -17,18 +17,29 @@ def test_no_keys(setup_kms):
     assert status_code == 404
 
 
-def test_no_key_release_policy(setup_kms):
+def test_no_jwt_policy(setup_kms):
     apply_kms_constitution(setup_kms["url"], setup_kms["workspace"])
     refresh(setup_kms["url"])
     while True:
         status_code, key_json = key(
             kms_url=setup_kms["url"],
-            attestation=setup_kms["attestation"],
-            wrapping_key=setup_kms["wrappingKey"],
         )
         if status_code != 202:
             break
-    assert status_code == 500
+    assert status_code == 401
+
+
+def test_no_key_release_policy(setup_kms):
+    apply_kms_constitution(setup_kms["url"], setup_kms["workspace"])
+    trust_jwt_issuer(setup_kms["url"], setup_kms["workspace"])
+    refresh(setup_kms["url"])
+    while True:
+        status_code, key_json = key(
+            kms_url=setup_kms["url"],
+        )
+        if status_code != 202:
+            break
+    assert status_code == 400
 
 
 def test_with_keys_and_policy(setup_kms):
