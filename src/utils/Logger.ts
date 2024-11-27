@@ -138,12 +138,11 @@ export class Logger {
    * - context is either a LogContext instance or undefined
    * - args is an array of additional arguments (with contextOrArg prepended if it's not a LogContext)
    */
-  private static extractContextAndArgs(contextOrArg: any, args: any[]): [LogContext | undefined, any[]] {
-    if (contextOrArg && (contextOrArg instanceof LogContext || contextOrArg.isLogContext)) {
+  private static extractContextAndArgs(contextOrArg: LogContext | any, args: any[]): [LogContext | undefined, any[]] {
+    if (contextOrArg instanceof LogContext) {
       return [contextOrArg, args];
-    } else {
-      return [undefined, [contextOrArg, ...args]];
     }
+    return [undefined, [contextOrArg, ...args]];
   }
 
   /**
@@ -153,14 +152,16 @@ export class Logger {
    * @param message - The main log message.
    */
   private static formatMessageWithContext(context: LogContext | undefined, message: string): string {
-    if (!context) {
-      return message;
+    if (context) {
+      return `${context.toString()} ${message}`;
     }
-    return `${context.toString()} ${message}`;
+    return message;
   }
 
-  private static getRemainingArgsString(remainingArgs: any[]): string {
-    return remainingArgs ? remainingArgs.filter(arg => arg !== undefined).join(' ') : '';
+  static getRemainingArgsString(remainingArgs: any[]): string {
+    return remainingArgs
+      .map(arg => (typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg))
+      .join(' ');
   }
 
   /**
@@ -196,9 +197,9 @@ export class Logger {
     if (Logger.logLevel >= LogLevel.WARN) {
       const remainingArgsString = this.getRemainingArgsString(remainingArgs);
       if (remainingArgsString) {
-          console.warn(`[WARN] ${formattedMessage} ${remainingArgsString}`);
+        console.warn(`[WARN] ${formattedMessage} ${remainingArgsString}`);
       } else {
-          console.warn(`[WARN] ${formattedMessage}`);
+        console.warn(`[WARN] ${formattedMessage}`);
       }
       return true;
     }
@@ -254,6 +255,7 @@ export class Logger {
    * @param args - Additional arguments to include in the log message.
    */
   static secret(message: string, contextOrArg?: LogContext | any, ...args: any[]): boolean {
-    return this.debug(message, contextOrArg, ...args);
+    // return this.debug(message, contextOrArg, ...args);
+    return false;
   }
 }

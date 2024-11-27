@@ -48,6 +48,7 @@ export class Settings {
     Logger.debug(`Service Name: ${settings.service.name}`, Settings.logContext);
     Logger.debug(`Service Description: ${settings.service.description}`, Settings.logContext);
     Logger.debug(`Service Version: ${settings.service.version}`, Settings.logContext);
+    Logger.debug(`Debug: ${settings.service.debug}`, Settings.logContext);
   }
 
   /**
@@ -61,10 +62,9 @@ export class Settings {
     settingsPolicyMap: ccfapp.KvMap,
     logContextIn: LogContext,
   ): Settings {
-    const logContext = logContextIn.appendScope("loadSettingsFromMap");
+    const logContext = (logContextIn?.clone() || new LogContext()).appendScope("loadSettingsFromMap");
 
     Logger.info(`Loading settings from map: ${settingsPolicyMap === undefined ? "undefined" : JSON.stringify(settingsPolicyMap)}`, logContext);
-    Logger.info(`Map size: ${settingsPolicyMap.size}`, logContext);
 
     // Load the settings from the map
     const key = "settings_policy"; // Ensure the key matches the stored key in governance
@@ -72,7 +72,7 @@ export class Settings {
 
     const settingsPolicy = settingsPolicyMap.get(keyBuf);
     const settingsPolicyStr = settingsPolicy ? ccf.bufToStr(settingsPolicy) : undefined;
-    Logger.info(`Loading settings: ${settingsPolicyStr}`, logContext);
+    Logger.debug(`Loading settings: ${settingsPolicyStr}`, logContext);
 
 
     let settings: ISettings;

@@ -43,11 +43,11 @@ setup: ## Setup proposals and generate an initial key
 
 stop-host:  ## 🏃 Stop the host
 	@echo -e "\e[34m$@\e[0m" || true
-	sudo lsof -t -i :8000 | xargs -r sudo kill -9
+	source ./scripts/ccf/sandbox_local/down.sh
 
 stop-idp:  ## 🏃 Stop the idp
 	@echo -e "\e[34m$@\e[0m" || true
-	sudo lsof -t -i :3000 | xargs -r sudo kill -9
+	source ./scripts/jwt_issuer/down.sh
 
 stop-all: stop-host stop-idp # Stop all services
 	@echo -e "\e[34m$@\e[0m" || true
@@ -55,25 +55,20 @@ stop-all: stop-host stop-idp # Stop all services
 # idp commands to issue JWT
 start-idp:  ## 🏃 Start the idp for testing jwt
 	@echo -e "\e[34m$@\e[0m" || true
-	mkdir -p ${KMS_WORKSPACE}
-	cd test/utils/jwt && KMS_WORKSPACE=${KMS_WORKSPACE} nohup npm run start > nohup.out 2>&1 &
-	./scripts/wait_idp_ready.sh
+	source ./scripts/jwt_issuer/up.sh
 
 # Start hosting the application using `sandbox.sh` and enable custom JWT authentication
 start-host: stop-host  ## 🏃 Start the CCF network using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
-	$(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count ${MEMBER_COUNT} --initial-user-count 1 --constitution ./governance/constitution/kms_actions.js  -v --http2
+	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh && \
+	source ./scripts/kms/js_app_set.sh && \
+	source ./scripts/kms/constitution_set.sh ./governance/constitution/kms_actions.js
 
-start-host-idp: stop-host stop-idp start-idp build ## 🏃 Start the CCF network && idp using Sandbox.sh
+start-host-idp: stop-host stop-idp start-idp start-host ## 🏃 Start the CCF network && idp using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
 	@echo "Executing: $(COMMAND)"
-	if [ "$(RUN_BACK)" = "true" ]; then \
-		 env -i PATH=${PATH} KMS_WORKSPACE=${KMS_WORKSPACE} $(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count  ${MEMBER_COUNT} --initial-user-count 1 --constitution ./governance/constitution/kms_actions_maa.js --jwt-issuer ${KMS_WORKSPACE}/proposals/set_jwt_issuer_test_sandbox.json  -v --http2 \
-		 	${CCF_SANDBOX_EXTRA_ARGS} & \
-	else \
-		 env -i PATH=${PATH} KMS_WORKSPACE=${KMS_WORKSPACE} $(CCFSB)/sandbox.sh --js-app-bundle ./dist/ --initial-member-count  ${MEMBER_COUNT} --initial-user-count 1 --constitution ./governance/constitution/kms_actions_maa.js --jwt-issuer ${KMS_WORKSPACE}/proposals/set_jwt_issuer_test_sandbox.json  -v --http2 \
-		 	${CCF_SANDBOX_EXTRA_ARGS};  \
-	fi
+	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh > /dev/null 2>&1 && \
+	source ./scripts/kms/jwt_issuer_trust.sh
 
 demo: stop-all start-host-idp ## 🎬 Demo the KMS Application in the Sandbox
 	@echo -e "\e[34m$@\e[0m" || true
@@ -169,42 +164,42 @@ jwt-issuer-up:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
 	IMAGE_TAG=${IMAGE_TAG} \
-		./scripts/jwt-issuer-up.sh
+		./scripts/jwt_issuer/up.sh
 
 jwt-issuer-down:
 	@DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
-		./scripts/jwt-issuer-down.sh
+		./scripts/jwt_issuer/down.sh
 
 jwt-issuer-trust:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	KMS_URL=${KMS_URL} \
 	DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
-		./scripts/jwt-issuer-trust.sh
+		./scripts/kms/jwt_issuer_trust.sh
 
 # Manage KMS -------------------------------------------------------------------
 
 js-app-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	KMS_URL=${KMS_URL} \
-		./scripts/js-app-set.sh
+		./scripts/kms/js_app_set.sh
 
 constitution-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	KMS_URL=${KMS_URL} \
 	CONSTITUTION_PATH=./governance/constitution/kms_actions.js \
-		./scripts/constitution-set.sh
+		./scripts/kms/constitution_set.sh
 
 release-policy-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	KMS_URL=${KMS_URL} \
 	RELEASE_POLICY_PROPOSAL=$(release-policy-proposal) \
-		./scripts/release-policy-set.sh
+		./scripts/kms/release_policy_set.sh
 
 settings-policy-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	KMS_URL=${KMS_URL} \
 	SETTINGS_POLICY_PROPOSAL=$(settings-policy-proposal) \
-		./scripts/settings-policy-set.sh
+		./scripts/kms/settings_policy_set.sh
 
 test-unit:
 	npm run test
