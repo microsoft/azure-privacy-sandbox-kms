@@ -42,42 +42,40 @@ export class ServiceResult<T> {
 
   public static Succeeded<T>(
     body: T,
+    logContext: LogContext,
     headers?: { [key: string]: string | number },
-    logContext?: LogContext,
-    requestId?: string,
   ): ServiceResult<T> {
-    if (requestId) {
+    if (logContext.requestId) {
       headers = headers ? headers : {};
-      headers[ServiceResult.KMS_REQUEST_ID_HEADER] = requestId;
+      headers[ServiceResult.KMS_REQUEST_ID_HEADER] = logContext.requestId;
     }
 
     const response = {
       ...(headers && { headers }),
       body,
     };
-    Logger.info("Response Succeeded: 200", logContext, response);
+    Logger.info("Response Succeeded: 200", logContext);
+    Logger.debug("Response: ", logContext, response);
     return new ServiceResult<T>(body, undefined, true, 200, headers);
   }
 
   public static Accepted(
-    logContext?: LogContext,
-    requestId?: string,
+    logContext: LogContext
   ): ServiceResult<string> {
-    Logger.info("Response Accepted: 202", logContext);
+    Logger.debug("Response Accepted: 202", logContext);
     const headers = { "retry-after": 3 };
-    if (requestId) headers[ServiceResult.KMS_REQUEST_ID_HEADER] = requestId;
+    if (logContext.requestId) headers[ServiceResult.KMS_REQUEST_ID_HEADER] = logContext.requestId;
     return new ServiceResult<string>(undefined, undefined, true, 202, headers);
   }
 
   public static Failed<T>(
     error: ErrorResponse,
     statusCode: number = 400,
-    logContext?: LogContext,
-    requestId?: string,
+    logContext: LogContext,
   ): ServiceResult<T> {
     Logger.error(`Failed result: ${statusCode},`, logContext, error);
     const headers = {};
-    if (requestId) headers[ServiceResult.KMS_REQUEST_ID_HEADER] = requestId;
+    if (logContext.requestId) headers[ServiceResult.KMS_REQUEST_ID_HEADER] = logContext.requestId;
     if (logContext) error.errorMessage = `${logContext.toString()} ${error.errorMessage}`;
     return new ServiceResult<T>(undefined, error, false, statusCode, headers);
   }

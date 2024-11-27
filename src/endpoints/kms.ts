@@ -36,7 +36,7 @@ export const auth = (
 
   return ServiceResult.Succeeded<IAuthResponse>({
     auth: policy!
-  }, undefined, logContext, serviceRequest.requestId);
+  }, logContext);
 };
 
 /*
@@ -55,5 +55,5 @@ export const heartbeat = (
     status: "Service is running",
   };
 
-  return ServiceResult.Succeeded<IHeartbeatResponse>(description, undefined, logContext);
+  return ServiceResult.Succeeded<IHeartbeatResponse>(description, logContext);
 };

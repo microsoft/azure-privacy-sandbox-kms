@@ -28,7 +28,7 @@ export class MemberCertValidator implements IValidatorService {
     const identityId = memberCaller.id;
     const isValid = this.isActiveMember(identityId);
     if (isValid.success && isValid.body) {
-      return ServiceResult.Succeeded(identityId, undefined, this.logContext);
+      return ServiceResult.Succeeded(identityId, this.logContext);
     }
     return ServiceResult.Failed({
       errorMessage: `Error: invalid caller identity (MemberCertValidator)->${JSON.stringify(isValid)}`,
@@ -61,7 +61,7 @@ export class MemberCertValidator implements IValidatorService {
     if (memberInfoBuf !== undefined) {
       const memberInfo = ccf.bufToJsonCompatible(memberInfoBuf) as CCFMember;
       const isActiveMember = memberInfo && memberInfo.status === "Active";
-      return ServiceResult.Succeeded(isActiveMember && isMember, undefined, this.logContext);
+      return ServiceResult.Succeeded(isActiveMember && isMember, this.logContext);
     } else {
       // memberInfoBuf is undefined
       return ServiceResult.Failed({

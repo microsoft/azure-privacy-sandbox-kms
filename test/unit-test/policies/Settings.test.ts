@@ -44,6 +44,9 @@ describe("Test Settings Policy properties", () => {
     expect(debugSpy).toHaveBeenCalledWith(
       `[DEBUG] [scope=Settings] Service Version: ${settings.service.version}`,
     );
+    expect(debugSpy).toHaveBeenCalledWith(
+      `[DEBUG] [scope=Settings] Debug: ${settings.service.debug}`,
+    );
 
     // Clean up
     debugSpy.mockRestore();
