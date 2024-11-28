@@ -26,7 +26,7 @@ jobs:
           - env: sandbox_local
             threads: 1
           - env: az-cleanroom-aci
-            threads: 1
+            threads: 2
     steps:
       - name: Checkout
         uses: actions/checkout@v4
