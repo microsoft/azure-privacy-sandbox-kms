@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "build": "rm -rf ./dist/ && rollup --config && cp app.json dist/ && node build_bundle.js dist/",
+    "build": "rollup --config && cp app.json dist/ && node build_bundle.js dist/",
     "bundle": "node build_bundle.js dist",
     "build-proto": "buf generate src/endpoints/proto",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
