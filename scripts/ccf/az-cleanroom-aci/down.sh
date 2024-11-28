@@ -18,6 +18,12 @@ az-cleanroom-aci-down() {
         --provider-config $WORKSPACE/providerConfig.json \
         --delete-option delete-storage
 
+    az storage account delete --yes \
+        --name "ccf$(cat $WORKSPACE/unique_string.txt)sa" \
+        --resource-group domayre
+
+    rm -rf $WORKSPACE
+
     docker compose -p ${DEPLOYMENT_NAME}-operator-governance down || true
     docker compose -p ${DEPLOYMENT_NAME}-provider down || true
 
@@ -33,4 +39,4 @@ az-cleanroom-aci-down() {
     exit 0
 }
 
-az-cleanroom-aci-down
+az-cleanroom-aci-down "$@"
