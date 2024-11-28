@@ -19,12 +19,14 @@ az-cleanroom-aci-up() {
     az cleanroom ccf network up \
         --subscription $SUBSCRIPTION \
         --resource-group $RESOURCE_GROUP \
+        --provider-client "$DEPLOYMENT_NAME-provider" \
         --name $DEPLOYMENT_NAME \
 
     export WORKSPACE=~/$DEPLOYMENT_NAME.ccfworkspace
     export KMS_URL=$( \
         az cleanroom ccf network show \
             --name ${DEPLOYMENT_NAME} \
+            --provider-client "$DEPLOYMENT_NAME-provider" \
             --provider-config $WORKSPACE/providerConfig.json \
             | jq -r '.endpoint' \
     )

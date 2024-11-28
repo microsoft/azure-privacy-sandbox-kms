@@ -15,6 +15,7 @@ az-cleanroom-aci-down() {
 
     az cleanroom ccf network delete \
         --name ${DEPLOYMENT_NAME} \
+        --provider-client "$DEPLOYMENT_NAME-provider" \
         --provider-config $WORKSPACE/providerConfig.json \
         --delete-option delete-storage
 
