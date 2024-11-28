@@ -9,15 +9,8 @@ import {
   IKeyReleasePolicySnpProps,
   ITinkPublicKeySet,
 } from "../../../src";
-import { IWrapped } from "../../../src/endpoints/KeyWrapper";
-import { ISnpAttestation } from "../../../src/attestation/ISnpAttestation";
 import https from "https";
 import * as http2 from "http2";
-import keyutil from "js-crypto-key-utils";
-import rsa from "js-crypto-rsa";
-import { JsonWebKey } from "node:crypto";
-import { Base64 } from "js-base64";
-import * as hpke from "../../../src/endpoints/proto/gen/hpke_pb.js";
 
 export interface ValidationProps {
   url: string;
@@ -186,46 +179,21 @@ export default class Api {
     return [response.statusCode, JSON.parse(response.data)];
   }
 
-  private static decryptTinkPrivateKey = async (
-    encryptedKeyset: string,
-    privateWrapKey: string,
-  ) => {
-    // Get base64 key set value
-    const respBuf = Base64.toUint8Array(encryptedKeyset);
-    const privateKey = new keyutil.Key("pem", privateWrapKey);
-    const unwrappedKey = await rsa.decrypt(
-      respBuf,
-      (await privateKey.jwk) as JsonWebKey,
-    );
-    return unwrappedKey;
-  };
-
   public static async key(
     props: DemoProps,
     member: DemoMemberProps,
-    attestation: ISnpAttestation,
     privateWrapKey: string,
     publicWrapKey: string,
-    tink: boolean,
     kid: string | undefined,
     httpsAgent: https.Agent,
     authorizationHeader?: string,
-  ): Promise<
-    [
-      { [key: string]: string | number },
-      number,
-      (
-        | IWrapped
-        | { receipt: string; wrappedKid: string; wrapped: string }
-        | undefined
-      ),
-    ]
-  > {
+  ): Promise<IKeyResponse>
+ {
     console.log(
       `${member.name} Get wrapped private key with receipt. tink: ${tink}:`,
       authorizationHeader,
     );
-    let query = tink ? "?fmt=tink" : "";
+    let query = "";
     if (kid) {
       if (query === "") {
         query = `?kid=${kid}`;
@@ -276,14 +244,6 @@ export default class Api {
       }
     }
 
-    if (tink) {
-      const resp = JSON.parse(response.data);
-      console.log(`Receipt: `, resp.receipt);
-      console.log(`key id: `, resp.wrappedKid);
-      console.log(`wrapped: `, resp.wrapped);
-
-      return [response.headers, response.statusCode, resp];
-    } else {
       const resp = JSON.parse(response.data);
       console.log(`key returned: `, response.data);
       const receipt = resp.receipt;
@@ -299,99 +259,6 @@ export default class Api {
           wrappedKid: resp.wrappedKid,
         },
       ];
-    }
-  }
-
-  public static async unwrap(
-    props: DemoProps,
-    member: DemoMemberProps,
-    wrappedKid: string,
-    attestation: ISnpAttestation,
-    privateWrapKey: string,
-    publicWrapKey: string,
-    tink: boolean,
-    httpsAgent: https.Agent,
-    authorizationHeader?: string,
-  ): Promise<[number, string | IKeyItem | { [key: string]: any }]> {
-    console.log(
-      `${member.name} Get unwrapped private key with receipt, think: ${tink}`,
-    );
-    const query = tink ? "?fmt=tink" : "";
-    const responseType = tink ? "arraybuffer" : "json";
-    const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
-      ? {
-          ":method": "POST",
-          ":path": `${props.unwrapPath}${query}`,
-          "Content-Type": "application/json",
-          Authorization: authorizationHeader,
-        }
-      : {
-          ":method": "POST",
-          ":path": `${props.unwrapPath}${query}`,
-          "Content-Type": "application/json",
-        };
-    const client = http2.connect(props.url, {
-      ...httpsAgent.options,
-      rejectUnauthorized: true,
-    } as http2.SecureClientSessionOptions);
-    const req = client.request(reqProps);
-    req.write(
-      JSON.stringify({ wrappedKid, attestation, wrappingKey: publicWrapKey }),
-    ); // Send the request body
-    req.end();
-
-    let response;
-    try {
-      response = await Api.responsePromise(req, responseType);
-      console.log("Status:", response.statusCode);
-      console.log(`Response--> `, response);
-      if (response.statusCode > 200) {
-        console.log(
-          `Directly return statuscode with response: `,
-          response.data,
-        );
-        return [
-          response.statusCode,
-          response.data ? JSON.parse(response.data) : undefined,
-        ];
-      }
-    } catch (error: any) {
-      console.error("Error:", error.message);
-      throw new Error(error.message);
-    } finally {
-      // Close the client session when done
-      if (client) {
-        client.close();
-      }
-    }
-    if (tink) {
-      const resp = JSON.parse(response.data);
-      console.log(`Wrapped key: `, resp.wrapped);
-      console.log(`Receipt: `, resp.receipt);
-      resp.wrapped = Base64.fromUint8Array(
-        await this.decryptTinkPrivateKey(resp.wrapped, privateWrapKey),
-      );
-      let tinkHpkeKey = new hpke.HpkePrivateKey();
-      const jsonKey = tinkHpkeKey.toJsonString(resp.wrapped);
-      console.log(`unwrap tink result (${jsonKey.length}): `, jsonKey);
-      return [response.statusCode, resp];
-    } else {
-      const resp = JSON.parse(response.data);
-      console.log(`unwrapKey returned: `, response.data);
-      const receipt = resp.receipt;
-      console.log(`Wrapped key: `, resp.wrapped);
-      console.log(`Receipt: `, resp.receipt);
-      const respBuf = Base64.toUint8Array(resp.wrapped);
-      const privateKey = new keyutil.Key("pem", privateWrapKey);
-      const wrappedKey = await rsa.decrypt(
-        respBuf,
-        (await privateKey.jwk) as JsonWebKey,
-      );
-      let unwrappedKey = convertUint8ArrayToString(wrappedKey);
-      console.log(`Unwrapped key decrypted: `, unwrappedKey);
-
-      return [response.statusCode, { key: JSON.parse(unwrappedKey), receipt }];
-    }
   }
 
   public static async keyReleasePolicy(
@@ -449,60 +316,12 @@ export default class Api {
     ];
   }
 
-  public static async pubkey(
-    props: DemoProps,
-    member: DemoMemberProps,
-    kid: string,
-    fmt: string,
-    httpsAgent: https.Agent,
-    authorizationHeader?: string,
-  ): Promise<[number, IKeyItem]> {
-    console.log(`${member.name} Get pubkey`);
-    console.log(`Get pubkey props:`, props);
-    console.log(`Get pubkey https agent:`, httpsAgent);
-    console.log(`Get pubkey authorization header:`, authorizationHeader);
-    const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
-      ? {
-          ":method": "GET",
-          ":path": `${props.pubkeyPath}`,
-          "Content-Type": "application/json",
-          Authorization: authorizationHeader,
-        }
-      : {
-          ":method": "GET",
-          ":path": `${props.pubkeyPath}`,
-          "Content-Type": "application/json",
-        };
-    const client = http2.connect(props.url, {
-      ...httpsAgent.options,
-      rejectUnauthorized: true,
-    } as http2.SecureClientSessionOptions);
-    const req = client.request(reqProps);
-
-    req.end();
-
-    let response;
-    try {
-      response = await Api.responsePromise(req);
-      console.log("Status:", response.statusCode);
-      console.log("Response data:", response.data);
-    } catch (error: any) {
-      console.error("Error:", error.message);
-    } finally {
-      // Close the client session when done
-      if (client) {
-        client.close();
-      }
-    }
-    return [response.statusCode, <IKeyItem>JSON.parse(response.data)];
-  }
-
   public static async listpubkeys(
     props: DemoProps,
     member: DemoMemberProps,
     httpsAgent: https.Agent,
     authorizationHeader?: string,
-  ): Promise<[number, ITinkPublicKeySet, { [key: string]: string | number }]> {
+  ): Promise<IPublicKey[]> {
     console.log(`${member.name} Get listpubkeys`);
     console.log(`Get listpubkeys props:`, props);
     console.log(`Get listpubkeys https agent:`, httpsAgent);

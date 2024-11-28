@@ -42,7 +42,7 @@ def apply_key_release_policy():
     subprocess.run(
         [
             "scripts/kms/release_policy_set.sh",
-            "governance/proposals/set_key_release_policy_add.json",
+            "governance/proposals/set_key_release_policy_maa_add.json",
         ],
         cwd=REPO_ROOT,
         check=True,
@@ -53,7 +53,7 @@ def remove_key_release_policy():
     subprocess.run(
         [
             "scripts/kms/release_policy_set.sh",
-            "governance/proposals/set_key_release_policy_remove.json",
+            "governance/proposals/set_key_release_policy_maa_remove.json",
         ],
         cwd=REPO_ROOT,
         check=True,

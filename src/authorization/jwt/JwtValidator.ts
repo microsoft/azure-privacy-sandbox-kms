@@ -9,6 +9,7 @@ import { IJwtIdentityProvider } from "./IJwtIdentityProvider";
 //import { DemoJwtProvider } from "./DemoJwtProvider";
 import { MsJwtProvider } from "./MsJwtProvider";
 import { Logger, LogContext } from "../../utils/Logger";
+import { DemoJwtProvider } from "./DemoJwtProvider";
 
 export class JwtValidator implements IValidatorService {
   private readonly identityProviders = new Map<
@@ -28,7 +29,6 @@ export class JwtValidator implements IValidatorService {
       JwtIdentityProviderEnum.MS_AAD,
       this.logContext
     );
-    /* Remove demo provider
     this.identityProviders.set(
       JwtIdentityProviderEnum.Demo,
       new DemoJwtProvider("DemoJwtProvider"),
@@ -37,7 +37,6 @@ export class JwtValidator implements IValidatorService {
       "JwtValidator: JwtIdentityProviderEnum.Demo",
       JwtIdentityProviderEnum.Demo,
     );
-    */
   }
 
   validate(request: ccfapp.Request<any>): ServiceResult<string> {
