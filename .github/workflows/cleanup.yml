@@ -6,7 +6,8 @@ permissions:
 
 on:
   workflow_dispatch:
-  workflow_call:
+  schedule:
+    - cron: "0 0 * * *"
 
 jobs:
   cleanup-aci:
