@@ -30,7 +30,7 @@ pubkey() {
         query_string="?"$(IFS='&'; echo "${params[*]}")
     fi
 
-    curl -k $KMS_URL/app/pubkey${query_string} \
+    curl $KMS_URL/app/pubkey${query_string} \
         --cacert $KMS_SERVICE_CERT_PATH \
         --cert $KMS_MEMBER_CERT_PATH \
         --key $KMS_MEMBER_PRIVK_PATH \

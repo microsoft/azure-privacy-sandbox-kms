@@ -4,7 +4,7 @@
 # Licensed under the MIT license.
 
 refresh() {
-    curl -k $KMS_URL/app/refresh \
+    curl $KMS_URL/app/refresh \
         -X POST \
         --cacert $KMS_SERVICE_CERT_PATH \
         -w '\n%{http_code}\n'

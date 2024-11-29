@@ -4,7 +4,7 @@
 # Licensed under the MIT license.
 
 listpubkeys() {
-    curl -k $KMS_URL/app/listpubkeys \
+    curl $KMS_URL/app/listpubkeys \
         --cacert $KMS_SERVICE_CERT_PATH \
         -w '\n%{http_code}\n'
 }

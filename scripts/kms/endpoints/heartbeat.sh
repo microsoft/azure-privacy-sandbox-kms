@@ -4,7 +4,7 @@
 # Licensed under the MIT license.
 
 heartbeat() {
-    curl -k $KMS_URL/app/heartbeat \
+    curl $KMS_URL/app/heartbeat \
         --cacert $KMS_SERVICE_CERT_PATH \
         -w '\n%{http_code}\n'
 }

@@ -24,7 +24,7 @@ settingsPolicy() {
         auth_arg=(--cert $KMS_MEMBER_CERT_PATH --key $KMS_MEMBER_PRIVK_PATH)
     fi
 
-    curl -k $KMS_URL/app/settingsPolicy \
+    curl $KMS_URL/app/settingsPolicy \
         --cacert $KMS_SERVICE_CERT_PATH \
         "${auth_arg[@]}" \
         -w '\n%{http_code}\n'
