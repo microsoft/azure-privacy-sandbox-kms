@@ -3,6 +3,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+THIS_DIR="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")"
+REPO_ROOT="$(realpath "$THIS_DIR/../../..")"
+
 az-cleanroom-aci-down() {
     set -e
 
