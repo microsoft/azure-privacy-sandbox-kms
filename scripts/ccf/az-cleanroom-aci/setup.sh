@@ -22,7 +22,6 @@ az-cleanroom-aci-setup() {
         --file /tmp/cleanroom-1.0.0-py2.py3-none-any.whl > /dev/null
     az extension add -y --allow-preview true --upgrade \
         --source /tmp/cleanroom-1.0.0-py2.py3-none-any.whl
-    rm /tmp/cleanroom-1.0.0-py2.py3-none-any.whl
 
     # Custom ccf-provider image
     az acr login -n azurekms > /dev/null
