@@ -234,8 +234,8 @@ export default class Api {
           response.data,
         );
         return [
-          response.headers,
           response.statusCode,
+          response.headers,
           response.data ? JSON.parse(response.data) : undefined,
         ];
       }

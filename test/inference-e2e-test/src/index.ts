@@ -83,11 +83,11 @@ class Demo {
       });
     });
   };
-/*
+
   private static sleep = (ms: number) => {
     return new Promise((resolve) => setTimeout(resolve, ms));
   };
-*/
+
   public static async start() {
     /**
      * Change working directory to the root of the project
@@ -96,7 +96,7 @@ class Demo {
     this.printTestSectionHeader("🔬 [TEST]: Starting...");
     const originalDirectory = path.resolve();
     console.log(`Original directory: ${originalDirectory}`);
-    
+
     this.printTestSectionHeader(
       `🏁 Starting e2e Tests on server ${serverUrl} for kms`,
     );
@@ -126,20 +126,20 @@ class Demo {
     console.log(`Private wrapping key: `, private_wrapping_key);
 
     this.printTestSectionHeader("🔬 [TEST]: Key generation Service");
-/*
-    const notUndefinedString = (key: string | number | any[]) => {
-      return key !== undefined;
-    };
-
-    const undefinedString = (key: string | number | any[]) => {
-      return key === undefined;
-    };
-
-    const numberHigerThanZero = (key: string | number | any[]) => {
-      const toTest = parseInt(key as string);
-      return !Number.isNaN(toTest) && toTest > 0;
-    };
-*/
+    /*
+        const notUndefinedString = (key: string | number | any[]) => {
+          return key !== undefined;
+        };
+    
+        const undefinedString = (key: string | number | any[]) => {
+          return key === undefined;
+        };
+    
+        const numberHigerThanZero = (key: string | number | any[]) => {
+          const toTest = parseInt(key as string);
+          return !Number.isNaN(toTest) && toTest > 0;
+        };
+    */
     //#region heartbeat
     // authorization on heartbeat
     const member = this.members[0];
@@ -171,24 +171,67 @@ class Demo {
     let keyResponse;
     let headers: { [key: string]: string | number };
     [
-      statusCode, 
-      headers, 
+      statusCode,
+      headers,
       keyResponse] = await Api.key(
+        this.demoProps,
+        member,
+        private_wrapping_key,
+        public_wrapping_key,
+        undefined,
+        this.createHttpsAgent(member.id, AuthKinds.JWT),
+        access_token,
+      ).catch((error) => {
+        console.log(`keyInitial error: `, error);
+        throw error;
+      });
+    console.log("initial keyResponse: ", keyResponse);
+
+    Demo.assert("statusCode == 202", statusCode == 202);
+    Demo.assert(`headers["retry-after"] == 3`, headers["retry-after"] == 3);
+    Demo.assert("response === undefined", !keyResponse);
+
+    console.log(`📝 Get initial key-No auth...`);
+    [statusCode, headers, keyResponse] = await Api.key(
       this.demoProps,
       member,
       private_wrapping_key,
       public_wrapping_key,
       undefined,
-      this.createHttpsAgent(member.id, AuthKinds.JWT),
-      access_token,
+      this.createHttpsAgent(member.id, AuthKinds.NoAuth),
     ).catch((error) => {
       console.log(`keyInitial error: `, error);
       throw error;
     });
-    console.log("initial keyResponse: ", keyResponse);
-    Demo.assert("statusCode == 202", statusCode == 202);
-    Demo.assert(`headers["retry-after"] == 3`, headers["retry-after"] == 3);
-    Demo.assert("response === undefined", !keyResponse);
+    console.log(`response after 202: `, keyResponse);
+    Demo.assert("No auth", statusCode == 401);
+    Demo.assert(
+      '(<any>keyResponse).error.message === "Invalid authentication credentials."',
+      (<any>keyResponse).error.message ===
+      "Invalid authentication credentials.",
+    );
+    // Wait for receipt to be generated
+    statusCode = 202;
+    do {
+      [statusCode, headers, keyResponse] = await Api.key(
+        this.demoProps,
+        member,
+        private_wrapping_key,
+        public_wrapping_key,
+        undefined,
+        this.createHttpsAgent(member.id, AuthKinds.JWT),
+        access_token,
+      ).catch((error) => {
+        console.log(`keyInitial error: `, error);
+        throw error;
+      });
+      if (statusCode === 202) {
+        await Demo.sleep(1000);
+      } else if (statusCode !== 200) {
+        throw new Error(`🛑 [TEST FAILURE]: Expected ${statusCode} to be 200`);
+      }
+    } while (statusCode !== 202);
+
     //#endregion
 
     await this.addCheckpoint("Key generation Stage Complete");

@@ -45,9 +45,5 @@ export class MaaAttestationValidation {
       this.logContext
     );
     return policyValidationResult;
-    return ServiceResult.Succeeded<IMaaAttestationReport>(
-      this.jwtIdentity.jwt.payload as IMaaAttestationReport,
-      this.logContext
-    );
   }
 }
