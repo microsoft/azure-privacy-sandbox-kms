@@ -7,6 +7,8 @@ import {
   IHeartbeatResponse,
   IKeyItem,
   IKeyReleasePolicySnpProps,
+  IKeyResponse,
+  IPublicKey,
   ITinkPublicKeySet,
 } from "../../../src";
 import https from "https";
@@ -99,16 +101,16 @@ export default class Api {
 
     const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
       ? {
-          ":method": "GET",
-          ":path": `${props.heartbeatPath}`,
-          "Content-Type": "application/json",
-          Authorization: authorizationHeader,
-        }
+        ":method": "GET",
+        ":path": `${props.heartbeatPath}`,
+        "Content-Type": "application/json",
+        Authorization: authorizationHeader,
+      }
       : {
-          ":method": "GET",
-          ":path": `${props.heartbeatPath}`,
-          "Content-Type": "application/json",
-        };
+        ":method": "GET",
+        ":path": `${props.heartbeatPath}`,
+        "Content-Type": "application/json",
+      };
 
     const client = http2.connect(props.url, {
       ...httpsAgent.options,
@@ -145,16 +147,16 @@ export default class Api {
     console.log(`${member.name} Refresh key:`);
     const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
       ? {
-          ":method": "POST",
-          ":path": `${props.refreshPath}`,
-          "Content-Type": "application/json",
-          Authorization: authorizationHeader,
-        }
+        ":method": "POST",
+        ":path": `${props.refreshPath}`,
+        "Content-Type": "application/json",
+        Authorization: authorizationHeader,
+      }
       : {
-          ":method": "POST",
-          ":path": `${props.refreshPath}`,
-          "Content-Type": "application/json",
-        };
+        ":method": "POST",
+        ":path": `${props.refreshPath}`,
+        "Content-Type": "application/json",
+      };
     const client = http2.connect(props.url, {
       ...httpsAgent.options,
       rejectUnauthorized: true,
@@ -187,10 +189,13 @@ export default class Api {
     kid: string | undefined,
     httpsAgent: https.Agent,
     authorizationHeader?: string,
-  ): Promise<IKeyResponse>
- {
+  ): Promise<[
+    number,
+    { [key: string]: string | number },
+    IKeyResponse
+  ]> {
     console.log(
-      `${member.name} Get wrapped private key with receipt. tink: ${tink}:`,
+      `${member.name} Get wrapped private key with receipt:`,
       authorizationHeader,
     );
     let query = "";
@@ -201,22 +206,22 @@ export default class Api {
     }
     const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
       ? {
-          ":method": "POST",
-          ":path": `${props.keyPath}${query}`,
-          "Content-Type": "application/json",
-          Authorization: authorizationHeader,
-        }
+        ":method": "POST",
+        ":path": `${props.keyPath}${query}`,
+        "Content-Type": "application/json",
+        Authorization: authorizationHeader,
+      }
       : {
-          ":method": "POST",
-          ":path": `${props.keyPath}${query}`,
-          "Content-Type": "application/json",
-        };
+        ":method": "POST",
+        ":path": `${props.keyPath}${query}`,
+        "Content-Type": "application/json",
+      };
     const client = http2.connect(props.url, {
       ...httpsAgent.options,
       rejectUnauthorized: true,
     } as http2.SecureClientSessionOptions);
     const req = client.request(reqProps);
-    req.write(JSON.stringify({ attestation, wrappingKey: publicWrapKey }));
+    req.write(JSON.stringify({}));
     req.end();
 
     let response;
@@ -244,21 +249,18 @@ export default class Api {
       }
     }
 
-      const resp = JSON.parse(response.data);
-      console.log(`key returned: `, response.data);
-      const receipt = resp.receipt;
-      console.log(`wrappedKid: `, resp.wrappedKid);
-      console.log(`Receipt: `, resp.receipt);
+    const resp: IKeyResponse = JSON.parse(response.data);
+    console.log(`key returned: `, response.data);
+    console.log(`kid: `, resp.kid);
+    console.log(`Receipt: `, resp.receipt);
 
-      return [
-        response.headers,
-        response.statusCode,
-        {
-          receipt,
-          wrapped: resp.wrapped,
-          wrappedKid: resp.wrappedKid,
-        },
-      ];
+    return [
+      response.statusCode,
+      response.headers,
+      {
+        ...resp,
+      },
+    ];
   }
 
   public static async keyReleasePolicy(
@@ -267,7 +269,11 @@ export default class Api {
     httpsAgent: https.Agent,
     authorizationHeader?: string,
   ): Promise<
-    [number, IKeyReleasePolicySnpProps, { [key: string]: string | number }]
+    [
+      number, 
+      { [key: string]: string | number },
+      IKeyReleasePolicySnpProps
+    ]
   > {
     console.log(`${member.name} Get key release policy`);
     console.log(`Get key release policy props:`, props);
@@ -278,16 +284,16 @@ export default class Api {
     );
     const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
       ? {
-          ":method": "GET",
-          ":path": `${props.keyReleasePolicyPath}`,
-          "Content-Type": "application/json",
-          Authorization: authorizationHeader,
-        }
+        ":method": "GET",
+        ":path": `${props.keyReleasePolicyPath}`,
+        "Content-Type": "application/json",
+        Authorization: authorizationHeader,
+      }
       : {
-          ":method": "GET",
-          ":path": `${props.keyReleasePolicyPath}`,
-          "Content-Type": "application/json",
-        };
+        ":method": "GET",
+        ":path": `${props.keyReleasePolicyPath}`,
+        "Content-Type": "application/json",
+      };
     const client = http2.connect(props.url, {
       ...httpsAgent.options,
       rejectUnauthorized: true,
@@ -311,8 +317,8 @@ export default class Api {
     }
     return [
       response.statusCode,
-      <IKeyReleasePolicySnpProps>JSON.parse(response.data),
       response.headers,
+      <IKeyReleasePolicySnpProps>JSON.parse(response.data),
     ];
   }
 
@@ -328,16 +334,16 @@ export default class Api {
     console.log(`Get listpubkeys authorization header:`, authorizationHeader);
     const reqProps: http2.OutgoingHttpHeaders = authorizationHeader
       ? {
-          ":method": "GET",
-          ":path": `${props.listpubkeysPath}`,
-          "Content-Type": "application/json",
-          Authorization: authorizationHeader,
-        }
+        ":method": "GET",
+        ":path": `${props.listpubkeysPath}`,
+        "Content-Type": "application/json",
+        Authorization: authorizationHeader,
+      }
       : {
-          ":method": "GET",
-          ":path": `${props.listpubkeysPath}`,
-          "Content-Type": "application/json",
-        };
+        ":method": "GET",
+        ":path": `${props.listpubkeysPath}`,
+        "Content-Type": "application/json",
+      };
     const client = http2.connect(props.url, {
       ...httpsAgent.options,
       rejectUnauthorized: true,

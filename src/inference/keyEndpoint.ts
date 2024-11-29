@@ -109,6 +109,7 @@ export const key = (
     );
   }
 
+  Logger
   // Check kid
   let kidString = serviceRequest.query?.["kid"];
   let kid: number | undefined;

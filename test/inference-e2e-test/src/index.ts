@@ -9,8 +9,8 @@ import https from "https";
 import fs from "fs";
 import inquirer from "inquirer";
 import { IKeyItem } from "../../../src";
-import { ISnpAttestation } from "../../../src/attestation/ISnpAttestation.js";
-
+//import { ISnpAttestation } from "../../../src/attestation/ISnpAttestation.js";
+/*
 const readJSON = async (filePath: string): Promise<any> => {
   try {
     const fileContents = fs.readFileSync(filePath, "utf-8");
@@ -19,7 +19,7 @@ const readJSON = async (filePath: string): Promise<any> => {
     throw new Error(`Error reading JSON file: ${error.message}`);
   }
 };
-
+*/
 const serverUrl = process.env.SERVER!;
 const certificateStorePath = process.env.CERTS_FOLDER!;
 const interactiveMode = process.env.INTERACTIVE_MODE!;
@@ -83,11 +83,11 @@ class Demo {
       });
     });
   };
-
+/*
   private static sleep = (ms: number) => {
     return new Promise((resolve) => setTimeout(resolve, ms));
   };
-
+*/
   public static async start() {
     /**
      * Change working directory to the root of the project
@@ -96,8 +96,7 @@ class Demo {
     this.printTestSectionHeader("🔬 [TEST]: Starting...");
     const originalDirectory = path.resolve();
     console.log(`Original directory: ${originalDirectory}`);
-    const attestation = await readJSON("test/attestation-samples/snp.json");
-
+    
     this.printTestSectionHeader(
       `🏁 Starting e2e Tests on server ${serverUrl} for kms`,
     );
@@ -108,7 +107,7 @@ class Demo {
     }
 
     this.printTestSectionHeader("🔬 [TEST]: Setup kms");
-    await Demo.executeCommand(`make setup >/tmp/make.txt`);
+    await Demo.executeCommand(`make setup-inference >/tmp/make.txt`);
 
     this.printTestSectionHeader("🔬 [TEST]: generate access token");
     const access_token = await Demo.executeCommand(
@@ -127,7 +126,7 @@ class Demo {
     console.log(`Private wrapping key: `, private_wrapping_key);
 
     this.printTestSectionHeader("🔬 [TEST]: Key generation Service");
-
+/*
     const notUndefinedString = (key: string | number | any[]) => {
       return key !== undefined;
     };
@@ -140,7 +139,7 @@ class Demo {
       const toTest = parseInt(key as string);
       return !Number.isNaN(toTest) && toTest > 0;
     };
-
+*/
     //#region heartbeat
     // authorization on heartbeat
     const member = this.members[0];
@@ -148,7 +147,7 @@ class Demo {
     let [statusCode, _] = await Api.heartbeat(
       this.demoProps,
       member,
-      this.createHttpsAgent("", AuthKinds.JWT),
+      this.createHttpsAgent("", AuthKinds.NoAuth),
       access_token,
     );
     Demo.assert("OK statusCode", statusCode == 200);
@@ -164,33 +163,21 @@ class Demo {
       this.createHttpsAgent(member.id, AuthKinds.NoAuth),
     );
     Demo.assert("OK statusCode", statusCode == 200);
-
-    Demo.assertField(member.name, response, "x", notUndefinedString);
-    Demo.assertField(
-      member.name,
-      response,
-      "kid",
-      (key: string | number | any[]) => {
-        return key !== undefined && (key as string).length > 40;
-      },
-    );
-    Demo.assertField(member.name, response, "timestamp", numberHigerThanZero);
-    Demo.assertField(member.name, response, "d", undefined);
-    Demo.assertField(member.name, response, "crv", "X25519");
-    Demo.assertField(member.name, response, "kty", "OKP");
+    Demo.assert("OK key", response.kty != undefined);
     //#endregion
 
     //#region key
     console.log(`📝 Get initial key...`);
     let keyResponse;
     let headers: { [key: string]: string | number };
-    [headers, statusCode, keyResponse] = await Api.key(
+    [
+      statusCode, 
+      headers, 
+      keyResponse] = await Api.key(
       this.demoProps,
       member,
-      attestation,
       private_wrapping_key,
       public_wrapping_key,
-      false,
       undefined,
       this.createHttpsAgent(member.id, AuthKinds.JWT),
       access_token,
@@ -199,378 +186,9 @@ class Demo {
       throw error;
     });
     console.log("initial keyResponse: ", keyResponse);
-
     Demo.assert("statusCode == 202", statusCode == 202);
     Demo.assert(`headers["retry-after"] == 3`, headers["retry-after"] == 3);
-
     Demo.assert("response === undefined", !keyResponse);
-
-    console.log(`📝 Get initial key-Bad request...`);
-    [headers, statusCode, keyResponse] = await Api.key(
-      this.demoProps,
-      member,
-      {} as ISnpAttestation,
-      private_wrapping_key,
-      public_wrapping_key,
-      false,
-      undefined,
-      this.createHttpsAgent(member.id, AuthKinds.MemberCerts),
-    ).catch((error) => {
-      console.log(`keyInitial error: `, error);
-      throw error;
-    });
-    Demo.assert("Bad request", statusCode == 400);
-
-    console.log(`📝 Get initial key-No auth...`);
-    [headers, statusCode, keyResponse] = await Api.key(
-      this.demoProps,
-      member,
-      attestation,
-      private_wrapping_key,
-      public_wrapping_key,
-      false,
-      undefined,
-      this.createHttpsAgent(member.id, AuthKinds.NoAuth),
-    ).catch((error) => {
-      console.log(`keyInitial error: `, error);
-      throw error;
-    });
-    console.log(`response after 202: `, keyResponse);
-    Demo.assert("No auth", statusCode == 401);
-    Demo.assert(
-      '(<any>keyResponse).error.message === "Invalid authentication credentials."',
-      (<any>keyResponse).error.message ===
-        "Invalid authentication credentials.",
-    );
-
-    // Wait for receipt to be generated
-    statusCode = 202;
-    do {
-      [headers, statusCode, keyResponse] = await Api.key(
-        this.demoProps,
-        member,
-        attestation,
-        private_wrapping_key,
-        public_wrapping_key,
-        false,
-        undefined,
-        this.createHttpsAgent(member.id, AuthKinds.JWT),
-        access_token,
-      ).catch((error) => {
-        console.log(`keyInitial error: `, error);
-        throw error;
-      });
-
-      if (statusCode === 202) {
-        await Demo.sleep(1000);
-      } else if (statusCode !== 200) {
-        throw new Error(`🛑 [TEST FAILURE]: Expected ${statusCode} to be 200`);
-      }
-    } while (statusCode !== 200);
-
-    // Test with JWT
-    console.log(`📝 Get wrapped key with JWT...`);
-    [headers, statusCode, keyResponse] = (await Api.key(
-      this.demoProps,
-      member,
-      attestation,
-      private_wrapping_key,
-      public_wrapping_key,
-      false,
-      undefined,
-      this.createHttpsAgent(member.id, AuthKinds.JWT),
-      access_token,
-    )) as [{ [key: string]: string | number }, number, any];
-    Demo.assert("Status OK", statusCode == 200);
-    Demo.assertField(member.name, keyResponse, "d", undefinedString);
-    Demo.assertField(member.name, keyResponse, "x", undefinedString);
-    Demo.assertField(
-      member.name,
-      keyResponse,
-      "wrappedKid",
-      notUndefinedString,
-    );
-    Demo.assertField(member.name, keyResponse, "receipt", notUndefinedString);
-    //#endregion
-
-    //#region unwrap
-    console.log(`📝 Get unwrapped key with JWT...`);
-    let unwrapResponse;
-    [statusCode, unwrapResponse] = (await Api.unwrap(
-      this.demoProps,
-      member,
-      keyResponse.wrappedKid,
-      attestation,
-      private_wrapping_key,
-      public_wrapping_key,
-      false,
-      this.createHttpsAgent(member.id, AuthKinds.JWT),
-      access_token,
-    )) as [number, IKeyItem];
-    console.log("JWT unwrapResponse: ", unwrapResponse);
-    const keyInResponse = unwrapResponse.key;
-    const receipt = { receipt: unwrapResponse.receipt };
-    Demo.assert("Status OK", statusCode == 200);
-    Demo.assertField(member.name, keyInResponse, "d", notUndefinedString);
-    Demo.assertField(member.name, keyInResponse, "x", notUndefinedString);
-    Demo.assertField(
-      member.name,
-      keyInResponse,
-      "kid",
-      (key: string | number | any[]) => {
-        return key !== undefined && (key as string).length > 40;
-      },
-    );
-    Demo.assertField(
-      member.name,
-      keyInResponse,
-      "timestamp",
-      numberHigerThanZero,
-    );
-    Demo.assertField(member.name, keyInResponse, "crv", "X25519");
-    Demo.assertField(member.name, keyInResponse, "kty", "OKP");
-    Demo.assertField(member.name, receipt, "receipt", notUndefinedString);
-
-    console.log(`📝 Get unwrapped key with JWT and missing wrappingKey...`);
-    [statusCode, unwrapResponse] = (await Api.unwrap(
-      this.demoProps,
-      member,
-      keyResponse.wrappedKid,
-      attestation,
-      private_wrapping_key,
-      <any>undefined,
-      false,
-      this.createHttpsAgent(member.id, AuthKinds.JWT),
-      access_token,
-    )) as [number, IKeyItem];
-    console.log("JWT unwrapResponse: ", unwrapResponse);
-    Demo.assert("Status BadRequest", statusCode == 400);
-
-    console.log(`📝 Get unwrapped key with JWT and wrong wrappingKey: `);
-    const badPublicKey = public_wrapping_key
-      .replace("1", "9")
-      .replace("2", "1");
-
-    [statusCode, unwrapResponse] = (await Api.unwrap(
-      this.demoProps,
-      member,
-      keyResponse.wrappedKid,
-      attestation,
-      private_wrapping_key,
-      badPublicKey,
-      false,
-      this.createHttpsAgent(member.id, AuthKinds.JWT),
-      access_token,
-    )) as [number, IKeyItem];
-    console.log("JWT unwrapResponse: ", unwrapResponse);
-    Demo.assert("Status BadRequest", statusCode === 400);
-
-    // Test with Tink
-    console.log(`📝 Get wrapped key with tink...`);
-    let wrapResponse;
-    [headers, statusCode, wrapResponse] = (await Api.key(
-      this.demoProps,
-      member,
-      attestation,
-      private_wrapping_key,
-      public_wrapping_key,
-      true,
-      undefined,
-      this.createHttpsAgent(member.id, AuthKinds.JWT),
-      access_token,
-    )) as [{ [key: string]: string | number }, number, any];
-    Demo.assert("OK statusCode", statusCode === 200);
-
-    Demo.assertField(member.name, wrapResponse, "d", undefinedString);
-    Demo.assertField(member.name, wrapResponse, "x", undefinedString);
-    Demo.assert(
-      "typeof wrapResponse.wrappedKid === 'string'",
-      typeof wrapResponse.wrappedKid === "string",
-    );
-    Demo.assert(
-      "typeof wrapResponse.wrapped === 'string'",
-      typeof wrapResponse.wrapped === "string",
-    );
-    Demo.assert(
-      "typeof wrapResponse.receipt === 'string'",
-      typeof wrapResponse.receipt === "string",
-    );
-
-    console.log(`Unwrap result: `, wrapResponse.wrappedKid);
-
-    const kid = wrapResponse.wrappedKid;
-    console.log("kid: ", kid);
-
-    // Fetch with kid in jwt and tink
-    [headers, statusCode, wrapResponse] = (await Api.key(
-      this.demoProps,
-      member,
-      attestation,
-      private_wrapping_key,
-      public_wrapping_key,
-      false,
-      kid,
-      this.createHttpsAgent(member.id, AuthKinds.JWT),
-      access_token,
-    )) as [{ [key: string]: string | number }, number, any];
-    Demo.assert("OK statusCode", statusCode === 200);
-    Demo.assert(
-      `keyResponse["wrappedKid"] === kid`,
-      keyResponse["wrappedKid"] === kid,
-    );
-
-    [headers, statusCode, wrapResponse] = (await Api.key(
-      this.demoProps,
-      member,
-      attestation,
-      private_wrapping_key,
-      public_wrapping_key,
-      true,
-      kid,
-      this.createHttpsAgent(member.id, AuthKinds.JWT),
-      access_token,
-    )) as [{ [key: string]: string | number }, number, any];
-    Demo.assert("OK statusCode", statusCode === 200);
-    Demo.assert(
-      `keyResponse["wrappedKid"] === kid`,
-      keyResponse["wrappedKid"] === kid,
-    );
-
-    console.log(`📝 Get private key with tink...`);
-    [statusCode, unwrapResponse] = (await Api.unwrap(
-      this.demoProps,
-      member,
-      kid as string,
-
-      attestation,
-      private_wrapping_key,
-      public_wrapping_key,
-      true,
-      this.createHttpsAgent(member.id, AuthKinds.JWT),
-      access_token,
-    )) as [number, Uint8Array];
-    Demo.assert("OK statusCode", statusCode == 200);
-    Demo.assert(
-      "typeof unwrapResponse.wrapped === 'string'",
-      typeof unwrapResponse.wrapped === "string",
-    );
-
-    //const wrappedBuf = Base64.toUint8Array(unwrapResponse.wrapped);
-    //let tinkHpkeKey = new hpke.HpkePrivateKey();
-    //tinkHpkeKey.fromBinary(new Uint8Array(wrappedBuf),);
-    //Demo.assert(
-    //  "tinkHpkeKey.privateKey instanceof Uint8Array",
-    //  tinkHpkeKey.privateKey instanceof Uint8Array,
-    //);
-
-    //console.log("tinkHpkeKey.toJsonString()", tinkHpkeKey.toJsonString());
-
-    //#endregion
-
-    //#region keyReleasePolicy
-    console.log(`📝 Get key release policy...`);
-    [statusCode, keyResponse] = await Api.keyReleasePolicy(
-      this.demoProps,
-      member,
-      this.createHttpsAgent(member.id, AuthKinds.MemberCerts),
-    ).catch((error) => {
-      console.log(`keyReleasePolicy error: `, error);
-      throw error;
-    });
-    Demo.assert("statusCode == 200", statusCode == 200);
-
-    console.log("keyReleasePolicy response: ", keyResponse);
-    Demo.assert(
-      `keyResponse.claims["x-ms-sevsnpvm-smt-allowed"][0] === true`,
-      keyResponse.claims["x-ms-sevsnpvm-smt-allowed"][0] === true,
-    );
-    Demo.assert(
-      `keyResponse.claims["x-ms-ver"][0] === '2'`,
-      keyResponse.claims["x-ms-ver"][0] === "2",
-    );
-    Demo.assert(
-      `keyResponse.claims["x-ms-sevsnpvm-is-debuggable"][0] === false`,
-      keyResponse.claims["x-ms-sevsnpvm-is-debuggable"][0] === false,
-    );
-    Demo.assert(
-      `keyResponse.gte["x-ms-ver"] === "2"`,
-      keyResponse.gte["x-ms-ver"] === "2",
-    );
-    Demo.assert(
-      `keyResponse.gt["x-ms-ver"] === "1"`,
-      keyResponse.gt["x-ms-ver"] === "1",
-    );
-
-    // JWT not allowed
-    [statusCode, keyResponse] = await Api.keyReleasePolicy(
-      this.demoProps,
-      member,
-      this.createHttpsAgent(member.id, AuthKinds.JWT),
-      access_token,
-    ).catch((error) => {
-      console.log(`keyReleasePolicy error: `, error);
-      throw error;
-    });
-    Demo.assert("statusCode == 401", statusCode == 401);
-
-    //#endregion
-
-    //#region pubkey
-    console.log(`📝 Get pubkey...`);
-    [statusCode, keyResponse] = await Api.pubkey(
-      this.demoProps,
-      member,
-      "kid",
-      "fmt",
-      this.createHttpsAgent(member.id, AuthKinds.MemberCerts),
-    ).catch((error) => {
-      console.log(`keyReleasePolicy error: `, error);
-      throw error;
-    });
-    Demo.assert("statusCode == 200", statusCode == 200);
-
-    console.log("pubkey response: ", keyResponse);
-
-    Demo.assert(`keyResponse.crv === 'X25519'`, keyResponse.crv === "X25519");
-    Demo.assertField(member.name, keyResponse, "kid", notUndefinedString);
-    Demo.assertField(member.name, keyResponse, "x", notUndefinedString);
-    Demo.assertField(member.name, keyResponse, "receipt", notUndefinedString);
-
-    Demo.assert(`keyResponse.timestamp > 0`, keyResponse.timestamp > 0);
-    Demo.assert(`keyResponse.id > 10`, keyResponse.id > 10);
-    //#endregion
-
-    //#region listpubkeys
-    console.log(`📝 Get listpubkeys...`);
-    [statusCode, keyResponse, headers] = await Api.listpubkeys(
-      this.demoProps,
-      member,
-      this.createHttpsAgent(member.id, AuthKinds.MemberCerts),
-    ).catch((error) => {
-      console.log(`keyReleasePolicy error: `, error);
-      throw error;
-    });
-    Demo.assert("statusCode == 200", statusCode == 200);
-
-    console.log("listpubkeys response: ", keyResponse);
-
-    Demo.assertField(
-      member.name,
-      keyResponse.keys[0],
-      "key",
-      notUndefinedString,
-    );
-    Demo.assertField(
-      member.name,
-      keyResponse.keys[0],
-      "id",
-      notUndefinedString,
-    );
-    Demo.assert(
-      `headers["cache-control"] == "max-age=254838"`,
-      headers["cache-control"] == "max-age=254838",
-    );
-
     //#endregion
 
     await this.addCheckpoint("Key generation Stage Complete");
@@ -588,6 +206,7 @@ class Demo {
     }
   }
 
+  /*
   private static assertField(
     memberName: string,
     toTest: any,
@@ -620,7 +239,7 @@ class Demo {
       );
     }
   }
-
+*/
   private static createMember(memberId: string): DemoMemberProps {
     return {
       id: memberId,

@@ -196,6 +196,22 @@
         }
       }
     },
+    "/auth": {
+      "get": {
+        "js_module": "endpoints/kms.js",
+        "js_function": "auth",
+        "forwarding_required": "never",
+        "authn_policies": ["user_cert", "member_cert", "jwt"],
+        "mode": "readonly",
+        "openapi": {
+          "responses": {
+            "200": {
+              "description": "Generate a heartbeat response"
+            }
+          }
+        }
+      }
+    },
     "/heartbeat": {
       "get": {
         "js_module": "endpoints/kms.js",

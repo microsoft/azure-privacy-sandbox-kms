@@ -37,9 +37,9 @@ build: ## 🔨 Build the Application
 	npm install
 	npm run build
 
-setup: ## Setup proposals and generate an initial key
+setup-inference: ## Setup proposals and generate an initial key
 	@echo -e "\e[34m$@\e[0m" || true
-	CCF_PLATFORM=${CCF_PLATFORM} ./scripts/kms_setup.sh --network-url "${KMS_URL}"  --certificate_dir "${KEYS_DIR}"
+	CCF_PLATFORM=${CCF_PLATFORM} ./scripts/kms_inference_setup.sh --network-url "${KMS_URL}"  --certificate_dir "${KEYS_DIR}"
 
 stop-host:  ## 🏃 Stop the host
 	@echo -e "\e[34m$@\e[0m" || true
@@ -62,7 +62,7 @@ start-host: stop-host  ## 🏃 Start the CCF network using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
 	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh && \
 	source ./scripts/kms/js_app_set.sh && \
-	source ./scripts/kms/constitution_set.sh ./governance/constitution/kms_actions.js
+	source ./scripts/kms/constitution_set.sh ./governance/constitution/kms_actions_maa.js
 
 start-host-idp: stop-host stop-idp start-idp start-host ## 🏃 Start the CCF network && idp using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
@@ -72,7 +72,7 @@ start-host-idp: stop-host stop-idp start-idp start-host ## 🏃 Start the CCF ne
 
 demo: stop-all start-host-idp ## 🎬 Demo the KMS Application in the Sandbox
 	@echo -e "\e[34m$@\e[0m" || true
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/test_sandbox.sh --nodeAddress 127.0.0.1:8000 --certificate_dir ${KMS_WORKSPACE}/sandbox_common --constitution ./governance/constitution/kms_actions.js
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/test_inference_sandbox.sh --nodeAddress 127.0.0.1:8000 --certificate_dir ${KMS_WORKSPACE}/sandbox_common --constitution ./governance/constitution/kms_actions_maa.js
 
 # Propose the JWT validation policy
 propose-jwt-demo-validation-policy: ## 🚀 Deploy the JWT validation policy
@@ -186,7 +186,7 @@ js-app-set:
 constitution-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	KMS_URL=${KMS_URL} \
-	CONSTITUTION_PATH=./governance/constitution/kms_actions.js \
+	CONSTITUTION_PATH=./governance/constitution/kms_actions_maa.js \
 		./scripts/kms/constitution_set.sh
 
 release-policy-set:

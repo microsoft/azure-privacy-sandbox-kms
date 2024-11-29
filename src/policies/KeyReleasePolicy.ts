@@ -269,9 +269,10 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
       const kvKey = kv.kvkey;
       const kvKeyBuf = ccf.strToBuf(kvKey);
       const kvValueBuf = keyReleasePolicyMap.get(kvKeyBuf);
+      Logger.debug(`Retrieved key release policy ${kvKey} from map: `, logContext, kvValueBuf ? ccf.bufToStr(kvValueBuf): "undefined");
       if (!kvValueBuf) {
         if (!kv.optional) {
-          throw new KmsError(`Key release policy ${kvKey} not found in the key release policy map`, logContext);        }
+          throw new KmsError(`Key release policy '${kvKey}' not found in the key release policy map`, logContext);        }
       } else {
         let kvValue = ccf.bufToStr(kvValueBuf!);
         try {

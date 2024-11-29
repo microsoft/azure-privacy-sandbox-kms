@@ -5,7 +5,7 @@
     "bundle": "node build_bundle.js dist",
     "build-proto": "buf generate src/endpoints/proto",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "e2e-test": "node --import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./loader-register.js\", pathToFileURL(\"./\"));' ./test/e2e-test/src/index.ts"
+    "e2e-inference-test": "node --import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"./loader-register.js\", pathToFileURL(\"./\"));' ./test/inference-e2e-test/src/index.ts"
   },
   "type": "module",
   "engines": {
