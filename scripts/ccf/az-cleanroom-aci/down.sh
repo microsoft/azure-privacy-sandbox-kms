@@ -6,6 +6,7 @@
 az-cleanroom-aci-down() {
     set -e
 
+    source $REPO_ROOT/services/cacitesting.env
     DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-$1}
     if [ -z "$DEPLOYMENT_NAME" ]; then
         read -p "Enter deployment name: " DEPLOYMENT_NAME
@@ -21,7 +22,7 @@ az-cleanroom-aci-down() {
 
     az storage account delete --yes \
         --name "ccf$(cat $WORKSPACE/unique_string.txt)sa" \
-        --resource-group domayre
+        --resource-group $RESOURCE_GROUP
 
     rm -rf $WORKSPACE
 
