@@ -47,6 +47,7 @@ jobs:
         env:
           TEST_ENVIRONMENT: ccf/${{ matrix.config.env }}
         run: |
+          source ./scripts/jwt_issuer/up.sh
           pytest -sv \
             test/system-test/test_${{ inputs.endpoint }}.py \
             -n ${{ matrix.config.threads }}
