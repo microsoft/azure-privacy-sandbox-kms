@@ -60,6 +60,9 @@ const token = (req: Request, res: Response) => {
     nbf: Math.floor(Date.now() / 1000),
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(Date.now() / 1000) + 60 * 60, // expires in 1 hour
+    "x-ms-ver": "1.0",
+    "x-ms-azurevm-debuggersdisabled": true,
+    "x-ms-azurevm-osversion-major": 22,
   };
 
   const access_token = jwt.sign(payload, privateKey, {
