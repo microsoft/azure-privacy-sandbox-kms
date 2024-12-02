@@ -6,6 +6,7 @@ KMS_URL ?= https://127.0.0.1:8000
 KEYS_DIR ?= ${KMS_WORKSPACE}/sandbox_common
 RUN_BACK ?= true
 CCF_PLATFORM ?= virtual
+JWT_ISSUER_WORKSPACE ?= ${PWD}/jwt_issuer_workspace
 
 DEPLOYMENT_ENV ?= $(if $(shell echo $(KMS_URL) | grep -E '127.0.0.1|localhost'),local,cloud)
 
@@ -68,7 +69,7 @@ start-host-idp: stop-host stop-idp start-idp start-host ## 🏃 Start the CCF ne
 	@echo -e "\e[34m$@\e[0m" || true
 	@echo "Executing: $(COMMAND)"
 	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh > /dev/null 2>&1 && \
-	source ./scripts/kms/jwt_issuer_trust.sh
+	JWT_ISSUER_WORKSPACE=${JWT_ISSUER_WORKSPACE} source ./scripts/kms/jwt_issuer_trust.sh
 
 demo: stop-all start-host-idp ## 🎬 Demo the KMS Application in the Sandbox
 	@echo -e "\e[34m$@\e[0m" || true

@@ -3,34 +3,69 @@ import os
 import subprocess
 import pytest
 from utils import deploy_app_code
+import string
+import random
+import uuid
+import time
+import hashlib
+import base64
 
 REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 TEST_ENVIRONMENT = os.getenv("TEST_ENVIRONMENT", "ccf/sandbox_local")
 
+def unique_string():
+    random_uuid = uuid.uuid4().bytes
+    timestamp = time.time_ns().to_bytes(8, 'big', signed=False)
+    pid = os.getpid().to_bytes(4, 'big', signed=False)
+
+    combined = random_uuid + timestamp + pid
+    hashed = hashlib.sha256(combined).digest()
+
+    return base64.urlsafe_b64encode(hashed).decode() \
+        .rstrip('=') \
+        .replace("-", "") \
+        .replace("_", "") \
+        .lower()[:12]
 
 @pytest.fixture()
 def setup_kms():
 
+    deployment_name = os.getenv("DEPLOYMENT_NAME", f"kms-{unique_string()}")
+
     # Setup the CCF backend and set the environment accordingly
-    setup_vars = json.loads(subprocess.run(
+    try:
+        res = subprocess.run(
             [f"scripts/{TEST_ENVIRONMENT}/up.sh", "--force-recreate"],
+            env={
+                **os.environ,
+                "DEPLOYMENT_NAME": deployment_name,
+            },
+            cwd=REPO_ROOT,
+            stdout=subprocess.PIPE,
+            check=True,
+        ).stdout.decode()
+        setup_vars = json.loads(res[res.rfind("{"):])
+        os.environ.update(setup_vars)
+
+        res = subprocess.run(
+            ["make", "jwt-issuer-up"],
             cwd=REPO_ROOT,
             check=True,
             stdout=subprocess.PIPE,
-        ).stdout.decode())
-    os.environ.update(setup_vars)
+        ).stdout.decode()
+        setup_vars = json.loads(res[res.rfind("{"):])
+        os.environ.update(setup_vars)
 
-    subprocess.run(
-        ["make", "jwt-issuer-up"],
-        cwd=REPO_ROOT,
-        check=True,
-    )
-    os.environ["JWT_ISSUER"] = "http://localhost:3000/token"
+        deploy_app_code()
 
-    deploy_app_code()
+        yield
 
-    yield
-
-    subprocess.run(
-        f"scripts/{TEST_ENVIRONMENT}/down.sh",
-    )
+    finally:
+        subprocess.run(
+            [f"scripts/{TEST_ENVIRONMENT}/down.sh", deployment_name],
+            env={
+                **os.environ,
+                "DEPLOYMENT_NAME": deployment_name,
+            },
+            check=False,
+        )
