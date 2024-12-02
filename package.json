@@ -30,7 +30,7 @@
     "@rollup/plugin-node-resolve": "15.3.0",
     "@rollup/plugin-typescript": "12.1.0",
     "@types/jasmine": "5.1.4",
-    "@types/jest": "29.5.13",
+    "@types/jest": "29.5.14",
     "@types/node": "22.9.0",
     "axios": "1.7.7",
     "babel-jest": "29.7.0",
