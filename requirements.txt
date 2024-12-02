@@ -9,7 +9,7 @@ matplotlib==3.7.5
 pandas==2.0.3
 paramiko==3.5.0
 pyasn1==0.6.1
-PyJWT==2.9.0
+PyJWT==2.10.1
 pre-commit==3.5.0
 setuptools==72.0.0
 pytest==8.3.3
