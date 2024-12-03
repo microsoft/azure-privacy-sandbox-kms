@@ -118,7 +118,7 @@ def test_key_kid_present(setup_kms):
         if status_code != 202:
             break
     assert status_code == 200
-    assert refresh_json["id"] == 10
+    assert refresh_json["id"] == 1
 
 
 
