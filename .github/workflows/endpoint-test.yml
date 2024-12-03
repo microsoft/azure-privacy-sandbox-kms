@@ -51,3 +51,38 @@ jobs:
           pytest -sv \
             test/system-test/test_${{ inputs.endpoint }}.py \
             -n ${{ matrix.config.threads }}
+
+  endpoint-akv:
+    name: ${{ inputs.endpoint }} (${{ matrix.config.env }}) (AKV)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - env: sandbox_local
+            threads: 1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log into Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
+          tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
+          subscription-id: 7ca35580-fc67-469c-91a7-68b38569ca6e
+
+      - name: Install Dependencies
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/tools/install-deps.sh
+
+      - name: Run System Tests
+        env:
+          TEST_ENVIRONMENT: ccf/${{ matrix.config.env }}
+          USE_AKV: true
+        run: |
+          source ./scripts/jwt_issuer/up.sh
+          pytest -sv \
+            test/system-test/test_${{ inputs.endpoint }}.py \
+            -n ${{ matrix.config.threads }}
