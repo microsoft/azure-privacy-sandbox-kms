@@ -1,6 +1,14 @@
 # Testing Strategy
 
-## Overview
+
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Unit Testing](#unit-testing)
+- [End to End Testing (System Tests)](#end-to-end-testing-system-tests)
+- [Quick End to End Testing](#quick-end-to-end-testing)
+
+## Introduction
 
 The purpose of this document is to describe how the application is being tested to assure quality and coverage.
 
@@ -39,7 +47,7 @@ All system tests are ran in docker to assure a clean testing environment deploye
 
 ```bash
 # In the terminal window
-make test-system-inference
+make test-system
 ```
 
 ## Quick End to end testing
