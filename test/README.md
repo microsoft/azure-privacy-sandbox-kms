@@ -1,6 +1,13 @@
 # Testing Strategy
 
-## Overview
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Unit Testing](#unit-testing)
+- [End to End Testing (System Tests)](#end-to-end-testing-system-tests)
+- [Quick End to End Testing](#quick-end-to-end-testing)
+
+## Introduction
 
 The purpose of this document is to describe how the application is being tested to assure quality and coverage.
 
