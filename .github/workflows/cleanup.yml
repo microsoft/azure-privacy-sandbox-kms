@@ -13,6 +13,8 @@ jobs:
   cleanup-aci:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Log into Azure
         uses: azure/login@v2
@@ -39,6 +41,8 @@ jobs:
   cleanup-storage:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Log into Azure
         uses: azure/login@v2
