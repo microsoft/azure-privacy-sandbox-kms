@@ -17,7 +17,7 @@ on:
 jobs:
 
   endpoint:
-    name: ${{ inputs.endpoint }} (${{ matrix.config.env }} ({{ matrix.config.use_akv && 'akv' || 'local' }} keys))
+    name: ${{ inputs.endpoint }} (${{ matrix.config.env }} (${{ matrix.config.use_akv && 'akv' || 'local' }}_keys))
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
