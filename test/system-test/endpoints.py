@@ -19,7 +19,7 @@ def call_endpoint(endpoint, **kwargs):
 
     print(f'Called "{" ".join(command)}"')
     print(f"Response Code: {status_code}")
-    print(f"Response Body: {json.loads("".join(response) or '{}')}")
+    print(f'Response Body: {json.loads("".join(response) or "{}")}')
 
     return (
         int(status_code),

@@ -47,7 +47,7 @@ def test_with_keys_and_policy(setup_kms):
     assert key_json["wrapped"] == ""
 
 
-def test_with_keys_and_policy_jwt_auth(setup_kms):
+def test_with_keys_and_policy_jwt_auth(setup_kms, setup_jwt_issuer):
     apply_kms_constitution()
     apply_key_release_policy()
     trust_jwt_issuer()
