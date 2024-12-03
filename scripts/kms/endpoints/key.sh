@@ -5,27 +5,13 @@
 
 key() {
     params=()
-    auth="member_cert"
-    attestation=""
-    wrappingKey=""
+    auth="jwt"
 
     # Parse command-line arguments
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --kid)
                 params+=("kid=$2")
-                shift 2
-                ;;
-            --fmt)
-                params+=("fmt=$2")
-                shift 2
-                ;;
-            --attestation)
-                attestation="$2"
-                shift 2
-                ;;
-            --wrapping-key)
-                wrappingKey="$2"
                 shift 2
                 ;;
             --auth)

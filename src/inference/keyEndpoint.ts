@@ -37,6 +37,7 @@ export const key = (
 ): ServiceResult<string | IKeyResponse> => {
   const logContext = new LogContext().appendScope("keyEndpoint");
   const serviceRequest = new ServiceRequest<IKeyRequest>(logContext, request);
+  Logger.info(`Before Authentication identity`, logContext);
 
   // check if caller has a valid identity
   let [policy, isValidIdentity] = serviceRequest.isAuthenticated();
@@ -109,12 +110,13 @@ export const key = (
     );
   }
 
-  Logger
   // Check kid
-  let kidString = serviceRequest.query?.["kid"];
+  let kidRaw = serviceRequest.query?.["kid"] || serviceRequest.body?.["kid"];
   let kid: number | undefined;
   let keyItem: IKeyItem | undefined;
-  if (kidString === undefined) {
+  Logger.debug(`Received kid: `, logContext, kidRaw);
+
+  if (kidRaw === undefined) {
     [kid, keyItem] = hpkeKeyMap.latestItem();
     if (keyItem === undefined) {
       return ServiceResult.Failed<string>(
@@ -124,7 +126,26 @@ export const key = (
       );
     }
   } else {
-    kid = parseInt(kidString, 10);
+    if (typeof kidRaw === "string") {
+      kid = parseInt(kidRaw, 10);
+      if (isNaN(kid)) {
+        return ServiceResult.Failed<string>(
+          { errorMessage: `kid ${kidRaw} is not a number` },
+          400,
+          logContext,
+        );
+      }
+    } else {  
+      if (typeof kidRaw !== "number") {
+        return ServiceResult.Failed<string>(
+          { errorMessage: `kid ${kidRaw} is not a number` },
+          400,
+          logContext,
+        );
+      }
+      kid = kidRaw;
+    }
+
     keyItem = hpkeKeyMap.store.get(kid) as IKeyItem;
     if (keyItem === undefined) {
       return ServiceResult.Failed<string>(
@@ -136,7 +157,6 @@ export const key = (
   }
 
   const receipt = hpkeKeyMap.receipt(kid);
-  Logger.info(`Retrieved key id: ${kid}`, logContext, keyItem);
 
   // Get receipt if available
   if (receipt !== undefined) {

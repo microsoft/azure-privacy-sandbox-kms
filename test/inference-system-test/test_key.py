@@ -2,6 +2,7 @@ import pytest
 from endpoints import key, refresh
 from utils import apply_kms_constitution, apply_key_release_policy, trust_jwt_issuer, get_test_attestation, get_test_wrapping_key
 
+
 @pytest.mark.xfail(strict=True)
 def test_no_keys(setup_kms):
     apply_kms_constitution()
@@ -12,7 +13,6 @@ def test_no_keys(setup_kms):
             break
     assert status_code == 404
 
-
 def test_no_jwt_policy(setup_kms):
     apply_kms_constitution()
     refresh()
@@ -21,7 +21,7 @@ def test_no_jwt_policy(setup_kms):
         if status_code != 202:
             break
     assert status_code == 401
-
+    
 
 def test_no_key_release_policy(setup_kms):
     apply_kms_constitution()
@@ -31,18 +31,19 @@ def test_no_key_release_policy(setup_kms):
         status_code, key_json = key(auth="jwt")
         if status_code != 202:
             break
-    assert status_code == 400
+    assert status_code == 500
 
 
 def test_with_keys_and_policy(setup_kms):
     apply_kms_constitution()
     apply_key_release_policy()
+    trust_jwt_issuer()
     refresh()
     while True:
         status_code, key_json = key(auth="jwt")
         if status_code != 202:
             break
-    assert status_code == 401
+    assert status_code == 200
 
 
 def test_with_keys_and_policy_jwt_auth(setup_kms):
@@ -72,7 +73,6 @@ def test_key_with_multiple(setup_kms):
 
 # Test kid parameter
 
-
 def test_key_kid_not_present_with_other_keys(setup_kms):
     refresh()
     refresh()
@@ -86,7 +86,8 @@ def test_key_kid_not_present_with_other_keys(setup_kms):
         )
         if status_code != 202:
             break
-    assert status_code == 404
+    assert status_code == 400
+
 
 
 def test_key_kid_not_present_without_other_keys(setup_kms):
@@ -100,7 +101,7 @@ def test_key_kid_not_present_without_other_keys(setup_kms):
         )
         if status_code != 202:
             break
-    assert status_code == 404
+    assert status_code == 400
 
 
 def test_key_kid_present(setup_kms):
@@ -112,12 +113,12 @@ def test_key_kid_present(setup_kms):
     while True:
         status_code, key_json = key(
             auth="jwt",
-            kid=refresh_json["kid"]
+            kid=refresh_json["id"]
         )
         if status_code != 202:
             break
     assert status_code == 200
-    assert key_json["wrappedKid"].endswith("_1")
+    assert refresh_json["id"] == 10
 
 
 

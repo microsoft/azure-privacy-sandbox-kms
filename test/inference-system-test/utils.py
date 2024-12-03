@@ -31,7 +31,7 @@ def apply_kms_constitution():
     subprocess.run(
         [
             "./scripts/kms/constitution_set.sh",
-            "./governance/constitution/kms_actions.js",
+            "./governance/constitution/kms_actions_maa.js",
         ],
         cwd=REPO_ROOT,
         check=True,
