@@ -97,7 +97,7 @@ def setup_kms(setup_ccf, setup_akv):
     if USE_AKV:
         call_script([
             "./scripts/akv/key-import.sh",
-            f"{os.getenv("DEPLOYMENT_NAME", "kms")}-private-key"
+            f'{os.getenv("DEPLOYMENT_NAME", "kms")}-private-key'
         ])
     deploy_app_code()
     yield
