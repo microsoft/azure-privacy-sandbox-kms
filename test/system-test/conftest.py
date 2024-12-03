@@ -31,6 +31,7 @@ def unique_string():
 def setup_kms():
 
     deployment_name = os.getenv("DEPLOYMENT_NAME", f"kms-{unique_string()}")
+    use_akv = os.getenv("USE_AKV", False)
 
     # Setup the CCF backend and set the environment accordingly
     try:
@@ -56,6 +57,26 @@ def setup_kms():
         setup_vars = json.loads(res[res.rfind("{"):])
         os.environ.update(setup_vars)
 
+        if use_akv:
+            res = subprocess.run(
+                ["./scripts/akv/up.sh", f"{deployment_name}-akv"],
+                cwd=REPO_ROOT,
+                check=True,
+                stdout=subprocess.PIPE,
+            )
+            res = res.stdout.decode()
+            setup_vars = json.loads(res[res.rfind("{"):])
+            os.environ.update(setup_vars)
+
+            res = subprocess.run(
+                ["./scripts/akv/key-import.sh", "private-key"],
+                cwd=REPO_ROOT,
+                check=True,
+                stdout=subprocess.PIPE,
+            ).stdout.decode()
+            setup_vars = json.loads(res[res.rfind("{"):])
+            os.environ.update(setup_vars)
+
         deploy_app_code()
 
         yield
@@ -69,3 +90,11 @@ def setup_kms():
             },
             check=False,
         )
+
+        if use_akv:
+            res = subprocess.run(
+                ["./scripts/akv/down.sh", f"{deployment_name}-akv"],
+                cwd=REPO_ROOT,
+                check=True,
+                stderr=subprocess.DEVNULL,
+            )
