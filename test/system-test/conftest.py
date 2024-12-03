@@ -67,6 +67,8 @@ def setup_akv():
                 ["./scripts/akv/down.sh", akv_name],
                 stderr=subprocess.DEVNULL,
             )
+    else:
+        yield
 
 
 @pytest.fixture()
