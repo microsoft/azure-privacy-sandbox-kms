@@ -45,6 +45,7 @@ def setup_kms():
             stdout=subprocess.PIPE,
             check=True,
         ).stdout.decode()
+        print(res)
         setup_vars = json.loads(res[res.rfind("{"):])
         os.environ.update(setup_vars)
 
@@ -54,6 +55,7 @@ def setup_kms():
             check=True,
             stdout=subprocess.PIPE,
         ).stdout.decode()
+        print(res)
         setup_vars = json.loads(res[res.rfind("{"):])
         os.environ.update(setup_vars)
 
@@ -65,6 +67,7 @@ def setup_kms():
                 stdout=subprocess.PIPE,
             )
             res = res.stdout.decode()
+            print(res)
             setup_vars = json.loads(res[res.rfind("{"):])
             os.environ.update(setup_vars)
 
@@ -74,6 +77,7 @@ def setup_kms():
                 check=True,
                 stdout=subprocess.PIPE,
             ).stdout.decode()
+            print(res)
             setup_vars = json.loads(res[res.rfind("{"):])
             os.environ.update(setup_vars)
 
