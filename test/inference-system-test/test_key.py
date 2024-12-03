@@ -113,13 +113,33 @@ def test_key_kid_present(setup_kms):
     while True:
         status_code, key_json = key(
             auth="jwt",
+            id=refresh_json["id"]
+        )
+        if status_code != 202:
+            break
+    assert status_code == 200
+    assert id == 1
+
+
+def test_key_refresh_all_ids(setup_kms):
+    apply_kms_constitution()
+    apply_key_release_policy()
+    trust_jwt_issuer()
+    for _ in range(256):
+        _, refresh_json = refresh()
+    
+    while True:
+        status_code, key_json = key(
+            auth="jwt",
             kid=refresh_json["id"]
         )
         if status_code != 202:
             break
     assert status_code == 200
-    assert refresh_json["id"] == 1
+    print(f"key_json: {key_json}")  # Debug print to see the contents of key_json
 
+    assert key_json["kid"] == 0
+    assert key_json["kid"] == refresh_json["id"]
 
 
 if __name__ == "__main__":
