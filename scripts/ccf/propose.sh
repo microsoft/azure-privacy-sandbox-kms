@@ -18,7 +18,7 @@ sign_proposal() {
         creation_time=$(date -u +"%Y-%m-%dT%H:%M:%S")
         bearer_token=$( \
             az account get-access-token \
-            --resource https://azure-key-management-akv.vault.azure.net \
+            --resource https://vault.azure.net \
             --query accessToken --output tsv \
         )
         signature=$(mktemp)
