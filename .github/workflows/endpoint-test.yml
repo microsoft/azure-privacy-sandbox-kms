@@ -42,4 +42,4 @@ jobs:
       - name: Run System Tests
         env:
             TEST_ENVIRONMENT: ${{ matrix.env }}
-        run: pytest -sv test/system-test/test_${{ inputs.endpoint }}.py
+        run: pytest -sv test/inference-system-test/test_${{ inputs.endpoint }}.py

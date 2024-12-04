@@ -200,7 +200,7 @@ curl $KMS_URL/receipt?transaction_id=2.20 --cacert ${KEYS_DIR}/service_cert.pem 
 ## Run end to end system tests
 
 ```
-pytest -s test/system-test
+pytest -s test/inference-system-test
 ```
 
 ## Access Tokens
