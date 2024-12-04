@@ -4,8 +4,8 @@
 
 - [Introduction](#introduction)
 - [Unit Testing](#unit-testing)
-- [End to End Testing (System Tests)](#end-to-end-testing-system-tests)
-- [Quick End to End Testing](#quick-end-to-end-testing)
+- [System Tests](#system-tests)
+- [End to End Testing](#end-to-end-testing)
 
 ## Introduction
 
@@ -14,29 +14,28 @@ The purpose of this document is to describe how the application is being tested 
 The application testing strategy depends on two main types of testing to achieve the objective:
 
 - Unit testing
+- System tests
 - End to end (e2e) testing
-- Quick e2e test 
 
-## Unit testing
+## Unit Testing
 
-This type of testing covers main functions.
+This type of testing covers main KMS functions.
 
 The application is using the [`Jest Testing Framework`](https://jestjs.io/docs/getting-started) to define the unit-test scenarios.
 
-### How to run unit tests
-
-To run the application unit tests
+### Build and run unit-test using jest framework
 
 ```bash
 # In the terminal window
-make unit-test                 # Build and run unit-test using jest framework
+make unit-test
 ```
+
 
 **NOTE**: To enable the CCF functionality on testing environment, the application is using built-in feature of CCF, [the Polyfill implementation](https://microsoft.github.io/CCF/main/js/ccf-app/modules/polyfill.html) which overrides the CCF modules' implementation to support testing and local environments
 
-## End to end testing (system tests)
+## System Tests
 
-End to end testing (E2E testing) is a testing method that involves testing an application’s workflow from beginning to end. This method aims to replicate real user scenarios to validate the system for integration and data integrity.
+System tests involve testing the application's workflow from beginning to end. This method aims to replicate real user scenarios to validate the system for integration and data integrity.
 
 The system test is based on [pytest](https://docs.pytest.org/en/stable/).
 
@@ -49,11 +48,13 @@ All system tests are ran in docker to assure a clean testing environment deploye
 make test-system-inference
 ```
 
-## Quick End to end testing
+## End to end testing
 
-Quick e2e testing is designed to quickly test if all endpoints are functional. This test run quickly and is intended to do a quick test after changes.
+E2e testing is designed to quickly test if all endpoints are functional. This test run quickly and is intended to do a quick test after changes.
 
-### How to run quick e2e tests
+This can also be used to launch KMS. Next one can do manual curl tests to test the endpoints.
+
+### How to run e2e tests
 
 ```bash
 # In the terminal window
