@@ -192,7 +192,7 @@ export default class Api {
   ): Promise<[
     number,
     { [key: string]: string | number },
-    IKeyResponse
+    IKeyResponse | undefined
   ]> {
     console.log(
       `${member.name} Get wrapped private key with receipt:`,
@@ -227,40 +227,21 @@ export default class Api {
     let response;
     try {
       response = await Api.responsePromise(req);
-      console.log("Status:", response.statusCode);
-      if (response.statusCode > 200) {
-        console.log(
-          `Directly return statuscode with response (${response.statusCode}): `,
-          response.data,
-        );
-        return [
-          response.statusCode,
-          response.headers,
-          response.data ? JSON.parse(response.data) : undefined,
-        ];
-      }
-      console.log("Response data:", response.data);
+      console.log("Response data:", response.data, response.headers, response.statusCode);
+      return [
+        response.statusCode,
+        response.headers,
+        response.data ? JSON.parse(response.data) as IKeyResponse : undefined,
+      ];
     } catch (error: any) {
       console.error("Error:", error.message);
+      throw error;
     } finally {
       // Close the client session when done
       if (client) {
         client.close();
       }
     }
-
-    const resp: IKeyResponse = JSON.parse(response.data);
-    console.log(`key returned: `, response.data);
-    console.log(`kid: `, resp.kid);
-    console.log(`Receipt: `, resp.receipt);
-
-    return [
-      response.statusCode,
-      response.headers,
-      {
-        ...resp,
-      },
-    ];
   }
 
   public static async keyReleasePolicy(
