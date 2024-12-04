@@ -113,12 +113,12 @@ def test_key_kid_present(setup_kms):
     while True:
         status_code, key_json = key(
             auth="jwt",
-            id=refresh_json["id"]
+            kid=refresh_json["id"]
         )
         if status_code != 202:
             break
     assert status_code == 200
-    assert id == 1
+    assert refresh_json["id"] == 1
 
 
 def test_key_refresh_all_ids(setup_kms):
