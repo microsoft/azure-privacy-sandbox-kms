@@ -10,6 +10,7 @@ ccf-member-add() {
     source $REPO_ROOT/scripts/ccf/propose.sh
     source $REPO_ROOT/scripts/ccf/member/info.sh
     source $REPO_ROOT/scripts/ccf/member/id.sh
+    source $REPO_ROOT/scripts/ccf/member/use.sh
 
     MEMBER_NAME=${1:-$MEMBER_NAME}
     if [ -z "$MEMBER_NAME" ]; then
@@ -20,7 +21,6 @@ ccf-member-add() {
 
     # Hopefully we will have a single command for this eventually, e.g.
     #   az cleanroom governance member up $MEMBER_NAME
-    # but for now:
 
     if [[ $USE_AKV == false ]]; then
         # Generate the member identity
@@ -29,11 +29,11 @@ ccf-member-add() {
         # Create a key in AKV and download the cert for proposing
         az keyvault certificate create \
             --vault-name $AKV_VAULT_NAME \
-            --name $MEMBER_NAME-cert \
+            --name $MEMBER_NAME \
             --policy "${AKV_POLICY:-$(az keyvault certificate get-default-policy)}"
         az keyvault certificate download \
             --vault-name $AKV_VAULT_NAME \
-            --name $MEMBER_NAME-cert \
+            --name $MEMBER_NAME \
             --file $WORKSPACE/${MEMBER_NAME}_cert.pem
     fi
 
@@ -52,9 +52,11 @@ ccf-member-add() {
         return 0
     fi
 
-    # Otherwise activate member
-    KMS_MEMBER_CERT_PATH=$WORKSPACE/${MEMBER_NAME}_cert.pem \
-    KMS_MEMBER_PRIVK_PATH=$WORKSPACE/${MEMBER_NAME}_privk.pem \
+    (
+        ccf-member-use $MEMBER_NAME
+
+        # Otherwise activate member
+        state_digest_file=$(mktemp)
         ccf-sign `mktemp` state_digest \
             | curl -s $KMS_URL/gov/members/state-digests/`ccf-member-id`:update?api-version=2024-07-01 \
                 -X POST \
@@ -63,7 +65,14 @@ ccf-member-add() {
                 --cacert $KMS_SERVICE_CERT_PATH \
                 --key ${WORKSPACE}/${MEMBER_NAME}_privk.pem \
                 --cert ${WORKSPACE}/${MEMBER_NAME}_cert.pem \
-                | jq
+                | jq > $state_digest_file
+
+        ccf-sign $state_digest_file ack \
+            | curl -s $KMS_URL/gov/members/state-digests/$(ccf-member-id):ack?api-version=2024-07-01 \
+                -H "Content-Type: application/cose" \
+                --data-binary @- \
+                --cacert $KMS_SERVICE_CERT_PATH
+    )
 
     set +e
 }
