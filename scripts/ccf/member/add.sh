@@ -7,6 +7,8 @@ REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../../..")"
 
 ccf-member-add() {
     set -e
+
+    source $REPO_ROOT/scripts/ccf/az-cleanroom-aci/setup.sh && az-cleanroom-aci-setup
     source $REPO_ROOT/scripts/ccf/propose.sh
     source $REPO_ROOT/scripts/ccf/member/info.sh
     source $REPO_ROOT/scripts/ccf/member/id.sh
