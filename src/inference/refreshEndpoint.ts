@@ -9,6 +9,7 @@ import { KeyGeneration } from "./KeyGeneration";
 import { enableEndpoint } from "../utils/Tooling";
 import { ServiceRequest } from "../utils/ServiceRequest";
 import { Logger, LogContext } from "../utils/Logger";
+import { OhttpPublicKey } from "./OhttpPublicKey";
 
 // Enable the endpoint
 enableEndpoint();
@@ -37,9 +38,13 @@ export const refresh = (
     const keyItem = KeyGeneration.generateKeyItem(id);
     Logger.info(`Key generated with id ${id}`, logContext, keyItem);
 
+    // Get claim for receipt
+    const claim: string = new OhttpPublicKey(keyItem, logContext).get();
+    Logger.info(`Claim generated for receipt: `, logContext, claim);
+
     // Store HPKE key pair using kid
     keyItem.kid = `${keyItem.kid!}`;
-    hpkeKeyMap.storeItem(id, keyItem, keyItem.x + keyItem.y);
+    hpkeKeyMap.storeItem(id, keyItem, claim);
     Logger.info(`Key item with id ${id} and kid ${keyItem.kid} stored`, logContext);
 
     delete keyItem.d;

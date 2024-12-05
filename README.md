@@ -114,6 +114,7 @@ curl ${KMS_URL}/app/refresh -X POST --cacert ${KEYS_DIR}/service_cert.pem  -H "C
 curl ${KMS_URL}/app/listpubkeys --cacert ${KEYS_DIR}/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
 
 # Get the latest private key (JWT)
+curl $KMS_URL/app/key -X POST --cacert ${KEYS_DIR}/service_cert.pem  -H "Content-Type: application/json" -H "Authorization:$AUTHORIZATION"  -w '\n'
 
 # Get key release policy
 curl $KMS_URL/app/keyReleasePolicy --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/member0_cert.pem --key ${KEYS_DIR}/member0_privk.pem -H "Content-Type: application/json" | jq
