@@ -13,15 +13,24 @@ az-cleanroom-aci-setup() {
     #   - Specifying provider client name to allow parallel execution
     # We can go back to just fetching the release
 
-    # Custom azcli extension
-    az storage blob download \
-        --account-name azurekmsstorage \
-        --container-name azure-cleanroom \
-        --name cleanroom-1.0.0-py2.py3-none-any.whl \
-        --auth-mode login \
-        --file /tmp/cleanroom-1.0.0-py2.py3-none-any.whl > /dev/null
-    az extension add -y --allow-preview true --upgrade \
-        --source /tmp/cleanroom-1.0.0-py2.py3-none-any.whl
+    retries=10
+    while [ ! -f /tmp/cleanroom-1.0.0-py2.py3-none-any.whl ] && [ $retries -gt 0 ]; do
+        az storage blob download \
+            --account-name azurekmsstorage \
+            --container-name azure-cleanroom \
+            --name cleanroom-1.0.0-py2.py3-none-any.whl \
+            --auth-mode login \
+            --file /tmp/cleanroom-1.0.0-py2.py3-none-any.whl > /dev/null
+        sleep 1
+        retries=$((retries - 1))
+    done
+    retries=10
+    while ! az cleanroom -h > /dev/null 2>&1 && [ $retries -gt 0 ]; do
+        az extension add -y --allow-preview true --upgrade \
+            --source /tmp/cleanroom-1.0.0-py2.py3-none-any.whl
+        sleep 1
+        retries=$((retries - 1))
+    done
 
     # Custom ccf-provider image
     az acr login -n azurekms > /dev/null
