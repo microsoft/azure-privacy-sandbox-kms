@@ -18,7 +18,7 @@ az-cleanroom-aci-up() {
 
     retries=10
     exit_code=-1
-    while [ $exit_code -eq 0 ] && [ $retries -gt 0 ]; do
+    while [ $exit_code -ne 0 ] && [ $retries -gt 0 ]; do
         az cleanroom ccf network up \
             --subscription $SUBSCRIPTION \
             --resource-group $RESOURCE_GROUP \
