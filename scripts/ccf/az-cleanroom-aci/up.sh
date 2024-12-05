@@ -16,11 +16,16 @@ az-cleanroom-aci-up() {
         export DEPLOYMENT_NAME
     fi
 
-    az cleanroom ccf network up \
-        --subscription $SUBSCRIPTION \
-        --resource-group $RESOURCE_GROUP \
-        --provider-client "$DEPLOYMENT_NAME-provider" \
-        --name $DEPLOYMENT_NAME \
+    retries=10
+    exit_code=-1
+    while [ $exit_code -eq 0 ] && [ $retries -gt 0 ]; do
+        az cleanroom ccf network up \
+            --subscription $SUBSCRIPTION \
+            --resource-group $RESOURCE_GROUP \
+            --provider-client "$DEPLOYMENT_NAME-provider" \
+            --name $DEPLOYMENT_NAME
+        exit_code=$?
+    done
 
     export WORKSPACE=~/$DEPLOYMENT_NAME.ccfworkspace
     export KMS_URL=$( \
