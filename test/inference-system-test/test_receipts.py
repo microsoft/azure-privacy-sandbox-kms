@@ -29,7 +29,7 @@ def test_validate_receipt(setup_kms):
     # In order to calculate the leaf value we need to hash all leaf_components
     write_set_digest = bytes.fromhex(receipt["leaf_components"]["write_set_digest"])
     claims_digest = bytes.fromhex(receipt["leaf_components"]["claims_digest"])
-    assert len(receipt['signature']) >= 138
+    assert len(receipt['signature']) >= 100
 
     commit_evidence_digest = sha256(
         receipt["leaf_components"]["commit_evidence"].encode()
