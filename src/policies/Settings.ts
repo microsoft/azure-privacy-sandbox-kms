@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
+import * as ccfapp from "@microsoft/ccf-app";
 import { ccf } from "@microsoft/ccf-app/global";
 import { Logger, LogContext } from "../utils/Logger";
 import { KmsError } from "../utils/KmsError";
@@ -47,6 +48,7 @@ export class Settings {
     Logger.debug(`Service Name: ${settings.service.name}`, Settings.logContext);
     Logger.debug(`Service Description: ${settings.service.description}`, Settings.logContext);
     Logger.debug(`Service Version: ${settings.service.version}`, Settings.logContext);
+    Logger.debug(`Debug: ${settings.service.debug}`, Settings.logContext);
   }
 
   /**
@@ -56,34 +58,36 @@ export class Settings {
    * @returns An instance of `Settings` containing the loaded settings.
    * @throws Error if the settings policy map is not found or if there is an error parsing the settings policy.
    */
-  public static loadSettings(): Settings {
+  public static loadSettingsFromMap(
+    settingsPolicyMap: ccfapp.KvMap,
+    logContextIn: LogContext,
+  ): Settings {
+    const logContext = (logContextIn?.clone() || new LogContext()).appendScope("loadSettingsFromMap");
+
+    Logger.info(`Loading settings from map: ${settingsPolicyMap === undefined ? "undefined" : JSON.stringify(settingsPolicyMap)}`, logContext);
+
     // Load the settings from the map
-    const settingsPolicyMapName = "public:ccf.gov.policies.settings";
-    const key = "settings_policy";
+    const key = "settings_policy"; // Ensure the key matches the stored key in governance
     const keyBuf = ccf.strToBuf(key);
 
-    const settingsPolicyMap = ccf.kv[settingsPolicyMapName];
-    if (!settingsPolicyMap) {
-      const error = `Settings policy map not found: ${settingsPolicyMapName}`;
-      Logger.error(error, Settings.logContext);
-      throw new KmsError(error, Settings.logContext);
-    }
-
     const settingsPolicy = settingsPolicyMap.get(keyBuf);
+    const settingsPolicyStr = settingsPolicy ? ccf.bufToStr(settingsPolicy) : undefined;
+    Logger.debug(`Loading settings: ${settingsPolicyStr}`, logContext);
+
+
     let settings: ISettings;
-    if (!settingsPolicy) {
+    if (!settingsPolicyStr) {
+      Logger.warn(`No settings policy found, using default settings`, logContext);
       settings = Settings.defaultSettings();
     } else {
-      Logger.info(`No settings policy found, using default settings`, Settings.logContext);
       try {
-        settings = JSON.parse(ccf.bufToStr(settingsPolicy)) as ISettings;
+        settings = JSON.parse(settingsPolicyStr) as ISettings;
       } catch {
-        const error = `Failed to parse settings policy: ${ccf.bufToStr(settingsPolicy)}`;
-        Logger.error(error, Settings.logContext);
-        throw new KmsError(error, Settings.logContext);
+        const error = `Failed to parse settings policy: ${settingsPolicyStr}`;
+        Logger.error(error, logContext);
+        throw new KmsError(error, logContext);
       }
     }
-
     return new Settings(settings);
   }
 }

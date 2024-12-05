@@ -40,6 +40,9 @@ export const authorizeJwt = (
       logContext
     );
   }
+  Logger.debug(
+    `Validate JWT policy for issuer ${issuer}: ${JSON.stringify(policy)}`, logContext
+  );
 
   Logger.info(
     `Validate JWT policy for issuer ${issuer}: ${JSON.stringify(policy)}`, logContext
@@ -60,7 +63,7 @@ export const authorizeJwt = (
       compliant = jwtProp === policy[key];
     }
 
-    Logger.info(
+    Logger.debug(
       `isValidJwtToken: ${key}, expected: ${policy[key]}, found: ${jwtProp}, ${compliant}`, logContext
     );
 
@@ -75,7 +78,7 @@ export const authorizeJwt = (
     }
   }
 
-  return ServiceResult.Succeeded("", undefined, logContext);
+  return ServiceResult.Succeeded("", logContext);
 };
 
 export class MsJwtProvider implements IJwtIdentityProvider {
@@ -111,6 +114,6 @@ export class MsJwtProvider implements IJwtIdentityProvider {
     }
 
     const identityId = identity?.jwt?.payload?.sub;
-    return ServiceResult.Succeeded(identityId, undefined, this.logContext);
+    return ServiceResult.Succeeded(identityId, this.logContext);
   }
 }

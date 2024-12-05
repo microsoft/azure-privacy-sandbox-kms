@@ -97,7 +97,6 @@ export const key = (
         validateAttestationResult.error!,
         validateAttestationResult.statusCode,
         logContext,
-        serviceRequest.requestId,
       );
     }
   } catch (exception: any) {
@@ -107,39 +106,56 @@ export const key = (
       },
       500,
       logContext,
-      serviceRequest.requestId,
     );
   }
 
   // Check kid
-  let kidString = serviceRequest.query?.["kid"];
+  let kidRaw = serviceRequest.query?.["kid"] || serviceRequest.body?.["kid"];
   let kid: number | undefined;
   let keyItem: IKeyItem | undefined;
-  if (kidString === undefined) {
+  Logger.debug(`Received kid: `, logContext, kidRaw);
+
+  if (kidRaw === undefined) {
     [kid, keyItem] = hpkeKeyMap.latestItem();
     if (keyItem === undefined) {
       return ServiceResult.Failed<string>(
         { errorMessage: `No keys in store` },
         400,
         logContext,
-        serviceRequest.requestId,
       );
     }
   } else {
-    kid = parseInt(kidString, 10);
+    if (typeof kidRaw === "string") {
+      kid = parseInt(kidRaw, 10);
+      if (isNaN(kid)) {
+        return ServiceResult.Failed<string>(
+          { errorMessage: `kid ${kidRaw} is not a number` },
+          400,
+          logContext,
+        );
+      }
+    } else {  
+      if (typeof kidRaw !== "number") {
+        return ServiceResult.Failed<string>(
+          { errorMessage: `kid ${kidRaw} is not a number` },
+          400,
+          logContext,
+        );
+      }
+      kid = kidRaw;
+    }
+
     keyItem = hpkeKeyMap.store.get(kid) as IKeyItem;
     if (keyItem === undefined) {
       return ServiceResult.Failed<string>(
         { errorMessage: `kid ${kid} not found in store` },
         404,
         logContext,
-        serviceRequest.requestId,
       );
     }
   }
 
   const receipt = hpkeKeyMap.receipt(kid);
-  Logger.info(`Retrieved key id: ${kid}`, logContext, keyItem);
 
   // Get receipt if available
   if (receipt !== undefined) {
@@ -147,7 +163,7 @@ export const key = (
     Logger.info(`Succesfully get key receipt for key id: ${kid}`, logContext);
     Logger.debug(`Key->Receipt: ${receipt}`, logContext);
   } else {
-    return ServiceResult.Accepted(logContext, serviceRequest.requestId);
+    return ServiceResult.Accepted(logContext);
   }
 
   // wrap the private key
@@ -165,7 +181,6 @@ export const key = (
       },
       500,
       logContext,
-      serviceRequest.requestId,
     );
   }
 
@@ -173,7 +188,7 @@ export const key = (
     kid: kid,
     key: wrappedKey.wrappedKey,
     receipt: receipt,
-  }, undefined, logContext, serviceRequest.requestId);
+  }, logContext);
 };
 
 //#endregion

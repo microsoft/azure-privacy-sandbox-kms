@@ -6,6 +6,7 @@ import { queryParams } from "./Tooling";
 import { AuthenticationService } from "../authorization/AuthenticationService";
 import { Logger, LogContext } from "./Logger";
 import { Settings } from "../policies/Settings";
+import { settingsPolicyMap } from "../repositories/Maps";
 
 /**
  * A generic request.
@@ -36,7 +37,7 @@ export class ServiceRequest<T> {
     // Set the log level from the settings
     let settings: Settings;
     try {
-      settings = Settings.loadSettings();
+      settings = Settings.loadSettingsFromMap(settingsPolicyMap, this.logContext);
     } catch (error) {
       const errorMessage = `${this.logContext.getBaseScope()}: Error loading settings: ${error}`;
       Logger.error(errorMessage, this.logContext);
@@ -59,7 +60,7 @@ export class ServiceRequest<T> {
       'request-id',
       'requestid',
     ]
-    const requestIdFromHeader = requestIdHeaderList
+    const requestIdFromHeader = (logcontext as LogContext).requestId || requestIdHeaderList
       .map((header) => this.headers ? this.headers[header] : undefined)
       .find((header) => header !== undefined);
     if (!requestIdFromHeader) {
@@ -70,16 +71,32 @@ export class ServiceRequest<T> {
     }
     this.logContext.setRequestId(this.requestId);
 
+    Logger.info(`ServiceRequest`, this.logContext);
+
     // Log request
-    Logger.debug(`Request:`, this.logContext, request);
-    this.query = queryParams(request, this.logContext);
-    if (this.query) {
-      Logger.info(`Query:`, this.logContext, this.query);
+    // Create a shallow copy of the request object without the Authorization header
+    const { Authorization, authorization, ...otherHeaders } = request.headers;
+    let requestWithoutAuth;
+    if (Authorization || authorization) {
+      requestWithoutAuth = {
+        ...request,
+        headers: {
+          ...otherHeaders,
+          authorization: "token deleted for logging",
+        }
+      }
+    }
+    else {
+      requestWithoutAuth = {
+        ...request,
+        headers: {
+          ...otherHeaders,
+        },
+      }
     }
 
-    if (this.headers) {
-      Logger.debug(`Headers:`, this.logContext, this.headers);
-    }
+    Logger.debug(`Request:`, this.logContext, JSON.stringify(requestWithoutAuth, null, 2));
+    this.query = queryParams(request, this.logContext);
 
     try {
       this.body = request.body.json();

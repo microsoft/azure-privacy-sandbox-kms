@@ -81,7 +81,7 @@ describe("LogContext", () => {
     context.setRequestId("12345");
 
     expect(context.requestId).toBe("12345");
-    expect(context.toString()).toBe("[requestId=12345]");
+    expect(context.toString()).toBe("[requestId=12345,scope=]");
   });
 
   test("should clear scope and requestId", () => {

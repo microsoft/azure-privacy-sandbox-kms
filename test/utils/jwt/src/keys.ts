@@ -61,3 +61,15 @@ export const getJwks = (
   (<any>jwk).kid = kid;
   return jwk;
 };
+
+
+export const getJwksFromPem = (
+  pemKeyPathpath: string,
+  kid: string,
+): JWK<Extras> => {
+  const publicKey = fs.readFileSync(pemKeyPathpath, "utf8");
+  console.log(`Get publicKey: ${publicKey}`);
+  const jwk = pem2jwk(publicKey);
+  (<any>jwk).kid = kid;
+  return jwk;
+};

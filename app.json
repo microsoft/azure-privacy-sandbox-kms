@@ -5,15 +5,34 @@
         "js_module": "endpoints/keyReleasePolicyEndpoint.js",
         "js_function": "keyReleasePolicy",
         "forwarding_required": "sometimes",
-        "authn_policies": [
-          "jwt"
-        ],
+        "authn_policies": ["member_cert"],
         "redirection_strategy": "none",
         "mode": "readonly",
         "openapi": {
           "responses": {
             "200": {
               "description": "Key release policy",
+              "content": {
+                "application/json": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/settingsPolicy": {
+      "get": {
+        "js_module": "endpoints/settingsPolicyEndpoint.js",
+        "js_function": "settingsPolicy",
+        "forwarding_required": "sometimes",
+        "authn_policies": ["member_cert"],
+        "mode": "readonly",
+        "openapi": {
+          "responses": {
+            "200": {
+              "description": "Settings policy",
               "content": {
                 "application/json": {
                   "type": "object"
@@ -177,16 +196,28 @@
         }
       }
     },
-    "/hearthbeat": {
+    "/auth": {
+      "get": {
+        "js_module": "endpoints/kms.js",
+        "js_function": "auth",
+        "forwarding_required": "never",
+        "authn_policies": ["user_cert", "member_cert", "jwt"],
+        "mode": "readonly",
+        "openapi": {
+          "responses": {
+            "200": {
+              "description": "Generate a heartbeat response"
+            }
+          }
+        }
+      }
+    },
+    "/heartbeat": {
       "get": {
         "js_module": "endpoints/kms.js",
         "js_function": "heartbeat",
         "forwarding_required": "never",
-        "authn_policies": [
-          "user_cert",
-          "member_cert",
-          "jwt"
-        ],
+        "authn_policies": [],
         "redirection_strategy": "none",
         "mode": "readonly",
         "openapi": {

@@ -27,7 +27,7 @@ export class JwtValidationPolicyMap {
     }
 
     const policy = ccf.bufToStr(policyBuf);
-    Logger.info(`JWT validation: Policy: ${policy} for issuer: ${issuer}`, logContext);
+    Logger.debug(`JWT validation: Policy: ${policy} for issuer: ${issuer}`, logContext);
     return JSON.parse(policy);
   }
 }

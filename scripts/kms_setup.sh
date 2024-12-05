@@ -62,6 +62,10 @@ service_cert="$certificate_dir/service_cert.pem"
 signing_cert="$certificate_dir/member0_cert.pem"
 signing_key="$certificate_dir/member0_privk.pem"
 
+# Set constitution
+source .venv_ccf_sandbox/bin/activate
+make set-constitution-maa
+
 # Add settings policy
 source .venv_ccf_sandbox/bin/activate
 make propose-settings-policy

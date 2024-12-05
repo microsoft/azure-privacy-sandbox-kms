@@ -43,10 +43,10 @@ export const refresh = (
     Logger.info(`Key item with id ${id} and kid ${keyItem.kid} stored`, logContext);
 
     delete keyItem.d;
-    return ServiceResult.Succeeded<IKeyItem>(keyItem, undefined, logContext, serviceRequest.requestId);
+    return ServiceResult.Succeeded<IKeyItem>(keyItem, logContext);
   } catch (exception: any) {
     const errorMessage = `${logContext.getBaseScope()}: Error: ${exception.message}`;
     console.error(errorMessage);
-    return ServiceResult.Failed<string>({ errorMessage }, 500, logContext, serviceRequest.requestId);
+    return ServiceResult.Failed<string>({ errorMessage }, 500, logContext);
   }
 };

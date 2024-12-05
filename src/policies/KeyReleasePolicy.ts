@@ -19,7 +19,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
   private static validateKeyReleasePolicyClaims(
     keyReleasePolicyClaims: IKeyReleasePolicySnpProps,
     attestationClaims: IAttestationReport,
-    logContext?: LogContext,
+    logContext: LogContext,
   ): ServiceResult<string | IAttestationReport> {
     if (
       keyReleasePolicyClaims === null ||
@@ -72,14 +72,14 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
         );
       }
     }
-    return ServiceResult.Succeeded<IAttestationReport>(attestationClaims, undefined, logContext);
+    return ServiceResult.Succeeded<IAttestationReport>(attestationClaims, logContext);
   }
 
   private static validateKeyReleasePolicyOperators(
     type: string,
     keyReleasePolicyClaims: IKeyReleasePolicySnpProps,
     attestationClaims: IAttestationReport,
-    logContext?: LogContext,
+    logContext: LogContext,
   ): ServiceResult<string | IAttestationReport> {
     if (
       keyReleasePolicyClaims === null ||
@@ -125,7 +125,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
             errorMessage: `Missing policy value for claim ${key} for operator type ${type}`,
           },
           500,
-          logContext
+          logContext,
         );
       }
       if (
@@ -160,7 +160,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
       }
 
       if (gte) {
-        Logger.info(
+        Logger.debug(
           `Checking if attestation value ${attestationValue} is greater than or equal to policy value ${policyValue}`,
           logContext,
         );
@@ -174,7 +174,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
           );
         }
       } else {
-        Logger.info(
+        Logger.debug(
           `Checking if attestation value ${attestationValue} is greater than policy value ${policyValue}`,
           logContext,
         );
@@ -184,12 +184,12 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
               errorMessage: `Attestation claim ${key}, value ${attestationValue} is not greater than policy value ${policyValue}`,
             },
             400,
-            logContext,
+            logContext
           );
         }
       }
     }
-    return ServiceResult.Succeeded<IAttestationReport>(attestationClaims, undefined, logContext);
+    return ServiceResult.Succeeded<IAttestationReport>(attestationClaims, logContext);
   }
 
   public static validateKeyReleasePolicy(
@@ -223,7 +223,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
 
     // Check operators gte and gt
     if (keyReleasePolicy.gte !== null && keyReleasePolicy.gte !== undefined) {
-      Logger.info(`Validating gte operator`, logContext, keyReleasePolicy.gte);
+      Logger.debug(`Validating gte operator`, logContext, keyReleasePolicy.gte);
       policyValidationResult =
         KeyReleasePolicy.validateKeyReleasePolicyOperators(
           "gte",
@@ -233,7 +233,7 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
         );
     }
     if (keyReleasePolicy.gt !== null && keyReleasePolicy.gt !== undefined) {
-      Logger.info(`Validating gt operator`, logContext, keyReleasePolicy.gt);
+      Logger.debug(`Validating gt operator`, logContext, keyReleasePolicy.gt);
       policyValidationResult =
         KeyReleasePolicy.validateKeyReleasePolicyOperators(
           "gt",
@@ -269,10 +269,10 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
       const kvKey = kv.kvkey;
       const kvKeyBuf = ccf.strToBuf(kvKey);
       const kvValueBuf = keyReleasePolicyMap.get(kvKeyBuf);
+      Logger.debug(`Retrieved key release policy ${kvKey} from map: `, logContext, kvValueBuf ? ccf.bufToStr(kvValueBuf): "undefined");
       if (!kvValueBuf) {
         if (!kv.optional) {
-          throw new KmsError(`Key release policy ${kvKey} not found in the key release policy map`, logContext);
-        }
+          throw new KmsError(`Key release policy '${kvKey}' not found in the key release policy map`, logContext);        }
       } else {
         let kvValue = ccf.bufToStr(kvValueBuf!);
         try {
@@ -280,12 +280,11 @@ export class KeyReleasePolicy implements IKeyReleasePolicy {
             kvValue,
           ) as IKeyReleasePolicySnpProps;
         } catch (error) {
-          throw new KmsError(`Key release policy ${kvKey} is not a valid JSON object: ${kvValue}`, logContext);
-        }
+          throw new KmsError(`Key release policy ${kvKey} is not a valid JSON object: ${kvValue}`, logContext);        }
       }
     });
 
-    Logger.info(`Resulting key release policy: `, logContext, keyReleasePolicy);
+    Logger.debug(`Resulting key release policy: `, logContext, keyReleasePolicy);
     return keyReleasePolicy;
   };
 }

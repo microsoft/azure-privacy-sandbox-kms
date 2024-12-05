@@ -7,12 +7,14 @@ import { LogContext } from "./Logger";
  * It is used to throw errors with an optional log context.
  */
 export class KmsError extends Error {
-    public readonly logContext?: LogContext;
-
-    constructor(message: string, logContext?: LogContext) {
-        if (logContext) {
+    constructor(message: string, public logContext?: LogContext) {
+        if (logContext?.isLogContext) {
             message = logContext.toString() + " " + message;
         }
         super(message);
+    }
+
+    public toString() {
+        return `${this.name}: ${this.message}`;
     }
 }

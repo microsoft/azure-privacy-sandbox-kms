@@ -1,17 +1,17 @@
 {
   "name": "KMS Dev",
-  "build": {
-    "dockerfile": "Dockerfile.devcontainer",
-    "context": ".."
-  },
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
   "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {
-      "version": "latest",
-      "enableNonRootDocker": "true",
-      "moby": "true"
-    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
     "ghcr.io/devcontainers/features/common-utils:2": {},
-    "ghcr.io/devcontainers/features/node:1": {}
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/devcontainers/features/powershell:1": {
+      "modules": "powershell-yaml"
+    },
+    "ghcr.io/devcontainers/features/azure-cli:1": {
+			"version": "2.61.0",
+      "extensions": "confcom,managedccfs"
+    }
   },
   "customizations": {
     "vscode": {

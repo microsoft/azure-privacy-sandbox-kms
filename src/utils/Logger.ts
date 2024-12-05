@@ -20,7 +20,7 @@ export class LogContext {
   scopeStack: string[] = [];
   requestId?: string;
 
-  /** 
+  /**
    * Constructor to initialize a new instance of the LogContext class.
    */
   constructor() { }
@@ -138,12 +138,11 @@ export class Logger {
    * - context is either a LogContext instance or undefined
    * - args is an array of additional arguments (with contextOrArg prepended if it's not a LogContext)
    */
-  private static extractContextAndArgs(contextOrArg: any, args: any[]): [LogContext | undefined, any[]] {
-    if (contextOrArg && (contextOrArg instanceof LogContext || contextOrArg.isLogContext)) {
+  private static extractContextAndArgs(contextOrArg: LogContext | any, args: any[]): [LogContext | undefined, any[]] {
+    if (contextOrArg instanceof LogContext) {
       return [contextOrArg, args];
-    } else {
-      return [undefined, [contextOrArg, ...args]];
     }
+    return [undefined, [contextOrArg, ...args]];
   }
 
   /**
@@ -153,10 +152,16 @@ export class Logger {
    * @param message - The main log message.
    */
   private static formatMessageWithContext(context: LogContext | undefined, message: string): string {
-    if (!context) {
-      return message;
+    if (context) {
+      return `${context.toString()} ${message}`;
     }
-    return `${context.toString()} ${message}`;
+    return message;
+  }
+
+  static getRemainingArgsString(remainingArgs: any[]): string {
+    return remainingArgs
+      .map(arg => (typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg))
+      .join(' ');
   }
 
   /**
@@ -169,7 +174,12 @@ export class Logger {
     const [context, remainingArgs] = this.extractContextAndArgs(contextOrArg, args);
     const formattedMessage = this.formatMessageWithContext(context, message);
     if (Logger.logLevel >= LogLevel.ERROR) {
-      console.error(`[ERROR] ${formattedMessage}`, ...remainingArgs);
+      const remainingArgsString = this.getRemainingArgsString(remainingArgs);
+      if (remainingArgsString) {
+          console.error(`[ERROR] ${formattedMessage} ${remainingArgsString}`);
+      } else {
+          console.error(`[ERROR] ${formattedMessage}`);
+      }
       return true;
     }
     return false;
@@ -185,7 +195,12 @@ export class Logger {
     const [context, remainingArgs] = this.extractContextAndArgs(contextOrArg, args);
     const formattedMessage = this.formatMessageWithContext(context, message);
     if (Logger.logLevel >= LogLevel.WARN) {
-      console.warn(`[WARN] ${formattedMessage}`, ...remainingArgs);
+      const remainingArgsString = this.getRemainingArgsString(remainingArgs);
+      if (remainingArgsString) {
+        console.warn(`[WARN] ${formattedMessage} ${remainingArgsString}`);
+      } else {
+        console.warn(`[WARN] ${formattedMessage}`);
+      }
       return true;
     }
     return false;
@@ -201,7 +216,12 @@ export class Logger {
     const [context, remainingArgs] = this.extractContextAndArgs(contextOrArg, args);
     const formattedMessage = this.formatMessageWithContext(context, message);
     if (Logger.logLevel >= LogLevel.INFO) {
-      console.log(`[INFO] ${formattedMessage}`, ...remainingArgs);
+      const remainingArgsString = this.getRemainingArgsString(remainingArgs);
+      if (remainingArgsString) {
+          console.log(`[INFO] ${formattedMessage} ${remainingArgsString}`);
+      } else {
+          console.log(`[INFO] ${formattedMessage}`);
+      }
       return true;
     }
     return false;
@@ -217,8 +237,13 @@ export class Logger {
     const [context, remainingArgs] = this.extractContextAndArgs(contextOrArg, args);
     const formattedMessage = this.formatMessageWithContext(context, message);
     if (Logger.logLevel >= LogLevel.DEBUG) {
-      console.log(`[DEBUG] ${formattedMessage}`, ...remainingArgs);
-      return true;
+      const remainingArgsString = this.getRemainingArgsString(remainingArgs);
+      if (remainingArgsString) {
+        console.log(`[DEBUG] ${formattedMessage} ${remainingArgsString}`);
+    } else {
+        console.log(`[DEBUG] ${formattedMessage}`);
+    }
+    return true;
     }
     return false;
   }
@@ -230,6 +255,7 @@ export class Logger {
    * @param args - Additional arguments to include in the log message.
    */
   static secret(message: string, contextOrArg?: LogContext | any, ...args: any[]): boolean {
-    return this.debug(message, contextOrArg, ...args);
+    // return this.debug(message, contextOrArg, ...args);
+    return false;
   }
 }
