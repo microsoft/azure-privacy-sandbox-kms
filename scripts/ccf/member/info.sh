@@ -19,8 +19,6 @@ ccf-member-info() {
     export MEMBER_ID=`ccf-member-id $MEMBER_NAME`
     curl -s $KMS_URL/gov/service/members?api-version=2024-07-01 \
         --cacert $KMS_SERVICE_CERT_PATH \
-        --key $KMS_MEMBER_PRIVK_PATH \
-        --cert $KMS_MEMBER_CERT_PATH \
         | jq -e ".value[] | select(.memberId==\"$MEMBER_ID\")"
 
 }
