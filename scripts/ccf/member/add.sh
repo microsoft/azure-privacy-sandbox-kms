@@ -32,7 +32,8 @@ ccf-member-add() {
         az keyvault certificate create \
             --vault-name $AKV_VAULT_NAME \
             --name $MEMBER_NAME \
-            --policy "${AKV_POLICY:-$(az keyvault certificate get-default-policy)}"
+            --policy "${AKV_POLICY:-$(cat $REPO_ROOT/scripts/akv/key_policy.json | jq -c .)}"
+        rm -rf $WORKSPACE/${MEMBER_NAME}_cert.pem
         az keyvault certificate download \
             --vault-name $AKV_VAULT_NAME \
             --name $MEMBER_NAME \
@@ -65,8 +66,6 @@ ccf-member-add() {
                 -H "Content-Type: application/cose" \
                 --data-binary @- \
                 --cacert $KMS_SERVICE_CERT_PATH \
-                --key ${WORKSPACE}/${MEMBER_NAME}_privk.pem \
-                --cert ${WORKSPACE}/${MEMBER_NAME}_cert.pem \
                 | jq > $state_digest_file
 
         ccf-sign $state_digest_file ack \
