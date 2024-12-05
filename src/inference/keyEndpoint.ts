@@ -37,7 +37,6 @@ export const key = (
 ): ServiceResult<string | IKeyResponse> => {
   const logContext = new LogContext().appendScope("keyEndpoint");
   const serviceRequest = new ServiceRequest<IKeyRequest>(logContext, request);
-  Logger.info(`Before Authentication identity`, logContext);
 
   // check if caller has a valid identity
   let [policy, isValidIdentity] = serviceRequest.isAuthenticated();
