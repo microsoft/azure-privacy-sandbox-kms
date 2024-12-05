@@ -251,7 +251,7 @@ export default class Api {
     authorizationHeader?: string,
   ): Promise<
     [
-      number, 
+      number,
       { [key: string]: string | number },
       IKeyReleasePolicySnpProps
     ]

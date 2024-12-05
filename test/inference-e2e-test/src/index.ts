@@ -230,7 +230,7 @@ class Demo {
       } else if (statusCode !== 200) {
         throw new Error(`🛑 [TEST FAILURE]: Expected ${statusCode} to be 200`);
       }
-    } while (statusCode !== 202);
+    } while (statusCode == 202);
 
     //#endregion
 
