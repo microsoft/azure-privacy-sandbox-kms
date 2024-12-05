@@ -56,7 +56,7 @@ ccf-propose() {
     if [[ $USE_AKV == false ]]; then
         echo "  using local key $KMS_MEMBER_PRIVK_PATH"
     else
-        echo "  using AKV key $AKV_KEY_NAME from $AKV_NAME"
+        echo "  using AKV key $AKV_KEY_NAME from $AKV_VAULT_NAME"
     fi
 
     sign_proposal $proposal \

@@ -6,11 +6,11 @@
 akv-key-import() {
     set -e
 
-    AKV_NAME=${AKV_NAME:-$1}
-    if [ -z "$AKV_NAME" ]; then
-        read -p "Enter AKV name: " AKV_NAME
+    AKV_VAULT_NAME=${AKV_VAULT_NAME:-$1}
+    if [ -z "$AKV_VAULT_NAME" ]; then
+        read -p "Enter AKV name: " AKV_VAULT_NAME
     fi
-    export AKV_NAME
+    export AKV_VAULT_NAME
 
     AKV_KEY_NAME=${AKV_KEY_NAME:-$1}
     if [ -z "$AKV_KEY_NAME" ]; then
@@ -19,7 +19,7 @@ akv-key-import() {
     export AKV_KEY_NAME
 
     az keyvault key import \
-        --vault-name $AKV_NAME \
+        --vault-name $AKV_VAULT_NAME \
         --name $AKV_KEY_NAME \
         --pem-file $KMS_MEMBER_PRIVK_PATH
 

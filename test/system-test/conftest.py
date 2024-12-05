@@ -57,7 +57,7 @@ def setup_jwt_issuer():
 
 @pytest.fixture(scope="session")
 def setup_akv():
-    akv_name = os.getenv("AKV_NAME", f"akv-{unique_string()}")
+    akv_name = os.getenv("AKV_VAULT_NAME", f"akv-{unique_string()}")
     if USE_AKV:
         try:
             call_script(["./scripts/akv/up.sh", akv_name])
