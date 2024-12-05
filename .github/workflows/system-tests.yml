@@ -25,6 +25,7 @@ jobs:
           echo "tests=$JSON_ARRAY" | sed ':a;N;$!ba;s/\n//g' >> $GITHUB_OUTPUT
 
   endpoint:
+    name: endpoint
     needs: discover-tests
     secrets: inherit # pragma: allowlist secret
     strategy:

@@ -17,6 +17,10 @@ def call_endpoint(endpoint, **kwargs):
         stdout=subprocess.PIPE,
     ).stdout.decode().splitlines()
 
+    print(f'Called "{" ".join(command)}"')
+    print(f"Response Code: {status_code}")
+    print(f'Response Body: {json.loads("".join(response) or "{}")}')
+
     return (
         int(status_code),
         json.loads("".join(response) or '{}'),

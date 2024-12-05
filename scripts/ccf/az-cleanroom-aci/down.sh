@@ -21,7 +21,7 @@ az-cleanroom-aci-down() {
         --name ${DEPLOYMENT_NAME} \
         --provider-client "$DEPLOYMENT_NAME-provider" \
         --provider-config $WORKSPACE/providerConfig.json \
-        --delete-option delete-storage
+        --delete-option delete-storage || true
 
     az storage account delete --yes \
         --name "ccf$(cat $WORKSPACE/unique_string.txt)sa" \
@@ -40,8 +40,6 @@ az-cleanroom-aci-down() {
     unset KMS_MEMBER_PRIVK_PATH
 
     set +e
-
-    exit 0
 }
 
 az-cleanroom-aci-down "$@"

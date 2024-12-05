@@ -17,15 +17,20 @@ on:
 jobs:
 
   endpoint:
-    name: ${{ inputs.endpoint }} (${{ matrix.config.env }})
+    name: ${{ inputs.endpoint }} (${{ matrix.config.env }}) (${{ matrix.config.use_akv && 'akv' || 'local' }}_keys)
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         config:
           - env: sandbox_local
+            use_akv: false
+            threads: 1
+          - env: sandbox_local
+            use_akv: true
             threads: 1
           - env: az-cleanroom-aci
+            use_akv: false
             threads: auto
     steps:
       - name: Checkout
@@ -50,8 +55,8 @@ jobs:
       - name: Run System Tests
         env:
           TEST_ENVIRONMENT: ccf/${{ matrix.config.env }}
+          USE_AKV: ${{ matrix.config.use_akv }}
         run: |
-          source ./scripts/jwt_issuer/up.sh
           pytest -sv \
             test/system-test/test_${{ inputs.endpoint }}.py \
             -n ${{ matrix.config.threads }}
