@@ -27,11 +27,13 @@ def apply_settings_policy(policy=None):
     )
 
 
-def apply_kms_constitution():
+def apply_kms_constitution(resolve="auto_accept", **kwargs):
     subprocess.run(
         [
             "./scripts/kms/constitution_set.sh",
-            "./governance/constitution/kms_actions.js",
+            "--resolve", f"./governance/constitution/resolve/{resolve}.js",
+            "--actions", "./governance/constitution/actions/kms.js",
+            *[arg for k, v in kwargs.items() for arg in [f"--{k}", v]],
         ],
         cwd=REPO_ROOT,
         check=True,
@@ -66,6 +68,20 @@ def trust_jwt_issuer():
         cwd=REPO_ROOT,
         check=True,
     )
+
+
+def propose(proposal, get_logs=False):
+    get_logs_arg = {"stdout": subprocess.PIPE} if get_logs else {}
+    res = subprocess.run(
+        ["scripts/ccf/propose.sh", proposal],
+        cwd=REPO_ROOT,
+        check=True,
+        **get_logs_arg,
+    )
+
+    # Parse out the returned json from the proposal
+    if get_logs:
+        return json.loads("{" + res.stdout.decode().split("{", 1)[1])
 
 
 def get_test_attestation():

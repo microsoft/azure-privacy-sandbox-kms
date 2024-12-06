@@ -63,7 +63,9 @@ start-host: stop-host  ## 🏃 Start the CCF network using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
 	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh && \
 	source ./scripts/kms/js_app_set.sh && \
-	source ./scripts/kms/constitution_set.sh ./governance/constitution/kms_actions.js
+	source ./scripts/kms/constitution_set.sh \
+		--resolve ./governance/constitution/auto_accept.ks \
+		--actions ./governance/constitution/actions/kms.js
 
 start-host-idp: stop-host stop-idp start-idp start-host ## 🏃 Start the CCF network && idp using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
@@ -187,7 +189,9 @@ constitution-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	KMS_URL=${KMS_URL} \
 	CONSTITUTION_PATH=./governance/constitution/kms_actions.js \
-		./scripts/kms/constitution_set.sh
+		./scripts/kms/constitution_set.sh \
+			--resolve ./governance/constitution/auto_accept.ks \
+			--actions ./governance/constitution/actions/kms.js
 
 release-policy-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
