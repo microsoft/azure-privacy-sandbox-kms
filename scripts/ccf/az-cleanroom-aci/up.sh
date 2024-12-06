@@ -6,6 +6,14 @@
 THIS_DIR="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")"
 REPO_ROOT="$(realpath "$THIS_DIR/../../..")"
 
+az-cleanroom-aci-get-url() {
+    az cleanroom ccf network show \
+        --name ${DEPLOYMENT_NAME} \
+        --provider-client "$DEPLOYMENT_NAME-provider" \
+        --provider-config $WORKSPACE/providerConfig.json \
+        | jq -r '.endpoint'
+}
+
 az-cleanroom-aci-up() {
     set -e
 
@@ -15,26 +23,24 @@ az-cleanroom-aci-up() {
         read -p "Enter deployment name: " DEPLOYMENT_NAME
         export DEPLOYMENT_NAME
     fi
+    export WORKSPACE=~/$DEPLOYMENT_NAME.ccfworkspace
 
     retries=10
-    exit_code=-1
-    while [ $exit_code -ne 0 ] && [ $retries -gt 0 ]; do
+    ccf_up=false
+    while [ $ccf_up = false ] && [ $retries -gt 0 ]; do
         az cleanroom ccf network up \
             --subscription $SUBSCRIPTION \
             --resource-group $RESOURCE_GROUP \
             --provider-client "$DEPLOYMENT_NAME-provider" \
             --name $DEPLOYMENT_NAME
-        exit_code=$?
+        kms_url=`az-cleanroom-aci-get-url`
+        if curl -k $kms_url/node/network -o /dev/null -s -w "%{http_code}" | grep -q 200; then
+            ccf_up=true
+        fi
+        retries=$((retries - 1))
     done
 
-    export WORKSPACE=~/$DEPLOYMENT_NAME.ccfworkspace
-    export KMS_URL=$( \
-        az cleanroom ccf network show \
-            --name ${DEPLOYMENT_NAME} \
-            --provider-client "$DEPLOYMENT_NAME-provider" \
-            --provider-config $WORKSPACE/providerConfig.json \
-            | jq -r '.endpoint' \
-    )
+    export KMS_URL=`az-cleanroom-aci-get-url`
 
     export KMS_SERVICE_CERT_PATH="$WORKSPACE/service_cert.pem"
     export KMS_MEMBER_CERT_PATH="$WORKSPACE/ccf-operator_cert.pem"
