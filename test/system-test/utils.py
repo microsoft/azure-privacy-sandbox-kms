@@ -2,7 +2,7 @@ import json
 import os
 import subprocess
 import tempfile
-
+from contextlib import contextmanager
 
 REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
@@ -90,3 +90,30 @@ def get_test_attestation():
 
 def get_test_wrapping_key():
     return '"-----BEGIN PUBLIC KEY-----\\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA0L9FDBjydkdstv7OKqkw\\ndMiugRqlSHC9Lchfd7jh5uCzv602LhlBJQeEFYchvaEquISLQFoZxEkpGEbEb15v\\nN2dKwTCi0ioEGBidtFmuKiVZqf46Hbnw4OdinQHrlGO2PRsRE+DYPOy6xrZTKEnD\\nK+OnHDsZ0U2qNJ80IjbxcC83lQpaMx8Ij8AddGY9Msv0TMMgaVsrDaQYLC8tmJih\\nxVI2f5BHFbTy3pw4Sq9xp6se+S/ycOUF0M6RFArZcD9uR/NxJKFJJlGOKskgwLnT\\nlhPck4sGeLhHUydRdqw0+h8EDsTIUysNxMOYtZETaVuBS+ISMy8+WQgVPs12Ujr3\\n17kaHeZr8Lq0bwaFHruRBpNwqtUCBv57IBpe7hnEDDdvOvN/tPubf1dv3HxEt42T\\nqqfozS+a9+1hcI8hpNlEjh+qcy1BmhSOXvmRzlhauX4xv6OLCNkRxo6x2Q/1moDC\\nPgnaJJVIuESr07xnC8fk43i5qFzEXQO3hwNsjd7sqFBBTb6t5N6Nm37mMNTqsDky\\nniAeFG+1gK/UD+cMPfbUIDaCqpCDwrTX0gMqqUTDG6eNPmQaOa+slici3h9WLaNy\\nmEzfKqJMBggKib/+e4Eb/ENdvxeT1X2YXpZ3tjZE+bRoiDgN4FYqBzYtZ/ieRcsq\\n4fPqgZPbh+ivT2o7QutzWH0CAwEAAQ==\\n-----END PUBLIC KEY-----\\n"'  # pragma: allowlist secret
+
+
+@contextmanager
+def get_test_action():
+    with tempfile.NamedTemporaryFile(mode="w+", prefix="test_action") as action_file:
+        action_file.write("""
+            actions.set(
+                "test_action",
+                new Action(function (args) {}, function (args) {}),
+            );
+        """)
+        action_file.flush()
+        yield action_file
+
+@contextmanager
+def get_test_proposal():
+    with tempfile.NamedTemporaryFile(mode="w+", prefix="test_proposal") as proposal_file:
+        proposal_file.write(json.dumps({
+            "actions": [
+                {
+                    "name": "test_action",
+                    "args": {}
+                }
+            ]
+        }))
+        proposal_file.flush()
+        yield proposal_file
