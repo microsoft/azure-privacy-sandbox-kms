@@ -48,11 +48,15 @@ ccf-member-add() {
 
     # Check if the proposal is accepted, otherwise early out with instructions to wait
     if [ `ccf-member-info | jq -r '.status'` != "Accepted" ]; then
-        echo -e \
-        "Proposal submitted, await sufficient votes for members to be accepted\n" \
-        "Check member status with:\n" \
-        "$REPO_ROOT/scripts/ccf/member/info.sh"
-        return 0
+        if [ `ccf-member-info | jq -r '.status'` == "Open" ]; then
+            echo -e \
+            "Proposal submitted, await sufficient votes for members to be accepted\n" \
+            "Check member status with:\n" \
+            "$REPO_ROOT/scripts/ccf/member/info.sh"
+            return 0
+        else
+            return 1
+        fi
     fi
 
     (

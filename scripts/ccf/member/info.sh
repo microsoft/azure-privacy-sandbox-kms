@@ -17,10 +17,42 @@ ccf-member-info() {
 
     # First check if the member is active
     export MEMBER_ID=`ccf-member-id $MEMBER_NAME`
-    curl -s $KMS_URL/gov/service/members?api-version=2024-07-01 \
+    if_active_member=`curl -s $KMS_URL/gov/service/members?api-version=2024-07-01 \
         --cacert $KMS_SERVICE_CERT_PATH \
-        | jq -e ".value[] | select(.memberId==\"$MEMBER_ID\")"
+        | jq -e ".value[] | select(.memberId==\"$MEMBER_ID\")"`
 
+    if [ -n "$if_active_member" ]; then
+        echo $if_active_member
+        return
+    fi
+    export MEMBER_CERT=$(cat $WORKSPACE/${MEMBER_NAME}_cert.pem)
+
+    # Otherwise look for open proposals to add the member
+    open_proposals=`curl -s $KMS_URL/gov/members/proposals?api-version=2024-07-01 \
+        --cacert $KMS_SERVICE_CERT_PATH \
+        | jq -r '.value[] | select(.proposalState == "Open") | .proposalId'`
+
+    for proposalId in $open_proposals; do
+        proposal=`curl -s "$KMS_URL/gov/members/proposals/$proposalId/actions?api-version=2024-07-01" \
+            --cacert $KMS_SERVICE_CERT_PATH`
+
+        if [ "$(echo "$proposal" | jq -r '.actions[0].name')" = "set_member" ]; then
+            if [ "$(echo "$proposal" | jq -r '.actions[0].args.cert')" = "$MEMBER_CERT" ]; then
+                jq -n '{
+                    certificate: env.MEMBER_CERT,
+                    memberId: env.MEMBER_ID,
+                    status: "Open"
+                }'
+                return
+            fi
+        fi
+    done
+
+    jq -n '{
+        certificate: env.MEMBER_CERT,
+        memberId: env.MEMBER_ID,
+        status: "Unknown"
+    }'
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
