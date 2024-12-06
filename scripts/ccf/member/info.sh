@@ -38,9 +38,11 @@ ccf-member-info() {
 
         if [ "$(echo "$proposal" | jq -r '.actions[0].name')" = "set_member" ]; then
             if [ "$(echo "$proposal" | jq -r '.actions[0].args.cert')" = "$MEMBER_CERT" ]; then
+                export PROPOSAL_ID=$proposalId
                 jq -n '{
                     certificate: env.MEMBER_CERT,
                     memberId: env.MEMBER_ID,
+                    proposalId: env.PROPOSAL_ID,
                     status: "Open"
                 }'
                 return
