@@ -34,7 +34,7 @@
     "@types/node": "22.9.0",
     "axios": "1.7.7",
     "babel-jest": "29.7.0",
-    "express": "4.21.1",
+    "express": "4.21.2",
     "inquirer": "9.1.4",
     "jest": "29.7.0",
     "js-crypto-key-utils": "1.0.7",
