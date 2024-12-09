@@ -3,7 +3,7 @@ cryptography==43.0.3
 detect-secrets==1.5.0
 docker==7.1.0
 GitPython==3.1.43
-httpx==0.27.2
+httpx==0.28.0
 jinja2==3.1.4
 matplotlib==3.7.5
 pandas==2.0.3
@@ -12,6 +12,6 @@ pyasn1==0.6.1
 PyJWT==2.9.0
 pre-commit==3.5.0
 setuptools==72.0.0
-pytest==8.3.3
+pytest==8.3.4
 pytest-xdist==3.6.1
 python-dotenv==1.0.1
