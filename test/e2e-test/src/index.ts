@@ -679,7 +679,8 @@ class Demo {
       console.log("\n");
       await inquirer.prompt([
         {
-          name: msg,
+          type: 'input',
+          name: 'msg',
           message: `🎬 ${msg}\n - Press return key to continue...`,
         },
       ]);
