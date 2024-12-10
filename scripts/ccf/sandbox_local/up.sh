@@ -10,6 +10,7 @@ ccf-sandbox-local-up() {
 
     export WORKSPACE="$(realpath ${WORKSPACE:-$REPO_ROOT/workspace})"
     mkdir -p $WORKSPACE
+    cp $REPO_ROOT/scripts/ccf/sandbox_local/join_config.json $WORKSPACE
     docker compose -f $REPO_ROOT/services/docker-compose.yml build ccf-sandbox > /dev/null 2>&1
     docker compose -f $REPO_ROOT/services/docker-compose.yml up ccf-sandbox --wait "$@"
     sudo chown $USER:$USER -R $WORKSPACE

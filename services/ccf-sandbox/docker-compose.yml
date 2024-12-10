@@ -15,3 +15,9 @@ services:
       retries: 120
     volumes:
       - ${WORKSPACE:-./}:/workspace
+
+  ccf-sandbox-joiner:
+    image: azurekms.azurecr.io/ccf_sandbox/${CCF_PLATFORM:-virtual}:latest
+    extends:
+      service: ccf-sandbox
+    command: /opt/ccf_virtual/bin/cchost --config /workspace/join_config.json
