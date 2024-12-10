@@ -13,8 +13,8 @@ az-cleanroom-aci-up() {
     DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-$1}
     if [ -z "$DEPLOYMENT_NAME" ]; then
         read -p "Enter deployment name: " DEPLOYMENT_NAME
-        export DEPLOYMENT_NAME
     fi
+    export DEPLOYMENT_NAME
 
     retries=10
     exit_code=-1
@@ -51,6 +51,7 @@ az-cleanroom-aci-setup
 az-cleanroom-aci-up "$@"
 
 jq -n '{
+    DEPLOYMENT_NAME: env.DEPLOYMENT_NAME,
     WORKSPACE: env.WORKSPACE,
     KMS_URL: env.KMS_URL,
     KMS_SERVICE_CERT_PATH: env.KMS_SERVICE_CERT_PATH,
