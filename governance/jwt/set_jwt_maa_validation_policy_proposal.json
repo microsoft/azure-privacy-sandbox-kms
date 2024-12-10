@@ -78,6 +78,24 @@
           "iss": "https://accnosecurebootmaawesteu.weu.attest.azure.net"
         }
       }
+    },
+    {
+      "name": "set_jwt_issuer",
+      "args": {
+        "issuer": "https://confinfermaaeus2test.eus2.test.attest.azure.net",
+        "key_filter": "all",
+        "ca_cert_bundle_name": "jwt_maa",
+        "auto_refresh": true
+      }
+    },
+    {
+      "name": "set_jwt_validation_policy",
+      "args": {
+        "issuer": "https://confinfermaaeus2test.eus2.test.attest.azure.net",
+        "validation_policy": {
+          "iss": "https://confinfermaaeus2test.eus2.test.attest.azure.net"
+        }
+      }
     }
   ]
 }
