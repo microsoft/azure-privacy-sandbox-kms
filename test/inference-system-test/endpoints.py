@@ -45,3 +45,7 @@ def keyReleasePolicy(**kwargs):
 
 def settingsPolicy(**kwargs):
     return call_endpoint("settingsPolicy", **kwargs)
+
+
+def auth(**kwargs):
+    return call_endpoint("auth", **kwargs)

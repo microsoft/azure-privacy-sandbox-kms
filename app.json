@@ -206,7 +206,7 @@
         "openapi": {
           "responses": {
             "200": {
-              "description": "Generate a heartbeat response"
+              "description": "Generate an auth response"
             }
           }
         }

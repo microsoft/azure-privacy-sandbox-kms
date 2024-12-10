@@ -18,6 +18,8 @@ ccf-sandbox-local-up() {
     export KMS_SERVICE_CERT_PATH="$WORKSPACE/sandbox_common/service_cert.pem"
     export KMS_MEMBER_CERT_PATH="$WORKSPACE/sandbox_common/member0_cert.pem"
     export KMS_MEMBER_PRIVK_PATH="$WORKSPACE/sandbox_common/member0_privk.pem"
+    export KMS_USER_CERT_PATH="$WORKSPACE/sandbox_common/user0_cert.pem"
+    export KMS_USER_PRIVK_PATH="$WORKSPACE/sandbox_common/user0_privk.pem"
 
     set +e
 }
@@ -29,5 +31,7 @@ jq -n '{
     KMS_URL: env.KMS_URL,
     KMS_SERVICE_CERT_PATH: env.KMS_SERVICE_CERT_PATH,
     KMS_MEMBER_CERT_PATH: env.KMS_MEMBER_CERT_PATH,
-    KMS_MEMBER_PRIVK_PATH: env.KMS_MEMBER_PRIVK_PATH
+    KMS_MEMBER_PRIVK_PATH: env.KMS_MEMBER_PRIVK_PATH,
+    KMS_USER_CERT_PATH: env.KMS_USER_CERT_PATH,
+    KMS_USER_PRIVK_PATH: env.KMS_USER_PRIVK_PATH
 }'
