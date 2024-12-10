@@ -65,6 +65,9 @@ console.log(`Wrapping key path: ${wrappingKeyPath}`);
 const wrappingKey: any = Keys.getJwksFromPem(wrappingKeyPath, "TpmEphemeralEncryptionKey");
 
 const token = (req: Request, res: Response) => {
+  // Extract query parameters
+  console.log("Query: ", req.query);
+
   const payload = {
     iss,
     sub,
@@ -76,7 +79,10 @@ const token = (req: Request, res: Response) => {
     "x-ms-azurevm-debuggersdisabled": true,
     "x-ms-azurevm-osversion-major": 22,
     "x-ms-runtime": { "keys": [wrappingKey] },
+    ...req.query, // Merge query parameters into the payload
   };
+
+  console.log(`Payload: `, payload);
 
   const access_token = jwt.sign(payload, privateKey, {
     algorithm: "RS256",
@@ -89,7 +95,7 @@ const token = (req: Request, res: Response) => {
   });
 };
 
-// Use POST simular as AAD. No body required.
+// Use POST similar as AAD. No body required.
 app.post("/token", token);
 
 // Endpoint for managed identities.

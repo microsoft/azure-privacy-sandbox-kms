@@ -36,7 +36,7 @@ export const authorizeJwt = (
         errorMessage,
         errorType: "AuthenticationError",
       },
-      500,
+      401,
       logContext
     );
   }

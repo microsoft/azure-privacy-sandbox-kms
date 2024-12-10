@@ -25,7 +25,8 @@ def setup_kms():
         cwd=REPO_ROOT,
         check=True,
     )
-    os.environ["JWT_ISSUER"] = "http://localhost:3000/token"
+    os.environ["JWT_TOKEN_ISSUER_URL"] = "http://localhost:3000/token"
+    os.environ["JWT_ISSUER"] = "http://Demo-jwt-issuer"
 
     deploy_app_code()
 

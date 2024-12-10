@@ -35,7 +35,7 @@ key() {
     if [[ "$auth" == "member_cert" ]]; then
         auth_arg=(--cert $KMS_MEMBER_CERT_PATH --key $KMS_MEMBER_PRIVK_PATH)
     elif [[ "$auth" == "jwt" ]]; then
-        auth_arg=(-H "Authorization: Bearer $(curl -X POST $JWT_ISSUER | jq -r '.access_token')")
+        auth_arg=(-H "Authorization: Bearer $(curl -X POST $JWT_TOKEN_ISSUER_URL | jq -r '.access_token')")
     fi
 
     curl $KMS_URL/app/key${query_string} \

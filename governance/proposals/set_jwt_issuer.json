@@ -3,7 +3,7 @@
       {
         "name": "set_jwt_issuer",
         "args": {
-          "issuer": "http://Demo-jwt-issuer",
+          "issuer":  "${JWT_ISSUER}",
           "key_filter": "all",
           "jwks": {
             "keys": [
@@ -15,9 +15,9 @@
       {
         "name": "set_jwt_validation_policy",
         "args": {
-          "issuer": "http://Demo-jwt-issuer",
+          "issuer": "${JWT_ISSUER}",
           "validation_policy": {
-            "iss": "http://Demo-jwt-issuer",
+            "iss": "${JWT_ISSUER}",
             "sub": "c0d8e9a7-6b8e-4e1f-9e4a-3b2c1d0f5a6b",
             "name": "Cool caller"
           }
@@ -26,7 +26,7 @@
       {
         "name": "set_jwt_public_signing_keys",
         "args": {
-          "issuer": "http://Demo-jwt-issuer",
+          "issuer": "${JWT_ISSUER}",
           "jwks": {
             "keys": [
               ${JWK}

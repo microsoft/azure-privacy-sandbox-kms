@@ -8,6 +8,24 @@ jwt-issuer-trust() {
 
   REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../..")"
 
+  # Check for new issuer
+  while [[ $# -gt 0 ]]; do
+      case "$1" in
+          --iss)
+              JWT_ISSUER="$2"
+              shift 2
+              ;;
+          --iss=*)
+              JWT_ISSUER="${1#*=}"
+              shift 1
+              ;;
+          *)
+              echo "Unknown parameter: $1"
+              exit 1
+              ;;
+      esac
+  done
+  
   # Populate the JWK of the token issuer
   PRIVATE_PEM="$WORKSPACE/private.pem"
   CERT_PEM="$WORKSPACE/cert.pem"
