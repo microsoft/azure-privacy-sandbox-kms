@@ -6,18 +6,29 @@ services:
       dockerfile: Dockerfile
       args:
         - CCF_PLATFORM=${CCF_PLATFORM:-virtual}
-    command: /opt/ccf_${CCF_PLATFORM:-virtual}/bin/sandbox.sh --http2 --initial-member-count ${MEMBER_COUNT:-1}
+    command: |
+      /bin/bash -c '
+        echo "sandbox_0" > /node_id &&
+        /opt/ccf_${CCF_PLATFORM:-virtual}/bin/sandbox.sh --http2 --initial-member-count ${MEMBER_COUNT:-1}
+      '
     network_mode: host
     healthcheck:
-      test:
-        ["CMD", "curl", "-k", "--fail", "https://localhost:8000/node/network"]
+      test: [
+        "CMD-SHELL",
+        "curl -k -f https://$(jq -r '.primary_rpc_interface' workspace/$(cat node_id)/0.rpc_addresses)/node/state"
+      ]
       interval: 1s
       retries: 120
     volumes:
       - ${WORKSPACE:-./}:/workspace
 
   ccf-sandbox-joiner:
-    image: azurekms.azurecr.io/ccf_sandbox/${CCF_PLATFORM:-virtual}:latest
     extends:
       service: ccf-sandbox
-    command: /opt/ccf_virtual/bin/cchost --config /workspace/join_config.json
+    command: |
+      /bin/bash -c '
+        echo "node-$(uuidgen)" > node_id &&
+        mkdir -p /workspace/$(cat node_id) &&
+        NODE_WORKSPACE=/workspace/$(cat node_id) envsubst < /workspace/join_config.json > /join_config.json &&
+        /opt/ccf_virtual/bin/cchost --config /join_config.json > /workspace/$(cat node_id)/out 2> /workspace/$(cat node_id)/err
+      '

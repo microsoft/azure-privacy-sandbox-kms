@@ -43,6 +43,8 @@ az-cleanroom-aci-up() {
     sudo cp $KMS_SERVICE_CERT_PATH /usr/local/share/ca-certificates/kms_ca.crt
     sudo update-ca-certificates
 
+    mkdir -p $WORKSPACE/proposals
+
     set +e
 }
 

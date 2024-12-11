@@ -14,6 +14,7 @@ ccf-sandbox-local-up() {
     docker compose -f $REPO_ROOT/services/docker-compose.yml build ccf-sandbox > /dev/null 2>&1
     docker compose -f $REPO_ROOT/services/docker-compose.yml up ccf-sandbox --wait "$@"
     sudo chown $USER:$USER -R $WORKSPACE
+    mkdir -p $WORKSPACE/proposals
 
     export KMS_URL="https://127.0.0.1:8000"
     export KMS_SERVICE_CERT_PATH="$WORKSPACE/sandbox_common/service_cert.pem"

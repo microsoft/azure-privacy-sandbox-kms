@@ -19,13 +19,31 @@ ccf-sandbox-local-node() {
 }
 
 ccf-sandbox-local-node-count() {
-    ccf-sandbox-local-nodes-raw | jq '.nodes | map(select(.status == "Trusted")) | length'
+    count=0
+    for node_url in $(ccf-sandbox-local-nodes-raw | jq -r '.nodes[].rpc_interfaces.primary_rpc_interface.published_address'); do
+        if [ "$(curl -s -k https://$node_url/node/network/nodes/self | jq -r '.status')" == "Trusted" ]; then
+            count=$((count + 1))
+        fi
+    done
+    echo $count
 }
 
 ccf-sandbox-local-pending-nodes() {
     curl -s $KMS_URL/node/network/nodes \
         --cacert $KMS_SERVICE_CERT_PATH \
         | jq -r '.nodes[] | select(.status == "Pending") | .node_id' | tr -d '"'
+}
+
+ccf-sandbox-local-stopped-nodes() {
+    for node_url in $(ccf-sandbox-local-nodes | jq -r '.nodes[]'); do
+        response=$(curl -k -s -o /dev/null -w "%{http_code}" "https://$node_url/node/network")
+        if [ "$response" -ne 200 ]; then
+            node_json=$(ccf-sandbox-local-nodes-raw | jq --arg url "${node_url}" '.nodes[] | select(.rpc_interfaces.primary_rpc_interface.published_address == $url)')
+            if [ "$(echo "$node_json" | jq -r '.status')" = "Trusted" ]; then
+                echo "$node_json" | jq -r '.node_id'
+            fi
+        fi
+    done
 }
 
 ccf-sandbox-local-node-delete() {
@@ -59,39 +77,36 @@ ccf-sandbox-local-scale-nodes() {
     current_node_count=$(ccf-sandbox-local-node-count)
     node_count_difference=$((node_count - current_node_count))
 
+    # Scale the CCF node containers
     docker compose \
-        -f $REPO_ROOT/services/docker-compose.yml up -d \
+        -f $REPO_ROOT/services/docker-compose.yml up ccf-sandbox-joiner --wait \
             --scale ccf-sandbox-joiner=$((node_count - 1))
 
-    if [ "$node_count_difference" -gt 0 ]; then
-        until [ "$(ccf-sandbox-local-pending-nodes | wc -l)" -eq "$node_count_difference" ]; do
-            sleep 1
-        done
+    # Propose adding any new nodes
+    for node_id in $(ccf-sandbox-local-pending-nodes); do
+        proposal_file="$WORKSPACE/proposals/trust_${node_id}.json"
+        NODE_ID=$node_id \
+        VALID_FROM=$(date -u +"%y%m%d%H%M%SZ") \
+            envsubst < "$REPO_ROOT/governance/proposals/transition_node_to_trusted.json" \
+                | jq > "$proposal_file"
+        ccf-propose "$proposal_file"
+    done
 
-        for node_id in $(ccf-sandbox-local-pending-nodes); do
-            proposal_file="$WORKSPACE/proposals/trust_${node_id}.json"
+    # Propose removing any stopped nodes
+    if [ "$node_count_difference" -lt 0 ]; then
+        for node_id in $(ccf-sandbox-local-stopped-nodes); do
+            proposal_file="$WORKSPACE/proposals/remove_${node_id}.json"
             NODE_ID=$node_id \
-            VALID_FROM=$(date -u +"%y%m%d%H%M%SZ") \
-                envsubst < "$REPO_ROOT/governance/proposals/transition_node_to_trusted.json" \
+                envsubst < "$REPO_ROOT/governance/proposals/remove_node.json" \
                     | jq > "$proposal_file"
             ccf-propose "$proposal_file"
         done
-    elif [ "$node_count_difference" -lt 0 ]; then
-        for node_url in $(ccf-sandbox-local-nodes | jq -r '.nodes[]'); do
-            response=$(curl -k -s -o /dev/null -w "%{http_code}" "https://$node_url/node/network")
-            if [ "$response" -ne 200 ]; then
-                node_json=$(ccf-sandbox-local-nodes-raw | jq --arg url "${node_url}" '.nodes[] | select(.rpc_interfaces.primary_rpc_interface.published_address == $url)')
-                if [ "$(echo "$node_json" | jq -r '.status')" = "Trusted" ]; then
-                    node_id=$(echo "$node_json" | jq -r '.node_id')
-                    proposal_file="$WORKSPACE/proposals/remove_${node_id}.json"
-                    NODE_ID=$node_id \
-                        envsubst < "$REPO_ROOT/governance/proposals/remove_node.json" \
-                            | jq > "$proposal_file"
-                    ccf-propose "$proposal_file"
-                fi
-            fi
-        done
     fi
+
+    # Wait until the node count matches the desired value
+    while [ "$(ccf-sandbox-local-node-count)" -ne "$node_count" ]; do
+        sleep 1
+    done
 }
 
 ccf-sandbox-local-scale-nodes "$@"

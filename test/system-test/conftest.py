@@ -109,3 +109,4 @@ def setup_kms(setup_ccf, setup_akv):
         ])
     deploy_app_code()
     yield
+    print("") # Prevents cleanup overwriting result

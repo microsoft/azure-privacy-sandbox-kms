@@ -11,7 +11,6 @@ def test_nodes_scale_up(setup_kms):
     # Scale the node number up
     result = nodes_scale(nodes_requested, get_logs=True)
     assert len(result["nodes"]) == nodes_requested
-    time.sleep(8)
 
     # Check that each node is reachable and reports a unique identity
     node_ids = set()
@@ -28,14 +27,12 @@ def test_nodes_scale_down(setup_kms):
 
     # Scale the node number up
     result = nodes_scale(nodes_requested, get_logs=True)
-    time.sleep(8)
     scaled_up_nodes = result["nodes"]
     assert len(result["nodes"]) == nodes_requested
 
     # Scale the node number down
     nodes_requested = 2
     result = nodes_scale(nodes_requested, get_logs=True)
-    time.sleep(8)
     assert len(result["nodes"]) == nodes_requested
 
     # Check the removed node is no longer accessible

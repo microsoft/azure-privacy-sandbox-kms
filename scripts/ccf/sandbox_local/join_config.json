@@ -14,7 +14,7 @@
           "app_protocol": "HTTP2",
           "bind_address": "127.0.0.1:0",
           "endorsement": {
-            "authority": "Service"
+            "authority": "Node"
           },
           "forwarding_timeout_ms": 3000,
           "http_configuration": {
@@ -40,5 +40,11 @@
         "target_rpc_address": "127.0.0.1:8000",
         "follow_redirect": true
       }
+    },
+    "output_files": {
+      "node_certificate_file": "${NODE_WORKSPACE}/0.pem",
+      "pid_file": "${NODE_WORKSPACE}/0.pid",
+      "node_to_node_address_file": "${NODE_WORKSPACE}/0.node_address",
+      "rpc_addresses_file": "${NODE_WORKSPACE}/0.rpc_addresses"
     }
   }
