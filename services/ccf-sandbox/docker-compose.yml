@@ -25,6 +25,11 @@ services:
   ccf-sandbox-joiner:
     extends:
       service: ccf-sandbox
+    healthcheck:
+      test: [
+        "CMD-SHELL",
+        "curl -k -f https://$(jq -r '.secondary_rpc_interface' workspace/$(cat node_id)/0.rpc_addresses)/node/state"
+      ]
     command: |
       /bin/bash -c '
         echo "node-$(uuidgen)" > node_id &&

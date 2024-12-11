@@ -88,12 +88,13 @@ def nodes_scale(node_count, get_logs=False):
     if get_logs:
         return get_final_json(res.stdout.decode())
 
+
 def get_node_info(node_url):
     res = subprocess.run(
         [
             "curl",
-            "-k", # The first node is endorsed by the service cert, but additional nodes are endorsed by a self signed cert
             f"https://{node_url}/node/network/nodes/self",
+            "--cacert", os.getenv("KMS_SERVICE_CERT_PATH"),
             "-w", "'\n%{http_code}'",
         ],
         check=True,
