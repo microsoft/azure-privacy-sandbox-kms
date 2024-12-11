@@ -1,0 +1,10 @@
+{
+  "actions": [
+    {
+      "name": "set_member",
+      "args": {
+        "cert": $MEMBER_CERT
+      }
+    }
+  ]
+}
