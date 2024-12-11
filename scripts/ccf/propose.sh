@@ -48,15 +48,15 @@ ccf-propose() {
     proposal=$1
     USE_AKV=${USE_AKV:-false}
 
-    echo "Proposing: $proposal"
-    echo "  to $KMS_URL"
-    echo "    cert: $KMS_SERVICE_CERT_PATH"
+    echo "Proposing: $proposal" >&2
+    echo "  to $KMS_URL" >&2
+    echo "    cert: $KMS_SERVICE_CERT_PATH" >&2
 
-    echo "  as $KMS_MEMBER_CERT_PATH"
+    echo "  as $KMS_MEMBER_CERT_PATH" >&2
     if [[ $USE_AKV == false ]]; then
-        echo "  using local key $KMS_MEMBER_PRIVK_PATH"
+        echo "  using local key $KMS_MEMBER_PRIVK_PATH" >&2
     else
-        echo "  using AKV key $AKV_KEY_NAME from $AKV_VAULT_NAME"
+        echo "  using AKV key $AKV_KEY_NAME from $AKV_VAULT_NAME" >&2
     fi
 
     sign_proposal $proposal \
@@ -66,7 +66,7 @@ ccf-propose() {
             -H "Content-Type: application/cose" \
             -s \
             -w '\n' \
-                | jq
+                | jq >&2
 
     set +e
 }

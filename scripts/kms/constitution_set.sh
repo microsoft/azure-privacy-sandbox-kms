@@ -10,7 +10,8 @@ constitution-set() {
   CONSTITUTION_PATH=$1
 
   # Get the current constitution
-  curl -s -k $KMS_URL/gov/service/constitution?api-version=2024-07-01 > $WORKSPACE/proposals/constitution.js
+  curl -s $KMS_URL/gov/service/constitution?api-version=2024-07-01 \
+    --cacert $KMS_SERVICE_CERT_PATH > $WORKSPACE/proposals/constitution.js
 
   # Append the consitution given
   cat "$CONSTITUTION_PATH" >> $WORKSPACE/proposals/constitution.js
