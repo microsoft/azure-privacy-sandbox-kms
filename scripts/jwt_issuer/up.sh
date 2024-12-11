@@ -14,7 +14,8 @@ jwt-issuer-up() {
 
     sudo chown $USER:$USER -R $JWT_ISSUER_WORKSPACE
 
-    export JWT_ISSUER="http://localhost:3000/token"
+    export JWT_TOKEN_ISSUER_URL="http://localhost:3000/token"
+    export JWT_ISSUER="http://Demo-jwt-issuer"
 
     set +e
 }
@@ -23,5 +24,5 @@ jwt-issuer-up
 
 jq -n '{
     JWT_ISSUER_WORKSPACE: env.JWT_ISSUER_WORKSPACE,
-    JWT_ISSUER: env.JWT_ISSUER,
+    JWT_TOKEN_ISSUER_URL: env.JWT_TOKEN_ISSUER_URL,
 }'
