@@ -60,9 +60,12 @@ def remove_key_release_policy():
     )
 
 
-def trust_jwt_issuer():
+def trust_jwt_issuer(iss=""):
+    command = ["scripts/kms/jwt_issuer_trust.sh"]
+    if iss:
+        command.extend(["--iss", iss])
     subprocess.run(
-        "scripts/kms/jwt_issuer_trust.sh",
+        command,
         cwd=REPO_ROOT,
         check=True,
     )

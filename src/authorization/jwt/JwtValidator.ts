@@ -6,7 +6,6 @@ import { ServiceResult } from "../../utils/ServiceResult";
 import { IValidatorService } from "../IValidationService";
 import { JwtIdentityProviderEnum } from "./JwtIdentityProviderEnum";
 import { IJwtIdentityProvider } from "./IJwtIdentityProvider";
-import { DemoJwtProvider } from "./DemoJwtProvider";
 import { MsJwtProvider } from "./MsJwtProvider";
 import { Logger, LogContext } from "../../utils/Logger";
 
@@ -23,24 +22,25 @@ export class JwtValidator implements IValidatorService {
       JwtIdentityProviderEnum.MS_AAD,
       new MsJwtProvider("JwtProvider", this.logContext),
     );
-    this.identityProviders.set(
-      JwtIdentityProviderEnum.Demo,
-      new DemoJwtProvider("DemoJwtProvider"),
-    );
   }
 
+  /*
+    * Validate the request
+    * @param request request to validate with JWT
+    * */
   validate(request: ccfapp.Request<any>): ServiceResult<string> {
     const jwtCaller = request.caller as unknown as ccfapp.JwtAuthnIdentity;
     Logger.debug(
       `Authorization: JWT jwtCaller (JwtValidator)-> ${<JwtIdentityProviderEnum>jwtCaller.jwt.keyIssuer}`,
       this.logContext
     );
+    Logger.info(`JWT content: ${JSON.stringify(jwtCaller.jwt)}`, this.logContext);
     const provider = this.identityProviders.get(
-      <JwtIdentityProviderEnum>jwtCaller.jwt.keyIssuer,
+      JwtIdentityProviderEnum.MS_AAD
     );
 
     if (!provider) {
-      const error = `Authorization: JWT validation provider is undefined (JwtValidator) for ${<JwtIdentityProviderEnum>jwtCaller.jwt.keyIssuer}`;
+      const error = `Authorization: JWT validation provider ${JwtIdentityProviderEnum.MS_AAD} is undefined (JwtValidator) for ${<JwtIdentityProviderEnum>jwtCaller.jwt.keyIssuer}`;
       Logger.error(error, this.logContext);
       return ServiceResult.Failed(
         { errorMessage: error, errorType: "caller error" },
