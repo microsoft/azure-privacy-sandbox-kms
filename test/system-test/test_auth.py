@@ -16,7 +16,7 @@ def test_auth_user_cert(setup_kms):
     assert auth_json["auth"]["policy"] == "user_cert"
 
 
-def test_auth_jwt(setup_kms):
+def test_auth_jwt(setup_kms, setup_jwt_issuer):
     apply_kms_constitution()
     trust_jwt_issuer()
     status_code, auth_json = auth(auth="jwt")
@@ -25,7 +25,7 @@ def test_auth_jwt(setup_kms):
     assert auth_json["auth"]["policy"] == "jwt"
 
 
-def test_auth_jwt_new_issuer(setup_kms):
+def test_auth_jwt_new_issuer(setup_kms, setup_jwt_issuer):
     issuer = "https://new-issuer"
     apply_kms_constitution()
     trust_jwt_issuer(iss=issuer)
@@ -34,7 +34,7 @@ def test_auth_jwt_new_issuer(setup_kms):
     assert status_code == 200
 
 
-def test_auth_jwt_wrong_iss(setup_kms):
+def test_auth_jwt_wrong_iss(setup_kms, setup_jwt_issuer):
     apply_kms_constitution()
     trust_jwt_issuer()
     status_code, auth_json = auth(auth="jwt", jwtprops="?iss=test")
