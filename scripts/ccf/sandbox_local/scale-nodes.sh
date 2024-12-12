@@ -121,9 +121,9 @@ ccf-sandbox-local-scale-nodes() {
 
     # Wait until the node count matches the desired value
     echo "Waiting for expected nodes to be available:" >&2
-    echo "If the networks constitution requires proposals are voted for, vote for outstanding proposals to trust nodes"
+    echo "If the networks constitution requires proposals are voted for, vote for outstanding proposals to trust nodes" >&2
     current_proposals=""
-    while [ "$(ccf-sandbox-local-nodes | running | count)" -ne "$node_count" ] && [ $retries -gt 0 ]; do
+    while [ "$(ccf-sandbox-local-nodes | running | count)" -ne "$node_count" ]; do
         sleep 1
         next_proposals=$(open-proposals)
         if [ "$current_proposals" != "$next_proposals" ]; then
