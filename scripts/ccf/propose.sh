@@ -59,6 +59,7 @@ ccf-propose() {
         echo "  using AKV key $AKV_KEY_NAME from $AKV_VAULT_NAME" >&2
     fi
 
+    resp=$(mktemp)
     sign_proposal $proposal \
         | curl $KMS_URL/gov/proposals \
             --cacert $KMS_SERVICE_CERT_PATH \
@@ -66,7 +67,11 @@ ccf-propose() {
             -H "Content-Type: application/cose" \
             -s \
             -w '\n' \
-                | jq >&2
+                | tee $resp | jq >&2
+
+    if jq -e '.error' $resp >/dev/null; then
+        exit 1
+    fi
 
     set +e
 }

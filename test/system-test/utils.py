@@ -16,11 +16,12 @@ def get_final_json(s):
             ...
 
 
-def deploy_app_code():
+def deploy_app_code(**kwargs):
     subprocess.run(
         "scripts/kms/js_app_set.sh",
         cwd=REPO_ROOT,
         check=True,
+        **kwargs,
     )
 
 
