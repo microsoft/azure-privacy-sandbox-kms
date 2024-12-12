@@ -77,6 +77,8 @@ ccf-propose() {
         exit 1
     fi
 
+    cat $resp
+
     set +e
 }
 
