@@ -90,6 +90,9 @@ def setup_ccf():
         )
         yield
 
+    except Exception:
+        raise
+
     finally:
         call_script(
             [f"scripts/{TEST_ENVIRONMENT}/down.sh"],

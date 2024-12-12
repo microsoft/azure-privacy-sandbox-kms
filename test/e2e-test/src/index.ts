@@ -266,7 +266,7 @@ class Demo {
       } else if (statusCode !== 200) {
         throw new Error(`🛑 [TEST FAILURE]: Expected ${statusCode} to be 200`);
       }
-    } while (statusCode !== 200);
+    } while (statusCode == 202);
 
     // Test with JWT
     console.log(`📝 Get wrapped key with JWT...`);
