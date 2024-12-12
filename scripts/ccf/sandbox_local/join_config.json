@@ -11,6 +11,7 @@
       },
       "rpc_interfaces": {
         "primary_rpc_interface": {
+          "app_protocol": "HTTP2",
           "bind_address": "127.0.0.1:0",
           "endorsement": {
             "authority": "Service"
@@ -30,6 +31,7 @@
           "published_address": "127.0.0.1:0"
         },
         "secondary_rpc_interface": {
+          "app_protocol": "HTTP2",
           "bind_address": "127.0.0.1:0",
           "endorsement": {
             "authority": "Node"
