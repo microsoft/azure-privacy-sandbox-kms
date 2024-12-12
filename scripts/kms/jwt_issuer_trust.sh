@@ -12,11 +12,11 @@ jwt-issuer-trust() {
   while [[ $# -gt 0 ]]; do
       case "$1" in
           --iss)
-              JWT_TOKEN_ISSUER_URL="$2"
+              JWT_ISSUER="$2"
               shift 2
               ;;
           --iss=*)
-              JWT_TOKEN_ISSUER_URL="${1#*=}"
+              JWT_ISSUER="${1#*=}"
               shift 1
               ;;
           *)

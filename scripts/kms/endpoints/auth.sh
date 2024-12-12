@@ -3,6 +3,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+set -e
+
 auth() {
     params=()
     auth="jwt"
@@ -28,7 +30,7 @@ auth() {
 
     # Extract iss from jwtprops if present
     if [[ "$jwtprops" == *"iss="* ]]; then
-        export JWT_TOKEN_ISSUER_URL=$(echo "$jwtprops" | grep -oP '(?<=iss=)[^&]*')
+        export JWT_ISSUER=$(echo "$jwtprops" | grep -oP '(?<=iss=)[^&]*')
     fi
 
     auth_arg=()
