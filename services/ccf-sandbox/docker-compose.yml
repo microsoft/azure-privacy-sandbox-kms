@@ -9,7 +9,7 @@ services:
     command: |
       /bin/bash -c '
         echo "sandbox_0" > /node_id &&
-        /opt/ccf_${CCF_PLATFORM:-virtual}/bin/sandbox.sh --http2 --initial-member-count ${MEMBER_COUNT:-1}
+        /opt/ccf_${CCF_PLATFORM:-virtual}/bin/sandbox.sh --initial-member-count ${MEMBER_COUNT:-1}
       '
     network_mode: host
     healthcheck:
