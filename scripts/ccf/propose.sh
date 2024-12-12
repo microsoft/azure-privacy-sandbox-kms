@@ -45,6 +45,7 @@ sign_proposal() {
 ccf-propose() {
     set -e
 
+    REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../..")"
     proposal=$1
     USE_AKV=${USE_AKV:-false}
 
