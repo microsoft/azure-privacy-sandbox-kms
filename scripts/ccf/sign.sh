@@ -42,7 +42,8 @@ ccf-sign() {
             --ccf-gov-msg-created_at $creation_time \
             --content $content \
             --signing-cert ${KMS_MEMBER_CERT_PATH} \
-            --signature $signature
+            --signature $signature \
+            $extra_args
         rm -rf $signature
     fi
 }
