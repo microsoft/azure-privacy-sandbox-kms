@@ -59,6 +59,10 @@ iterate() {
     jq -c '.[]' | tr -d '"'
 }
 
+open-proposals() {
+    curl -s $KMS_URL/gov/members/proposals | jq -r '.[].proposalId'
+}
+
 ccf-sandbox-local-scale-nodes() {
 
     REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../../..")"
@@ -116,24 +120,17 @@ ccf-sandbox-local-scale-nodes() {
     fi
 
     # Wait until the node count matches the desired value
-    retries=10
+    echo "Waiting for expected nodes to be available:" >&2
+    echo "If the networks constitution requires proposals are voted for, vote for outstanding proposals to trust nodes"
+    current_proposals=""
     while [ "$(ccf-sandbox-local-nodes | running | count)" -ne "$node_count" ] && [ $retries -gt 0 ]; do
         sleep 1
-        retries=$((retries - 1))
-        echo "Waiting for expected nodes to be available (retries=$retries)" >&2
+        next_proposals=$(open-proposals)
+        if [ "$current_proposals" != "$next_proposals" ]; then
+            current_proposals=$next_proposals
+            echo "Current proposals: $current_proposals"
+        fi
     done
-
-    # If the scaling failed
-    if [ "$(ccf-sandbox-local-nodes | running | count)" -ne "$node_count" ]; then
-        echo "Failed to reach the required node number" >&2
-        echo "Requested: $node_count" >&2
-        echo "Actual: $(ccf-sandbox-local-nodes | running | count)" >&2
-        echo "ccf-sandbox-local-nodes:" >&2
-        ccf-sandbox-local-nodes | status-is "Trusted" >&2
-        echo "ccf-sandbox-local-nodes | self:" >&2
-        ccf-sandbox-local-nodes | self >&2
-        return 1
-    fi
 }
 
 ccf-sandbox-local-scale-nodes "$@" && \
