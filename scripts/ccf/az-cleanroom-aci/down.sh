@@ -38,7 +38,8 @@ az-cleanroom-aci-down() {
     unset KMS_SERVICE_CERT_PATH
     unset KMS_MEMBER_CERT_PATH
     unset KMS_MEMBER_PRIVK_PATH
-
+    unset JWT_TOKEN_ISSUER_URL
+    unset JWT_ISSUER
     set +e
 }
 
