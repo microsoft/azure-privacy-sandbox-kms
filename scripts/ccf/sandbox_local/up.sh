@@ -18,8 +18,6 @@ ccf-sandbox-local-up() {
     export KMS_SERVICE_CERT_PATH="$WORKSPACE/sandbox_common/service_cert.pem"
     export KMS_MEMBER_CERT_PATH="$WORKSPACE/sandbox_common/member0_cert.pem"
     export KMS_MEMBER_PRIVK_PATH="$WORKSPACE/sandbox_common/member0_privk.pem"
-    export KMS_USER_CERT_PATH="$WORKSPACE/sandbox_common/user0_cert.pem"
-    export KMS_USER_PRIVK_PATH="$WORKSPACE/sandbox_common/user0_privk.pem"
     export JWT_TOKEN_ISSUER_URL="http://localhost:3000/token"
     export JWT_ISSUER="http://Demo-jwt-issuer"
 
@@ -34,8 +32,6 @@ jq -n '{
     KMS_SERVICE_CERT_PATH: env.KMS_SERVICE_CERT_PATH,
     KMS_MEMBER_CERT_PATH: env.KMS_MEMBER_CERT_PATH,
     KMS_MEMBER_PRIVK_PATH: env.KMS_MEMBER_PRIVK_PATH,
-    KMS_USER_CERT_PATH: env.KMS_USER_CERT_PATH,
-    KMS_USER_PRIVK_PATH: env.KMS_USER_PRIVK_PATH,
     JWT_TOKEN_ISSUER_URL: env.JWT_TOKEN_ISSUER_URL,
     JWT_ISSUER: env.JWT_ISSUER,
 

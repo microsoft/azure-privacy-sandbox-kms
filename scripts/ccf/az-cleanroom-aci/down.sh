@@ -38,8 +38,6 @@ az-cleanroom-aci-down() {
     unset KMS_SERVICE_CERT_PATH
     unset KMS_MEMBER_CERT_PATH
     unset KMS_MEMBER_PRIVK_PATH
-    unset KMS_USER_CERT_PATH
-    unset KMS_USER_PRIVK_PATH
 
     set +e
 }
