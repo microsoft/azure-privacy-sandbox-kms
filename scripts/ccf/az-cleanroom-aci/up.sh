@@ -39,8 +39,6 @@ az-cleanroom-aci-up() {
     export KMS_SERVICE_CERT_PATH="$WORKSPACE/service_cert.pem"
     export KMS_MEMBER_CERT_PATH="$WORKSPACE/ccf-operator_cert.pem"
     export KMS_MEMBER_PRIVK_PATH="$WORKSPACE/ccf-operator_privk.pem"
-    export JWT_TOKEN_ISSUER_URL="http://localhost:3000/token"
-    export JWT_ISSUER="http://Demo-jwt-issuer"
 
     sudo cp $KMS_SERVICE_CERT_PATH /usr/local/share/ca-certificates/kms_ca.crt
     sudo update-ca-certificates
@@ -58,6 +56,4 @@ jq -n '{
     KMS_SERVICE_CERT_PATH: env.KMS_SERVICE_CERT_PATH,
     KMS_MEMBER_CERT_PATH: env.KMS_MEMBER_CERT_PATH,
     KMS_MEMBER_PRIVK_PATH: env.KMS_MEMBER_PRIVK_PATH,
-    JWT_TOKEN_ISSUER_URL: env.JWT_TOKEN_ISSUER_URL,
-    JWT_ISSUER: env.JWT_ISSUER,
 }'
