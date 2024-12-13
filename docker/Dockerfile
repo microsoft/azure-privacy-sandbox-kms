@@ -8,7 +8,6 @@ RUN curl -fsSL https://raw.githubusercontent.com/devcontainers/features/refs/hea
 COPY . /kms
 WORKDIR /kms
 CMD /bin/bash -c "\
-  docker compose -f services/docker-compose.yml logs -f & \
   . scripts/ccf/sandbox_local/up.sh && \
   . scripts/kms/js_app_set.sh && \
   ./scripts/kms/constitution_set.sh \
@@ -16,4 +15,4 @@ CMD /bin/bash -c "\
 		--actions ./governance/constitution/actions/kms.js && \
   . scripts/jwt_issuer/up.sh && \
   ./scripts/kms/endpoints/refresh.sh && \
-  tail -f workspace/sandbox_0/out"
+  docker compose -f services/docker-compose.yml logs -f"
