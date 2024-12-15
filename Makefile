@@ -67,11 +67,16 @@ start-host: stop-host  ## 🏃 Start the CCF network using Sandbox.sh
 		--resolve ./governance/constitution/resolve/auto_accept.js \
 		--actions ./governance/constitution/actions/kms.js
 
-start-host-idp: stop-host stop-idp start-idp start-host ## 🏃 Start the CCF network && idp using Sandbox.sh
+start-host-idp: stop-host stop-idp build ## 🏃 Start the CCF network && idp using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
 	@echo "Executing: $(COMMAND)"
-	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh > /dev/null 2>&1 && \
-	JWT_ISSUER_WORKSPACE=${JWT_ISSUER_WORKSPACE} source ./scripts/kms/jwt_issuer_trust.sh
+	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh && \
+	source ./scripts/jwt_issuer/up.sh && \
+	source ./scripts/kms/constitution_set.sh \
+		--resolve ./governance/constitution/resolve/auto_accept.js \
+		--actions ./governance/constitution/actions/kms.js && \
+	source scripts/kms/jwt_issuer_trust.sh && \
+	source scripts/kms/js_app_set.sh
 
 demo: stop-all start-host-idp ## 🎬 Demo the KMS Application in the Sandbox
 	@echo -e "\e[34m$@\e[0m" || true
