@@ -15,4 +15,4 @@ WORKDIR /kms
 
 ARG CCF_PLATFORM
 ENV CCF_PLATFORM=${CCF_PLATFORM}
-CMD ["/bin/bash", "-c", "sudo dockerd > /dev/null 2>&1 & make start-host-idp & (./scripts/kms_wait.sh && make setup && tail -f /kms/workspace/sandbox_0/out)"]
+CMD ["/bin/bash", "-c", "sudo dockerd > /dev/null 2>&1 & while ! docker info &>/dev/null; do sleep 1; done && make start-host-idp & (./scripts/kms_wait.sh && make setup && tail -f /kms/workspace/sandbox_0/out)"]
