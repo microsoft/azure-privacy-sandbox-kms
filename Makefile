@@ -63,17 +63,24 @@ start-host: stop-host  ## 🏃 Start the CCF network using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
 	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh && \
 	source ./scripts/kms/js_app_set.sh && \
-	source ./scripts/kms/constitution_set.sh ./governance/constitution/kms_actions.js
+	source ./scripts/kms/constitution_set.sh \
+		--resolve ./governance/constitution/resolve/auto_accept.js \
+		--actions ./governance/constitution/actions/kms.js
 
-start-host-idp: stop-host stop-idp start-idp start-host ## 🏃 Start the CCF network && idp using Sandbox.sh
+start-host-idp: stop-host stop-idp build ## 🏃 Start the CCF network && idp using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
 	@echo "Executing: $(COMMAND)"
-	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh > /dev/null 2>&1 && \
-	JWT_ISSUER_WORKSPACE=${JWT_ISSUER_WORKSPACE} source ./scripts/kms/jwt_issuer_trust.sh
+	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh && \
+	source ./scripts/jwt_issuer/up.sh && \
+	source ./scripts/kms/constitution_set.sh \
+		--resolve ./governance/constitution/resolve/auto_accept.js \
+		--actions ./governance/constitution/actions/kms.js && \
+	source scripts/kms/jwt_issuer_trust.sh && \
+	source scripts/kms/js_app_set.sh
 
 demo: stop-all start-host-idp ## 🎬 Demo the KMS Application in the Sandbox
 	@echo -e "\e[34m$@\e[0m" || true
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/test_sandbox.sh --nodeAddress 127.0.0.1:8000 --certificate_dir ${KMS_WORKSPACE}/sandbox_common --constitution ./governance/constitution/kms_actions.js
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/test_sandbox.sh --nodeAddress 127.0.0.1:8000 --certificate_dir ${KMS_WORKSPACE}/sandbox_common --constitution ./governance/constitution/actions/kms.js
 
 # Propose the JWT validation policy
 propose-jwt-demo-validation-policy: ## 🚀 Deploy the JWT validation policy
@@ -119,7 +126,7 @@ set-constitution: start-host-idp ## Set new custom constitution
 		@sleep 5; \
 		cp -r ${KMS_WORKSPACE}/sandbox_common/*.js ${KEYS_DIR}; \
 	fi
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_constitution.sh --network-url "${KMS_URL}" --certificate-dir "${KEYS_DIR}" --custom-constitution ./governance/constitution/kms_actions.js --member-count ${MEMBER_COUNT}
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_constitution.sh --network-url "${KMS_URL}" --certificate-dir "${KEYS_DIR}" --custom-constitution ./governance/constitution/actions/kms.js --member-count ${MEMBER_COUNT}
 
 get-service-cert: # Get the mCCF service cert
 	@echo -e "\e[34m$@\e[0m" || true
@@ -186,8 +193,9 @@ js-app-set:
 constitution-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	KMS_URL=${KMS_URL} \
-	CONSTITUTION_PATH=./governance/constitution/kms_actions.js \
-		./scripts/kms/constitution_set.sh
+	./scripts/kms/constitution_set.sh \
+		--resolve ./governance/constitution/resolve/auto_accept.js \
+		--actions ./governance/constitution/actions/kms.js
 
 release-policy-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
