@@ -12,7 +12,7 @@ from utils import deploy_app_code
 
 REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 TEST_ENVIRONMENT = os.getenv("TEST_ENVIRONMENT", "ccf/sandbox_local")
-USE_AKV = os.getenv("USE_AKV", False)
+USE_AKV = os.getenv("USE_AKV", 'False').lower() == 'true'
 
 
 def unique_string():
