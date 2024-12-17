@@ -13,9 +13,10 @@ jwt-issuer-up() {
     export JWT_ISSUER="http://Demo-jwt-issuer"
 
     docker compose -f services/docker-compose.yml up jwt-issuer --wait
-
     sudo chown $USER:$USER -R $JWT_ISSUER_WORKSPACE
 
+    export JWT_TOKEN_ISSUER_URL="http://localhost:3000/token"
+    export JWT_ISSUER="http://Demo-jwt-issuer"
 
     set +e
 }
