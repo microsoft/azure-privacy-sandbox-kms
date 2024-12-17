@@ -59,7 +59,7 @@ ccf-member-add() {
         fi
     fi
 
-    (
+    ( # Use a subshell to temporarily operate as the new member
         ccf-member-use $MEMBER_NAME
 
         # Otherwise activate member
