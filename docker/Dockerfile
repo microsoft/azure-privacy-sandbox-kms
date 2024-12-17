@@ -49,4 +49,4 @@ WORKDIR /kms
 
 ARG CCF_PLATFORM
 ENV CCF_PLATFORM=${CCF_PLATFORM}
-CMD ["/bin/bash", "-c", "make start-host-idp & (./scripts/kms_wait.sh && make setup && tail -f /kms/workspace/sandbox_0/out)"]
+CMD ["/bin/bash", "-c", "mkdir -p workspace && (cd test/utils/jwt && KMS_WORKSPACE=/kms/workspace nohup npm run start > nohup.out 2>&1 &) && ./scripts/wait_idp_ready.sh && ./scripts/set_python_env.sh && npm install && npm run build && env -i PATH=${PATH} KMS_WORKSPACE=workspace /opt/ccf_${CCF_PLATFORM}/bin/sandbox.sh --js-app-bundle ./dist/ --initial-member-count 3 --initial-user-count 1 --constitution ./governance/constitution/actions/kms.js --jwt-issuer workspace/proposals/set_jwt_issuer_test_sandbox.json  -v --http2 & (./scripts/kms_wait.sh && make setup && tail -f /kms/workspace/sandbox_0/out)"]

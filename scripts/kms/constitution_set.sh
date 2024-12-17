@@ -42,6 +42,7 @@ constitution-set() {
   done
 
   rm -f $OUTPUT || true
+  mkdir -p $WORKSPACE/proposals
   touch $OUTPUT
   for key in "${!constitution_files[@]}"; do
     files=${constitution_files[$key]}
