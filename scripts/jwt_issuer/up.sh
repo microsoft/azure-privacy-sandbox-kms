@@ -7,14 +7,13 @@ jwt-issuer-up() {
     set -e
 
     REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../..")"
-    export JWT_ISSUER_WORKSPACE=$(realpath ${JWT_ISSUER_WORKSPACE:-$REPO_ROOT/jwt_issuer_workspace})
+    export JWT_ISSUER_WORKSPACE=$(realpath ${JWT_ISSUER_WORKSPACE:-$REPO_ROOT/jwt_issuer_workspace_${UNIQUE_ID:-services}})
     mkdir -p $JWT_ISSUER_WORKSPACE
 
-    docker compose -f services/docker-compose.yml up jwt-issuer --wait
-
+    docker compose -p ${UNIQUE_ID-:services} -f services/docker-compose.yml up jwt-issuer --wait "$@"
     sudo chown $USER:$USER -R $JWT_ISSUER_WORKSPACE
 
-    export JWT_ISSUER="http://localhost:3000/token"
+    export JWT_ISSUER="$(cat $JWT_ISSUER_WORKSPACE/jwt_issuer_address)/token"
 
     set +e
 }
