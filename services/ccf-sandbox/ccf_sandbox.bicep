@@ -64,7 +64,6 @@ resource containerGroup 'Microsoft.ContainerInstance/containerGroups@2023-05-01'
             join([
               'echo "UVM_SECURITY_CONTEXT_DIR=$UVM_SECURITY_CONTEXT_DIR" > /aci_env &&'
               '/opt/ccf_snp/bin/sandbox.sh'
-              '--http2'
               '--snp-endorsements-servers THIM:$Fabric_NodeIPOrFQDN:2377'
               '-n "local://${kmsPrivateIp}:8000,${kmsPublicIp}:8000"'
               '--subject-alt-names iPAddress:${kmsPrivateIp}'
