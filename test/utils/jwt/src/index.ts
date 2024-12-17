@@ -12,8 +12,7 @@ const proposalsPath = `${process.env.KMS_WORKSPACE}/proposals`;
 const privateKeyPath = `${process.env.KMS_WORKSPACE}/private.pem`;
 const certificatePath = `${process.env.KMS_WORKSPACE}/cert.pem`;
 const kid = "Demo IDP kid";
-const hostPort = 3000;
-const host = `http://localhost:${hostPort}`;
+const host = `http://localhost:0`;
 const iss = "http://Demo-jwt-issuer";
 const sub = "c0d8e9a7-6b8e-4e1f-9e4a-3b2c1d0f5a6b";
 const name = "Cool caller";
@@ -85,6 +84,14 @@ app.get("/keys", (req: Request, res: Response) => {
   res.send({ keys: [jwk] });
 });
 
-app.listen(hostPort, () =>
-  console.log(`JWT Issuer started on port ${hostPort}`),
-);
+const server = app.listen(0, () => {
+  const addressInfo = server.address();
+  if (addressInfo && typeof addressInfo !== "string") {
+    const { port } = addressInfo;
+    fs.writeFileSync(
+      `${process.env.KMS_WORKSPACE}/jwt_issuer_address`,
+      `http://localhost:${port}`
+    );
+    console.log(`JWT Issuer started on http://localhost:${port}`);
+  }
+});
