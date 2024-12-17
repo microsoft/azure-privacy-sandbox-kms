@@ -1,4 +1,4 @@
-name: Endpoint Test
+name: System Test
 
 permissions:
   id-token: write
@@ -7,17 +7,17 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      endpoint:
+      test:
         type: string
   workflow_call:
     inputs:
-      endpoint:
+      test:
         type: string
 
 jobs:
 
-  endpoint:
-    name: ${{ inputs.endpoint }} (${{ matrix.config.env }}) (${{ matrix.config.use_akv && 'akv' || 'local' }}_keys)
+  test:
+    name: ${{ inputs.test }} (${{ matrix.config.env }}) (${{ matrix.config.use_akv && 'akv' || 'local' }}_keys)
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -58,5 +58,5 @@ jobs:
           USE_AKV: ${{ matrix.config.use_akv }}
         run: |
           pytest -sv \
-            test/system-test/test_${{ inputs.endpoint }}.py \
+            test/system-test/test_${{ inputs.test }}.py \
             -n ${{ matrix.config.threads }}
