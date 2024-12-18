@@ -8,7 +8,7 @@ ccf-propose() {
 
     REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../..")"
     source $REPO_ROOT/scripts/ccf/sign.sh
-    
+
     proposal=$1
     USE_AKV=${USE_AKV:-false}
 
@@ -28,7 +28,7 @@ ccf-propose() {
 
     resp=$(mktemp)
     ccf-sign $proposal \
-        | curl $KMS_URL/gov/proposals \
+        | curl $KMS_PRIMARY/gov/proposals \
             --cacert $KMS_SERVICE_CERT_PATH \
             --data-binary @- \
             -H "Content-Type: application/cose" \
