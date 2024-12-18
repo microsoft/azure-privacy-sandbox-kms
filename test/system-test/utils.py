@@ -37,8 +37,9 @@ def apply_settings_policy(policy=None):
     )
 
 
-def apply_kms_constitution(resolve="auto_accept", **kwargs):
-    subprocess.run(
+def apply_kms_constitution(resolve="auto_accept", get_logs=False, **kwargs):
+    get_logs_arg = {"stdout": subprocess.PIPE} if get_logs else {}
+    res = subprocess.run(
         [
             "./scripts/kms/constitution_set.sh",
             "--resolve", f"./governance/constitution/resolve/{resolve}.js",
@@ -47,7 +48,12 @@ def apply_kms_constitution(resolve="auto_accept", **kwargs):
         ],
         cwd=REPO_ROOT,
         check=True,
+        **get_logs_arg,
     )
+
+    # Parse out the returned json from the proposal
+    if get_logs:
+        return json.loads("{" + res.stdout.decode().split("{", 1)[1])
 
 
 def apply_key_release_policy():
@@ -78,6 +84,32 @@ def trust_jwt_issuer():
         cwd=REPO_ROOT,
         check=True,
     )
+
+def add_member(member_name):
+    subprocess.run(
+        ["scripts/ccf/member/add.sh", member_name],
+        cwd=REPO_ROOT,
+        check=True,
+    )
+
+
+def member_info(member_name):
+    return json.loads(subprocess.run(
+        ["scripts/ccf/member/info.sh", member_name],
+        cwd=REPO_ROOT,
+        check=True,
+        stdout=subprocess.PIPE
+    ).stdout.decode())
+
+
+def use_member(member_name):
+    env_vars = json.loads(subprocess.run(
+        ["scripts/ccf/member/use.sh", member_name],
+        cwd=REPO_ROOT,
+        check=True,
+        stdout=subprocess.PIPE
+    ).stdout.decode())
+    os.environ.update(env_vars)
 
 
 def nodes_scale(node_count, get_logs=False):
@@ -114,6 +146,20 @@ def propose(proposal, get_logs=False):
     get_logs_arg = {"stdout": subprocess.PIPE} if get_logs else {}
     res = subprocess.run(
         ["scripts/ccf/propose.sh", proposal],
+        cwd=REPO_ROOT,
+        check=True,
+        **get_logs_arg,
+    )
+
+    # Parse out the returned json from the proposal
+    if get_logs:
+        return json.loads("{" + res.stdout.decode().split("{", 1)[1])
+
+
+def vote(proposal_id, vote, get_logs=False):
+    get_logs_arg = {"stdout": subprocess.PIPE} if get_logs else {}
+    res = subprocess.run(
+        ["scripts/ccf/vote.sh", proposal_id, vote],
         cwd=REPO_ROOT,
         check=True,
         **get_logs_arg,
