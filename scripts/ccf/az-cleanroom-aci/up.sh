@@ -21,8 +21,8 @@ az-cleanroom-aci-up() {
     DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-$1}
     if [ -z "$DEPLOYMENT_NAME" ]; then
         read -p "Enter deployment name: " DEPLOYMENT_NAME
-        export DEPLOYMENT_NAME
     fi
+    export DEPLOYMENT_NAME
     export WORKSPACE=~/$DEPLOYMENT_NAME.ccfworkspace
 
     retries=10
@@ -46,6 +46,8 @@ az-cleanroom-aci-up() {
     export KMS_MEMBER_CERT_PATH="$WORKSPACE/ccf-operator_cert.pem"
     export KMS_MEMBER_PRIVK_PATH="$WORKSPACE/ccf-operator_privk.pem"
 
+    mkdir -p $WORKSPACE/proposals
+    
     set +e
 }
 
@@ -54,6 +56,7 @@ az-cleanroom-aci-setup
 az-cleanroom-aci-up "$@"
 
 jq -n '{
+    DEPLOYMENT_NAME: env.DEPLOYMENT_NAME,
     WORKSPACE: env.WORKSPACE,
     KMS_URL: env.KMS_URL,
     KMS_SERVICE_CERT_PATH: env.KMS_SERVICE_CERT_PATH,

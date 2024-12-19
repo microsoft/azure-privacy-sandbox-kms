@@ -5,13 +5,23 @@ import tempfile
 from contextlib import contextmanager
 
 REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
+TEST_ENVIRONMENT = os.getenv("TEST_ENVIRONMENT", "ccf/sandbox_local")
 
 
-def deploy_app_code():
+def get_final_json(s):
+    for sub in reversed(s.split("{")):
+        try:
+            return json.loads("{" + sub)
+        except json.JSONDecodeError:
+            ...
+
+
+def deploy_app_code(**kwargs):
     subprocess.run(
         "scripts/kms/js_app_set.sh",
         cwd=REPO_ROOT,
         check=True,
+        **kwargs,
     )
 
 
@@ -102,6 +112,36 @@ def use_member(member_name):
     os.environ.update(env_vars)
 
 
+def nodes_scale(node_count, get_logs=False):
+    get_logs_arg = {"stdout": subprocess.PIPE} if get_logs else {}
+    res = subprocess.run(
+        [f"scripts/{TEST_ENVIRONMENT}/scale-nodes.sh", "-n", str(node_count)],
+        cwd=REPO_ROOT,
+        check=True,
+        **get_logs_arg,
+    )
+    if get_logs:
+        return get_final_json(res.stdout.decode())
+
+
+def get_node_info(node_url):
+    res = subprocess.run(
+        [
+            "curl",
+            f"https://{node_url}/node/network/nodes/self",
+            "--cacert", os.getenv("KMS_SERVICE_CERT_PATH"),
+            "-w", "'\n%{http_code}'",
+        ],
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+    ).stdout.decode()
+
+    *response, status_code = res.strip("'").splitlines()
+    return (
+        int(status_code),
+        json.loads("".join(response).strip("\'") or "{}"),
+    )
 def propose(proposal, get_logs=False):
     get_logs_arg = {"stdout": subprocess.PIPE} if get_logs else {}
     res = subprocess.run(

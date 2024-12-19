@@ -1,0 +1,70 @@
+{
+    "enclave": {
+      "file": "/opt/ccf_virtual/lib/libjs_generic.virtual.so",
+      "type": "Release",
+      "platform": "Virtual"
+    },
+    "network": {
+      "node_to_node_interface": {
+        "bind_address": "127.0.0.1:0",
+        "published_address": ""
+      },
+      "rpc_interfaces": {
+        "primary_rpc_interface": {
+          "app_protocol": "HTTP2",
+          "bind_address": "127.0.0.1:0",
+          "endorsement": {
+            "authority": "Service"
+          },
+          "forwarding_timeout_ms": 3000,
+          "http_configuration": {
+            "initial_window_size": "65536",
+            "max_body_size": "1048576",
+            "max_concurrent_streams_count": 100,
+            "max_frame_size": "16384",
+            "max_header_size": "16384",
+            "max_headers_count": 256
+          },
+          "max_open_sessions_hard": 1010,
+          "max_open_sessions_soft": 1000,
+          "protocol": "tcp",
+          "published_address": "127.0.0.1:0"
+        },
+        "secondary_rpc_interface": {
+          "app_protocol": "HTTP2",
+          "bind_address": "127.0.0.1:0",
+          "endorsement": {
+            "authority": "Node"
+          },
+          "forwarding_timeout_ms": 3000,
+          "http_configuration": {
+            "initial_window_size": "65536",
+            "max_body_size": "1048576",
+            "max_concurrent_streams_count": 100,
+            "max_frame_size": "16384",
+            "max_header_size": "16384",
+            "max_headers_count": 256
+          },
+          "max_open_sessions_hard": 1010,
+          "max_open_sessions_soft": 1000,
+          "protocol": "tcp",
+          "published_address": "127.0.0.1:0"
+        }
+      }
+    },
+    "command": {
+      "type": "Join",
+      "service_certificate_file": "/workspace/sandbox_common/service_cert.pem",
+      "join": {
+        "retry_timeout": "1s",
+        "target_rpc_address": "127.0.0.1:8000",
+        "follow_redirect": true
+      }
+    },
+    "output_files": {
+      "node_certificate_file": "${NODE_WORKSPACE}/0.pem",
+      "pid_file": "${NODE_WORKSPACE}/0.pid",
+      "node_to_node_address_file": "${NODE_WORKSPACE}/0.node_address",
+      "rpc_addresses_file": "${NODE_WORKSPACE}/0.rpc_addresses"
+    }
+  }
