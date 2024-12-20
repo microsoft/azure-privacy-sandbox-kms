@@ -48,7 +48,7 @@ def call_script(args, **kwargs):
         ...
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def setup_jwt_issuer():
     try:
         call_script(
