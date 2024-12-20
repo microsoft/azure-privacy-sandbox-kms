@@ -29,6 +29,8 @@ def unique_string():
         .replace("_", "") \
         .lower()[:12]
 
+os.environ["UNIQUE_ID"] = unique_string()
+
 
 def call_script(args, **kwargs):
     res = subprocess.run(
@@ -46,7 +48,7 @@ def call_script(args, **kwargs):
         ...
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def setup_jwt_issuer():
     try:
         call_script(
