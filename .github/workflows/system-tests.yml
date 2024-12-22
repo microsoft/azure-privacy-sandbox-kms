@@ -58,4 +58,4 @@ jobs:
         env:
           TEST_ENVIRONMENT: ccf/az-cleanroom-aci
         run: |
-          ./scripts/jwt_issuer_up.sh
+          ./scripts/jwt_issuer/up.sh
