@@ -16,8 +16,6 @@ export interface IKeyItem extends JsonWebKeyEdDSAPublic {
   receipt?: string;
   id?: number;
   d?: string;
-  creationDate?: string;
-  expiryDate?: string;
 }
 
 // Define an interface for a wrap key
