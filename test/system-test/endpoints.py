@@ -2,96 +2,54 @@ import json
 import os
 import subprocess
 
-import requests
-
 REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
-def kms_request(endpoint, auth, method="GET", headers=[], body=None):
-    delimiter = "\n___END___"
-    header_arg = []
-    for header in headers:
-        header_arg.extend(["-H", f'"{header}"'])
-    cert = ""
-    if auth == "jwt":
-        res = requests.post(
-            url="http://localhost:3000/token",
-        )
-        header_arg.extend(["-H", f'Authorization: Bearer {json.loads(res.content)["access_token"]}'])
-    elif auth == "member_cert":
-        cert = f"{REPO_ROOT}/workspace/sandbox_common/member0_cert.pem"
-    else:
-        cert = f"{REPO_ROOT}/workspace/sandbox_common/user0_cert.pem"
-    resp = subprocess.run(
-        [
-            "curl",
-            "-k",
-            endpoint,
-            "-X", method,
-            "--cacert",
-            f"{REPO_ROOT}/workspace/sandbox_common/service_cert.pem",
-            *([
-                "--cert",
-                f"{REPO_ROOT}/workspace/sandbox_common/member0_cert.pem",
-                "--key",
-                f"{REPO_ROOT}/workspace/sandbox_common/member0_privk.pem",
-            ] if cert != "" else []),
-            *header_arg,
-            *(["-d", body] if body is not None else []),
-            "-s",
-            "-w", f"{delimiter}%{{http_code}}\n"
-        ],
+def call_endpoint(endpoint, **kwargs):
+
+    command = [f"scripts/kms/endpoints/{endpoint}.sh"]
+    for k, v in kwargs.items():
+        command.extend([f'--{k.replace("_", "-")}', str(v)])
+
+    *response, status_code = subprocess.run(
+        command,
         cwd=REPO_ROOT,
         check=True,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
-    body, status_line = resp.stdout.rsplit(delimiter, 1)
-    status_code = int(status_line.strip('\n'))
-    if status_code != 200:
-        return (status_code, None)
-    else:
-        return (status_code, json.loads(body))
+    ).stdout.decode().splitlines()
 
+    print(f'Called "{" ".join(command)}"')
+    print(f"Response Code: {status_code}")
+    print(f'Response Body: {json.loads("".join(response) or "{}")}')
 
-def heartbeat(kms_url, auth="member_cert"):
-    return kms_request(f"{kms_url}/app/heartbeat", auth=auth)
-
-
-def key(kms_url, attestation, wrapping_key, kid=None, fmt=None, auth="member_cert"):
-    query_string = ""
-    if kid is not None or fmt is not None:
-        query_string = "?"
-    query_string += "&".join([
-        *([f"kid={kid}"] if kid is not None else []),
-        *([f"fmt={fmt}"] if fmt is not None else []),
-    ])
-    return kms_request(
-        endpoint=f"{kms_url}/app/key{query_string}",
-        method="POST",
-        body=f'{{\"attestation\": {attestation}, \"wrappingKey\": {wrapping_key}}}',
-        auth=auth,
+    return (
+        int(status_code),
+        json.loads("".join(response) or '{}'),
     )
 
 
-def listpubkeys(kms_url, auth="member_cert"):
-    return kms_request(f"{kms_url}/app/listpubkeys", auth=auth)
+def heartbeat(**kwargs):
+    return call_endpoint("heartbeat", **kwargs)
 
 
-def pubkey(kms_url, kid=None, fmt=None, auth="member_cert"):
-    query_string = ""
-    if kid is not None or fmt is not None:
-        query_string = "?"
-    query_string += "&".join([
-        *([f"kid={kid}"] if kid is not None else []),
-        *([f"fmt={fmt}"] if fmt is not None else []),
-    ])
-    return kms_request(f"{kms_url}/app/pubkey{query_string}", auth=auth)
+def key(**kwargs):
+    return call_endpoint("key", **kwargs)
 
 
-def refresh(kms_url, auth="member_cert"):
-    return kms_request(f"{kms_url}/app/refresh", method="POST", auth=auth)
+def listpubkeys(**kwargs):
+    return call_endpoint("listpubkeys", **kwargs)
 
 
-def keyReleasePolicy(kms_url, auth="member_cert"):
-    return kms_request(f"{kms_url}/app/keyReleasePolicy", auth=auth)
+def pubkey(**kwargs):
+    return call_endpoint("pubkey", **kwargs)
+
+
+def refresh(**kwargs):
+    return call_endpoint("refresh", **kwargs)
+
+
+def keyReleasePolicy(**kwargs):
+    return call_endpoint("keyReleasePolicy", **kwargs)
+
+
+def settingsPolicy(**kwargs):
+    return call_endpoint("settingsPolicy", **kwargs)

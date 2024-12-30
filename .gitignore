@@ -4,10 +4,12 @@ package-lock.json
 vol
 .venv_ccf_sandbox
 workspace*
+jwt_issuer_workspace*
 .env
 hello/
 ccf-app/
 nohup.out
 aad.env
 *.log
+temp*/
 __pycache__/

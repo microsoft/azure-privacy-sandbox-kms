@@ -145,17 +145,13 @@ class Demo {
     // authorization on heartbeat
     const member = this.members[0];
     console.log(`📝 Heartbeat...`);
-    let [statusCode, hearthBeatResponse] = await Api.heartbeat(
+    let [statusCode, _] = await Api.heartbeat(
       this.demoProps,
       member,
       this.createHttpsAgent("", AuthKinds.JWT),
       access_token,
     );
     Demo.assert("OK statusCode", statusCode == 200);
-    Demo.assert(
-      "response.description.length > 0",
-      hearthBeatResponse.description.length > 0,
-    );
     //#endregion
 
     //#region refresh
@@ -270,7 +266,7 @@ class Demo {
       } else if (statusCode !== 200) {
         throw new Error(`🛑 [TEST FAILURE]: Expected ${statusCode} to be 200`);
       }
-    } while (statusCode !== 200);
+    } while (statusCode == 202);
 
     // Test with JWT
     console.log(`📝 Get wrapped key with JWT...`);

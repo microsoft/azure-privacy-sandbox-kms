@@ -1,0 +1,11 @@
+{
+  "actions": [
+    {
+      "name": "transition_node_to_trusted",
+      "args": {
+        "node_id": "${NODE_ID}",
+        "valid_from": "${VALID_FROM}"
+      }
+    }
+  ]
+}

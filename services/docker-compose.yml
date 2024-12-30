@@ -5,6 +5,12 @@ services:
       file: ./ccf-sandbox/docker-compose.yml
       service: ccf-sandbox
 
+  ccf-sandbox-joiner:
+    image: azurekms.azurecr.io/ccf_sandbox/${CCF_PLATFORM:-virtual}:latest
+    extends:
+      file: ./ccf-sandbox/docker-compose.yml
+      service: ccf-sandbox-joiner
+
   jwt-issuer:
     image: azurekms.azurecr.io/jwt_issuer:latest
     build:
@@ -27,4 +33,4 @@ services:
       interval: 1s
       retries: 120
     volumes:
-      - ${WORKSPACE:-./}:/workspace
+      - ${JWT_ISSUER_WORKSPACE:-./}:/workspace

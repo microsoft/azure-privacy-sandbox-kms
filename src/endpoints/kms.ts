@@ -5,18 +5,17 @@ import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../utils/ServiceResult";
 import { enableEndpoint } from "../utils/Tooling";
 import { ServiceRequest } from "../utils/ServiceRequest";
-import { Settings } from "../policies/Settings";
+import { LogContext } from "../utils/Logger";
 
 // Enable the endpoint
 enableEndpoint();
 
 export interface IAuthResponse {
   auth: ccfapp.AuthnIdentityCommon;
-  description: string[];
 }
 
 export interface IHeartbeatResponse {
-  description: string[];
+  status: string;
 }
 
 /*
@@ -28,25 +27,16 @@ export interface IHeartbeatResponse {
 export const auth = (
   request: ccfapp.Request<void>,
 ): ServiceResult<string | IAuthResponse> => {
-  const name = "auth";
-  const serviceRequest = new ServiceRequest<void>(name, request);
+  const logContext = new LogContext().appendScope("authEndpoint");
+  const serviceRequest = new ServiceRequest<void>(logContext, request);
 
   // check if caller has a valid identity
   const [policy, isValidIdentity] = serviceRequest.isAuthenticated();
   if (isValidIdentity.failure) return isValidIdentity;
 
-  const settings = Settings.loadSettings();
-  const description = [
-    settings.settings.service.name,
-    settings.settings.service.description,
-    settings.settings.service.version,
-    settings.settings.service.debug.toString(),
-  ];
-
   return ServiceResult.Succeeded<IAuthResponse>({
-    auth: policy!,
-    description,
-  });
+    auth: policy!
+  }, logContext);
 };
 
 /*
@@ -58,18 +48,12 @@ export const auth = (
 export const heartbeat = (
   request: ccfapp.Request<void>,
 ): ServiceResult<string | IHeartbeatResponse> => {
-  const name = "heartbeat";
-  new ServiceRequest<void>(name, request);
+  const logContext = new LogContext().appendScope("heartbeatEndpoint");
+  new ServiceRequest<void>(logContext, request);
 
-  const settings = Settings.loadSettings();
-  const description = [
-    settings.settings.service.name,
-    settings.settings.service.description,
-    settings.settings.service.version,
-    settings.settings.service.debug.toString(),
-  ];
+  const description = {
+    status: "Service is running",
+  };
 
-  return ServiceResult.Succeeded<IHeartbeatResponse>({
-    description,
-  });
+  return ServiceResult.Succeeded<IHeartbeatResponse>(description, logContext);
 };

@@ -1,0 +1,96 @@
+name: Cleanup
+
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  cleanup-aci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log into Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
+          tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
+          subscription-id: 7ca35580-fc67-469c-91a7-68b38569ca6e
+
+      - run: |
+          source services/cacitesting.env
+          aci_names=$(az container list \
+              --resource-group "$RESOURCE_GROUP" \
+              --query "[?starts_with(name, 'kms-') || starts_with(name, 'lb-')].name" \
+              -o tsv)
+
+          for name in $aci_names; do
+              echo "Deleting ACI: $name"
+              az container delete \
+                  --name "$name" \
+                  --resource-group "$RESOURCE_GROUP" \
+                  --yes
+          done
+
+  cleanup-storage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log into Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
+          tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
+          subscription-id: 7ca35580-fc67-469c-91a7-68b38569ca6e
+
+      - run: |
+          source services/cacitesting.env
+          storage_accounts=$(az storage account list \
+            --resource-group "$RESOURCE_GROUP" \
+            --query "[?starts_with(name, 'ccf')].name" \
+            -o tsv)
+
+          # Loop through each storage account and delete it
+          for account in $storage_accounts; do
+            echo "Deleting Storage Account: $account"
+            az storage account delete \
+              --name "$account" \
+              --resource-group "$RESOURCE_GROUP" \
+              --yes
+          done
+
+  cleanup-akv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log into Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
+          tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
+          subscription-id: 7ca35580-fc67-469c-91a7-68b38569ca6e
+
+      - run: |
+          source services/cacitesting.env
+          key_vaults=$(az keyvault list \
+            --resource-group "$RESOURCE_GROUP" \
+            --query "[].name" \
+            -o tsv \
+          )
+
+          for kv in $key_vaults; do
+            echo "Deleting Key Vault: $kv"
+            az keyvault delete \
+              --name "$kv" \
+              --resource-group "$RESOURCE_GROUP" > /dev/null 2>&1
+          done

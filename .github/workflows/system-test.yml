@@ -1,0 +1,62 @@
+name: System Test
+
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      test:
+        type: string
+  workflow_call:
+    inputs:
+      test:
+        type: string
+
+jobs:
+
+  test:
+    name: ${{ inputs.test }} (${{ matrix.config.env }}) (${{ matrix.config.use_akv && 'akv' || 'local' }}_keys)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - env: sandbox_local
+            use_akv: false
+            threads: 1
+          - env: sandbox_local
+            use_akv: true
+            threads: 1
+          - env: az-cleanroom-aci
+            use_akv: false
+            threads: auto
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log into Azure
+        uses: azure/login@v2
+        with:
+          # Use a managed identity to authenticate to Azure
+          # Use properties such as client-id, tenant-id, and subscription-id in the secrets and vars
+          # The managed identity should have a federated credential with subject identiier repo:<organization>/<repo>:pull_request
+          # Use subject identifier repo:<organization>/<repo>:ref:refs/heads/<branch> for running manual CI's
+          client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
+          tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
+          subscription-id: 7ca35580-fc67-469c-91a7-68b38569ca6e
+
+      - name: Install Dependencies
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/tools/install-deps.sh
+
+      - name: Run System Tests
+        env:
+          TEST_ENVIRONMENT: ccf/${{ matrix.config.env }}
+          USE_AKV: ${{ matrix.config.use_akv }}
+        run: |
+          pytest -sv \
+            test/system-test/test_${{ inputs.test }}.py \
+            -n ${{ matrix.config.threads }}
