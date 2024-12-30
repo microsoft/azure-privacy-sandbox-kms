@@ -38,11 +38,9 @@ export const refresh = (
     // since OHTTP is limited to 2 char ids, we can only have ids from 10 to 99
     // So the current logic is to have ids rotate from 10 to 99
     const keyItem = KeyGeneration.generateKeyItem(id % 90 + 10);
-    
+
     // Store HPKE key pair kid
     keyItem.kid = `${keyItem.kid!}_${id}`;
-    keyItem.creationDate = creationDate.toISOString();
-    keyItem.expiryDate = expiryDate.toISOString();
     hpkeKeyIdMap.storeItem(id, keyItem.kid);
 
     // Store HPKE key pair
