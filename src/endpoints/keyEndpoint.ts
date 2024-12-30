@@ -178,7 +178,10 @@ export const key = (
     );
   }
 
-  const keyRotation = KeyRotationPolicy.loadKeyRotationPolicyFromMap(keyRotationPolicyMap, logContext).keyRotationPolicy;
+  const keyRotation = KeyRotationPolicy.loadKeyRotationPolicyFromMap(
+    keyRotationPolicyMap,
+    logContext
+  ).keyRotationPolicy;
   const gracePeriodSeconds = keyRotation.gracePeriodSeconds;
   const rotationIntervalSeconds = keyRotation.rotationIntervalSeconds;
   // Get the current time using TrustedTime
@@ -189,11 +192,14 @@ export const key = (
   const creationDate = new Date(keyItem.timestamp!);
 
   // Calculate the expiry date of the key by adding the rotation interval to the creation date
-  const expiryDateMillis = creationDate.getTime() + rotationIntervalSeconds * 1000;
+  const expiryDateMillis =
+    creationDate.getTime() + rotationIntervalSeconds * 1000;
   const expiryDate = new Date(expiryDateMillis);
-  // Calculate the grace period start date by subtracting the grace period days from the expiry date
+  // Calculate the grace period start date by subtracting the grace period from the expiry date
   const gracePeriodMillis = gracePeriodSeconds * 1000;
-  const gracePeriodStartDate = new Date(expiryDate.getTime() - gracePeriodMillis);
+  const gracePeriodStartDate = new Date(
+    expiryDate.getTime() - gracePeriodMillis
+  );
 
   if (currentDate > expiryDate) {
     return ServiceResult.Failed<string>(
