@@ -79,28 +79,26 @@ def setup_akv():
 
 @pytest.fixture()
 def setup_ccf():
-    deployment_name = os.getenv("DEPLOYMENT_NAME", f"kms-{unique_string()}")
-    try:
-        call_script(
-            [f"scripts/{TEST_ENVIRONMENT}/up.sh", "--force-recreate"],
-            env={
-                **os.environ,
-                "DEPLOYMENT_NAME": deployment_name,
-            },
-        )
-        yield
-
-    except Exception:
-        raise
-
-    finally:
-        call_script(
-            [f"scripts/{TEST_ENVIRONMENT}/down.sh"],
-            env={
-                **os.environ,
-                "DEPLOYMENT_NAME": deployment_name,
-            },
-        )
+    for _ in range(10):
+        try:
+            deployment_name = os.getenv("DEPLOYMENT_NAME", f"kms-{unique_string()}")
+            call_script(
+                [f"scripts/{TEST_ENVIRONMENT}/up.sh", "--force-recreate"],
+                env={
+                    **os.environ,
+                    "DEPLOYMENT_NAME": deployment_name,
+                },
+            )
+            yield
+        except Exception: ...
+        finally:
+            call_script(
+                [f"scripts/{TEST_ENVIRONMENT}/down.sh"],
+                env={
+                    **os.environ,
+                    "DEPLOYMENT_NAME": deployment_name,
+                },
+            )
 
 
 @pytest.fixture()
