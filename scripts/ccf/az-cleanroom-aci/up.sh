@@ -27,6 +27,7 @@ az-cleanroom-aci-up() {
 
     retries=10
     ccf_up=false
+    set +e
     while [ $ccf_up = false ] && [ $retries -gt 0 ]; do
         az cleanroom ccf network up \
             --subscription $SUBSCRIPTION \
@@ -39,6 +40,7 @@ az-cleanroom-aci-up() {
         fi
         retries=$((retries - 1))
     done
+    set -e
 
     export KMS_URL=`az-cleanroom-aci-get-url`
 
@@ -47,7 +49,7 @@ az-cleanroom-aci-up() {
     export KMS_MEMBER_PRIVK_PATH="$WORKSPACE/ccf-operator_privk.pem"
 
     mkdir -p $WORKSPACE/proposals
-    
+
     set +e
 }
 
