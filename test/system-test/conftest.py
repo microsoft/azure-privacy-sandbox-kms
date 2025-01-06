@@ -89,9 +89,8 @@ def setup_ccf():
                     "DEPLOYMENT_NAME": deployment_name,
                 },
             )
-            yield
-        except Exception: ...
-        finally:
+            break
+        except Exception:
             call_script(
                 [f"scripts/{TEST_ENVIRONMENT}/down.sh"],
                 env={
@@ -99,6 +98,16 @@ def setup_ccf():
                     "DEPLOYMENT_NAME": deployment_name,
                 },
             )
+
+    yield
+
+    call_script(
+        [f"scripts/{TEST_ENVIRONMENT}/down.sh"],
+        env={
+            **os.environ,
+            "DEPLOYMENT_NAME": deployment_name,
+        },
+    )
 
 
 @pytest.fixture()
