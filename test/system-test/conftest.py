@@ -52,7 +52,7 @@ def call_script(args, **kwargs):
 def setup_jwt_issuer():
     try:
         call_script(
-            "./scripts/jwt_issuer/up.sh",
+            ["./scripts/jwt_issuer/up.sh", "--build"],
             env={
                 **os.environ,
                 "JWT_ISSUER_WORKSPACE": f"{REPO_ROOT}/jwt_issuer_workspace",

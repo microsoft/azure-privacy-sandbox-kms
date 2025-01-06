@@ -18,7 +18,7 @@ jwt-issuer-up() {
     set +e
 }
 
-jwt-issuer-up
+jwt-issuer-up "$@"
 
 jq -n '{
     JWT_ISSUER_WORKSPACE: env.JWT_ISSUER_WORKSPACE,
