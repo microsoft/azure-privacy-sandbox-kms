@@ -91,13 +91,15 @@ def setup_ccf():
             )
             break
         except Exception:
-            call_script(
-                [f"scripts/{TEST_ENVIRONMENT}/down.sh"],
-                env={
-                    **os.environ,
-                    "DEPLOYMENT_NAME": deployment_name,
-                },
-            )
+            try:
+                call_script(
+                    [f"scripts/{TEST_ENVIRONMENT}/down.sh"],
+                    env={
+                        **os.environ,
+                        "DEPLOYMENT_NAME": deployment_name,
+                    },
+                )
+            except Exception: ...
 
     yield
 
