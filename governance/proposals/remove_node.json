@@ -1,0 +1,10 @@
+{
+  "actions": [
+    {
+      "name": "remove_node",
+      "args": {
+        "node_id": "${NODE_ID}"
+      }
+    }
+  ]
+}

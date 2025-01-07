@@ -5,13 +5,23 @@ import tempfile
 from contextlib import contextmanager
 
 REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
+TEST_ENVIRONMENT = os.getenv("TEST_ENVIRONMENT", "ccf/sandbox_local")
 
 
-def deploy_app_code():
+def get_final_json(s):
+    for sub in reversed(s.split("{")):
+        try:
+            return json.loads("{" + sub)
+        except json.JSONDecodeError:
+            ...
+
+
+def deploy_app_code(**kwargs):
     subprocess.run(
         "scripts/kms/js_app_set.sh",
         cwd=REPO_ROOT,
         check=True,
+        **kwargs,
     )
 
 
@@ -27,8 +37,9 @@ def apply_settings_policy(policy=None):
     )
 
 
-def apply_kms_constitution(resolve="auto_accept", **kwargs):
-    subprocess.run(
+def apply_kms_constitution(resolve="auto_accept", get_logs=False, **kwargs):
+    get_logs_arg = {"stdout": subprocess.PIPE} if get_logs else {}
+    res = subprocess.run(
         [
             "./scripts/kms/constitution_set.sh",
             "--resolve", f"./governance/constitution/resolve/{resolve}.js",
@@ -37,7 +48,12 @@ def apply_kms_constitution(resolve="auto_accept", **kwargs):
         ],
         cwd=REPO_ROOT,
         check=True,
+        **get_logs_arg,
     )
+
+    # Parse out the returned json from the proposal
+    if get_logs:
+        return json.loads("{" + res.stdout.decode().split("{", 1)[1])
 
 
 def apply_key_release_policy():
@@ -72,11 +88,81 @@ def trust_jwt_issuer(iss=""):
         check=True,
     )
 
+def add_member(member_name):
+    subprocess.run(
+        ["scripts/ccf/member/add.sh", member_name],
+        cwd=REPO_ROOT,
+        check=True,
+    )
 
+
+def member_info(member_name):
+    return json.loads(subprocess.run(
+        ["scripts/ccf/member/info.sh", member_name],
+        cwd=REPO_ROOT,
+        check=True,
+        stdout=subprocess.PIPE
+    ).stdout.decode())
+
+
+def use_member(member_name):
+    env_vars = json.loads(subprocess.run(
+        ["scripts/ccf/member/use.sh", member_name],
+        cwd=REPO_ROOT,
+        check=True,
+        stdout=subprocess.PIPE
+    ).stdout.decode())
+    os.environ.update(env_vars)
+
+
+def nodes_scale(node_count, get_logs=False):
+    get_logs_arg = {"stdout": subprocess.PIPE} if get_logs else {}
+    res = subprocess.run(
+        [f"scripts/{TEST_ENVIRONMENT}/scale-nodes.sh", "-n", str(node_count)],
+        cwd=REPO_ROOT,
+        check=True,
+        **get_logs_arg,
+    )
+    if get_logs:
+        return get_final_json(res.stdout.decode())
+
+
+def get_node_info(node_url):
+    res = subprocess.run(
+        [
+            "curl",
+            f"https://{node_url}/node/network/nodes/self",
+            "--cacert", os.getenv("KMS_SERVICE_CERT_PATH"),
+            "-w", "'\n%{http_code}'",
+        ],
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+    ).stdout.decode()
+
+    *response, status_code = res.strip("'").splitlines()
+    return (
+        int(status_code),
+        json.loads("".join(response).strip("\'") or "{}"),
+    )
 def propose(proposal, get_logs=False):
     get_logs_arg = {"stdout": subprocess.PIPE} if get_logs else {}
     res = subprocess.run(
         ["scripts/ccf/propose.sh", proposal],
+        cwd=REPO_ROOT,
+        check=True,
+        **get_logs_arg,
+    )
+
+    # Parse out the returned json from the proposal
+    if get_logs:
+        return json.loads("{" + res.stdout.decode().split("{", 1)[1])
+
+
+def vote(proposal_id, vote, get_logs=False):
+    get_logs_arg = {"stdout": subprocess.PIPE} if get_logs else {}
+    res = subprocess.run(
+        ["scripts/ccf/vote.sh", proposal_id, vote],
         cwd=REPO_ROOT,
         check=True,
         **get_logs_arg,

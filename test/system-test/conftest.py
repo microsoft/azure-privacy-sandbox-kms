@@ -12,7 +12,7 @@ from utils import deploy_app_code
 
 REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 TEST_ENVIRONMENT = os.getenv("TEST_ENVIRONMENT", "ccf/sandbox_local")
-USE_AKV = os.getenv("USE_AKV", False)
+USE_AKV = os.getenv("USE_AKV", 'False').lower() == 'true'
 
 
 def unique_string():
@@ -49,7 +49,13 @@ def call_script(args, **kwargs):
 @pytest.fixture(scope="session")
 def setup_jwt_issuer():
     try:
-        call_script(["./scripts/jwt_issuer/up.sh", "--force-recreate"])
+        call_script(
+            "./scripts/jwt_issuer/up.sh",
+            env={
+                **os.environ,
+                "JWT_ISSUER_WORKSPACE": f"{REPO_ROOT}/jwt_issuer_workspace",
+            },
+        )
         yield
     finally:
         call_script("./scripts/jwt_issuer/down.sh")
@@ -73,28 +79,35 @@ def setup_akv():
 
 @pytest.fixture()
 def setup_ccf():
-    deployment_name = os.getenv("DEPLOYMENT_NAME", f"kms-{unique_string()}")
-    try:
-        call_script(
-            [f"scripts/{TEST_ENVIRONMENT}/up.sh", "--force-recreate"],
-            env={
-                **os.environ,
-                "DEPLOYMENT_NAME": deployment_name,
-            },
-        )
-        yield
+    for _ in range(10):
+        try:
+            deployment_name = os.getenv("DEPLOYMENT_NAME", f"kms-{unique_string()}")
+            call_script(
+                [f"scripts/{TEST_ENVIRONMENT}/up.sh", "--force-recreate"],
+                env={
+                    **os.environ,
+                    "DEPLOYMENT_NAME": deployment_name,
+                },
+            )
+            break
+        except Exception:
+            call_script(
+                [f"scripts/{TEST_ENVIRONMENT}/down.sh"],
+                env={
+                    **os.environ,
+                    "DEPLOYMENT_NAME": deployment_name,
+                },
+            )
 
-    except Exception:
-        raise
+    yield
 
-    finally:
-        call_script(
-            [f"scripts/{TEST_ENVIRONMENT}/down.sh"],
-            env={
-                **os.environ,
-                "DEPLOYMENT_NAME": deployment_name,
-            },
-        )
+    call_script(
+        [f"scripts/{TEST_ENVIRONMENT}/down.sh"],
+        env={
+            **os.environ,
+            "DEPLOYMENT_NAME": deployment_name,
+        },
+    )
 
 
 @pytest.fixture()
@@ -106,3 +119,4 @@ def setup_kms(setup_ccf, setup_akv):
         ])
     deploy_app_code()
     yield
+    print("") # Prevents cleanup overwriting result
