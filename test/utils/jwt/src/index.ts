@@ -6,7 +6,6 @@ import jwt from "jsonwebtoken";
 import fs from "fs";
 import { Request, Response } from "express";
 import * as Keys from "./keys";
-import * as Proposals from "./proposals";
 
 const proposalsPath = `${process.env.KMS_WORKSPACE}/proposals`;
 const privateKeyPath = `${process.env.KMS_WORKSPACE}/private.pem`;
@@ -19,34 +18,12 @@ const sub = "c0d8e9a7-6b8e-4e1f-9e4a-3b2c1d0f5a6b";
 const name = "Cool caller";
 const expiry = 1000;
 
-const createProposalsFolder = async (): Promise<void> => {
-  console.log(`Create proposals path: ${proposalsPath}`);
-  // make sure the proposals folder exists.
-  await fs.promises
-    .mkdir(proposalsPath, { recursive: true })
-    .catch(console.error);
-};
-
 (async () => {
   // Generate private key and proposals if needed
   console.log(`Check for IDP private key path: ${privateKeyPath}`);
   if (!fs.existsSync(privateKeyPath)) {
     console.log(`Generate IDP private key path: ${privateKeyPath}`);
     await Keys.generate(privateKeyPath, certificatePath);
-
-    // Create folders
-    await createProposalsFolder();
-
-    // generate issuer proposal
-    await Proposals.issuerProposal(host, proposalsPath);
-
-    // generate issuer configuration used in sandbox
-    await Proposals.issuerConfiguration(
-      privateKeyPath,
-      certificatePath,
-      proposalsPath,
-      kid,
-    );
   }
 })();
 
