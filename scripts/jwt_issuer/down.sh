@@ -5,4 +5,7 @@
 
 set -e
 
-docker compose -f services/docker-compose.yml down jwt-issuer --remove-orphans
+docker compose -p ${UNIQUE_ID:-default} -f services/docker-compose.yml down jwt-issuer --remove-orphans
+
+unset JWT_ISSUER_WORKSPACE
+unset JWT_ISSUER
