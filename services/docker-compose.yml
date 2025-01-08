@@ -20,17 +20,8 @@ services:
     environment:
       - KMS_WORKSPACE=/workspace
     healthcheck:
-      test:
-        [
-          "CMD",
-          "curl",
-          "-k",
-          "--fail",
-          "-X",
-          "POST",
-          "http://localhost:3000/token",
-        ]
+      test: "curl -k --fail -X POST $(cat /workspace/jwt_issuer_address)/token"
       interval: 1s
       retries: 120
     volumes:
-      - ${JWT_ISSUER_WORKSPACE:-./}:/workspace
+      - ${JWT_ISSUER_WORKSPACE:-../jwt_issuers_workspace/default}:/workspace

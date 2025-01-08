@@ -56,12 +56,12 @@ stop-all: stop-host stop-idp # Stop all services
 # idp commands to issue JWT
 start-idp:  ## 🏃 Start the idp for testing jwt
 	@echo -e "\e[34m$@\e[0m" || true
-	source ./scripts/jwt_issuer/up.sh
+	source ./scripts/jwt_issuer/up.sh --build
 
 # Start hosting the application using `sandbox.sh` and enable custom JWT authentication
 start-host: stop-host  ## 🏃 Start the CCF network using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
-	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh && \
+	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh --build && \
 	source ./scripts/kms/js_app_set.sh && \
 	source ./scripts/kms/constitution_set.sh \
 		--resolve ./governance/constitution/resolve/auto_accept.js \
@@ -70,8 +70,8 @@ start-host: stop-host  ## 🏃 Start the CCF network using Sandbox.sh
 start-host-idp: stop-host stop-idp build ## 🏃 Start the CCF network && idp using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
 	@echo "Executing: $(COMMAND)"
-	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh && \
-	source ./scripts/jwt_issuer/up.sh && \
+	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh --build && \
+	source ./scripts/jwt_issuer/up.sh --build && \
 	source ./scripts/kms/constitution_set.sh \
 		--resolve ./governance/constitution/resolve/auto_accept.js \
 		--actions ./governance/constitution/actions/kms.js && \

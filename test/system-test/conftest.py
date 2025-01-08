@@ -29,6 +29,8 @@ def unique_string():
         .replace("_", "") \
         .lower()[:12]
 
+os.environ["UNIQUE_ID"] = unique_string()
+
 
 def call_script(args, **kwargs):
     res = subprocess.run(
@@ -46,11 +48,11 @@ def call_script(args, **kwargs):
         ...
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def setup_jwt_issuer():
     try:
         call_script(
-            "./scripts/jwt_issuer/up.sh",
+            ["./scripts/jwt_issuer/up.sh", "--build"],
             env={
                 **os.environ,
                 "JWT_ISSUER_WORKSPACE": f"{REPO_ROOT}/jwt_issuer_workspace",
@@ -91,13 +93,15 @@ def setup_ccf():
             )
             break
         except Exception:
-            call_script(
-                [f"scripts/{TEST_ENVIRONMENT}/down.sh"],
-                env={
-                    **os.environ,
-                    "DEPLOYMENT_NAME": deployment_name,
-                },
-            )
+            try:
+                call_script(
+                    [f"scripts/{TEST_ENVIRONMENT}/down.sh"],
+                    env={
+                        **os.environ,
+                        "DEPLOYMENT_NAME": deployment_name,
+                    },
+                )
+            except Exception: ...
 
     yield
 
