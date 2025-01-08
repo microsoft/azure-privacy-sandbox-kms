@@ -33,20 +33,6 @@ const createProposalsFolder = async (): Promise<void> => {
   if (!fs.existsSync(privateKeyPath)) {
     console.log(`Generate IDP private key path: ${privateKeyPath}`);
     await Keys.generate(privateKeyPath, certificatePath);
-
-    // Create folders
-    await createProposalsFolder();
-
-    // generate issuer proposal
-    await Proposals.issuerProposal(host, proposalsPath);
-
-    // generate issuer configuration used in sandbox
-    await Proposals.issuerConfiguration(
-      privateKeyPath,
-      certificatePath,
-      proposalsPath,
-      kid,
-    );
   }
 })();
 
