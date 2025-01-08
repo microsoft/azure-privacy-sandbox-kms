@@ -42,7 +42,6 @@ const token = (req: Request, res: Response) => {
     "x-ms-azurevm-osversion-major": 22,
     ...req.query, // Merge query parameters into the payload
   };
-
   console.log(`Payload: `, payload);
 
   const access_token = jwt.sign(payload, privateKey, {
