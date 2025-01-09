@@ -61,7 +61,8 @@ app.get("/keys", (req: Request, res: Response) => {
   res.send({ keys: [jwk] });
 });
 
-const server = app.listen(0, () => {
+const port = process.env.JWT_ISSUER_PORT || 0;
+const server = app.listen(port, () => {
   const addressInfo = server.address();
   if (addressInfo && typeof addressInfo !== "string") {
     const { port } = addressInfo;
