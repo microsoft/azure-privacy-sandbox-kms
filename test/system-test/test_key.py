@@ -1,6 +1,6 @@
 import pytest
 from endpoints import key, refresh
-from utils import apply_kms_constitution, apply_key_release_policy, trust_jwt_issuer, get_test_attestation, get_test_public_wrapping_key
+from utils import apply_kms_constitution, apply_key_release_policy, trust_jwt_issuer, get_test_attestation, get_test_public_wrapping_key, decrypted_wrapped_key
 
 @pytest.mark.xfail(strict=True)
 def test_no_keys(setup_kms):
@@ -45,7 +45,6 @@ def test_with_keys_and_policy(setup_kms):
     # Key isn't actually returned here, just the id of a key
     assert key_json["wrappedKid"] != ""
     assert key_json["wrapped"] == ""
-
 
 def test_with_keys_and_policy_jwt_auth(setup_kms, setup_jwt_issuer):
     apply_kms_constitution()

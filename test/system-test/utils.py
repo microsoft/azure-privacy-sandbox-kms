@@ -184,19 +184,41 @@ def read_pem_key(file_name):
         return f'"{key}"'
 
 def get_test_public_wrapping_key():
-    return read_pem_key('../data-samples/publicWrapKey.pem')
+    with open(os.path.join(os.path.dirname(__file__), '../data-samples/publicWrapKey.pem'), 'r') as file:
+        key = file.read().strip()
+        # Escape newlines and wrap the key in double quotes
+        key = key.replace("\n", "\\n")
+        #return f"{key}"
+        return f'"{key}"'
 
 def get_test_private_wrapping_key():
-    return read_pem_key('../data-samples/privateWrapKey.pem')
-
+    with open(os.path.join(os.path.dirname(__file__), '../data-samples/privateWrapKey.pem'), 'r') as file:
+        key = file.read().strip()
+        return key
+"""
 def decrypt_key(wrapped_key):
-    private_key = get_test_private_wrapping_key()
-    private_key = RSA.import_key(private_key)
+    private_key = get_test_private_wrapping_key().replace("PRIVATE", "OPENSSH PRIVATE")
     cipher = PKCS1_OAEP.new(private_key)
     wrapped_key = base64.b64decode(wrapped_key)
     return cipher.decrypt(wrapped_key)
+"""
+def decrypt_key(wrapped_key):
+    # Load the private key from the PEM file
+    private_key_data = get_test_private_wrapping_key()
+    private_key = RSA.import_key(private_key_data)  # Convert PEM string to RSA key object
+    print(f"Wrapped Key: {wrapped_key}, Length: {len(wrapped_key)}")
 
+    # Initialize the cipher with the private key
+    cipher = PKCS1_OAEP.new(private_key)
 
+    # Decode the wrapped key from base64 and decrypt it
+    wrapped_key = base64.b64decode(wrapped_key)
+    print(f"Decoded Key Length: {len(wrapped_key)}")
+    return cipher.decrypt(wrapped_key)
+
+# decrypt wrapped key
+def decrypted_wrapped_key(wrapped_key):
+    return decrypt_key(wrapped_key).decode()
 
 @contextmanager
 def get_test_action():
