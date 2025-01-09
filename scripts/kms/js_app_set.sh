@@ -4,7 +4,7 @@
 # Licensed under the MIT license.
 
 js-app-set() {
-  set -ex
+  set -e
 
   REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../..")"
 
