@@ -27,11 +27,11 @@ jobs:
           tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
           subscription-id: 7ca35580-fc67-469c-91a7-68b38569ca6e
 
+      - name: Use Orchestrator
+        run: cd scripts/ccf/az-cleanroom-aci/orchestrator
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
       - name: Test Orchestrator
-        uses: devcontainers/ci@v0.3
-        with:
-          push: never
-          configFile: scripts/ccf/az-cleanroom-aci/orchestrator/.devcontainer/devcontainer.json
-          mounts: |
-            source=${{ github.workspace }}/.azure,target=/root/.azure,type=bind
-          runCmd: pytest -sv scripts/ccf/az-cleanroom-aci/orchestrator/test.py
+        run: pytest -sv test.py
