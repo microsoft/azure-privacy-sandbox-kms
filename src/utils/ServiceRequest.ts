@@ -95,9 +95,6 @@ export class ServiceRequest<T> {
       }
     }
 
-    Logger.debug(`Request:`, this.logContext, JSON.stringify(requestWithoutAuth, null, 2));
-    this.query = queryParams(request, this.logContext);
-
     try {
       this.body = request.body.json();
     } catch (exception) {
@@ -107,6 +104,11 @@ export class ServiceRequest<T> {
       this.success = false;
       return;
     }
+
+    requestWithoutAuth.body = this.body;
+    Logger.debug(`Request:`, this.logContext, JSON.stringify(requestWithoutAuth, null, 2));
+    this.query = queryParams(request, this.logContext);
+
     this.success = true;
   }
 
