@@ -217,7 +217,6 @@ make start-host-idp
 ### Test identity provier in seperate terminal
 
 ```
-export AadEndpoint=http://localhost:3000/token
 ./scripts/generate_access_token.sh
 ```
 

@@ -35,11 +35,19 @@ az-cleanroom-aci-scale-nodes() {
         read -p "Enter node count to scale to: " node_count
     fi
 
-    az cleanroom ccf network update \
-        --name $DEPLOYMENT_NAME \
-        --provider-client "$DEPLOYMENT_NAME-provider" \
-        --provider-config $WORKSPACE/providerConfig.json \
-        --node-count $node_count
+    retries=10
+    success=false
+    while [ $success = false ] && [ $retries -gt 0 ]; do
+        az cleanroom ccf network update \
+            --name $DEPLOYMENT_NAME \
+            --provider-client "$DEPLOYMENT_NAME-provider" \
+            --provider-config $WORKSPACE/providerConfig.json \
+            --node-count $node_count
+        if [ $? -eq 0 ]; then
+            success=true
+        fi
+        ((retries--))
+    done
 }
 
 az-cleanroom-aci-scale-nodes "$@"

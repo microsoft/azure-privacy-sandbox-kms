@@ -4,7 +4,7 @@ package-lock.json
 vol
 .venv_ccf_sandbox
 workspace*
-jwt_issuer_workspace*
+jwt_issuers_workspace*
 .env
 hello/
 ccf-app/
