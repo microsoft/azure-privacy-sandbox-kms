@@ -27,11 +27,8 @@ jobs:
           tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
           subscription-id: 7ca35580-fc67-469c-91a7-68b38569ca6e
 
-      - name: Use Orchestrator
-        run: cd scripts/ccf/az-cleanroom-aci/orchestrator
-
       - name: Install Dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r scripts/ccf/az-cleanroom-aci/orchestrator/requirements.txt
 
       - name: Test Orchestrator
-        run: pytest -sv test.py
+        run: pytest -sv scripts/ccf/az-cleanroom-aci/orchestrator/test.py
