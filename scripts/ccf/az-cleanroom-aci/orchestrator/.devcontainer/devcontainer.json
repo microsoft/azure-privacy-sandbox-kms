@@ -2,7 +2,7 @@
     "name": "CCF Orchestrator CI",
     "image": "mcr.microsoft.com/devcontainers/base:bullseye",
     "features": {
-      "ghcr.io/devcontainers/features/docker-in-docker:1": {},
+      "ghcr.io/devcontainers/features/docker-in-docker:2.12.0": {},
       "ghcr.io/devcontainers/features/python:1": {
         "version": "3.12.1"
       }
