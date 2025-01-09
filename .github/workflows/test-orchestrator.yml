@@ -20,18 +20,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Log into Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
+          tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
+          subscription-id: 7ca35580-fc67-469c-91a7-68b38569ca6e
+
       - name: Test Orchestrator
         uses: devcontainers/ci@v0.3
         with:
           push: never
           configFile: scripts/ccf/az-cleanroom-aci/orchestrator/.devcontainer/devcontainer.json
-          env:
-            AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-            AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-            AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          runCmd: |
-            az login --service-principal \
-              --username $AZURE_CLIENT_ID \
-              --password $AZURE_CLIENT_SECRET \
-              --tenant $AZURE_TENANT_ID
-            pytest -sv scripts/ccf/az-cleanroom-aci/orchestrator/test.py
+          mounts: |
+            source=${{ github.workspace }}/.azure,target=/root/.azure,type=bind
+          runCmd: pytest -sv scripts/ccf/az-cleanroom-aci/orchestrator/test.py
