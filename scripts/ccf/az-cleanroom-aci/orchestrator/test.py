@@ -107,8 +107,8 @@ def get_network_health():
         [
             "az", "cleanroom", "ccf", "network", "show-health",
             "--name", os.getenv("DEPLOYMENT_NAME"),
-            "--provider-client", f"{os.getenv("DEPLOYMENT_NAME")}-provider",
-            "--provider-config", f"{os.getenv("WORKSPACE")}/providerConfig.json",
+            "--provider-client", f'{os.getenv("DEPLOYMENT_NAME")}-provider',
+            "--provider-config", f'{os.getenv("WORKSPACE")}/providerConfig.json',
         ],
         check=True,
         stdout=subprocess.PIPE,
