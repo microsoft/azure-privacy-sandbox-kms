@@ -8,7 +8,6 @@ unwrap_key() {
     auth="member_cert"
     attestation=""
     wrappedKid=""
-    wrapped=""
     wrappingKey=""
 
     # Parse command-line arguments
@@ -20,10 +19,6 @@ unwrap_key() {
                 ;;
             --wrappedKid)
                 wrappedKid="$2"
-                shift 2
-                ;;
-            --wrapped)
-                wrapped="$2"
                 shift 2
                 ;;
             --wrapping-key)
@@ -48,7 +43,6 @@ unwrap_key() {
         auth_arg=(-H "Authorization: Bearer $(curl -X POST $JWT_ISSUER | jq -r '.access_token')")
     fi
 
-    #        -d "{\"attestation\":$attestation, \"wrappedKid\":$wrappedKid, \"wrapped\":\"\", \"wrappingKey\":$wrappingKey}" \
     curl $KMS_URL/app/unwrapKey \
         -X POST \
         --cacert $KMS_SERVICE_CERT_PATH \
