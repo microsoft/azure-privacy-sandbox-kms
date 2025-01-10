@@ -5,6 +5,7 @@ import tempfile
 from contextlib import contextmanager
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Hash import SHA256
 import base64
 
 REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -202,7 +203,7 @@ def decrypt_key(wrapped_key):
     print(f"Wrapped Key: {wrapped_key}, Length: {len(wrapped_key)}")
 
     # Initialize the cipher with the private key
-    cipher = PKCS1_OAEP.new(private_key)
+    cipher = PKCS1_OAEP.new(private_key, hashAlgo=SHA256)
 
     # Decode the wrapped key from base64 and decrypt it
     wrapped_key = base64.b64decode(wrapped_key)
