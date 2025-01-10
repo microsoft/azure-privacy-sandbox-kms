@@ -34,6 +34,9 @@ def heartbeat(**kwargs):
 def key(**kwargs):
     return call_endpoint("key", **kwargs)
 
+def unwrapKey(**kwargs):
+    return call_endpoint("unwrapKey", **kwargs)
+
 
 def listpubkeys(**kwargs):
     return call_endpoint("listpubkeys", **kwargs)
