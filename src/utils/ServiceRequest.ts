@@ -95,14 +95,11 @@ export class ServiceRequest<T> {
       }
     }
 
+    Logger.info(`Is there a body?`, this.logContext, JSON.stringify(request.body), request.body.json === undefined);
     try {
       this.body = request.body.json();
     } catch (exception) {
-      this.error = {
-        errorMessage: `${this.logContext.getBaseScope()}: No valid JSON request for ${this.logContext.getFormattedScopeString()}`,
-      };
-      this.success = false;
-      return;
+      Logger.info("No JSON body found", this.logContext);
     }
 
     requestWithoutAuth.body = this.body;
