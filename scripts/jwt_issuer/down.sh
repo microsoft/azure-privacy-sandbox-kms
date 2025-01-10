@@ -9,3 +9,4 @@ docker compose -p ${UNIQUE_ID:-default} -f services/docker-compose.yml down jwt-
 
 unset JWT_ISSUER_WORKSPACE
 unset JWT_ISSUER
+unset JWT_TOKEN_ISSUER_URL
