@@ -48,12 +48,13 @@ unwrap_key() {
         auth_arg=(-H "Authorization: Bearer $(curl -X POST $JWT_ISSUER | jq -r '.access_token')")
     fi
 
+    #        -d "{\"attestation\":$attestation, \"wrappedKid\":$wrappedKid, \"wrapped\":\"\", \"wrappingKey\":$wrappingKey}" \
     curl $KMS_URL/app/unwrapKey \
         -X POST \
         --cacert $KMS_SERVICE_CERT_PATH \
         "${auth_arg[@]}" \
         -H "Content-Type: application/json" \
-        -d "{\"attestation\":$attestation, \"wrappedKid\":$wrappedKid, \"wrapped\":\"\", \"wrappingKey\":$wrappingKey}" \
+        -d "{\"attestation\":$attestation, \"wrappedKid\":\"$wrappedKid\", \"wrapped\":\"\", \"wrappingKey\":$wrappingKey}" \
         -w '\n%{http_code}\n'
 }
 
