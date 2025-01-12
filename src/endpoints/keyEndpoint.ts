@@ -11,9 +11,11 @@ import { IAttestationReport } from "../attestation/ISnpAttestationReport";
 import { IKeyItem } from "./IKeyItem";
 import { KeyGeneration } from "./KeyGeneration";
 import { validateAttestation } from "../attestation/AttestationValidation";
-import { hpkeKeyIdMap, hpkeKeysMap } from "../repositories/Maps";
+import { hpkeKeyIdMap, hpkeKeysMap, keyRotationPolicyMap } from "../repositories/Maps";
 import { ServiceRequest } from "../utils/ServiceRequest";
 import { LogContext, Logger } from "../utils/Logger";
+import { TrustedTime } from "../utils/TrustedTime";
+import { KeyRotationPolicy } from "../policies/KeyRotationPolicy";
 
 // Enable the endpoint
 enableEndpoint();
@@ -175,6 +177,40 @@ export const key = (
       logContext
     );
   }
+
+  const keyRotation = KeyRotationPolicy.loadKeyRotationPolicyFromMap(
+    keyRotationPolicyMap,
+    logContext
+  ).keyRotationPolicy;
+  const gracePeriodSeconds = keyRotation.gracePeriodSeconds;
+  const rotationIntervalSeconds = keyRotation.rotationIntervalSeconds;
+  // Get the current time using TrustedTime
+  const currentTime = TrustedTime.getCurrentTime();
+  const currentDate = new Date(currentTime);
+
+  // Get the creation date of the key
+  const creationDate = new Date(keyItem.timestamp!);
+
+  // Calculate the expiry date of the key by adding the rotation interval to the creation date
+  const expiryDateMillis =
+    creationDate.getTime() + rotationIntervalSeconds * 1000;
+  const expiryDate = new Date(expiryDateMillis);
+  // Calculate the grace period start date by subtracting the grace period from the expiry date
+  const gracePeriodMillis = gracePeriodSeconds * 1000;
+  const gracePeriodStartDate = new Date(
+    expiryDate.getTime() - gracePeriodMillis
+  );
+
+  if (currentDate > expiryDate) {
+    return ServiceResult.Failed<string>(
+      { errorMessage: `${name}: Key has expired and is no longer valid` },
+      400,
+      logContext
+    );
+  } else if (currentDate > gracePeriodStartDate) {
+    Logger.warn(`${name}: Key is deprecated and will expire soon`);
+  }
+
   const receipt = hpkeKeysMap.receipt(kid);
 
   if (validateAttestationResult.statusCode === 202) {
