@@ -1,28 +1,48 @@
-from conftest import stop_node, node_url_to_name, nodes_scale, wait_for_network_condition, healthy_node_count
+from conftest import deploy_ccf_network, deploy_orchestrator, stop_node, node_url_to_name, nodes_scale, wait_for_network_condition, healthy_node_count
+
+full_network_node_count = 3
+
+def test_kill_node_while_orchestrator_running():
+    with deploy_ccf_network():
+        with deploy_orchestrator():
+            result = nodes_scale(full_network_node_count, check=True, get_logs=True)
+
+            stop_node(node_url_to_name(result['nodes'][-1]))
+
+            wait_for_network_condition(
+                condition=lambda nh: healthy_node_count(nh) == full_network_node_count - 1,
+            )
+
+            print("Waiting for network to heal")
+            print("  i.e. 3 available nodes and no nodes requiring replacement")
+            wait_for_network_condition(
+                condition=lambda nh: all([
+                    healthy_node_count(nh) == full_network_node_count,
+                    sum(n["status"] == "NeedsReplacement" for n in nh["nodeHealth"]) == 0
+                ]),
+                timeout= 60 * 10, # 10 minutes
+            )
 
 
-def test_kill_node(az_cleanroom):
+def test_kill_node_before_orchestrator_running():
+    with deploy_ccf_network():
+        result = nodes_scale(full_network_node_count, check=True, get_logs=True)
 
-    # Scale up nodes
-    node_count = 3
-    result = nodes_scale(node_count, get_logs=True)
-    assert len(result["nodes"]) == node_count
+        stop_node(node_url_to_name(result['nodes'][-1]))
 
-    print("3 node network running, killing one node through ACI")
-    stop_node(node_url_to_name(result['nodes'][-1]))
+        wait_for_network_condition(
+            condition=lambda nh: healthy_node_count(nh) == full_network_node_count - 1,
+        )
 
-    print("Waiting for the network to see node as unhealthy")
-    wait_for_network_condition(
-        condition=lambda nh: healthy_node_count(nh) == node_count - 1,
-    )
-    print("Unhealthy node found")
+        with deploy_orchestrator():
+            print("Waiting for network to heal")
+            print("  i.e. 3 available nodes and no nodes requiring replacement")
+            wait_for_network_condition(
+                condition=lambda nh: all([
+                    healthy_node_count(nh) == full_network_node_count,
+                    sum(n["status"] == "NeedsReplacement" for n in nh["nodeHealth"]) == 0
+                ]),
+                timeout= 60 * 10, # 10 minutes
+            )
 
-    print("Waiting for network to heal")
-    print("  i.e. 3 available nodes and no nodes requiring replacement")
-    wait_for_network_condition(
-        condition=lambda nh: all([
-            healthy_node_count(nh) == node_count,
-            sum(n["status"] == "NeedsReplacement" for n in nh["nodeHealth"]) == 0
-        ]),
-        timeout= 60 * 10, # 10 minutes
-    )
+

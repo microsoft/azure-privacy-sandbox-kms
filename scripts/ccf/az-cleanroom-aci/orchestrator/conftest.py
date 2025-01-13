@@ -1,11 +1,11 @@
 import base64
+from contextlib import contextmanager
 import hashlib
 import json
 import os
 import subprocess
 import time
 import uuid
-import pytest
 
 REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
 
@@ -49,16 +49,24 @@ def unique_string():
         .lower()[:12]
 
 
-def nodes_scale(node_count, get_logs=False):
-    get_logs_arg = {"stdout": subprocess.PIPE} if get_logs else {}
+def nodes_scale(node_count, get_logs=False, check=False):
+    get_logs_arg = {"stdout": subprocess.PIPE} if get_logs or check else {}
     res = subprocess.run(
         [f"scripts/ccf/az-cleanroom-aci/scale-nodes.sh", "-n", str(node_count)],
         cwd=REPO_ROOT,
         check=True,
         **get_logs_arg,
     )
+
+    if get_logs or check:
+        result = get_final_json(res.stdout.decode())
+
+    if check:
+        assert len(result["nodes"]) == node_count
+
     if get_logs:
-        return get_final_json(res.stdout.decode())
+        return result
+
 
 
 def get_network_health():
@@ -69,7 +77,6 @@ def get_network_health():
             "--provider-client", f'{os.getenv("DEPLOYMENT_NAME")}-provider',
             "--provider-config", f'{os.getenv("WORKSPACE")}/providerConfig.json',
         ],
-        check=True,
         stdout=subprocess.PIPE,
     )
 
@@ -77,11 +84,15 @@ def get_network_health():
 
 
 def wait_for_network_condition(condition, timeout=60):
+
     timeout = time.time() + timeout
     while time.time() < timeout:
-        network_health = get_network_health()
-        if condition(network_health):
-            break
+        try:
+            network_health = get_network_health()
+            if condition(network_health):
+                break
+        except:
+            print("Failed to get network health")
         time.sleep(5)
     assert condition(network_health)
 
@@ -91,6 +102,7 @@ def healthy_node_count(network_health):
 
 
 def stop_node(node_name):
+    print(f"Stopping node: {node_name}")
     subprocess.run(
         [
             "az", "container", "stop",
@@ -106,9 +118,8 @@ def node_url_to_name(node_url):
     return node_name
 
 
-@pytest.fixture
-def az_cleanroom():
-
+@contextmanager
+def deploy_ccf_network():
     deployment_name = os.getenv("DEPLOYMENT_NAME", f"kms-{unique_string()}")
     call_script(
         [f"scripts/ccf/az-cleanroom-aci/up.sh", "--force-recreate"],
@@ -118,6 +129,19 @@ def az_cleanroom():
         },
     )
 
+    yield
+
+    call_script(
+        [f"scripts/ccf/az-cleanroom-aci/down.sh"],
+        env={
+            **os.environ,
+            "DEPLOYMENT_NAME": deployment_name,
+        },
+    )
+
+
+@contextmanager
+def deploy_orchestrator():
     subprocess.run(
         [
             "docker", "compose",
@@ -136,12 +160,4 @@ def az_cleanroom():
             "down", "ccf-orchestrator", "--remove-orphans"
         ],
         check=True,
-    )
-
-    call_script(
-        [f"scripts/ccf/az-cleanroom-aci/down.sh"],
-        env={
-            **os.environ,
-            "DEPLOYMENT_NAME": deployment_name,
-        },
     )
