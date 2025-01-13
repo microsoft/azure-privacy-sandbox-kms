@@ -16,9 +16,24 @@ def test_settingsPolicy_with_no_policy(setup_kms):
             "name": "azure-privacy-sandbox-kms",
             "description": "Key Management Service",
             "version": "1.0.0",
+            "debug": True,
+        }
+    }
+
+
+def test_settingsPolicy_with_fixed_policy(setup_kms):
+    apply_kms_constitution()
+    policy = {
+        "service": {
+            "name": "azure-privacy-sandbox-kms",
+            "description": "Key Management Service",
+            "version": "1.0.0",
             "debug": False,
         }
     }
+    status_code, settings_json = settingsPolicy(policy=policy)
+    assert status_code == 200
+    assert settings_json == policy
 
 
 def test_settingsPolicy_with_no_auth(setup_kms):

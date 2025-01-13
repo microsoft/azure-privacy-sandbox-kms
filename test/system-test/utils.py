@@ -29,12 +29,17 @@ def deploy_app_code(**kwargs):
 
 
 def apply_settings_policy(policy=None):
+    command = ["./scripts/kms/settings_policy_set.sh"]
+    env = {**os.environ}
+
+    if policy is not None:
+        command.extend(["--policy", json.dumps(policy)])
+    else:
+        command.extend(["--debug", "true"])
+
     subprocess.run(
-        "./scripts/kms/settings_policy_set.sh",
-        env={
-            **os.environ,
-            **({"SETTINGS_POLICY": json.dumps(policy)} if policy is not None else {})
-        },
+        command,
+        env=env,
         cwd=REPO_ROOT,
         check=True,
     )
