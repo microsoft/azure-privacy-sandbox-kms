@@ -5,6 +5,11 @@
 
 # This is intended to be run inside a docker container defined in compose.yml
 
+# `show-health` produces a report of the nodes in the network according to CCF.
+# The question of how many nodes we want is left to the governance of the
+# network, this script merely ensures any nodes the network expects but are actually
+# unhealthy in ACI are reprovisioned.
+
 previous_health=""
 while true; do
 
@@ -13,6 +18,10 @@ while true; do
         --provider-client ${DEPLOYMENT_NAME}-provider \
         --provider-config /workspace/providerConfig.json | jq > health.json
 
+    # Comparing health.json to a previous health isn't functionally
+    # consequential, if the nodes health hasn't changed, `network update` is a
+    # no-op, but the check keeps logging concise and reduces unnecessary calls
+    # to `network update`.
     if [ "$(cat health.json)" != "$previous_health" ]; then
         cat health.json
         previous_health=$(cat health.json)
