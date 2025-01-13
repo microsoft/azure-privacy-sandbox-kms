@@ -1,0 +1,19 @@
+services:
+
+  ccf-orchestrator:
+
+    build:
+      dockerfile_inline: |
+        FROM mcr.microsoft.com/azure-cli:latest
+        RUN az extension add -y --allow-preview true \
+          --source https://cleanroomazcli.blob.core.windows.net/azcli/cleanroom-1.0.0-py2.py3-none-any.whl
+        COPY orchestrate.sh /orchestrate.sh
+
+    # Temp solution to allow running locally with running containers
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${WORKSPACE}:/workspace
+
+    network_mode: host
+    env_file: .env
+    command: /orchestrate.sh
