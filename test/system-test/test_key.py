@@ -1,6 +1,6 @@
 import pytest
 from endpoints import key, refresh
-from utils import apply_kms_constitution, apply_key_release_policy, trust_jwt_issuer, get_test_attestation, get_test_wrapping_key
+from utils import apply_kms_constitution, apply_key_release_policy, trust_jwt_issuer, get_test_attestation, get_test_public_wrapping_key, decrypted_wrapped_key
 
 @pytest.mark.xfail(strict=True)
 def test_no_keys(setup_kms):
@@ -9,7 +9,7 @@ def test_no_keys(setup_kms):
     while True:
         status_code, key_json = key(
             attestation=get_test_attestation(),
-            wrapping_key=get_test_wrapping_key(),
+            wrapping_key=get_test_public_wrapping_key(),
         )
         if status_code != 202:
             break
@@ -22,7 +22,7 @@ def test_no_key_release_policy(setup_kms):
     while True:
         status_code, key_json = key(
             attestation=get_test_attestation(),
-            wrapping_key=get_test_wrapping_key(),
+            wrapping_key=get_test_public_wrapping_key(),
         )
         if status_code != 202:
             break
@@ -36,7 +36,7 @@ def test_with_keys_and_policy(setup_kms):
     while True:
         status_code, key_json = key(
             attestation=get_test_attestation(),
-            wrapping_key=get_test_wrapping_key(),
+            wrapping_key=get_test_public_wrapping_key(),
         )
         if status_code != 202:
             break
@@ -46,7 +46,6 @@ def test_with_keys_and_policy(setup_kms):
     assert key_json["wrappedKid"] != ""
     assert key_json["wrapped"] == ""
 
-
 def test_with_keys_and_policy_jwt_auth(setup_kms, setup_jwt_issuer):
     apply_kms_constitution()
     apply_key_release_policy()
@@ -55,7 +54,7 @@ def test_with_keys_and_policy_jwt_auth(setup_kms, setup_jwt_issuer):
     while True:
         status_code, key_json = key(
             attestation=get_test_attestation(),
-            wrapping_key=get_test_wrapping_key(),
+            wrapping_key=get_test_public_wrapping_key(),
             auth="jwt"
         )
         if status_code != 202:
@@ -75,7 +74,7 @@ def test_key_with_multiple(setup_kms):
     while True:
         status_code, key_json = key(
             attestation=get_test_attestation(),
-            wrapping_key=get_test_wrapping_key(),
+            wrapping_key=get_test_public_wrapping_key(),
         )
         if status_code != 202:
             break
@@ -121,7 +120,7 @@ def test_key_kid_not_present_with_other_keys(setup_kms):
     while True:
         status_code, key_json = key(
             attestation=get_test_attestation(),
-            wrapping_key=get_test_wrapping_key(),
+            wrapping_key=get_test_public_wrapping_key(),
             kid="doesntexist"
         )
         if status_code != 202:
@@ -135,7 +134,7 @@ def test_key_kid_not_present_without_other_keys(setup_kms):
     while True:
         status_code, key_json = key(
             attestation=get_test_attestation(),
-            wrapping_key=get_test_wrapping_key(),
+            wrapping_key=get_test_public_wrapping_key(),
             kid="doesntexist"
         )
         if status_code != 202:
@@ -151,7 +150,7 @@ def test_key_kid_present(setup_kms):
     while True:
         status_code, key_json = key(
             attestation=get_test_attestation(),
-            wrapping_key=get_test_wrapping_key(),
+            wrapping_key=get_test_public_wrapping_key(),
             kid=refresh_json["kid"]
         )
         if status_code != 202:
@@ -170,7 +169,7 @@ def test_key_fmt_tink(setup_kms):
     while True:
         status_code, key_json = key(
             attestation=get_test_attestation(),
-            wrapping_key=get_test_wrapping_key(),
+            wrapping_key=get_test_public_wrapping_key(),
             fmt="tink",
         )
         if status_code != 202:
@@ -186,7 +185,7 @@ def test_key_fmt_jwk(setup_kms):
     while True:
         status_code, key_json = key(
             attestation=get_test_attestation(),
-            wrapping_key=get_test_wrapping_key(),
+            wrapping_key=get_test_public_wrapping_key(),
             fmt="jwk",
         )
         if status_code != 202:
@@ -205,7 +204,7 @@ def test_key_fmt_invalid(setup_kms):
     while True:
         status_code, key_json = key(
             attestation=get_test_attestation(),
-            wrapping_key=get_test_wrapping_key(),
+            wrapping_key=get_test_public_wrapping_key(),
             fmt="invalid",
         )
         if status_code != 202:
