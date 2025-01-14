@@ -18,7 +18,7 @@ jobs:
 
   test:
     name: ${{ inputs.test }} (${{ matrix.config.env }}) (${{ matrix.config.use_akv && 'akv' || 'local' }}_keys)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
