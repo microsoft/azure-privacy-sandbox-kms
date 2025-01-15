@@ -69,6 +69,9 @@ make propose-settings-policy
 # Add key release policy
 make propose-add-key-release-policy
 
+# Add key rotation policy
+make propose-key-rotation-policy
+
 # Add demo validation policy
 make propose-jwt-demo-validation-policy
 

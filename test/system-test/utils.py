@@ -81,6 +81,16 @@ def remove_key_release_policy():
         check=True,
     )
 
+def apply_key_rotation_policy():
+    subprocess.run(
+        [
+            "scripts/kms/key_rotation_policy_set.sh",
+            "governance/proposals/set_key_rotation_policy.json",
+        ],
+        cwd=REPO_ROOT,
+        check=True,
+    )
+
 
 def trust_jwt_issuer():
     subprocess.run(

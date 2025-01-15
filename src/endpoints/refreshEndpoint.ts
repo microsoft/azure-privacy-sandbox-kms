@@ -10,7 +10,6 @@ import { enableEndpoint } from "../utils/Tooling";
 import { ServiceRequest } from "../utils/ServiceRequest";
 import { LogContext, Logger } from "../utils/Logger";
 import { KeyRotationPolicy } from "../policies/KeyRotationPolicy";
-import { TrustedTime } from "../utils/TrustedTime";
 
 // Enable the endpoint
 enableEndpoint();
@@ -34,12 +33,20 @@ export const refresh = (
   if (isValidIdentity.failure) return isValidIdentity;
 
   // Get key rotation policy if available
-  const creationTime = TrustedTime.getCurrentTime();
+  const creationTime = Date.now();
+  Logger.info(`Creation time: ${creationTime}`, logContext);
+
   const expiry = KeyRotationPolicy.getKeyItemExpiryTime(
     keyRotationPolicyMap,
     creationTime,
     logContext
   )?.expiryTimeMs;
+
+  if (expiry !== undefined) {
+    Logger.info(`${name}: Key rotation policy defined. Expiry: ${expiry}`, logContext);
+  } else {
+    Logger.info(`${name}: Key rotation policy not defined`, logContext);
+  }
 
   try {
     // Get HPKE key pair id
@@ -55,7 +62,7 @@ export const refresh = (
 
     // Store HPKE key pair
     hpkeKeysMap.storeItem(keyItem.kid, keyItem, keyItem.x);
-    Logger.info(`Key item with id ${id} and kid ${keyItem.kid} stored`);
+    Logger.info(`Key item with id ${id} and kid ${keyItem.kid} stored`, logContext);
 
     delete keyItem.d;
     const ret = keyItem;

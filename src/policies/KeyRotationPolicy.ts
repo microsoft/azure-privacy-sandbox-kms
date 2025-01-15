@@ -4,8 +4,11 @@ import { IKeyRotationPolicy } from "./IKeyRotationPolicy";
 import { Logger, LogContext } from "../utils/Logger";
 import { KmsError } from "../utils/KmsError";
 import { IKeyItem } from "../endpoints/IKeyItem";
-import { TrustedTime } from "../utils/TrustedTime";
+import { enableEndpoint } from "../utils/Tooling";
 
+
+// Enable the endpoint
+enableEndpoint();
 /**
  * Interface representing the expiry times.
  */
@@ -38,8 +41,8 @@ export class KeyRotationPolicy {
    */
   public static defaultKeyRotationPolicy(): IKeyRotationPolicy {
     return {
-      rotationIntervalSeconds: 300,
-      gracePeriodSeconds: 60,
+      rotation_interval_seconds: 300,
+      grace_period_seconds: 60,
     };
   }
 
@@ -51,11 +54,11 @@ export class KeyRotationPolicy {
     keyRotationPolicy: IKeyRotationPolicy
   ): void {
     Logger.debug(
-      `Rotation Interval Seconds: ${keyRotationPolicy.rotationIntervalSeconds}`,
+      `Rotation Interval Seconds: ${keyRotationPolicy.grace_period_seconds}`,
       KeyRotationPolicy.logContext
     );
     Logger.debug(
-      `Grace Period Seconds: ${keyRotationPolicy.gracePeriodSeconds}`,
+      `Grace Period Seconds: ${keyRotationPolicy.grace_period_seconds}`,
       KeyRotationPolicy.logContext
     );
   }
@@ -69,10 +72,10 @@ export class KeyRotationPolicy {
    * @returns A new KeyRotationPolicy instance.
    * @throws {KmsError} If the key rotation policy cannot be parsed.
    */
-  public static loadKeyRotationPolicyFromMap(
+  public static getKeyRotationPolicyFromMap(
     keyRotationPolicyMap: ccfapp.KvMap,
     logContextIn: LogContext
-  ): KeyRotationPolicy | undefined {
+  ): IKeyRotationPolicy | undefined {
     const logContext = (logContextIn?.clone() || new LogContext()).appendScope(
       "loadKeyRotationPolicyFromMap"
     );
@@ -93,7 +96,7 @@ export class KeyRotationPolicy {
     let keyRotation: IKeyRotationPolicy;
     if (!keyRotationPolicyStr) {
       Logger.info(
-        `No key rotation policy found, using default key rotation policy`,
+        `No key rotation policy found`,
         logContext
       );
       return undefined;
@@ -106,7 +109,7 @@ export class KeyRotationPolicy {
         throw new KmsError(error, logContext);
       }
     }
-    return new KeyRotationPolicy(keyRotation);
+    return keyRotation;
   }
 
   /**
@@ -121,28 +124,32 @@ export class KeyRotationPolicy {
     keyItemCreationTime: number,
     logContextIn: LogContext): IExpiryTimes | undefined {
 
-    const keyRotation = KeyRotationPolicy.loadKeyRotationPolicyFromMap(
+    const keyRotation = KeyRotationPolicy.getKeyRotationPolicyFromMap(
       keyRotationPolicyMap,
       logContextIn
-    )?.keyRotationPolicy;
+    );
 
     if (keyRotation !== undefined) {
-      const gracePeriodSeconds = keyRotation.gracePeriodSeconds;
-      const rotationIntervalSeconds = keyRotation.rotationIntervalSeconds;
+      const gracePeriodSeconds = keyRotation.grace_period_seconds;
+      const rotationIntervalSeconds = keyRotation.rotation_interval_seconds;
+      Logger.info(`Key rotation policy content: ${JSON.stringify(keyRotation)}`, logContextIn);
 
       // Get the current time using TrustedTime
-      const currentTime = TrustedTime.getCurrentTime();
+      const currentTime = Date.now();
 
       // Get the creation time of the key
       const creationTimeMs = keyItemCreationTime;
-      Logger.debug(`Key->Creation time (ms): ${creationTimeMs}, Current Time (ms): ${currentTime}, delta (ms): ${currentTime - creationTimeMs}`);
 
       // Calculate the expiry time of the key by adding the rotation interval to the creation date
-      const expiryTimeMs = creationTimeMs + rotationIntervalSeconds * 1000;
-      const expiryTimeAndGraceMs = expiryTimeMs + gracePeriodSeconds * 1000;
+      const expiryTimeMs = creationTimeMs + (rotationIntervalSeconds * 1000);
+      const expiryTimeAndGraceMs = expiryTimeMs + (gracePeriodSeconds * 1000);
+
+      Logger.info(`Key rotation policy Creation time: ${new Date(creationTimeMs)}, Current Time: ${new Date(currentTime)}, delta (ms): ${currentTime - creationTimeMs}, expiryTimeMs (${expiryTimeMs}): ${new Date(expiryTimeMs)}, expiryTimeAndGraceMs (${expiryTimeAndGraceMs}): ${new Date(expiryTimeAndGraceMs)}`);
       return {expiryTimeMs, expiryTimeAndGraceMs};
+    } else {
+      Logger.info(`Key rotation policy is not defined, cannot calculate expiry time`, logContextIn);
+      return undefined;
     }
-    return undefined;
   }
 
   /**
@@ -157,7 +164,7 @@ export class KeyRotationPolicy {
     keyItem: IKeyItem,
     logContextIn: LogContext): [boolean, boolean] {
 
-    const currentTimeMs = TrustedTime.getCurrentTime();
+    const currentTimeMs = Date.now();
     const expiryTimes = KeyRotationPolicy.getKeyItemExpiryTime(keyRotationPolicyMap, keyItem.timestamp!, logContextIn);
 
     // check if key rotation policy is defined

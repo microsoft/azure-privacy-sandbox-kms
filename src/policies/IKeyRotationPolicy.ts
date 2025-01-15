@@ -1,4 +1,4 @@
 export interface IKeyRotationPolicy {
-    rotationIntervalSeconds: number;
-    gracePeriodSeconds: number;
+    rotation_interval_seconds: number;
+    grace_period_seconds: number;
 }
