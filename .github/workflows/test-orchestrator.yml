@@ -34,4 +34,5 @@ jobs:
         run: pytest -sv scripts/ccf/az-cleanroom-aci/orchestrator/test/test.py
 
       - name: Test Orchestrator
+        if: always()
         run: docker compose -p orchestrator logs
