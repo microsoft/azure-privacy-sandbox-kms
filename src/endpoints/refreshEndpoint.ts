@@ -4,11 +4,13 @@
 import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../utils/ServiceResult";
 import { IKeyItem } from "./IKeyItem";
-import { hpkeKeyIdMap, hpkeKeysMap } from "../repositories/Maps";
+import { hpkeKeyIdMap, hpkeKeysMap, keyRotationPolicyMap } from "../repositories/Maps";
 import { KeyGeneration } from "./KeyGeneration";
 import { enableEndpoint } from "../utils/Tooling";
 import { ServiceRequest } from "../utils/ServiceRequest";
 import { LogContext, Logger } from "../utils/Logger";
+import { KeyRotationPolicy } from "../policies/KeyRotationPolicy";
+import { TrustedTime } from "../utils/TrustedTime";
 
 // Enable the endpoint
 enableEndpoint();
@@ -31,13 +33,21 @@ export const refresh = (
   const [_, isValidIdentity] = serviceRequest.isAuthenticated();
   if (isValidIdentity.failure) return isValidIdentity;
 
+  // Get key rotation policy if available
+  const creationTime = TrustedTime.getCurrentTime();
+  const expiry = KeyRotationPolicy.getKeyItemExpiryTime(
+    keyRotationPolicyMap,
+    creationTime,
+    logContext
+  )?.expiryTimeMs;
+
   try {
     // Get HPKE key pair id
     const id = hpkeKeyIdMap.size + 1;
 
     // since OHTTP is limited to 2 char ids, we can only have ids from 10 to 99
     // So the current logic is to have ids rotate from 10 to 99
-    const keyItem = KeyGeneration.generateKeyItem(id % 90 + 10);
+    const keyItem = KeyGeneration.generateKeyItem(id % 90 + 10, expiry);
 
     // Store HPKE key pair kid
     keyItem.kid = `${keyItem.kid!}_${id}`;

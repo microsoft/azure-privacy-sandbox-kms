@@ -28,7 +28,7 @@ export class KeyGeneration {
   };
 
   // Generate new key item
-  public static generateKeyItem = (id: number): IKeyItem => {
+  public static generateKeyItem = (id: number, expiry?: number) => {
     const keyType = "x25519";
     const keys = ccfcrypto.generateEddsaKeyPair(keyType);
     const jwk: IKeyItem = ccfcrypto.eddsaPemToJwk(
@@ -39,6 +39,9 @@ export class KeyGeneration {
 
     // We will get an untrusted timestamp from the host. Is this a threat?
     jwk.timestamp = Date.now();
+    if (expiry) {
+      jwk.expiry = expiry;
+    }
     jwk.id = id;
 
     Logger.secret(`JWK: `, jwk);

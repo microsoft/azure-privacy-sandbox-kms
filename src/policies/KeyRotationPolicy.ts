@@ -3,6 +3,16 @@ import { ccf } from "@microsoft/ccf-app/global";
 import { IKeyRotationPolicy } from "./IKeyRotationPolicy";
 import { Logger, LogContext } from "../utils/Logger";
 import { KmsError } from "../utils/KmsError";
+import { IKeyItem } from "../endpoints/IKeyItem";
+import { TrustedTime } from "../utils/TrustedTime";
+
+/**
+ * Interface representing the expiry times.
+ */
+export interface IExpiryTimes {
+  expiryTimeMs: number;
+  expiryTimeAndGraceMs: number;
+}
 
 /**
  * Class representing a Key Rotation Policy.
@@ -12,7 +22,7 @@ export class KeyRotationPolicy {
    * Constructs a new KeyRotationPolicy instance.
    * @param keyRotationPolicy - The key rotation policy settings.
    */
-  constructor(public keyRotationPolicy: IKeyRotationPolicy) {}
+  constructor(public keyRotationPolicy: IKeyRotationPolicy) { }
 
   /**
    * The log context for the KeyRotationPolicy class.
@@ -62,7 +72,7 @@ export class KeyRotationPolicy {
   public static loadKeyRotationPolicyFromMap(
     keyRotationPolicyMap: ccfapp.KvMap,
     logContextIn: LogContext
-  ): KeyRotationPolicy {
+  ): KeyRotationPolicy | undefined {
     const logContext = (logContextIn?.clone() || new LogContext()).appendScope(
       "loadKeyRotationPolicyFromMap"
     );
@@ -82,11 +92,11 @@ export class KeyRotationPolicy {
 
     let keyRotation: IKeyRotationPolicy;
     if (!keyRotationPolicyStr) {
-      Logger.warn(
+      Logger.info(
         `No key rotation policy found, using default key rotation policy`,
         logContext
       );
-      keyRotation = KeyRotationPolicy.defaultKeyRotationPolicy();
+      return undefined;
     } else {
       try {
         keyRotation = JSON.parse(keyRotationPolicyStr) as IKeyRotationPolicy;
@@ -97,5 +107,71 @@ export class KeyRotationPolicy {
       }
     }
     return new KeyRotationPolicy(keyRotation);
+  }
+
+  /**
+   *
+   * @param keyRotationPolicyMap  - The map containing the key rotation policy.
+   * @param keyItem - The key item to check.
+   * @param logContextIn  - The log context to use.
+   * @returns [expired, deprecated] - A tuple containing two number values. The first value indicates the key expiring time, and the second value indicates if the key deprecation time.
+   */
+  public static getKeyItemExpiryTime(
+    keyRotationPolicyMap: ccfapp.KvMap,
+    keyItemCreationTime: number,
+    logContextIn: LogContext): IExpiryTimes | undefined {
+
+    const keyRotation = KeyRotationPolicy.loadKeyRotationPolicyFromMap(
+      keyRotationPolicyMap,
+      logContextIn
+    )?.keyRotationPolicy;
+
+    if (keyRotation !== undefined) {
+      const gracePeriodSeconds = keyRotation.gracePeriodSeconds;
+      const rotationIntervalSeconds = keyRotation.rotationIntervalSeconds;
+
+      // Get the current time using TrustedTime
+      const currentTime = TrustedTime.getCurrentTime();
+
+      // Get the creation time of the key
+      const creationTimeMs = keyItemCreationTime;
+      Logger.debug(`Key->Creation time (ms): ${creationTimeMs}, Current Time (ms): ${currentTime}, delta (ms): ${currentTime - creationTimeMs}`);
+
+      // Calculate the expiry time of the key by adding the rotation interval to the creation date
+      const expiryTimeMs = creationTimeMs + rotationIntervalSeconds * 1000;
+      const expiryTimeAndGraceMs = expiryTimeMs + gracePeriodSeconds * 1000;
+      return {expiryTimeMs, expiryTimeAndGraceMs};
+    }
+    return undefined;
+  }
+
+  /**
+   *
+   * @param keyRotationPolicyMap  - The map containing the key rotation policy.
+   * @param keyItem - The key item to check.
+   * @param logContextIn  - The log context to use.
+   * @returns [expired, deprecated] - A tuple containing two boolean values. The first value indicates if the key has expired, and the second value indicates if the key is deprecated.
+   */
+  public static isExpired(
+    keyRotationPolicyMap: ccfapp.KvMap,
+    keyItem: IKeyItem,
+    logContextIn: LogContext): [boolean, boolean] {
+
+    const currentTimeMs = TrustedTime.getCurrentTime();
+    const expiryTimes = KeyRotationPolicy.getKeyItemExpiryTime(keyRotationPolicyMap, keyItem.timestamp!, logContextIn);
+
+    // check if key rotation policy is defined
+    if (!expiryTimes) {
+      return [false, false];
+    }
+
+    if (currentTimeMs > expiryTimes.expiryTimeMs) {
+      Logger.warn(`Key has expired and is no longer valid`, logContextIn);
+      return [true, true];
+    } else if (currentTimeMs > expiryTimes.expiryTimeAndGraceMs) {
+      Logger.warn(`Key is deprecated and will expire soon`, logContextIn);
+      return [false, true];
+    }
+    return [false, false];
   }
 }
