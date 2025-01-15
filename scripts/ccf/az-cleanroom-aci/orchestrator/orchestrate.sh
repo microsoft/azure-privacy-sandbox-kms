@@ -19,6 +19,7 @@ az cleanroom ccf provider configure --name ${DEPLOYMENT_NAME}-provider \
     --signing-cert /workspace/ccf-operator_cert.pem \
     --signing-key /workspace/ccf-operator_privk.pem
 
+docker compose -p ${DEPLOYMENT_NAME}-provider logs -f &
 
 previous_health=""
 while true; do

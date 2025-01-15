@@ -32,3 +32,6 @@ jobs:
 
       - name: Test Orchestrator
         run: pytest -sv scripts/ccf/az-cleanroom-aci/orchestrator/test/test.py
+
+      - name: Test Orchestrator
+        run: docker compose -p orchestrator logs
