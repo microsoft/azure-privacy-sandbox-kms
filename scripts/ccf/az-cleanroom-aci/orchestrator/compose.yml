@@ -1,19 +1,42 @@
 services:
 
   ccf-orchestrator:
-
     build:
+      additional_contexts:
+        - workspace_root=/
       dockerfile_inline: |
-        FROM mcr.microsoft.com/azure-cli:latest
+        FROM mcr.microsoft.com/devcontainers/base:latest
+
+        USER root
+
+        RUN apt-get update \
+          && apt-get install -y --no-install-recommends \
+              ca-certificates \
+              curl \
+          && rm -rf /var/lib/apt/lists/*
+
+        RUN curl -fsSL "https://raw.githubusercontent.com/devcontainers/features/main/src/docker-in-docker/install.sh" \
+          | bash -s -- --version latest
+
+        ENV _REMOTE_USER="root"
+        RUN curl -fsSL "https://raw.githubusercontent.com/devcontainers/features/main/src/azure-cli/install.sh" \
+          | bash -s --
+
+        # Install cleanroom Azure CLI extension
         RUN az extension add -y --allow-preview true \
           --source https://cleanroomazcli.blob.core.windows.net/azcli/cleanroom-1.0.0-py2.py3-none-any.whl
+
+        # Copy main orchestrator script and workspace
         COPY orchestrate.sh /orchestrate.sh
+        COPY --from=workspace_root $WORKSPACE /workspace
 
-    # Temp solution to allow running locally with running containers
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ${WORKSPACE}:/workspace
-
-    network_mode: host
+      - ~/.azure/azureProfile.json:/root/.azure/azureProfile.json
+      - ~/.azure/msal_token_cache.json:/root/.azure/msal_token_cache.json
     env_file: .env
+    privileged: true
     command: /orchestrate.sh
+    healthcheck:
+      test: ["CMD", "test", "-f", "/health.json"]
+      interval: 1s
+      retries: 1200

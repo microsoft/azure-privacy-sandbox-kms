@@ -10,6 +10,16 @@
 # network, this script merely ensures any nodes the network expects but are actually
 # unhealthy in ACI are reprovisioned.
 
+# Start the docker daemon
+/usr/local/share/docker-init.sh
+
+# Setup the Azure Cleanroom Client Containers
+az cleanroom ccf provider deploy --name ${DEPLOYMENT_NAME}-provider
+az cleanroom ccf provider configure --name ${DEPLOYMENT_NAME}-provider \
+    --signing-cert /workspace/ccf-operator_cert.pem \
+    --signing-key /workspace/ccf-operator_privk.pem
+
+
 previous_health=""
 while true; do
 
