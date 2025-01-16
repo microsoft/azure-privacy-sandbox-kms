@@ -2,8 +2,10 @@ services:
 
   ccf-orchestrator:
     build:
+
       additional_contexts:
         - workspace_root=/
+
       dockerfile_inline: |
         FROM mcr.microsoft.com/devcontainers/base:latest
 
@@ -29,13 +31,16 @@ services:
         # Copy main orchestrator script and workspace
         COPY orchestrate.sh /orchestrate.sh
         COPY --from=workspace_root $WORKSPACE /workspace
+    command: /orchestrate.sh
+    env_file: .env
+    privileged: true
 
+    # Azure CLI credentials from host
     volumes:
       - ${HOME}/.azure/azureProfile.json:/root/.azure/azureProfile.json
       - ${HOME}/.azure/msal_token_cache.json:/root/.azure/msal_token_cache.json
-    env_file: .env
-    privileged: true
-    command: /orchestrate.sh
+      - ${HOME}/.azure/tokenCache.json:/root/.azure/tokenCache.json
+
     healthcheck:
       test: ["CMD", "test", "-f", "/health.json"]
       interval: 1s
