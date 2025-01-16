@@ -1,20 +1,22 @@
 #!/bin/bash
 
-# Copyright (c) Microsoft Corporation.
-# Licensed under the MIT license.
-
 key_rotation_policy_set() {
-    set -e
+    set -ex
 
     REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../..")"
-    RELEASE_POLICY_PROPOSAL=$1
+    ROTATION_POLICY_PROPOSAL=$1
 
-    # Construct the proposal
-    cp $REPO_ROOT/$RELEASE_POLICY_PROPOSAL $WORKSPACE/proposals/key_rotation_policy.json
+    # If rotation policy is not set, use default from the proposal file
+    if [ -z "$ROTATION_POLICY" ]; then
+        ROTATION_POLICY=$(cat "$ROTATION_POLICY_PROPOSAL")
+    fi
+
+    # Echo the ROTATION_POLICY to the proposal file
+    echo "$ROTATION_POLICY" | jq > "$WORKSPACE/proposals/set_key_rotation_policy.json"
 
     # Submit the proposal
-    source $REPO_ROOT/scripts/ccf/propose.sh
-    ccf-propose $WORKSPACE/proposals/key_rotation_policy.json
+    source "$REPO_ROOT/scripts/ccf/propose.sh"
+    ccf-propose "$WORKSPACE/proposals/set_key_rotation_policy.json"
 
     set +e
 }
