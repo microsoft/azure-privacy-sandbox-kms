@@ -1,5 +1,26 @@
 {
   "endpoints": {
+    "/keyRotationPolicy": {
+      "get": {
+        "js_module": "endpoints/keyRotationPolicyEndpoint.js",
+        "js_function": "keyRotationPolicy",
+        "forwarding_required": "sometimes",
+        "authn_policies": ["member_cert"],
+        "mode": "readonly",
+        "openapi": {
+          "responses": {
+            "200": {
+              "description": "Key rotation policy",
+              "content": {
+                "application/json": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/keyReleasePolicy": {
       "get": {
         "js_module": "endpoints/keyReleasePolicyEndpoint.js",
