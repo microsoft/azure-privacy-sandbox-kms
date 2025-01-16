@@ -37,9 +37,7 @@ services:
 
     # Azure CLI credentials from host
     volumes:
-      - ${HOME}/.azure/azureProfile.json:/root/.azure/azureProfile.json
-      - ${HOME}/.azure/msal_token_cache.json:/root/.azure/msal_token_cache.json
-      - ${HOME}/.azure/tokenCache.json:/root/.azure/tokenCache.json
+      - ${HOME}/.azure:/root/.azure
 
     healthcheck:
       test: ["CMD", "test", "-f", "/health.json"]
