@@ -31,8 +31,8 @@ services:
         COPY --from=workspace_root $WORKSPACE /workspace
 
     volumes:
-      - ~/.azure/azureProfile.json:/root/.azure/azureProfile.json
-      - ~/.azure/msal_token_cache.json:/root/.azure/msal_token_cache.json
+      - ${HOME}/.azure/azureProfile.json:/root/.azure/azureProfile.json
+      - ${HOME}/.azure/msal_token_cache.json:/root/.azure/msal_token_cache.json
     env_file: .env
     privileged: true
     command: /orchestrate.sh
