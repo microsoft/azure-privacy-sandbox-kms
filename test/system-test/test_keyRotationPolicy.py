@@ -126,7 +126,7 @@ def test_key_in_grace_period_with_custom_rotation_policy(setup_kms):
     assert status_code == 200
 
     # wait for the key to expire
-    time.sleep(5)
+    time.sleep(10)
     status_code, unwrapped_json = unwrapKey(
         attestation=get_test_attestation(),
         wrapping_key=get_test_public_wrapping_key(),
