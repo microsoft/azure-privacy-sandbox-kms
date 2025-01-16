@@ -37,22 +37,7 @@ services:
 
     # Azure CLI credentials from host
     volumes:
-      - ${HOME}/.azure/msal_token_cache.json:/root/.azure/msal_token_cache.json
-      - ${HOME}/.azure/azureProfile.json:/root/.azure/azureProfile.json
-      - ${HOME}/.azure/tokenCache.json:/root/.azure/tokenCache.json
-      - ${HOME}/.azure/az.sess:/root/.azure/az.sess
-      - ${HOME}/.azure/msal_http_cache.bin:/root/.azure/msal_http_cache.bin
-      - ${HOME}/.azure/config:/root/.azure/config
-      - ${HOME}/.azure/clouds.config:/root/.azure/clouds.config
-      - ${HOME}/.azure/az.json:/root/.azure/az.json
-      - ${HOME}/.azure/extensionCommandTree.json:/root/.azure/extensionCommandTree.json
-      - ${HOME}/.azure/commandIndex.json:/root/.azure/commandIndex.json
-      - ${HOME}/.azure/commands:/root/.azure/commands
-      - ${HOME}/.azure/versionCheck.json:/root/.azure/versionCheck.json
-      - ${HOME}/.azure/logs:/root/.azure/logs
-      - ${HOME}/.azure/telemetry:/root/.azure/telemetry
-      - ${HOME}/.azure/telemetry.txt:/root/.azure/telemetry.txt
-      - ${HOME}/.azure/az_survey.json:/root/.azure/az_survey.json
+      - ${HOME}/.azure/:/root/.azure/
 
     healthcheck:
       test: ["CMD", "test", "-f", "/health.json"]
