@@ -13,9 +13,6 @@
 # Start the docker daemon
 /usr/local/share/docker-init.sh
 
-az extension add -y --allow-preview true \
-    --source https://cleanroomazcli.blob.core.windows.net/azcli/cleanroom-1.0.0-py2.py3-none-any.whl
-
 # Setup the Azure Cleanroom Client Containers
 az cleanroom ccf provider deploy --name ${DEPLOYMENT_NAME}-provider
 az cleanroom ccf provider configure --name ${DEPLOYMENT_NAME}-provider \
