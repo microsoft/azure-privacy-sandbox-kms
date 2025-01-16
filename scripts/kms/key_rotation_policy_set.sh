@@ -1,7 +1,7 @@
 #!/bin/bash
 
 key_rotation_policy_set() {
-    set -ex
+    set -e
 
     REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../..")"
     ROTATION_POLICY_PROPOSAL=$1
