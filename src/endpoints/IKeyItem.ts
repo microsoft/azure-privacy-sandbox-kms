@@ -13,7 +13,6 @@ enableEndpoint();
 // Define the interface for storing keys
 export interface IKeyItem extends JsonWebKeyEdDSAPublic {
   timestamp?: number;
-  expiry?: number;
   receipt?: string;
   id?: number;
   d?: string;

@@ -11,10 +11,9 @@ import { IAttestationReport } from "../attestation/ISnpAttestationReport";
 import { IKeyItem } from "./IKeyItem";
 import { KeyGeneration } from "./KeyGeneration";
 import { validateAttestation } from "../attestation/AttestationValidation";
-import { hpkeKeyIdMap, hpkeKeysMap, keyRotationPolicyMap } from "../repositories/Maps";
+import { hpkeKeyIdMap, hpkeKeysMap } from "../repositories/Maps";
 import { ServiceRequest } from "../utils/ServiceRequest";
 import { LogContext, Logger } from "../utils/Logger";
-import { KeyRotationPolicy } from "../policies/KeyRotationPolicy";
 
 // Enable the endpoint
 enableEndpoint();
@@ -176,7 +175,6 @@ export const key = (
       logContext
     );
   }
-
   const receipt = hpkeKeysMap.receipt(kid);
 
   if (validateAttestationResult.statusCode === 202) {
@@ -339,15 +337,6 @@ export const unwrapKey = (
     return ServiceResult.Failed<string>(
       { errorMessage: `${name}:kid ${wrappedKid} not found in store` },
       404,
-      logContext
-    );
-  }
-
-  const [expired, _depricated] = KeyRotationPolicy.isExpired(keyRotationPolicyMap, keyItem, logContext);
-  if (expired) {
-    return ServiceResult.Failed<string>(
-      { errorMessage: `${name}:kid ${wrappedKid} has expired` },
-      410,  // 410 Gone, key no longer available
       logContext
     );
   }

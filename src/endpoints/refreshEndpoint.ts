@@ -4,12 +4,11 @@
 import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../utils/ServiceResult";
 import { IKeyItem } from "./IKeyItem";
-import { hpkeKeyIdMap, hpkeKeysMap, keyRotationPolicyMap } from "../repositories/Maps";
+import { hpkeKeyIdMap, hpkeKeysMap } from "../repositories/Maps";
 import { KeyGeneration } from "./KeyGeneration";
 import { enableEndpoint } from "../utils/Tooling";
 import { ServiceRequest } from "../utils/ServiceRequest";
 import { LogContext, Logger } from "../utils/Logger";
-import { KeyRotationPolicy } from "../policies/KeyRotationPolicy";
 
 // Enable the endpoint
 enableEndpoint();
@@ -32,29 +31,13 @@ export const refresh = (
   const [_, isValidIdentity] = serviceRequest.isAuthenticated();
   if (isValidIdentity.failure) return isValidIdentity;
 
-  // Get key rotation policy if available
-  const creationTime = Date.now();
-  Logger.info(`Creation time: ${creationTime}`, logContext);
-
-  const expiry = KeyRotationPolicy.getKeyItemExpiryTime(
-    keyRotationPolicyMap,
-    creationTime,
-    logContext
-  )?.expiryTimeMs;
-
-  if (expiry !== undefined) {
-    Logger.info(`${name}: Key rotation policy defined. Expiry: ${expiry}`, logContext);
-  } else {
-    Logger.info(`${name}: Key rotation policy not defined`, logContext);
-  }
-
   try {
     // Get HPKE key pair id
     const id = hpkeKeyIdMap.size + 1;
 
     // since OHTTP is limited to 2 char ids, we can only have ids from 10 to 99
     // So the current logic is to have ids rotate from 10 to 99
-    const keyItem = KeyGeneration.generateKeyItem(id % 90 + 10, expiry);
+    const keyItem = KeyGeneration.generateKeyItem(id % 90 + 10);
 
     // Store HPKE key pair kid
     keyItem.kid = `${keyItem.kid!}_${id}`;
@@ -62,7 +45,7 @@ export const refresh = (
 
     // Store HPKE key pair
     hpkeKeysMap.storeItem(keyItem.kid, keyItem, keyItem.x);
-    Logger.info(`Key item with id ${id} and kid ${keyItem.kid} stored`, logContext);
+    Logger.info(`Key item with id ${id} and kid ${keyItem.kid} stored`);
 
     delete keyItem.d;
     const ret = keyItem;
