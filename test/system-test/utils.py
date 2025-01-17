@@ -81,30 +81,6 @@ def remove_key_release_policy():
         check=True,
     )
 
-def apply_key_rotation_policy(policy=None):
-    command = [
-        "scripts/kms/key_rotation_policy_set.sh",
-        "governance/proposals/set_key_rotation_policy.json",
-    ]
-    env = {
-        **os.environ,
-        **({"ROTATION_POLICY": json.dumps(policy)} if policy is not None else {})
-    }
-
-    result = subprocess.run(
-        command,
-        env=env,
-        cwd=REPO_ROOT,
-        check=False,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-
-    if result.returncode != 0:
-        print("Error running key_rotation_policy_set.sh")
-        print("stdout:", result.stdout.decode())
-        print("stderr:", result.stderr.decode())
-        result.check_returncode()  # This will raise the CalledProcessError
 
 def trust_jwt_issuer():
     subprocess.run(
