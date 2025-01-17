@@ -13,6 +13,4 @@ export const keyReleaseMapName = "public:ccf.gov.policies.key_release";
 export const keyReleasePolicyMap = ccf.kv[keyReleaseMapName];
 export const settingsMapName = "public:ccf.gov.policies.settings";
 export const settingsPolicyMap = ccf.kv[settingsMapName];
-export const keyRotationMapName = "public:ccf.gov.policies.key_rotation";
-export const keyRotationPolicyMap = ccf.kv[keyRotationMapName];
 //#endregion
