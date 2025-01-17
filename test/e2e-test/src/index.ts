@@ -7,7 +7,6 @@ import { member0DataPart1, member1Data, member2Data } from "./data.js";
 import { exec } from "child_process";
 import https from "https";
 import fs from "fs";
-import inquirer from "inquirer";
 import { IKeyItem } from "../../../src";
 import { ISnpAttestation } from "../../../src/attestation/ISnpAttestation.js";
 
@@ -22,7 +21,6 @@ const readJSON = async (filePath: string): Promise<any> => {
 
 const serverUrl = process.env.SERVER!;
 const certificateStorePath = process.env.CERTS_FOLDER!;
-const interactiveMode = process.env.INTERACTIVE_MODE!;
 
 export interface DemoProps {
   url: string;
@@ -240,7 +238,7 @@ class Demo {
     Demo.assert(
       '(<any>keyResponse).error.message === "Invalid authentication credentials."',
       (<any>keyResponse).error.message ===
-        "Invalid authentication credentials.",
+      "Invalid authentication credentials.",
     );
 
     // Wait for receipt to be generated
@@ -573,8 +571,6 @@ class Demo {
 
     //#endregion
 
-    await this.addCheckpoint("Key generation Stage Complete");
-
     this.printTestSectionHeader("🎉 All Tests Passed...");
   }
 
@@ -674,17 +670,7 @@ class Demo {
     console.log("===============================================");
   }
 
-  private static async addCheckpoint(msg: string) {
-    if (interactiveMode == "1") {
-      console.log("\n");
-      await inquirer.prompt([
-        {
-          name: msg,
-          message: `🎬 ${msg}\n - Press return key to continue...`,
-        },
-      ]);
-    }
-  }
+
 }
 
 console.log("Starting...");
