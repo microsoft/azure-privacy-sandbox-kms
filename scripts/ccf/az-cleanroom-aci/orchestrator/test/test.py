@@ -1,4 +1,4 @@
-from conftest import deploy_ccf_network, deploy_orchestrator, stop_node, node_url_to_name, nodes_scale, wait_for_network_condition, healthy_node_count
+from utils import deploy_ccf_network, deploy_orchestrator, stop_node, node_url_to_name, nodes_scale, wait_for_network_condition, healthy_node_count
 
 full_network_node_count = 3
 

@@ -5,12 +5,18 @@ import json
 import os
 import subprocess
 import time
+from typing import Callable, TypedDict
 import uuid
 
-REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+
+REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), *([".."] * 5)))
 
 
-def get_final_json(s):
+def get_final_json(s: str) -> dict:
+    """
+    Finds the last valid JSON object in a given string, used to extract env
+    variables emitted by KMS scripts.
+    """
     for sub in reversed(s.split("{")):
         try:
             return json.loads("{" + sub)
@@ -19,6 +25,10 @@ def get_final_json(s):
 
 
 def call_script(args, **kwargs):
+    """
+    Wrapper for subprocess.run which also assumes the output will be a dict of
+    environment variables which we then set here.
+    """
     res = subprocess.run(
         args,
         cwd=REPO_ROOT,
@@ -34,7 +44,7 @@ def call_script(args, **kwargs):
         ...
 
 
-def unique_string():
+def unique_string() -> str:
     random_uuid = uuid.uuid4().bytes
     timestamp = time.time_ns().to_bytes(8, 'big', signed=False)
     pid = os.getpid().to_bytes(4, 'big', signed=False)
@@ -49,7 +59,11 @@ def unique_string():
         .lower()[:12]
 
 
-def nodes_scale(node_count, get_logs=False, check=False):
+class NodesScaleResult(TypedDict, total=False):
+    nodes: list[dict] # URL of the node
+
+
+def nodes_scale(node_count: int, get_logs=False, check=False) -> NodesScaleResult:
     get_logs_arg = {"stdout": subprocess.PIPE} if get_logs or check else {}
     res = subprocess.run(
         [f"scripts/ccf/az-cleanroom-aci/scale-nodes.sh", "-n", str(node_count)],
@@ -82,8 +96,13 @@ def get_network_health():
 
     return json.loads(res.stdout.decode())
 
+class NodeHealth(TypedDict, total=False):
+    status: str
+class NetworkHealth(TypedDict, total=False):
+    nodeHealth: list[NodeHealth]
 
-def wait_for_network_condition(condition, timeout=60):
+
+def wait_for_network_condition(condition: Callable[[NetworkHealth], bool], timeout=60):
 
     timeout = time.time() + timeout
     while time.time() < timeout:
@@ -97,11 +116,11 @@ def wait_for_network_condition(condition, timeout=60):
     assert condition(network_health)
 
 
-def healthy_node_count(network_health):
+def healthy_node_count(network_health: NetworkHealth) -> int:
     return sum(n["status"] == "Ok" for n in network_health["nodeHealth"])
 
 
-def stop_node(node_name):
+def stop_node(node_name: str):
     print(f"Stopping node: {node_name}")
     subprocess.run(
         [
@@ -112,7 +131,7 @@ def stop_node(node_name):
         check=True,
     )
 
-def node_url_to_name(node_url):
+def node_url_to_name(node_url: str) -> str:
     node_name_plus_uid = node_url.split(".")[0]
     node_name = "-".join(node_name_plus_uid.split("-")[:-1])
     return node_name
