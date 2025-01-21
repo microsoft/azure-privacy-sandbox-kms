@@ -3,7 +3,10 @@ name: Release
 on:
   push:
     tags:
-      - 'kms-v*'
+        - 'kms-v*'
+
+permissions:
+  contents: write
 
 jobs:
   release:
@@ -15,7 +18,7 @@ jobs:
 
     - name: Set release version
       id: vars
-      run: echo "::set-output name=release_version::${GITHUB_REF#refs/tags/kms-v}"
+      run: echo "::set-output name=release_version::${GITHUB_REF#refs/tags/}"
 
     - name: Set up Node.js
       uses: actions/setup-node@v2
@@ -39,10 +42,9 @@ jobs:
         echo "## Release Notes" > release_notes.md
         echo "" >> release_notes.md
         git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"- %s" >> release_notes.md
-        echo "" >> release_notes.md
-        echo "## SBOM" >> release_notes.md
-        cat sbom.xml >> release_notes.md
-
+        echo "" >> RELEASE_NOTES.md
+        echo "## SBOM" >> RELEASE_NOTES.md
+        cat sbom.xml >> RELEASE_NOTES.md
     - name: Create GitHub Release
       id: create_release
       uses: actions/create-release@v1
@@ -51,7 +53,7 @@ jobs:
       with:
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
-        body_path: ./release_notes.md
+        body_path: ./RELEASE_NOTES.md
         draft: false
         prerelease: false
 
