@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-        - 'kms-v*'
+      - 'kms-v*'
 
 permissions:
   contents: write
@@ -18,7 +18,7 @@ jobs:
 
     - name: Set release version
       id: vars
-      run: echo "::set-output name=release_version::${GITHUB_REF#refs/tags/}"
+      run: echo "::set-output name=release_version::${GITHUB_REF#refs/tags/kms-v}"
 
     - name: Set up Node.js
       uses: actions/setup-node@v2
@@ -45,6 +45,12 @@ jobs:
         echo "" >> RELEASE_NOTES.md
         echo "## SBOM" >> RELEASE_NOTES.md
         cat sbom.xml >> RELEASE_NOTES.md
+
+    - name: Check GITHUB_TOKEN permissions
+      run: |
+        echo "Checking GITHUB_TOKEN permissions..."
+        curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/rate_limit
+
     - name: Create GitHub Release
       id: create_release
       uses: actions/create-release@v1
