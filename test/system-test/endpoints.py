@@ -54,5 +54,9 @@ def keyReleasePolicy(**kwargs):
     return call_endpoint("keyReleasePolicy", **kwargs)
 
 
+def keyRotationPolicy(**kwargs):
+    return call_endpoint("keyRotationPolicy", **kwargs)
+
+
 def settingsPolicy(**kwargs):
     return call_endpoint("settingsPolicy", **kwargs)

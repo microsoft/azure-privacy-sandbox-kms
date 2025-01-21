@@ -1,7 +1,7 @@
 import json
 import pytest
 import time
-from endpoints import key, refresh, unwrapKey
+from endpoints import key, refresh, unwrapKey, keyRotationPolicy
 from utils import (
     apply_kms_constitution,
     apply_settings_policy,
@@ -12,6 +12,32 @@ from utils import (
     decrypted_wrapped_key,
 )
 
+
+# Test the key rotation endpoint.
+def test_retrieve_key_rotation_policy(setup_kms):
+    apply_kms_constitution()
+    apply_settings_policy()
+    apply_key_release_policy()
+    policy = {
+        "actions": [
+            {
+                "name": "set_key_rotation_policy",
+                "args": {
+                    "key_rotation_policy": {
+                        "rotation_interval_seconds": 6,
+                        "grace_period_seconds": 5,
+                    }
+                },
+            }
+        ]
+    }
+    apply_key_rotation_policy(policy)
+
+    # get key rotation policy
+    status_code, key_rotation_policy_json = keyRotationPolicy()
+    assert status_code == 200
+    assert key_rotation_policy_json["rotation_interval_seconds"] == 6
+    assert key_rotation_policy_json["grace_period_seconds"] == 5
 
 # Test the key retrieval during the grace period with key rotation policy.
 def test_key_in_grace_period_with_rotation_policy(setup_kms):
