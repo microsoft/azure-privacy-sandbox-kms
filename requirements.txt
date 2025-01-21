@@ -1,10 +1,10 @@
-ccf==5.0.8
+ccf==5.0.11
 cryptography==43.0.3
 detect-secrets==1.5.0
 docker==7.1.0
-GitPython==3.1.43
+GitPython==3.1.44
 httpx==0.27.2
-jinja2==3.1.4
+jinja2==3.1.5
 matplotlib==3.7.5
 pandas==2.0.3
 paramiko==3.5.0
