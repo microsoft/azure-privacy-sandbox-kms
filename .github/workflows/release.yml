@@ -41,6 +41,13 @@ jobs:
       run: |
         echo "Checking GITHUB_TOKEN permissions..."
         curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/rate_limit
+        echo "Permissions check completed."
+
+    - name: Print GITHUB_TOKEN permissions
+      run: |
+        echo "Printing GITHUB_TOKEN permissions..."
+        curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/user/permissions
+        echo "Permissions printed."
 
     - name: Create release notes
       run: |
