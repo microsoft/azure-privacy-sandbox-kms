@@ -53,12 +53,9 @@ jobs:
 
     - name: Create release notes
       run: |
-        echo "## Release Notes" > release_notes.md
-        echo "" >> release_notes.md
-        git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"- %s" >> release_notes.md
+        echo "## Release Notes" > RELEASE_NOTES.md
         echo "" >> RELEASE_NOTES.md
-        echo "## SBOM" >> RELEASE_NOTES.md
-        cat sbom.xml >> RELEASE_NOTES.md
+        git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"- %s" >> RELEASE_NOTES.md
 
     - name: Create GitHub Release
       id: create_release
@@ -71,13 +68,18 @@ jobs:
         body_path: ./RELEASE_NOTES.md
         draft: false
         prerelease: false
-    - name: "Upload dist"
-      uses: actions/upload-artifact@v4
-      with:
-        name: dist.zip
-        path: ./dist.zip
 
-    - name: Upload Release Asset
+    - name: Upload SBOM
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./sbom.xml
+        asset_name: sbom.xml
+        asset_content_type: application/xml
+
+    - name: Upload dist.zip
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
