@@ -40,18 +40,6 @@ jobs:
     - name: Zip /dist directory
       run: zip -r dist.zip dist
 
-    - name: Check GITHUB_TOKEN permissions
-      run: |
-        echo "Checking GITHUB_TOKEN permissions..."
-        curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/rate_limit
-        echo "Permissions check completed."
-
-    - name: Print GITHUB_TOKEN permissions
-      run: |
-        echo "Printing GITHUB_TOKEN permissions..."
-        curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/user/permissions
-        echo "Permissions printed."
-
     - name: Create release notes
       run: |
         echo "## Release Notes" > RELEASE_NOTES.md
@@ -92,3 +80,13 @@ jobs:
         asset_path: ./dist.zip
         asset_name: dist.zip
         asset_content_type: application/zip
+
+    - name: Upload RELEASE_NOTES.md
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./RELEASE_NOTES.md
+        asset_name: RELEASE_NOTES.md
+        asset_content_type: text/markdown
