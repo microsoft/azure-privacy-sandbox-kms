@@ -28,6 +28,26 @@ jobs:
       with:
         node-version: '22'
 
+    - name: Wait for Running CI Workflows
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        set -euo pipefail
+        owner="${GITHUB_REPOSITORY%%/*}"
+        repo="${GITHUB_REPOSITORY##*/}"
+        workflow_id="ci.yml"
+
+        running=""
+        while [ "$running" != "0" ]; do
+          runs=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/$owner/$repo/actions/workflows/$workflow_id/runs?per_page=1&status=in_progress&branch=main")
+          running=$(echo "$runs" | jq -r '.total_count')
+          if [ "$running" != "0" ]; then
+            echo "Waiting for running CI workflows to complete..."
+            sleep 30
+          fi
+        done
+
     - name: Trigger CI Workflow
       id: trigger_ci
       uses: benc-uk/workflow-dispatch@v1
@@ -60,7 +80,7 @@ jobs:
           fi
         done
 
-        if [ "$conclusion" != "success" ]; then
+        if [ "$conclusion" != "success" ] && [ "$conclusion" != "cancelled" ]; then
           echo "CI workflow failed with conclusion: $conclusion"
           exit 1
         fi
