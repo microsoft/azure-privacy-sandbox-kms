@@ -9,6 +9,7 @@ permissions:
   contents: write
   actions: write
   checks: write
+  packages: write
 
 jobs:
   release:
