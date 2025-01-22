@@ -36,10 +36,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         ref: main
 
-    - name: Install dependencies
-      run: npm install
-
-    - name: Wait for CI Workflow (Bash)
+    - name: Wait for CI Workflow
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
@@ -64,6 +61,10 @@ jobs:
           echo "CI workflow failed with conclusion: $conclusion"
           exit 1
         fi
+
+    - name: Install dependencies
+      run: npm install
+
     - name: Build project
       run: make build
 
