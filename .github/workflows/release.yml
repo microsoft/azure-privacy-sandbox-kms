@@ -44,7 +44,7 @@ jobs:
       id: wait_for_ci
       with:
         script: |
-          const { Octokit } = await import("@octokit/rest");
+          const { Octokit } = await import('octokit');
           const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
           const owner = context.repo.owner;
           const repo = context.repo.repo;
@@ -53,7 +53,7 @@ jobs:
 
           let conclusion = null;
           while (conclusion === null) {
-            const { data: workflowRuns } = await octokit.actions.listWorkflowRuns({
+            const { data: workflowRuns } = await octokit.rest.actions.listWorkflowRuns({
               owner,
               repo,
               workflow_id,
@@ -75,7 +75,6 @@ jobs:
           if (conclusion !== 'success') {
             throw new Error('CI workflow did not complete successfully');
           }
-
 
     - name: Build project
       run: make build
