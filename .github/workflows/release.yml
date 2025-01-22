@@ -39,33 +39,12 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Build project
-      run: make build
-
-    - name: Generate SBOM
-      run: npx cyclonedx-bom -o sbom.xml
-
-    - name: Zip /dist directory
-      run: zip -r dist.zip dist
-
-    - name: Fetch PR notes
-      id: pr_notes
-      run: |
-        echo "## Release Notes" > RELEASE_NOTES.md
-        echo "" >> RELEASE_NOTES.md
-        PRS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "https://api.github.com/repos/${{ github.repository }}/pulls?state=closed&base=${{ github.ref_name }}&sort=updated&direction=desc")
-        echo "$PRS" | jq -r '.[] | select(.merged_at != null) | "- " + .title + "\n" + .body' >> RELEASE_NOTES.md
-        echo "" >> RELEASE_NOTES.md
-        echo "## SBOM" >> RELEASE_NOTES.md
-        head -c 100000 sbom.xml >> RELEASE_NOTES.md  # Truncate SBOM to avoid exceeding the limit
-
     - name: Wait for CI Workflow
       uses: actions/github-script@v4
       id: wait_for_ci
       with:
         script: |
-          const { Octokit } = require("@octokit/rest");
+          const { Octokit } = await import("@octokit/rest");
           const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
           const owner = context.repo.owner;
           const repo = context.repo.repo;
@@ -96,6 +75,28 @@ jobs:
           if (conclusion !== 'success') {
             throw new Error('CI workflow did not complete successfully');
           }
+
+
+    - name: Build project
+      run: make build
+
+    - name: Generate SBOM
+      run: npx cyclonedx-bom -o sbom.xml
+
+    - name: Zip /dist directory
+      run: zip -r dist.zip dist
+
+    - name: Fetch PR notes
+      id: pr_notes
+      run: |
+        echo "## Release Notes" > RELEASE_NOTES.md
+        echo "" >> RELEASE_NOTES.md
+        PRS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ github.repository }}/pulls?state=closed&base=${{ github.ref_name }}&sort=updated&direction=desc")
+        echo "$PRS" | jq -r '.[] | select(.merged_at != null) | "- " + .title + "\n" + .body' >> RELEASE_NOTES.md
+        echo "" >> RELEASE_NOTES.md
+        echo "## SBOM" >> RELEASE_NOTES.md
+        head -c 100000 sbom.xml >> RELEASE_NOTES.md  # Truncate SBOM to avoid exceeding the limit
 
     - name: Create GitHub Release
       id: create_release
