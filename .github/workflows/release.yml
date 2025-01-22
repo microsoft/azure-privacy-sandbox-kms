@@ -28,6 +28,14 @@ jobs:
       with:
         node-version: '22'
 
+    - name: Trigger CI Workflow
+      id: trigger_ci
+      uses: benc-uk/workflow-dispatch@v1
+      with:
+        workflow: CI
+        token: ${{ secrets.GITHUB_TOKEN }}
+        ref: main
+
     - name: Install dependencies
       run: npm install
 
@@ -51,14 +59,6 @@ jobs:
         echo "" >> RELEASE_NOTES.md
         echo "## SBOM" >> RELEASE_NOTES.md
         head -c 100000 sbom.xml >> RELEASE_NOTES.md  # Truncate SBOM to avoid exceeding the limit
-
-    - name: Trigger CI Workflow
-      id: trigger_ci
-      uses: benc-uk/workflow-dispatch@v1
-      with:
-        workflow: CI
-        token: ${{ secrets.GITHUB_TOKEN }}
-        ref: main
 
     - name: Wait for CI Workflow
       uses: actions/github-script@v4
