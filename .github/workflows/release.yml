@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
   checks: write
   packages: write
 
@@ -39,11 +40,14 @@ jobs:
     - name: Zip /dist directory
       run: zip -r dist.zip dist
 
-    - name: Create release notes
+    - name: Fetch PR notes
+      id: pr_notes
       run: |
         echo "## Release Notes" > RELEASE_NOTES.md
         echo "" >> RELEASE_NOTES.md
-        git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"- %s" >> RELEASE_NOTES.md
+        PRS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ github.repository }}/pulls?state=closed&base=${{ github.ref_name }}&sort=updated&direction=desc")
+        echo "$PRS" | jq -r '.[] | select(.merged_at != null) | "- " + .title + "\n" + .body' >> RELEASE_NOTES.md
         echo "" >> RELEASE_NOTES.md
         echo "## SBOM" >> RELEASE_NOTES.md
         head -c 100000 sbom.xml >> RELEASE_NOTES.md  # Truncate SBOM to avoid exceeding the limit
