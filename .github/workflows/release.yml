@@ -40,41 +40,37 @@ jobs:
       run: npm install
 
     - name: Wait for CI Workflow
-      uses: actions/github-script@v4
-      id: wait_for_ci
-      with:
-        script: |
-          const { Octokit } = await import('@octokit/rest');
-          const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-          const owner = context.repo.owner;
-          const repo = context.repo.repo;
-          const workflow_id = 'CI.yml';
-          const run_id = context.runId;
-
-          let conclusion = null;
-          while (conclusion === null) {
-            const { data: workflowRuns } = await octokit.rest.actions.listWorkflowRuns({
-              owner,
-              repo,
-              workflow_id,
-              per_page: 1,
-              status: 'completed',
-              branch: 'main',
-            });
-
-            if (workflowRuns.workflow_runs.length > 0) {
-              conclusion = workflowRuns.workflow_runs[0].conclusion;
-            }
-
-            if (conclusion === null) {
-              console.log('Waiting for CI workflow to complete...');
-              await new Promise(resolve => setTimeout(resolve, 30000)); // Wait for 30 seconds
-            }
-          }
-
-          if (conclusion !== 'success') {
-            throw new Error('CI workflow did not complete successfully');
-          }
+      run: |
+        echo "const { Octokit } = await import('@octokit/rest');" > waitForCI.js
+        echo "const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });" >> waitForCI.js
+        echo "const owner = process.env.GITHUB_REPOSITORY.split('/')[0];" >> waitForCI.js
+        echo "const repo = process.env.GITHUB_REPOSITORY.split('/')[1];" >> waitForCI.js
+        echo "const workflow_id = 'CI.yml';" >> waitForCI.js
+        echo "async function waitForCI() {" >> waitForCI.js
+        echo "  let conclusion = null;" >> waitForCI.js
+        echo "  while (conclusion === null) {" >> waitForCI.js
+        echo "    const { data: workflowRuns } = await octokit.rest.actions.listWorkflowRuns({" >> waitForCI.js
+        echo "      owner," >> waitForCI.js
+        echo "      repo," >> waitForCI.js
+        echo "      workflow_id," >> waitForCI.js
+        echo "      per_page: 1," >> waitForCI.js
+        echo "      status: 'completed'," >> waitForCI.js
+        echo "      branch: 'main'," >> waitForCI.js
+        echo "    });" >> waitForCI.js
+        echo "    if (workflowRuns.workflow_runs.length > 0) {" >> waitForCI.js
+        echo "      conclusion = workflowRuns.workflow_runs[0].conclusion;" >> waitForCI.js
+        echo "    }" >> waitForCI.js
+        echo "    if (conclusion === null) {" >> waitForCI.js
+        echo "      console.log('Waiting for CI workflow to complete...');" >> waitForCI.js
+        echo "      await new Promise(resolve => setTimeout(resolve, 30000)); // Wait for 30 seconds" >> waitForCI.js
+        echo "    }" >> waitForCI.js
+        echo "  }" >> waitForCI.js
+        echo "  if (conclusion !== 'success') {" >> waitForCI.js
+        echo "    throw new Error('CI workflow did not complete successfully');" >> waitForCI.js
+        echo "  }" >> waitForCI.js
+        echo "}" >> waitForCI.js
+        echo "waitForCI();" >> waitForCI.js
+        node waitForCI.js
 
     - name: Build project
       run: make build
