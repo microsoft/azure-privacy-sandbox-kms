@@ -40,11 +40,13 @@ jobs:
       run: npm install
 
     - name: Wait for CI Workflow (Bash)
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         set -euo pipefail
         owner="${GITHUB_REPOSITORY%%/*}"
         repo="${GITHUB_REPOSITORY##*/}"
-        workflow_id="ci.yml"  # Use lowercase here
+        workflow_id="ci.yml"
 
         conclusion=""
         while [ "$conclusion" = "" ]; do
@@ -62,7 +64,6 @@ jobs:
           echo "CI workflow failed with conclusion: $conclusion"
           exit 1
         fi
-
     - name: Build project
       run: make build
 
