@@ -44,7 +44,7 @@ jobs:
       id: wait_for_ci
       with:
         script: |
-          const { Octokit } = await import('octokit');
+          const { Octokit } = await import('@octokit/rest');
           const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
           const owner = context.repo.owner;
           const repo = context.repo.repo;
