@@ -15,9 +15,10 @@ permissions:
 jobs:
   tests:
     name: Tests
-    secrets:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     uses: ./.github/workflows/ci.yml
+    secrets:
+      MANAGED_ID_CLIENT_ID: ${{ secrets.MANAGED_ID_CLIENT_ID }}
+      MANAGED_ID_TENANT_ID: ${{ secrets.MANAGED_ID_TENANT_ID }}
 
   release:
     needs: tests

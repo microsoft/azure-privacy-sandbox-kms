@@ -11,7 +11,9 @@ on:
   workflow_dispatch:
   workflow_call:
     secrets:
-      GH_TOKEN:
+      MANAGED_ID_CLIENT_ID:
+        required: true
+      MANAGED_ID_TENANT_ID:
         required: true
   schedule:
     - cron: "0 1 * * *"
@@ -66,5 +68,7 @@ jobs:
         run: cat workspace/sandbox_0/out
 
   system:
-    secrets: inherit # pragma: allowlist secret
     uses: ./.github/workflows/system-tests.yml
+    secrets:
+      MANAGED_ID_CLIENT_ID: ${{ secrets.MANAGED_ID_CLIENT_ID }}
+      MANAGED_ID_TENANT_ID: ${{ secrets.MANAGED_ID_TENANT_ID }}
