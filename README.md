@@ -264,6 +264,20 @@ which protoc-gen-ts
 We are using [protobuf-es](https://github.com/bufbuild/protobuf-es) to use protobuf.
 When you want to update protobuf generated code run `npm run build-proto`.
 
+# Release management
+# Publishing release tag
+The release management workflow called release.yml is triggered by publising a release tag:
+```
+git tag kms-v0.1.0;git push origin kms-v0.1.0
+```
+# Deleteting a tag
+```
+git tag -d kms-v0.1.0;git push origin :refs/tags/kms-v0.1.0
+```
+# Az login
+The azure login process needs a subject identifier in the form repo:microsoft/azure-privacy-sandbox-kms:ref:refs/tags/kms-v0.1.0.
+Make sure the federated credential support the tag you publish.
+
 # Contributing
 
 To take administrator actions such as adding users as contributors, please refer to [engineering hub](https://eng.ms/docs/initiatives/open-source-at-microsoft/github/opensource/repos/jit)
