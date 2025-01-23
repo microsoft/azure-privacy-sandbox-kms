@@ -40,17 +40,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install Dependencies
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/tools/install-deps.sh
+
       - name: Log into Azure
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
           tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
           subscription-id: 7ca35580-fc67-469c-91a7-68b38569ca6e
-
-      - name: Install Dependencies
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: ./scripts/tools/install-deps.sh
 
       - name: Run System Tests
         env:
