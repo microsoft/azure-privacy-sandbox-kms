@@ -16,7 +16,6 @@ jobs:
     name: Tests
     secrets:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    # secrets: inherit # pragma: allowlist secret
     uses: ./.github/workflows/ci.yml
 
   release:
