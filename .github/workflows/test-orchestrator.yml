@@ -32,3 +32,7 @@ jobs:
 
       - name: Test Orchestrator
         run: pytest -sv scripts/ccf/az-cleanroom-aci/orchestrator/test/test.py
+
+      - name: Print Orchestrator Logs
+        if: always()
+        run: docker compose -p orchestrator logs

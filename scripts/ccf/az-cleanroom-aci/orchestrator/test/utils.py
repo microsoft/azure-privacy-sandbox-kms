@@ -165,7 +165,7 @@ def deploy_orchestrator():
         [
             "docker", "compose",
             "-f", f"{REPO_ROOT}/scripts/ccf/az-cleanroom-aci/orchestrator/compose.yml",
-            "up", "ccf-orchestrator", "-d"
+            "up", "ccf-orchestrator", "--wait", "--build"
         ],
         check=True,
     )
