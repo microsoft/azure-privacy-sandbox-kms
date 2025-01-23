@@ -56,10 +56,8 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         ref: main
 
-    - name: Install dependencies
-      run: npm install
-
-    - name: Wait for CI Workflow to Complete
+    - name: Get CI Workflow Run ID
+      id: get_run_id
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
@@ -68,12 +66,37 @@ jobs:
         repo="${GITHUB_REPOSITORY##*/}"
         workflow_id="ci.yml"
 
+        run_id=""
+        while [ "$run_id" = "" ]; do
+          runs=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/$owner/$repo/actions/workflows/$workflow_id/runs?per_page=1&status=in_progress&branch=main")
+          run_id=$(echo "$runs" | jq -r '.workflow_runs[0].id')
+          if [ "$run_id" = "null" ]; then
+            echo "Waiting for CI workflow to start..."
+            run_id=""
+            sleep 30
+          fi
+        done
+        echo "run_id=$run_id" >> $GITHUB_ENV
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Wait for CI Workflow to Complete
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        RUN_ID: ${{ env.run_id }}
+      run: |
+        set -euo pipefail
+        owner="${GITHUB_REPOSITORY%%/*}"
+        repo="${GITHUB_REPOSITORY##*/}"
+
         conclusion=""
         while [ "$conclusion" = "" ]; do
-          runs=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-            "https://api.github.com/repos/$owner/$repo/actions/runs?per_page=1&status=completed&branch=main")
-          echo "Runs: $runs"  # Debug statement
-          conclusion=$(echo "$runs" | jq -r '.workflow_runs[0].conclusion')
+          run=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/$owner/$repo/actions/runs/$RUN_ID")
+          echo "Run: $run"  # Debug statement
+          conclusion=$(echo "$run" | jq -r '.conclusion')
           echo "Conclusion: $conclusion"  # Debug statement
           if [ "$conclusion" = "null" ]; then
             echo "Waiting for CI workflow to complete..."
@@ -119,34 +142,6 @@ jobs:
         body_path: ./RELEASE_NOTES.md
         draft: false
         prerelease: false
-
-    - name: Wait for CI Workflow to Complete
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        set -euo pipefail
-        owner="${GITHUB_REPOSITORY%%/*}"
-        repo="${GITHUB_REPOSITORY##*/}"
-        workflow_id="ci.yml"
-
-        conclusion=""
-        while [ "$conclusion" = "" ]; do
-          runs=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-            "https://api.github.com/repos/$owner/$repo/actions/runs?per_page=1&status=completed&branch=main")
-          echo "Runs: $runs"  # Debug statement
-          conclusion=$(echo "$runs" | jq -r '.workflow_runs[0].conclusion')
-          echo "Conclusion: $conclusion"  # Debug statement
-          if [ "$conclusion" = "null" ]; then
-            echo "Waiting for CI workflow to complete..."
-            conclusion=""
-            sleep 30
-          fi
-        done
-
-        if [ "$conclusion" != "success" ] && [ "$conclusion" != "cancelled" ]; then
-          echo "CI workflow failed with conclusion: $conclusion"
-          exit 1
-        fi
 
     - name: Upload SBOM
       uses: actions/upload-release-asset@v1
