@@ -9,6 +9,10 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  workflow_call:
+    secrets:
+      GITHUB_TOKEN:
+        required: true
   schedule:
     - cron: "0 1 * * *"
 
