@@ -19,6 +19,7 @@ services:
     network_mode: host
     environment:
       - KMS_WORKSPACE=/workspace
+      - JWT_ISSUER_PORT=${JWT_ISSUER_PORT:-}
     healthcheck:
       test: "curl -k --fail -X POST $(cat /workspace/jwt_issuer_address)/token"
       interval: 1s

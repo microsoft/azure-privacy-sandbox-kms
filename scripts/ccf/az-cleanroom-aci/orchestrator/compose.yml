@@ -31,7 +31,8 @@ services:
         # Copy main orchestrator script and workspace
         COPY orchestrate.sh /orchestrate.sh
         COPY --from=workspace_root $WORKSPACE /workspace
-    command: /orchestrate.sh
+
+        CMD /orchestrate.sh
     env_file: .env
     privileged: true
 
