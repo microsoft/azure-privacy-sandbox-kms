@@ -1,0 +1,34 @@
+name: Test Orchestrator
+
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 1 * * *"
+
+jobs:
+
+  test-orchestrator:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log into Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
+          tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
+          subscription-id: 7ca35580-fc67-469c-91a7-68b38569ca6e
+
+      - name: Install Dependencies
+        run: pip install -r scripts/ccf/az-cleanroom-aci/orchestrator/requirements.txt
+
+      - name: Test Orchestrator
+        run: pytest -sv scripts/ccf/az-cleanroom-aci/orchestrator/test/test.py
