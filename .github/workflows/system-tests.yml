@@ -32,7 +32,9 @@ jobs:
   test:
     name: ${{ '' }}
     needs: discover-tests
-    secrets: inherit # pragma: allowlist secret
+    secrets:
+      MANAGED_ID_CLIENT_ID: ${{ secrets.MANAGED_ID_CLIENT_ID }}
+      MANAGED_ID_TENANT_ID: ${{ secrets.MANAGED_ID_TENANT_ID }}
     strategy:
       fail-fast: false
       matrix:
