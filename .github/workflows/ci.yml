@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
   workflow_call:
     secrets:
-      GITHUB_TOKEN:
+      GH_TOKEN:
         required: true
   schedule:
     - cron: "0 1 * * *"
