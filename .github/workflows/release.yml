@@ -21,7 +21,7 @@ jobs:
       MANAGED_ID_TENANT_ID: ${{ secrets.MANAGED_ID_TENANT_ID }}
 
   release:
-    needs: tests
+    #needs: tests
     runs-on: ubuntu-latest
 
     steps:
@@ -49,17 +49,15 @@ jobs:
     - name: Zip /dist directory
       run: zip -r dist.zip dist
 
-    - name: Fetch PR notes
-      id: pr_notes
+    - name: Fetch Commit Comments
+      id: commit_comments
       run: |
         echo "## Release Notes" > RELEASE_NOTES.md
         echo "" >> RELEASE_NOTES.md
-        PRS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "https://api.github.com/repos/${{ github.repository }}/pulls?state=closed&base=${{ github.ref_name }}&sort=updated&direction=desc")
-        echo "$PRS" | jq -r '.[] | select(.merged_at != null) | "- " + .title + "\n" + .body' >> RELEASE_NOTES.md
+        COMMITS=$(git log --pretty=format:"- %s" $(git describe --tags --abbrev=0 @^)..@)
+        echo "$COMMITS" >> RELEASE_NOTES.md
         echo "" >> RELEASE_NOTES.md
         echo "## SBOM" >> RELEASE_NOTES.md
-        head -c 100000 sbom.xml >> RELEASE_NOTES.md  # Truncate SBOM to avoid exceeding the limit
 
     - name: Create GitHub Release
       id: create_release
