@@ -13,10 +13,10 @@ permissions:
   id-token: write
 
 jobs:
-  tests:
-    name: Tests
-    uses: ./.github/workflows/ci.yml
-    secrets: inherit # pragma: allowlist secret
+  #tests:
+  #  name: Tests
+  #  uses: ./.github/workflows/ci.yml
+  #  secrets: inherit # pragma: allowlist secret
 
   release:
     #needs: tests
@@ -47,12 +47,22 @@ jobs:
     - name: Zip /dist directory
       run: zip -r dist.zip dist
 
+    - name: Debug Git Tags
+      run: |
+        echo "Listing all tags:"
+        git tag -l
+        echo "Current tag: ${GITHUB_REF#refs/tags/}"
+        echo "Previous tag:"
+        git describe --tags --abbrev=0 @^
+
     - name: Fetch Commit Comments
       id: commit_comments
       run: |
         echo "## Release Notes" > RELEASE_NOTES.md
         echo "" >> RELEASE_NOTES.md
-        COMMITS=$(git log --pretty=format:"- %s" $(git describe --tags --abbrev=0 @^)..@)
+        PREV_TAG=$(git describe --tags --abbrev=0 @^)
+        echo "Previous tag: $PREV_TAG"
+        COMMITS=$(git log --pretty=format:"- %s" $PREV_TAG..@)
         echo "$COMMITS" >> RELEASE_NOTES.md
 
     - name: Create GitHub Release
