@@ -47,14 +47,6 @@ jobs:
     - name: Zip /dist directory
       run: zip -r dist.zip dist
 
-    - name: Debug Git Tags
-      run: |
-        echo "Listing all tags:"
-        git tag -l
-        echo "Current tag: ${GITHUB_REF#refs/tags/}"
-        echo "Previous tag:"
-        git describe --tags --abbrev=0 @^
-
     - name: Fetch Commit Comments
       id: commit_comments
       run: |
