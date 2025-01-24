@@ -274,6 +274,7 @@ git tag kms-v0.1.0;git push origin kms-v0.1.0
 ```
 git tag -d kms-v0.1.0;git push origin :refs/tags/kms-v0.1.0
 ```
+
 # Az login
 The azure login process needs a subject identifier in the form repo:microsoft/azure-privacy-sandbox-kms:ref:refs/tags/kms-v0.1.0.
 Make sure the federated credential support the tag you publish.
