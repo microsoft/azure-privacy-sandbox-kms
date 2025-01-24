@@ -69,6 +69,4 @@ jobs:
 
   system:
     uses: ./.github/workflows/system-tests.yml
-    secrets:
-      MANAGED_ID_CLIENT_ID: ${{ secrets.MANAGED_ID_CLIENT_ID }}
-      MANAGED_ID_TENANT_ID: ${{ secrets.MANAGED_ID_TENANT_ID }}
+    secrets: inherit # pragma: allowlist secret
