@@ -13,12 +13,10 @@ permissions:
   id-token: write
 
 jobs:
-  #tests:
-    #name: Tests
-    #uses: ./.github/workflows/ci.yml
-    #secrets:
-      #MANAGED_ID_CLIENT_ID: ${{ secrets.MANAGED_ID_CLIENT_ID }}
-      #MANAGED_ID_TENANT_ID: ${{ secrets.MANAGED_ID_TENANT_ID }}
+  tests:
+    name: Tests
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit # pragma: allowlist secret
 
   release:
     #needs: tests
@@ -56,8 +54,6 @@ jobs:
         echo "" >> RELEASE_NOTES.md
         COMMITS=$(git log --pretty=format:"- %s" $(git describe --tags --abbrev=0 @^)..@)
         echo "$COMMITS" >> RELEASE_NOTES.md
-        echo "" >> RELEASE_NOTES.md
-        echo "## SBOM" >> RELEASE_NOTES.md
 
     - name: Create GitHub Release
       id: create_release
