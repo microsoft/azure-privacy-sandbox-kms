@@ -270,7 +270,6 @@ The release management workflow called release.yml is triggered by publising a r
 ```
 git tag kms-v0.1.0;git push origin kms-v0.1.0
 ```
-
 # Deleteting a tag
 ```
 git tag -d kms-v0.1.0;git push origin :refs/tags/kms-v0.1.0
