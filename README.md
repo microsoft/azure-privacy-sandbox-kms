@@ -99,7 +99,6 @@ make start-host-idp
 # Setup additional vars used in the manual tests
 . ./scripts/setup_local.sh
 ```
-
 ## Propose and vote new key release policy
 
 ### Add claims
