@@ -141,6 +141,7 @@ make setup
 # Heartbeat endpoint
 curl ${KMS_URL}/app/heartbeat --cacert ${KEYS_DIR}/service_cert.pem  -H "Content-Type: application/json"  -w '\n' | jq
 
+
 # Testing with auth: Use user certs
 curl ${KMS_URL}/app/auth --cacert ${KEYS_DIR}/service_cert.pem --cert ${KEYS_DIR}/user0_cert.pem --key ${KEYS_DIR}/user0_privk.pem -H "Content-Type: application/json" -w '\n' | jq
 
