@@ -52,8 +52,9 @@ jobs:
       run: |
         echo "## Release Notes" > RELEASE_NOTES.md
         echo "" >> RELEASE_NOTES.md
-        PREV_TAG=$(git describe --tags --abbrev=0 @^ 2>/dev/null || echo "No previous tag")
-        if [ "$PREV_TAG" != "No previous tag" ]; then
+        TAG_COUNT=$(git tag -l | wc -l)
+        if [ "$TAG_COUNT" -gt 1 ]; then
+          PREV_TAG=$(git describe --tags --abbrev=0 @^)
           echo "Previous tag: $PREV_TAG"
           COMMITS=$(git log --pretty=format:"- %s" $PREV_TAG..@)
         else
