@@ -6,10 +6,10 @@ on:
       - 'kms-v*'
 
 permissions:
-  contents: write
-  checks: write
-  packages: write
-  id-token: write
+  contents: write # n- **contents: write** – needed to create or update releases, commit files, or upload assets.
+  actions: write # needed to manage or trigger workflow actions
+  checks: write # needed to create or update checks for pull requests and commits
+  id-token: write # needed to generate OIDC tokens for secure deployments or cloud access
 
 jobs:
   tests:
