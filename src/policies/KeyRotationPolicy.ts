@@ -36,17 +36,6 @@ export class KeyRotationPolicy {
   );
 
   /**
-   * Returns the default key rotation policy.
-   * @returns The default key rotation policy.
-   */
-  public static defaultKeyRotationPolicy(): IKeyRotationPolicy {
-    return {
-      rotation_interval_seconds: 300,
-      grace_period_seconds: 60,
-    };
-  }
-
-  /**
    * Logs the key rotation policy settings.
    * @param keyRotationPolicy - The key rotation policy to log.
    */
