@@ -17,7 +17,7 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash 
     && nvm use $NODE_VERSION
 
 # overcome sandbox issues with npm
-apt-get install -y libstdc++6
+apt-get install -y libstdc++11
 
 echo "Install rollup, this is a temporary workaround to a bug around symlinking"
 npm install -g rollup@4.21.1
