@@ -1,12 +1,12 @@
 services:
   ccf-sandbox:
-    image: azurekms.azurecr.io/ccf_sandbox/${CCF_PLATFORM:-virtual}:latest
+    image: azurekms.azurecr.io/ccf_sandbox/${CCF_PLATFORM:-virtual}:ccf-5.0.11
     extends:
       file: ./ccf-sandbox/docker-compose.yml
       service: ccf-sandbox
 
   ccf-sandbox-joiner:
-    image: azurekms.azurecr.io/ccf_sandbox/${CCF_PLATFORM:-virtual}:latest
+    image: azurekms.azurecr.io/ccf_sandbox/${CCF_PLATFORM:-virtual}:ccf-5.0.11
     extends:
       file: ./ccf-sandbox/docker-compose.yml
       service: ccf-sandbox-joiner

@@ -1,5 +1,5 @@
 ARG CCF_PLATFORM
-FROM ghcr.io/microsoft/ccf/app/dev/${CCF_PLATFORM}:latest
+FROM ghcr.io/microsoft/ccf/app/dev/${CCF_PLATFORM}:ccf-5.0.11
 
 # Pre install CCF dependencies to speed up container start (only works in virtual mode)
 ARG CCF_PLATFORM
