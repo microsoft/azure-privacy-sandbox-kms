@@ -12,4 +12,5 @@ apt-get update && apt-get install -y \
     lsof \
     sudo \
     tar \
+    libstdc++6 \
     default-jre
