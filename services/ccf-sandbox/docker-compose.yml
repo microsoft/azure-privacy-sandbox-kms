@@ -1,6 +1,6 @@
 services:
   ccf-sandbox:
-    image: azurekms.azurecr.io/ccf_sandbox/${CCF_PLATFORM:-virtual}:latest
+    image: azurekms.azurecr.io/ccf_sandbox/${CCF_PLATFORM:-virtual}:ccf-5.0.11
     build:
       context: .
       dockerfile: Dockerfile
@@ -9,7 +9,7 @@ services:
     command: |
       /bin/bash -c '
         echo "sandbox_0" > /node_id &&
-        mkdir -p /workspace/sandbox_0/ && touch /workspace/sandbox_0/out && tail -f /workspace/sandbox_0/out & 
+        mkdir -p /workspace/sandbox_0/ && touch /workspace/sandbox_0/out && tail -f /workspace/sandbox_0/out &
         /opt/ccf_${CCF_PLATFORM:-virtual}/bin/sandbox.sh --http2 --initial-member-count ${MEMBER_COUNT:-1}
       '
     network_mode: host
