@@ -104,7 +104,7 @@ export class KeyRotationPolicy {
   /**
    *
    * @param keyRotationPolicyMap  - The map containing the key rotation policy.
-   * @param keyItem - The key item to check.
+   * @param keyItemCreationTime - The creation time of the key item in milliseconds.
    * @param logContextIn  - The log context to use.
    * @returns [expired, deprecated] - A tuple containing two number values. The first value indicates the key expiring time, and the second value indicates if the key deprecation time.
    */
