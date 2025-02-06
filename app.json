@@ -5,6 +5,7 @@
         "js_module": "endpoints/keyReleasePolicyEndpoint.js",
         "js_function": "keyReleasePolicy",
         "forwarding_required": "sometimes",
+        "redirection_strategy": "none",
         "authn_policies": ["member_cert"],
         "mode": "readonly",
         "openapi": {
@@ -26,6 +27,7 @@
         "js_module": "endpoints/settingsPolicyEndpoint.js",
         "js_function": "settingsPolicy",
         "forwarding_required": "sometimes",
+        "redirection_strategy": "none",
         "authn_policies": ["member_cert"],
         "mode": "readonly",
         "openapi": {
@@ -47,6 +49,7 @@
         "js_module": "endpoints/publickeyEndpoint.js",
         "js_function": "pubkey",
         "forwarding_required": "sometimes",
+        "redirection_strategy": "none",
         "authn_policies": [],
         "mode": "readonly",
         "parameters": [
@@ -100,6 +103,7 @@
         "js_module": "endpoints/publickeyEndpoint.js",
         "js_function": "listpubkeys",
         "forwarding_required": "sometimes",
+        "redirection_strategy": "none",
         "authn_policies": [],
         "mode": "readonly",
         "openapi": {
@@ -125,6 +129,7 @@
         "js_module": "endpoints/keyEndpoint.js",
         "js_function": "unwrapKey",
         "forwarding_required": "sometimes",
+        "redirection_strategy": "none",
         "authn_policies": ["jwt", "member_cert", "user_cert"],
         "mode": "readonly",
         "openapi": {
@@ -192,6 +197,7 @@
         "js_module": "endpoints/keyEndpoint.js",
         "js_function": "key",
         "forwarding_required": "sometimes",
+        "redirection_strategy": "none",
         "authn_policies": ["jwt", "member_cert", "user_cert"],
         "mode": "readonly",
         "parameters": [
@@ -310,6 +316,7 @@
         "js_module": "endpoints/kms.js",
         "js_function": "auth",
         "forwarding_required": "never",
+        "redirection_strategy": "none",
         "authn_policies": ["user_cert", "member_cert", "jwt"],
         "mode": "readonly",
         "openapi": {
@@ -326,6 +333,7 @@
         "js_module": "endpoints/kms.js",
         "js_function": "heartbeat",
         "forwarding_required": "sometimes",
+        "redirection_strategy": "none",
         "authn_policies": [],
         "mode": "readonly",
         "openapi": {
