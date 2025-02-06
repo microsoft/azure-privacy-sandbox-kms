@@ -13,9 +13,13 @@ on:
     inputs:
       test:
         type: string
+    secrets:
+      MANAGED_ID_CLIENT_ID:
+        required: true
+      MANAGED_ID_TENANT_ID:
+        required: true
 
 jobs:
-
   test:
     name: ${{ inputs.test }} (${{ matrix.config.env }}) (${{ matrix.config.use_akv && 'akv' || 'local' }}_keys)
     runs-on: ubuntu-latest
@@ -40,7 +44,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: ./scripts/tools/install-deps.sh
-      
+
       - name: Log into Azure
         uses: azure/login@v2
         with:

@@ -1,0 +1,105 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'kms-v*'
+
+permissions:
+  contents: write # n- **contents: write** – needed to create or update releases, commit files, or upload assets.
+  actions: write # needed to manage or trigger workflow actions
+  checks: write # needed to create or update checks for pull requests and commits
+  id-token: write # needed to generate OIDC tokens for secure deployments or cloud access
+
+jobs:
+  tests:
+    name: Tests
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit # pragma: allowlist secret
+
+  release:
+    needs: tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set release version
+      id: vars
+      run: echo "release_version=${GITHUB_REF#refs/tags/kms-v}" >> $GITHUB_ENV
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '22'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build project
+      run: make build
+
+    - name: Generate SBOM
+      run: npx cyclonedx-bom -o sbom.xml
+
+    - name: Zip /dist directory
+      run: zip -r dist.zip dist
+
+    - name: Fetch Commit Comments
+      id: commit_comments
+      run: |
+        echo "## Release Notes" > RELEASE_NOTES.md
+        echo "" >> RELEASE_NOTES.md
+        TAG_COUNT=$(git tag -l | wc -l)
+        if [ "$TAG_COUNT" -gt 1 ]; then
+          PREV_TAG=$(git describe --tags --abbrev=0 @^)
+          echo "Previous tag: $PREV_TAG"
+          COMMITS=$(git log --pretty=format:"- %s" $PREV_TAG..@)
+        else
+          echo "No previous tag found."
+          COMMITS=$(git log --pretty=format:"- %s")
+        fi
+        echo "$COMMITS" >> RELEASE_NOTES.md
+
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body_path: ./RELEASE_NOTES.md
+        draft: false
+        prerelease: false
+
+    - name: Upload SBOM
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./sbom.xml
+        asset_name: sbom.xml
+        asset_content_type: application/xml
+
+    - name: Upload dist.zip
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist.zip
+        asset_name: dist.zip
+        asset_content_type: application/zip
+
+    - name: Upload RELEASE_NOTES.md
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./RELEASE_NOTES.md
+        asset_name: RELEASE_NOTES.md
+        asset_content_type: text/markdown

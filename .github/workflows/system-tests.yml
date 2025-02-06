@@ -7,6 +7,11 @@ permissions:
 on:
   workflow_dispatch:
   workflow_call:
+    secrets:
+      MANAGED_ID_CLIENT_ID:
+        required: true
+      MANAGED_ID_TENANT_ID:
+        required: true
 
 jobs:
   discover-tests:

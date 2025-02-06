@@ -9,6 +9,12 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  workflow_call:
+    secrets:
+      MANAGED_ID_CLIENT_ID:
+        required: true
+      MANAGED_ID_TENANT_ID:
+        required: true
   schedule:
     - cron: "0 1 * * *"
 
@@ -62,5 +68,5 @@ jobs:
         run: cat workspace/sandbox_0/out
 
   system:
-    secrets: inherit # pragma: allowlist secret
     uses: ./.github/workflows/system-tests.yml
+    secrets: inherit # pragma: allowlist secret
