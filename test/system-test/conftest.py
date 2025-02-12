@@ -55,7 +55,7 @@ def setup_jwt_issuer():
             ["./scripts/jwt_issuer/up.sh", "--build"],
             env={
                 **os.environ,
-                "JWT_ISSUER_WORKSPACE": f"{REPO_ROOT}/jwt_issuer_workspace",
+                "JWT_ISSUER_WORKSPACE": f"{REPO_ROOT}/jwt_issuers_workspace",
             },
         )
         yield

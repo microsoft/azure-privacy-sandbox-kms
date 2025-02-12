@@ -22,6 +22,10 @@ js-app-set() {
       echo "$line" >> "$temp_file"
     fi
   done < $REPO_ROOT/governance/proposals/set_js_app.json
+
+  # Ensure the target directory exists
+  mkdir -p $WORKSPACE/proposals
+
   mv "$temp_file" $WORKSPACE/proposals/set_js_app.json
 
   # Submit the proposal
