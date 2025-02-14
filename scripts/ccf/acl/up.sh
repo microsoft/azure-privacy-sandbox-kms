@@ -16,6 +16,7 @@ acl-up() {
     export DEPLOYMENT_NAME
 
     # Deploy the confidential ledger
+    # (Must be in Australia East for now to get custom endpoint support)
     az confidentialledger create \
         --name $DEPLOYMENT_NAME \
         --subscription $SUBSCRIPTION \
