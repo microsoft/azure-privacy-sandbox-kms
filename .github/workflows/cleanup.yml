@@ -12,6 +12,12 @@ on:
 jobs:
   cleanup-aci:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        subscription:
+          - ${{ vars.SUBSCRIPTION }}
+          - 7ca35580-fc67-469c-91a7-68b38569ca6e
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,7 +27,7 @@ jobs:
         with:
           client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
           tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
-          subscription-id: 7ca35580-fc67-469c-91a7-68b38569ca6e
+          subscription-id: ${{ matrix.subscription }}
 
       - run: |
           source services/cacitesting.env
@@ -40,6 +46,12 @@ jobs:
 
   cleanup-storage:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        subscription:
+          - ${{ vars.SUBSCRIPTION }}
+          - 7ca35580-fc67-469c-91a7-68b38569ca6e
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -49,7 +61,7 @@ jobs:
         with:
           client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
           tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
-          subscription-id: 7ca35580-fc67-469c-91a7-68b38569ca6e
+          subscription-id: ${{ matrix.subscription }}
 
       - run: |
           source services/cacitesting.env
@@ -69,6 +81,12 @@ jobs:
 
   cleanup-akv:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        subscription:
+          - ${{ vars.SUBSCRIPTION }}
+          - 7ca35580-fc67-469c-91a7-68b38569ca6e
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -78,7 +96,7 @@ jobs:
         with:
           client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
           tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
-          subscription-id: 7ca35580-fc67-469c-91a7-68b38569ca6e
+          subscription-id: ${{ matrix.subscription }}
 
       - run: |
           source services/cacitesting.env

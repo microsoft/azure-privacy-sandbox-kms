@@ -24,12 +24,19 @@ jobs:
       matrix:
         config:
           - env: sandbox_local
+            subscription: ${{ vars.SUBSCRIPTION }}
             use_akv: false
             threads: 1
           - env: sandbox_local
+            subscription: ${{ vars.SUBSCRIPTION }}
             use_akv: true
             threads: 1
           - env: az-cleanroom-aci
+            subscription: 7ca35580-fc67-469c-91a7-68b38569ca6e
+            use_akv: false
+            threads: auto
+          - env: acl
+            subscription: ${{ vars.SUBSCRIPTION }}
             use_akv: false
             threads: auto
     steps:
@@ -40,7 +47,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: ./scripts/tools/install-deps.sh
-      
+
       - name: Log into Azure
         uses: azure/login@v2
         with:
@@ -50,7 +57,7 @@ jobs:
           # Use subject identifier repo:<organization>/<repo>:ref:refs/heads/<branch> for running manual CI's
           client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
           tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
-          subscription-id: 7ca35580-fc67-469c-91a7-68b38569ca6e
+          subscription-id: ${{ matrix.config.subscription }}
 
       - name: Run System Tests
         env:
