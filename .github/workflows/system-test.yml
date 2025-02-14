@@ -32,6 +32,9 @@ jobs:
           - env: az-cleanroom-aci
             use_akv: false
             threads: auto
+          - env: acl
+            use_akv: false
+            threads: auto
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,7 +43,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: ./scripts/tools/install-deps.sh
-      
+
       - name: Log into Azure
         uses: azure/login@v2
         with:
