@@ -97,6 +97,11 @@ propose-settings-policy: ## 🚀 Deploy the settings policy
 	@echo -e "\e[34m$@\e[0m" || true
 	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/policies/settings-policy.json --certificate_dir "${KEYS_DIR}" --member-count ${MEMBER_COUNT}
 
+# Propose a new key rotation policy
+propose-key-rotation-policy: ## 🚀 Deploy the key rotation policy
+	@echo -e "\e[34m$@\e[0m" || true
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/proposals/set_key_rotation_policy.json --certificate_dir "${KEYS_DIR}" --member-count ${MEMBER_COUNT}
+
 # Propose a new key release policy
 propose-add-key-release-policy: ## 🚀 Deploy the add claim key release policy to the sandbox or mCCF
 	@echo -e "\e[34m$@\e[0m" || true
@@ -106,10 +111,6 @@ propose-rm-key-release-policy: ## 🚀 Deploy the remove claim key release polic
 	@echo -e "\e[34m$@\e[0m" || true
 	$(call check_defined, KMS_URL)
 	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/policies/key-release-policy-remove.json --certificate_dir "${KEYS_DIR}"
-
-propose-key-rotation-policy: ## 🚀 Deploy the key rotation policy to the sandbox or mCCF
-	@echo -e "\e[34m$@\e[0m" || true
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/policies/key-rotation-policy.json --certificate_dir "${KEYS_DIR}" --member-count ${MEMBER_COUNT}
 
 refresh-key: ## 🚀 Refresh a key on the instance
 	@echo -e "\e[34m$@\e[0m" || true
