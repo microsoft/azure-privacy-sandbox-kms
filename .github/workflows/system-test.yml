@@ -14,7 +14,7 @@ on:
         type: string
         description: The CCF service type to run KMS on
       use_akv:
-        type: string
+        type: boolean
         description: Whether or not to store keys in AKV
   workflow_call:
     inputs:
@@ -25,7 +25,7 @@ on:
         type: string
         description: The CCF service type to run KMS on
       use_akv:
-        type: string
+        type: boolean
         description: Whether or not to store keys in AKV
 
 jobs:
