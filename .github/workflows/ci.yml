@@ -70,7 +70,7 @@ jobs:
         use_akv: [false, true]
     uses: ./.github/workflows/system-tests.yml
     with:
-      env: ccf/sandbox_local
+      env: sandbox_local
       use_akv: ${{ matrix.use_akv }}
 
   system-stateful:
@@ -79,5 +79,5 @@ jobs:
     uses: ./.github/workflows/system-test.yml
     with:
       test_path: test_all_seq
-      env: ccf/sandbox/az-cleanroom-aci
+      env: az-cleanroom-aci
       use_akv: false
