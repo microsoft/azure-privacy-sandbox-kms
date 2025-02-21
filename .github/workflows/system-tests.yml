@@ -34,7 +34,7 @@ jobs:
       - name: Find Test Files
         id: find_tests
         run: |
-          TEST_FILES=$(cd test/system-test && find . -name 'test_*.py' ! -name 'test_all_seq.py' | sed -e 's|^\./||' -e 's|^test_||' -e 's|\.py$||')
+          TEST_FILES=$(cd test/system-test && find . -name 'test_*.py' ! -name 'test_all_seq.py' | sed -e 's|^\./||' -e 's|\.py$||')
           JSON_ARRAY=$(printf '%s\n' "${TEST_FILES[@]}" | jq -R . | jq -s .)
           echo "tests=$JSON_ARRAY" | sed ':a;N;$!ba;s/\n//g' >> $GITHUB_OUTPUT
 
