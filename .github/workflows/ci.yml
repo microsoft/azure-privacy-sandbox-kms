@@ -78,6 +78,6 @@ jobs:
     secrets: inherit # pragma: allowlist secret
     uses: ./.github/workflows/system-test.yml
     with:
-      test-path: test_all_seq
+      test_path: test_all_seq
       env: ccf/sandbox/az-cleanroom-aci
       use_akv: false
