@@ -1,4 +1,4 @@
-name: CI
+name: Daily
 
 permissions:
   id-token: write
@@ -7,8 +7,9 @@ permissions:
 on:
   push:
     branches: [main]
-  pull_request:
   workflow_dispatch:
+  schedule:
+    - cron: "0 1 * * *"
 
 jobs:
   lint:
@@ -60,22 +61,19 @@ jobs:
         run: cat workspace/sandbox_0/out
 
   system-stateless:
-    name: system / stateless (${{ inputs.use_akv && 'akv' || 'local' }}_keys)
+    name: system
     secrets: inherit # pragma: allowlist secret
     strategy:
       fail-fast: false
       matrix:
-        use_akv: [false, true]
+        config:
+          - env: sandbox_local
+            use_akv: false
+          - env: sandbox_local
+            use_akv: true
+          - env: az-cleanroom-aci
+            use_akv: false
     uses: ./.github/workflows/system-tests.yml
     with:
-      env: sandbox_local
-      use_akv: ${{ matrix.use_akv }}
-
-  system-stateful:
-    name: system / stateful (local_keys)
-    secrets: inherit # pragma: allowlist secret
-    uses: ./.github/workflows/system-test.yml
-    with:
-      test_path: test_all_seq
-      env: az-cleanroom-aci
-      use_akv: false
+      env: ${{ matrix.config.env }}
+      use_akv: ${{ matrix.config.use_akv }}
