@@ -25,7 +25,7 @@ jobs:
         with:
           client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
           tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
-          subscription-id: 7ca35580-fc67-469c-91a7-68b38569ca6e
+          subscription-id: ${{ vars.SUBSCRIPTION }}
 
       - name: Install Dependencies
         run: pip install -r scripts/ccf/az-cleanroom-aci/orchestrator/requirements.txt
