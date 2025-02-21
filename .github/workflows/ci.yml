@@ -64,8 +64,10 @@ jobs:
   system-stateless:
     name: system / ccf sandbox / ${{ matrix.use_akv && 'akv' || 'local' }}_keys
     secrets: inherit # pragma: allowlist secret
-    matrix:
-      use_akv: [false, true]
+    strategy:
+      fail-fast: false
+      matrix:
+        use_akv: [false, true]
     uses: ./.github/workflows/system-tests.yml
     with:
       env: ccf/sandbox_local
