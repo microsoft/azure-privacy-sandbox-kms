@@ -31,7 +31,7 @@ on:
 jobs:
 
   test:
-    name: ${{ inputs.env }} / ${{ inputs.use_akv && 'akv' || 'local' }}_keys / ${{ inputs.test_path }}
+    name: ${{ inputs.test_path }} (${{ inputs.env }}, ${{ inputs.use_akv && 'akv' || 'local' }}_keys)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
