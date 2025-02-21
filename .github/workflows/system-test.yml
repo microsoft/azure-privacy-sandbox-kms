@@ -38,7 +38,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           ./scripts/tools/install-c-aci-testing.sh
-          pip install pytest==8.3.3 pytest-xdist==3.6.1 cryptography==43.0.3
+          pip install pytest==8.3.3 pytest-xdist==3.6.1 pycryptodome==3.21.0
 
       - name: Log into Azure
         uses: azure/login@v2
