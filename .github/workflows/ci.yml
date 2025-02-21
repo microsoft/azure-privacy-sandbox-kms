@@ -60,7 +60,7 @@ jobs:
         run: cat workspace/sandbox_0/out
 
   system-stateless:
-    name: system
+    name: system / stateless (${{ inputs.use_akv && 'akv' || 'local' }}_keys)
     secrets: inherit # pragma: allowlist secret
     strategy:
       fail-fast: false
@@ -72,7 +72,7 @@ jobs:
       use_akv: ${{ matrix.use_akv }}
 
   system-stateful:
-    name: system
+    name: system / stateful (local_keys)
     secrets: inherit # pragma: allowlist secret
     uses: ./.github/workflows/system-test.yml
     with:
