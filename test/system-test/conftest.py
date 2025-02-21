@@ -47,9 +47,7 @@ def call_script(args, **kwargs):
     except json.JSONDecodeError:
         ...
 
-
-@pytest.fixture()
-def setup_jwt_issuer():
+def _setup_jwt_issuer():
     try:
         call_script(
             ["./scripts/jwt_issuer/up.sh", "--build"],
@@ -61,6 +59,16 @@ def setup_jwt_issuer():
         yield
     finally:
         call_script("./scripts/jwt_issuer/down.sh")
+
+
+@pytest.fixture()
+def setup_jwt_issuer():
+    yield from _setup_jwt_issuer()
+
+
+@pytest.fixture(scope="session")
+def setup_jwt_issuer_session():
+    yield from _setup_jwt_issuer()
 
 
 @pytest.fixture(scope="session")
@@ -79,8 +87,7 @@ def setup_akv():
         yield
 
 
-@pytest.fixture()
-def setup_ccf():
+def _setup_ccf():
     for _ in range(10):
         try:
             deployment_name = os.getenv("DEPLOYMENT_NAME", f"kms-{unique_string()}")
@@ -115,12 +122,31 @@ def setup_ccf():
 
 
 @pytest.fixture()
-def setup_kms(setup_ccf, setup_akv):
+def setup_ccf():
+    yield from _setup_ccf()
+
+
+@pytest.fixture(scope="session")
+def setup_ccf_session():
+    yield from _setup_ccf()
+
+
+def _setup_kms():
     if USE_AKV:
         call_script([
             "./scripts/akv/key-import.sh",
             f'{os.getenv("DEPLOYMENT_NAME", "kms")}-private-key'
         ])
     deploy_app_code()
-    yield
+    yield {}
     print("") # Prevents cleanup overwriting result
+
+
+@pytest.fixture()
+def setup_kms(setup_ccf, setup_akv):
+    yield from _setup_kms()
+
+
+@pytest.fixture(scope="session")
+def setup_kms_session(setup_ccf_session, setup_akv):
+    yield from _setup_kms()
