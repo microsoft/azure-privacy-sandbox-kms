@@ -61,6 +61,21 @@ jobs:
       - name: Print CCF logs
         run: cat workspace/sandbox_0/out
 
-  system:
+  system-stateless:
+    name: system / ccf sandbox / ${{ matrix.use_akv && 'akv' || 'local' }}_keys
     secrets: inherit # pragma: allowlist secret
+    matrix:
+      use_akv: [false, true]
     uses: ./.github/workflows/system-tests.yml
+    with:
+      env: ccf/sandbox_local
+      use_akv: ${{ matrix.use_akv }}
+
+  system-stateful:
+    name: system / az cleanroom / local_keys
+    secrets: inherit # pragma: allowlist secret
+    uses: ./.github/workflows/system-test.yml
+    with:
+      test-path: test_all_seq
+      env: ccf/sandbox/az-cleanroom-aci
+      use_akv: false

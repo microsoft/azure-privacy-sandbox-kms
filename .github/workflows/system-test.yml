@@ -7,28 +7,32 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      test:
+      test_path:
         type: string
+        description: "Path to pytest file/s"
+      env:
+        type: string
+        description: The CCF service type to run KMS on
+      use_akv:
+        type: bool
+        description: Whether or not to store keys in AKV
   workflow_call:
     inputs:
-      test:
+      test_path:
         type: string
+        description: "Path to pytest file/s"
+      env:
+        type: string
+        description: The CCF service type to run KMS on
+      use_akv:
+        type: bool
+        description: Whether or not to store keys in AKV
 
 jobs:
 
   test:
-    name: ${{ inputs.test }} (${{ matrix.config.env }}) (${{ matrix.config.use_akv && 'akv' || 'local' }}_keys)
+    name: ${{ inputs.test }} (${{ inputs.env }}) (${{ inputs.use_akv && 'akv' || 'local' }}_keys)
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-          - env: sandbox_local
-            use_akv: false
-          - env: sandbox_local
-            use_akv: true
-          - env: az-cleanroom-aci
-            use_akv: false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -51,8 +55,8 @@ jobs:
 
       - name: Run System Tests
         env:
-          TEST_ENVIRONMENT: ccf/${{ matrix.config.env }}
-          USE_AKV: ${{ matrix.config.use_akv }}
+          TEST_ENVIRONMENT: ccf/${{ inputs.env }}
+          USE_AKV: ${{ inputs.use_akv }}
         run: |
           pytest -sv \
-            test/system-test/test_${{ inputs.test }}.py
+            test/system-test/${{ inputs.test_path }}.py
