@@ -6,19 +6,21 @@ permissions:
 
 on:
   workflow_dispatch:
-    env:
-      type: string
-      description: The CCF service type to run KMS on
-    use_akv:
-      type: bool
-      description: Whether or not to store keys in AKV
+    inputs:
+      env:
+        type: string
+        description: The CCF service type to run KMS on
+      use_akv:
+        type: bool
+        description: Whether or not to store keys in AKV
   workflow_call:
-    env:
-      type: string
-      description: The CCF service type to run KMS on
-    use_akv:
-      type: bool
-      description: Whether or not to store keys in AKV
+    inputs:
+      env:
+        type: string
+        description: The CCF service type to run KMS on
+      use_akv:
+        type: bool
+        description: Whether or not to store keys in AKV
 
 jobs:
   discover-tests:
