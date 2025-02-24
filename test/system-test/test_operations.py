@@ -5,6 +5,11 @@ import pytest
 from utils import get_node_info, nodes_scale, deploy_app_code
 
 
+@pytest.mark.xfail(
+    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
+    strict=True,
+    reason="Governance operations need to move to user endpoints",
+)
 def test_nodes_scale_up(setup_kms):
     nodes_requested = 2
 
@@ -22,6 +27,11 @@ def test_nodes_scale_up(setup_kms):
     assert len(node_ids) == nodes_requested
 
 
+@pytest.mark.xfail(
+    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
+    strict=True,
+    reason="Governance operations need to move to user endpoints",
+)
 def test_nodes_scale_down(setup_kms):
     nodes_requested = 3
 
@@ -44,6 +54,11 @@ def test_nodes_scale_down(setup_kms):
         except subprocess.CalledProcessError as e: ...
     assert available_nodes == nodes_requested
 
+@pytest.mark.xfail(
+    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
+    strict=True,
+    reason="Governance operations need to move to user endpoints",
+)
 def test_nodes_non_primary(setup_kms):
     nodes = nodes_scale(2, get_logs=True)["nodes"]
 
