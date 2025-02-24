@@ -26,8 +26,8 @@ on:
         type: boolean
         description: Whether or not to store keys in AKV
       parallel:
-        type: boolean
-        default: true
+        type: string
+        default: 'true'
         description: Whether to run tests in parallel
 
 jobs:
