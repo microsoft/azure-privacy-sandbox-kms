@@ -39,13 +39,7 @@ ccf-propose() {
     echo "output from ccf-sign is $?"
     echo "resp= $(cat $resp)"
 
-    if [ -z "$(tr -d '[:space:]' < $resp)" ]; then
-        echo "resp is empty"
-        exit 1
-    fi
-
-    if jq -e '.error' $resp >/dev/null; then
-        echo "exiting with 1"
+    if [ -z "$(tr -d '[:space:]' < "$resp")" ] || jq -e '.error' "$resp" >/dev/null; then
         exit 1
     fi
 
