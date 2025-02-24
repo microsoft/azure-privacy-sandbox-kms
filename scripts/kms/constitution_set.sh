@@ -63,6 +63,8 @@ constitution-set() {
   source $REPO_ROOT/scripts/ccf/propose.sh
   ccf-propose $WORKSPACE/proposals/set_constitution.json
 
+  echo "CCF propose output is: $?"
+
   set +e
 }
 

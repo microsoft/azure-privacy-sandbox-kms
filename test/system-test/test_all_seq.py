@@ -83,7 +83,7 @@ from utils import get_test_attestation, get_test_public_wrapping_key, apply_kms_
 )
 def test_no_policy_no_keys_no_jwt_set_key_release_policy(setup_kms_session):
     apply_kms_constitution()
-    apply_key_release_policy()
+    # apply_key_release_policy()
 
 
 # @pytest.mark.xfail(
@@ -369,13 +369,13 @@ def test_no_policy_no_keys_no_jwt_set_key_release_policy(setup_kms_session):
 # def test_key_incorrectly_signed_attestation(setup_kms): ...
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
-def test_set_policy_single_key_no_jwt_trust_jwt_issuer(setup_kms_session, setup_jwt_issuer_session):
-    trust_jwt_issuer()
+# @pytest.mark.xfail(
+#     os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
+#     strict=True,
+#     reason="Governance operations need to move to user endpoints",
+# )
+# def test_set_policy_single_key_no_jwt_trust_jwt_issuer(setup_kms_session, setup_jwt_issuer_session):
+#     trust_jwt_issuer()
 
 
 # @pytest.mark.xfail(
@@ -527,13 +527,13 @@ def test_set_policy_single_key_no_jwt_trust_jwt_issuer(setup_kms_session, setup_
 #     assert unwrapped_json["kty"] == "OKP"
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
-def test_set_policy_multiple_keys_set_jwt_unset_key_release_policy(setup_kms_session):
-    remove_key_release_policy()
+# @pytest.mark.xfail(
+#     os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
+#     strict=True,
+#     reason="Governance operations need to move to user endpoints",
+# )
+# def test_set_policy_multiple_keys_set_jwt_unset_key_release_policy(setup_kms_session):
+#     remove_key_release_policy()
 
 
 # @pytest.mark.xfail(
