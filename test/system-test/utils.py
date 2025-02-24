@@ -55,10 +55,6 @@ def apply_kms_constitution(resolve="auto_accept", get_logs=False, **kwargs):
         **get_logs_arg,
     )
 
-    print(f"{res=}")
-    print(f"expected raised exception, manually raising as a test")
-    raise Exception("Manually raised exception")
-
     # Parse out the returned json from the proposal
     if get_logs:
         return json.loads("{" + res.stdout.decode().split("{", 1)[1])

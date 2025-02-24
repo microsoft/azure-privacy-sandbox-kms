@@ -36,9 +36,6 @@ ccf-propose() {
             -w '\n' \
                 | tee $resp | jq >&2
 
-    echo "output from ccf-sign is $?"
-    echo "resp= $(cat $resp)"
-
     if [ -z "$(tr -d '[:space:]' < "$resp")" ] || jq -e '.error' "$resp" >/dev/null; then
         exit 1
     fi
