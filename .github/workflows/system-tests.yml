@@ -51,7 +51,7 @@ jobs:
     secrets: inherit # pragma: allowlist secret
     strategy:
       fail-fast: false
-      max-parallel: ${{ inputs.parallel && 2 || 1 }}
+      max-parallel: ${{ inputs.parallel == 'true' && 2 || 1 }}
       matrix:
         test: ${{ fromJson(needs.discover-tests.outputs.tests) }}
     uses: ./.github/workflows/system-test.yml
