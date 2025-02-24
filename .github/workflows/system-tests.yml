@@ -25,9 +25,9 @@ on:
       use_akv:
         type: boolean
         description: Whether or not to store keys in AKV
-      max-parallel:
-        type: number
-        default: 999
+      parallel:
+        type: boolean
+        default: true
         description: Whether to run tests in parallel
 
 jobs:
@@ -51,7 +51,7 @@ jobs:
     secrets: inherit # pragma: allowlist secret
     strategy:
       fail-fast: false
-      max-parallel: ${{ inputs.max-parallel }}
+      max-parallel: ${{ inputs.parallel == true && 999 || 1 }}
       matrix:
         test: ${{ fromJson(needs.discover-tests.outputs.tests) }}
     uses: ./.github/workflows/system-test.yml
