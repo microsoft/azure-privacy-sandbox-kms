@@ -36,7 +36,7 @@ ccf-propose() {
             -w '\n' \
                 | tee $resp | jq >&2
 
-    if jq -e '.error' $resp >/dev/null; then
+    if [ -z "$(tr -d '[:space:]' < "$resp")" ] || jq -e '.error' "$resp" >/dev/null; then
         exit 1
     fi
 

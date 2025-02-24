@@ -73,6 +73,9 @@ jobs:
             use_akv: true
           - env: az-cleanroom-aci
             use_akv: false
+          - env: acl
+            use_akv: false
+            parallel: false
     uses: ./.github/workflows/system-tests.yml
     with:
       env: ${{ matrix.config.env }}
