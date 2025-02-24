@@ -39,6 +39,12 @@ ccf-propose() {
     echo "output from ccf-sign is $?"
     echo "resp= $(cat $resp)"
 
+
+    if [ ! -s "$resp" ]; then
+        echo "resp is empty"
+        exit 1
+    fi
+
     if jq -e '.error' $resp >/dev/null; then
         echo "exiting with 1"
         exit 1
