@@ -39,8 +39,7 @@ ccf-propose() {
     echo "output from ccf-sign is $?"
     echo "resp= $(cat $resp)"
 
-
-    if [ ! -s "$resp" ]; then
+    if [ -z "$(tr -d '[:space:]' < $resp)" ]; then
         echo "resp is empty"
         exit 1
     fi
