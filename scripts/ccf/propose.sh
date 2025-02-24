@@ -40,6 +40,7 @@ ccf-propose() {
     echo "resp= $(cat $resp)"
 
     if jq -e '.error' $resp >/dev/null; then
+        echo "exiting with 1"
         exit 1
     fi
 
