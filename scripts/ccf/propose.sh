@@ -36,6 +36,9 @@ ccf-propose() {
             -w '\n' \
                 | tee $resp | jq >&2
 
+    echo "output from ccf-sign is $?"
+    echo "resp= $resp"
+
     if jq -e '.error' $resp >/dev/null; then
         exit 1
     fi
