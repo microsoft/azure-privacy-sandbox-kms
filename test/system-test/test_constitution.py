@@ -1,8 +1,14 @@
+import os
 import pytest
 import tempfile
 
 from utils import apply_kms_constitution, propose, get_test_action, get_test_proposal
 
+@pytest.mark.xfail(
+    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
+    strict=True,
+    reason="Governance operations need to move to user endpoints",
+)
 def test_constitution_auto_accept(setup_kms):
     with get_test_action() as action_file:
         apply_kms_constitution(actions=action_file.name)
@@ -12,6 +18,11 @@ def test_constitution_auto_accept(setup_kms):
         assert proposal_response["state"] == "Accepted"
 
 
+@pytest.mark.xfail(
+    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
+    strict=True,
+    reason="Governance operations need to move to user endpoints",
+)
 def test_constitution_majority_vote(setup_kms):
     with get_test_action() as action_file:
         apply_kms_constitution(resolve="majority_vote", actions=action_file.name)
