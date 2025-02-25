@@ -70,7 +70,7 @@
         "js_function": "settingsPolicy",
         "forwarding_required": "sometimes",
         "redirection_strategy": "none",
-        "authn_policies": ["member_cert"],
+        "authn_policies": [],
         "mode": "readonly",
         "openapi": {
           "responses": {

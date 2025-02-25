@@ -73,7 +73,7 @@ describe("Test Settings Policy properties", () => {
 
   test("Should load settings from map successfully", () => {
     // Arrange
-    const settingsPolicyMap = globalThis.ccf.kv["public:ccf.gov.policies.settings"];
+    const settingsPolicyMap = globalThis.ccf.kv["public:policies.settings"];
     settingsPolicyMap.clear();
     const settingsPolicyValue = globalThis.ccf.strToBuf(JSON.stringify({
       service: {
@@ -97,7 +97,7 @@ describe("Test Settings Policy properties", () => {
 
   test("Should load default settings when settings are found on map successfully", () => {
     // Arrange
-    const settingsPolicyMap = globalThis.ccf.kv["public:ccf.gov.policies.settings"];
+    const settingsPolicyMap = globalThis.ccf.kv["public:policies.settings"];
     settingsPolicyMap.clear();
 
     const settingsPolicyValue = globalThis.ccf.strToBuf(JSON.stringify({

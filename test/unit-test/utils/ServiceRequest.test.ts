@@ -62,7 +62,7 @@ describe("Test ServiceRequest properties", () => {
         };
 
         // Set settings policy
-        const settingsPolicyMap = globalThis.ccf.kv["public:ccf.gov.policies.settings"];
+        const settingsPolicyMap = globalThis.ccf.kv["public:policies.settings"];
         settingsPolicyMap.clear();
         const settingsPolicyValue = globalThis.ccf.strToBuf(JSON.stringify({
             service: {
