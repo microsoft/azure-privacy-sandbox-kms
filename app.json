@@ -4,7 +4,7 @@
       "post": {
         "js_module": "endpoints/proposals.js",
         "js_function": "proposals",
-        "forwarding_required": "sometimes",
+        "forwarding_required": "always",
         "redirection_strategy": "none",
         "authn_policies": [],
         "mode": "readwrite",
