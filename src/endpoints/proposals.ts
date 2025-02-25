@@ -3,7 +3,8 @@
 
 import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../utils/ServiceResult";
-import { LogContext } from "../utils/Logger";
+import { LogContext, Logger } from "../utils/Logger";
+import { actions } from '../actions/actions';
 
 // This file serves to emulate a simplified version CCF's governance mechanism.
 // This allows governance type operations on CCF platforms which don't expose
@@ -48,8 +49,10 @@ export const proposals = (
     // TODO: Look up which proposal it is
 
     // TODO: Call proposal specific validation
+    // actions.get("set_settings_policy")?.validate("args");
 
     // TODO: Call proposal specific application
+    // actions.get("set_settings_policy")?.apply("args");
 
     return ServiceResult.Succeeded<IProposalResult>(new IProposalResult(), logContext);
 }
