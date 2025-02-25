@@ -74,8 +74,12 @@ jobs:
   system-stateful:
     name: system / stateful (local_keys)
     secrets: inherit # pragma: allowlist secret
+    strategy:
+      fail-fast: false
+      matrix:
+        env: [az-cleanroom-aci, acl]
     uses: ./.github/workflows/system-test.yml
     with:
       test_path: test_all_seq
-      env: az-cleanroom-aci
+      env: ${{ matrix.env }}
       use_akv: false

@@ -69,11 +69,18 @@ jobs:
         config:
           - env: sandbox_local
             use_akv: false
+            parallel: true
           - env: sandbox_local
             use_akv: true
+            parallel: true
           - env: az-cleanroom-aci
             use_akv: false
+            parallel: false
+          - env: acl
+            use_akv: false
+            parallel: false
     uses: ./.github/workflows/system-tests.yml
     with:
       env: ${{ matrix.config.env }}
       use_akv: ${{ matrix.config.use_akv }}
+      parallel: ${{ matrix.config.parallel }}

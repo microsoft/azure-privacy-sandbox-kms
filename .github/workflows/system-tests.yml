@@ -11,16 +11,24 @@ on:
         type: string
         description: The CCF service type to run KMS on
       use_akv:
-        type: string
+        type: boolean
         description: Whether or not to store keys in AKV
+      parallel:
+        type: boolean
+        default: true
+        description: Whether to run tests in parallel
   workflow_call:
     inputs:
       env:
         type: string
         description: The CCF service type to run KMS on
       use_akv:
-        type: string
+        type: boolean
         description: Whether or not to store keys in AKV
+      parallel:
+        type: boolean
+        default: true
+        description: Whether to run tests in parallel
 
 jobs:
   discover-tests:
@@ -43,6 +51,7 @@ jobs:
     secrets: inherit # pragma: allowlist secret
     strategy:
       fail-fast: false
+      max-parallel: ${{ inputs.parallel == true && 999 || 1 }}
       matrix:
         test: ${{ fromJson(needs.discover-tests.outputs.tests) }}
     uses: ./.github/workflows/system-test.yml
