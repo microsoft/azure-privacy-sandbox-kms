@@ -5,6 +5,7 @@ import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../utils/ServiceResult";
 import { LogContext, Logger } from "../utils/Logger";
 import { actions } from '../actions/actions';
+import { ServiceRequest } from "../utils/ServiceRequest";
 
 // This file serves to emulate a simplified version CCF's governance mechanism.
 // This allows governance type operations on CCF platforms which don't expose
@@ -43,16 +44,41 @@ export const proposals = (
 ): ServiceResult<string | IProposalResult> => {
 
     const logContext = new LogContext().appendScope("proposals");
+    const serviceRequest = new ServiceRequest<void>(logContext, request);
 
-    // TODO: Check caller identity
+    // Check caller identity
+    const [_, isValidIdentity] = serviceRequest.isAuthenticated();
+    if (isValidIdentity.failure) return isValidIdentity;
 
-    // TODO: Look up which proposal it is
+    // Extract settings policy from request
+    // TODO: Use actual input values
+    const args = {
+        settings_policy: {
+            service: {
+                name: "test_kms",
+                description: "test description",
+                version: "1.0.4",
+                debug: true,
+            }
+        }
+    }
+
+    // Look up which proposal it is
+    // TODO: Use actual input values
+    const action = actions.get("set_settings_policy");
+    if (action === undefined) {
+        return ServiceResult.Failed<IProposalResult>(
+            { errorMessage: `Proposal not found` },
+            404,
+            logContext,
+        );
+    }
 
     // TODO: Call proposal specific validation
-    // actions.get("set_settings_policy")?.validate("args");
+    action.validate(args);
 
     // TODO: Call proposal specific application
-    // actions.get("set_settings_policy")?.apply("args");
+    action.apply(args);
 
     return ServiceResult.Succeeded<IProposalResult>(new IProposalResult(), logContext);
 }
