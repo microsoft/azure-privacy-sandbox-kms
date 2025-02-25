@@ -9,7 +9,9 @@ proposals() {
         -H "Content-Type: application/json" \
         -d @"$@" \
         --cacert $KMS_SERVICE_CERT_PATH \
-        -w '\n%{http_code}\n'
+        -w '\n%{http_code}\n' \
+        --retry 120 \
+        --retry-delay 1
 }
 
 proposals "$@"

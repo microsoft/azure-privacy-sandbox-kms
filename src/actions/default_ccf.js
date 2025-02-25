@@ -1,3 +1,6 @@
+// This is a near replica of the constitution you get when you start a CCF
+// network from scratch.
+
 export class Action {
   constructor(validate, apply) {
     this.validate = validate;
