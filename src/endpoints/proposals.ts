@@ -14,6 +14,15 @@ import { ServiceRequest } from "../utils/ServiceRequest";
 // Currently all proposals will be automatically accepted, and regulation comes
 // from which identities can successfully call this endpoint.
 
+interface IProposalsAction {
+    name: string;
+    args: any;
+}
+
+interface IProposalsRequest {
+    actions: IProposalsAction[];
+}
+
 class IProposalVotes {}
 
 class IProposalResult {
@@ -40,7 +49,7 @@ class IProposalResult {
 }
 
 export const proposals = (
-  request: ccfapp.Request<void>,
+  request: ccfapp.Request<IProposalsRequest>,
 ): ServiceResult<string | IProposalResult> => {
 
     const logContext = new LogContext().appendScope("proposals");
@@ -51,34 +60,27 @@ export const proposals = (
     if (isValidIdentity.failure) return isValidIdentity;
 
     // Extract settings policy from request
-    // TODO: Use actual input values
-    const args = {
-        settings_policy: {
-            service: {
-                name: "test_kms",
-                description: "test description",
-                version: "1.0.4",
-                debug: true,
-            }
+    let proposalActions: IProposalsAction[] = [];
+    if (serviceRequest.body && serviceRequest.body["actions"]) {
+        proposalActions = serviceRequest.body["actions"];
+    }
+
+    // Iterate through the proposed actions
+    for (const proposalAction of proposalActions) {
+
+        // Look up which proposal it is
+        const action = actions.get(proposalAction.name);
+        if (action === undefined) {
+            return ServiceResult.Failed<IProposalResult>(
+                { errorMessage: `Proposal not found` },
+                404,
+                logContext,
+            );
         }
+
+        action.validate(proposalAction.args);
+        action.apply(proposalAction.args);
     }
-
-    // Look up which proposal it is
-    // TODO: Use actual input values
-    const action = actions.get("set_settings_policy");
-    if (action === undefined) {
-        return ServiceResult.Failed<IProposalResult>(
-            { errorMessage: `Proposal not found` },
-            404,
-            logContext,
-        );
-    }
-
-    // TODO: Call proposal specific validation
-    action.validate(args);
-
-    // TODO: Call proposal specific application
-    action.apply(args);
 
     return ServiceResult.Succeeded<IProposalResult>(new IProposalResult(), logContext);
 }
