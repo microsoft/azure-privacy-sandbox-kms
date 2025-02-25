@@ -15,7 +15,7 @@ acl-down() {
     fi
     export DEPLOYMENT_NAME
 
-    az confidentialledger delete -y --no-wait \
+    az confidentialledger delete -y "$@" \
         --name $DEPLOYMENT_NAME \
         --subscription $SUBSCRIPTION \
         --resource-group $RESOURCE_GROUP
