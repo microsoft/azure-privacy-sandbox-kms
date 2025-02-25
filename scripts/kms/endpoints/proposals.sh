@@ -10,7 +10,7 @@ proposals() {
         -d @"$@" \
         --cacert $KMS_SERVICE_CERT_PATH \
         -w '\n%{http_code}\n' \
-        --retry 120 \
+        --retry 240 \
         --retry-delay 1
 }
 
