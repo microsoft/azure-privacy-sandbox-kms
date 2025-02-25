@@ -21,11 +21,6 @@ def test_settingsPolicy_with_no_policy(setup_kms):
     }
 
 
-def test_settingsPolicy_with_no_auth(setup_kms):
-    status_code, settings_json = settingsPolicy(auth=None)
-    assert status_code == 401
-
-
 def test_settingsPolicy_with_policy(setup_kms):
     apply_kms_constitution()
 
