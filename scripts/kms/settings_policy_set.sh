@@ -25,8 +25,9 @@ settings-policy-set() {
     envsubst < $REPO_ROOT/governance/proposals/set_settings_policy.json | jq > $WORKSPACE/proposals/set_settings_policy.json
 
     # Submit the proposal
-    source $REPO_ROOT/scripts/kms/endpoints/proposals.sh \
-        $WORKSPACE/proposals/set_settings_policy.json
+    source $REPO_ROOT/scripts/ccf/propose.sh
+    ccf-propose $WORKSPACE/proposals/set_settings_policy.json
+
     set +e
 }
 

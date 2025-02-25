@@ -26,6 +26,11 @@ def test_settingsPolicy_with_no_auth(setup_kms):
     assert status_code == 401
 
 
+@pytest.mark.xfail(
+    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
+    strict=True,
+    reason="Governance operations need to move to user endpoints",
+)
 def test_settingsPolicy_with_policy(setup_kms):
     apply_kms_constitution()
 
@@ -44,6 +49,11 @@ def test_settingsPolicy_with_policy(setup_kms):
     assert settings_json == policy
 
 
+@pytest.mark.xfail(
+    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
+    strict=True,
+    reason="Governance operations need to move to user endpoints",
+)
 def test_settingsPolicy_with_multiple_policy_sets(setup_kms):
     apply_kms_constitution()
 
