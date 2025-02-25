@@ -10,6 +10,7 @@ export * from "./endpoints/settingsPolicyEndpoint";
 export * from "./endpoints/IKeyItem";
 export * from "./endpoints/KeyGeneration";
 export * from "./endpoints/TinkKey";
+export * from "./endpoints/proposals";
 export * from "./policies/IKeyReleasePolicySnpProps";
 export * from "./utils/Tooling";
 export * from "./utils/ServiceResult";
