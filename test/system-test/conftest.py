@@ -120,14 +120,8 @@ def _setup_ccf():
         },
     )
 
-    os.environ = {k: v for k, v in os.environ.items() if k not in {
-        "DEPLOYMENT_NAME",
-        "WORKSPACE",
-        "KMS_URL",
-        "KMS_SERVICE_CERT_PATH",
-        "KMS_MEMBER_CERT_PATH",
-        "KMS_MEMBER_PRIVK_PATH",
-    }}
+    if "DEPLOYMENT_NAME" in os.environ:
+        del os.environ["DEPLOYMENT_NAME"]
 
 
 @pytest.fixture()
