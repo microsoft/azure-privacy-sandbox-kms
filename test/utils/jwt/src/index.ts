@@ -27,6 +27,9 @@ const expiry = 1000;
 const app = express();
 let privateKey = fs.readFileSync(privateKeyPath);
 const token = (req: Request, res: Response) => {
+  // Extract query parameters
+  console.log("Query: ", req.query);
+
   const payload = {
     iss,
     sub,
@@ -34,7 +37,12 @@ const token = (req: Request, res: Response) => {
     nbf: Math.floor(Date.now() / 1000),
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(Date.now() / 1000) + 60 * 60, // expires in 1 hour
+    "x-ms-ver": "1.0",
+    "x-ms-azurevm-debuggersdisabled": true,
+    "x-ms-azurevm-osversion-major": 22,
+    ...req.query, // Merge query parameters into the payload
   };
+  console.log(`Payload: `, payload);
 
   const access_token = jwt.sign(payload, privateKey, {
     algorithm: "RS256",
@@ -47,7 +55,7 @@ const token = (req: Request, res: Response) => {
   });
 };
 
-// Use POST simular as AAD. No body required.
+// Use POST similar as AAD. No body required.
 app.post("/token", token);
 
 // Endpoint for managed identities.
