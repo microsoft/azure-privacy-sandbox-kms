@@ -51,8 +51,8 @@ jobs:
           # Use properties such as client-id, tenant-id, and subscription-id in the secrets and vars
           # The managed identity should have a federated credential with subject identiier repo:<organization>/<repo>:pull_request
           # Use subject identifier repo:<organization>/<repo>:ref:refs/heads/<branch> for running manual CI's
-          client-id: ${{ secrets.MANAGED_ID_CLIENT_ID }}
-          tenant-id: ${{ secrets.MANAGED_ID_TENANT_ID }}
+          client-id: ${{ vars.MANAGED_ID_CLIENT_ID }}
+          tenant-id: ${{ vars.MANAGED_ID_TENANT_ID }}
           subscription-id: ${{ vars.SUBSCRIPTION }}
 
       - name: Run System Tests
