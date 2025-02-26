@@ -33,6 +33,6 @@ echo "$resources_json" | jq -c '.[]' | while read -r resource; do
 
     if [ "$skip" = false ]; then
         echo "Deleting resource: $name ($type)"
-        # az resource delete --ids "$id"
+        az resource delete --ids "$id"
     fi
 done
