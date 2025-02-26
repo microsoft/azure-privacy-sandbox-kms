@@ -6,7 +6,9 @@ permissions:
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - feature/*
   workflow_dispatch:
   schedule:
     - cron: "0 1 * * *"
