@@ -5,6 +5,9 @@ permissions:
   contents: read
 
 on:
+  push:
+    branches:
+      - feature/*
   workflow_dispatch:
   schedule:
     - cron: "0 1 * * *"
