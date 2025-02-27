@@ -6,7 +6,7 @@ KMS_URL ?= https://127.0.0.1:8000
 KEYS_DIR ?= ${KMS_WORKSPACE}/sandbox_common
 RUN_BACK ?= true
 CCF_PLATFORM ?= virtual
-JWT_ISSUER_WORKSPACE ?= ${PWD}/jwt_issuer_workspace
+JWT_ISSUER_WORKSPACE ?= ${PWD}/jwt_issuers_workspace/default
 
 DEPLOYMENT_ENV ?= $(if $(shell echo $(KMS_URL) | grep -E '127.0.0.1|localhost'),local,cloud)
 
