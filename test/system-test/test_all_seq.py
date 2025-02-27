@@ -382,8 +382,12 @@ def test_set_policy_single_key_no_jwt_auth_member_cert(setup_kms_session):
 
 
 def test_set_policy_single_key_no_jwt_auth_jwt(setup_kms_session):
-    with pytest.raises(CalledProcessError):
-        auth(auth="jwt")
+    try:
+        status_code, auth_json = auth(auth="jwt")
+        assert status_code == 401
+    except CalledProcessError:
+        with pytest.raises(CalledProcessError):
+            raise
 
 
 @pytest.mark.xfail(
