@@ -26,9 +26,11 @@ acl-up() {
         --aad-based-security-principals ledger-role-name="Administrator" principal-id="$(az account show | jq -r '.id')"
     export KMS_URL="https://$DEPLOYMENT_NAME.confidential-ledger.azure.com"
 
-    # Save the service certificate
     export WORKSPACE=~/$DEPLOYMENT_NAME.aclworkspace
     mkdir -p $WORKSPACE
+    mkdir -p $WORKSPACE/proposals
+
+    # Save the service certificate
     curl https://identity.confidential-ledger.core.azure.com/ledgerIdentity/$DEPLOYMENT_NAME \
         | jq -r '.ledgerTlsCertificate' > $WORKSPACE/service_cert.pem
     export KMS_SERVICE_CERT_PATH="$WORKSPACE/service_cert.pem"
