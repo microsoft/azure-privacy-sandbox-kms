@@ -31,6 +31,10 @@ def heartbeat(**kwargs):
     return call_endpoint("heartbeat", **kwargs)
 
 
+def auth(**kwargs):
+    return call_endpoint("auth", **kwargs)
+
+
 def key(**kwargs):
     return call_endpoint("key", **kwargs)
 
