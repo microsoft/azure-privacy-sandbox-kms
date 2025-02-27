@@ -120,6 +120,9 @@ def _setup_ccf():
         },
     )
 
+    if "DEPLOYMENT_NAME" in os.environ:
+        del os.environ["DEPLOYMENT_NAME"]
+
 
 @pytest.fixture()
 def setup_ccf():
