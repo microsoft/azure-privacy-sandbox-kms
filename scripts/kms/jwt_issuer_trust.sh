@@ -5,6 +5,26 @@
 
 REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../..")"
 
+decode_jwt() {
+
+  # Extract the metadata field from the JWT and convert into non URL base64
+  JWT_B64=$(echo "$JWT" \
+    | cut -d '.' -f2 \
+    | sed 's/-/+/g; s/_/\//g;')
+
+  # Add padding if necessary
+  MOD4=$(( ${#JWT_B64} % 4 ))
+  if [ $MOD4 -eq 2 ]; then
+    JWT_B64="${JWT_B64}=="
+  elif [ $MOD4 -eq 3 ]; then
+    JWT_B64="${JWT_B64}="
+  fi
+
+  # Decode the JWT
+  echo "$JWT_B64" | base64 --decode
+
+}
+
 set_jwt_issuer() {
   set -e
 
@@ -34,7 +54,10 @@ set_jwt_validation_policy() {
 use_demo_issuer() {
   set -e
 
-  export ISSUER="http://Demo-jwt-issuer"
+  JWT=$(. $JWT_ISSUER_WORKSPACE/fetch.sh && jwt_issuer_fetch)
+  DECODED_JWT=$(decode_jwt)
+
+  # For set_jwt_issuer
   export JWKS=$(\
     npx pem-jwk "$JWT_ISSUER_WORKSPACE/private.pem" \
       | jq \
@@ -42,6 +65,14 @@ use_demo_issuer() {
         '{keys: [({kty, n, e} + {x5c: [$cert]} + {kid: "Demo IDP kid"})]}' \
           | sed -e '1s/^/"jwks": /' -e '$s/$/,/' \
   )
+
+  # For set_jwt_validation_policy
+  export ISSUER=$(echo "$DECODED_JWT" | jq -r '.iss')
+  export SUB=$(echo "$DECODED_JWT" | jq -r '.sub')
+  export NAME=$(echo "$DECODED_JWT" | jq -r '.name')
+
+  set +e
+}
 
   set +e
 }
