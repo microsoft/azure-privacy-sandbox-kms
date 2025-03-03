@@ -12,7 +12,7 @@ from utils import deploy_app_code
 
 REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 TEST_ENVIRONMENT = os.getenv("TEST_ENVIRONMENT", "ccf/sandbox_local")
-JWT_ISSUER_TYPE = os.getenv("JWT_ISSUER_TYPE", "jwt_issuer/demo")
+JWT_ISSUER_TYPE = os.getenv("JWT_ISSUER_TYPE", "jwt_issuer/aad")
 os.environ["JWT_ISSUER_TYPE"] = JWT_ISSUER_TYPE
 USE_AKV = os.getenv("USE_AKV", 'False').lower() == 'true'
 

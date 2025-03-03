@@ -5,6 +5,8 @@
         "args": {
           "issuer": "${ISSUER}",
           ${JWKS}
+          ${CA_CERT_BUNDLE_NAME_FIELD}
+          ${AUTO_REFRESH}
           "key_filter": "all"
         }
       }

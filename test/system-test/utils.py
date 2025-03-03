@@ -108,7 +108,13 @@ def apply_key_rotation_policy(policy=None):
 
 def trust_jwt_issuer():
     subprocess.run(
-        "scripts/kms/jwt_issuer_trust.sh",
+        [
+            "scripts/kms/jwt_issuer_trust.sh",
+            {
+                "jwt_issuer/demo": "--demo",
+                "jwt_issuer/aad": "--aad",
+            }[os.getenv("JWT_ISSUER_TYPE")],
+        ],
         cwd=REPO_ROOT,
         check=True,
     )

@@ -87,6 +87,32 @@ use_demo_issuer() {
   set +e
 }
 
+use_aad_issuer() {
+  set -e
+
+  JWT=$(. $JWT_ISSUER_WORKSPACE/fetch.sh && jwt_issuer_fetch)
+  DECODED_JWT=$(decode_jwt)
+
+  # For set_ca_cert_bundle
+  export CA_CERT_BUNDLE_NAME="Microsoft_AAD"
+  export CA_CERT_BUNDLE="$(awk '{printf "%s\\n", $0}' $REPO_ROOT/governance/jwt/aad_cert)"
+
+  # For set_jwt_issuer
+  export ISSUER=$(echo "$DECODED_JWT" | jq -r '.iss')
+  export JWKS=$(\
+    curl https://login.microsoftonline.com/${TENANT_ID}/discovery/v2.0/keys \
+      | jq \
+          | sed -e '1s/^/"jwks": /' -e '$s/$/,/' \
+  )
+  export CA_CERT_BUNDLE_NAME_FIELD="\"ca_cert_bundle_name\": \"$CA_CERT_BUNDLE_NAME\","
+  export AUTO_REFRESH="\"auto_refresh\": true,"
+
+  # For set_jwt_validation_policy
+  export SUB=$(echo "$DECODED_JWT" | jq -r '.sub')
+  export NAME=$(echo "$DECODED_JWT" | jq -r '.name')
+
+  set_ca_cert_bundle
+
   set +e
 }
 
@@ -100,7 +126,11 @@ jwt-issuer-trust() {
       case "$1" in
           --demo)
               issuer="demo"
-              shift 2
+              shift 1
+              ;;
+          --aad)
+              issuer="aad"
+              shift 1
               ;;
           *)
               echo "Unknown parameter: $1"
@@ -111,6 +141,8 @@ jwt-issuer-trust() {
 
   if [[ "$issuer" == "demo" ]]; then
     use_demo_issuer
+  elif [[ "$issuer" == "aad" ]]; then
+    use_aad_issuer
   fi
 
   set_jwt_issuer
