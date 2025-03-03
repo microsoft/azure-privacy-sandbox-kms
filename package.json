@@ -30,7 +30,7 @@
     "@rollup/plugin-typescript": "12.1.2",
     "@types/jasmine": "5.1.5",
     "@types/jest": "29.5.13",
-    "@types/node": "22.13.5",
+    "@types/node": "22.13.8",
     "axios": "1.7.9",
     "babel-jest": "29.7.0",
     "express": "4.21.1",
