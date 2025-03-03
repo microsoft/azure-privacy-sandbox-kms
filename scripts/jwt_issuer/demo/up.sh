@@ -4,7 +4,7 @@
 # Licensed under the MIT license.
 
 jwt_issuer_fetch() {
-    curl -X POST "$(cat $JWT_ISSUER_WORKSPACE/jwt_issuer_address)/token" \
+    curl -X POST "$(cat ${JWT_ISSUER_WORKSPACE:-$REPO_ROOT/jwt_issuers_workspace/${UNIQUE_ID:-default}/}/jwt_issuer_address)/token" \
         | jq -r '.access_token'
 }
 
