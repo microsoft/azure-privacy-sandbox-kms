@@ -7,7 +7,7 @@
           "validation_policy": {
             "iss": "${ISSUER}",
             "sub": "${SUB}",
-            "name": "${NAME}"
+            ${ID_FIELDS}
           }
         }
       }

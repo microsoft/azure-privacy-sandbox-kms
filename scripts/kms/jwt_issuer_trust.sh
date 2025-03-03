@@ -82,7 +82,7 @@ use_demo_issuer() {
   # For set_jwt_validation_policy
   export ISSUER=$(echo "$DECODED_JWT" | jq -r '.iss')
   export SUB=$(echo "$DECODED_JWT" | jq -r '.sub')
-  export NAME=$(echo "$DECODED_JWT" | jq -r '.name')
+  export ID_FIELDS="\"name\": \"$(echo "$DECODED_JWT" | jq -r '.name')\""
 
   set +e
 }
@@ -109,7 +109,11 @@ use_aad_issuer() {
 
   # For set_jwt_validation_policy
   export SUB=$(echo "$DECODED_JWT" | jq -r '.sub')
-  export NAME=$(echo "$DECODED_JWT" | jq -r '.name')
+  export ID_FIELDS=" \
+    \"idtyp\": \"$(echo "$DECODED_JWT" | jq -r '.idtyp')\", \
+    \"appid\": \"$(echo "$DECODED_JWT" | jq -r '.appid')\", \
+    \"appidacr\": \"$(echo "$DECODED_JWT" | jq -r '.appidacr')\", \
+    \"oid\": \"$(echo "$DECODED_JWT" | jq -r '.oid')\""
 
   set_ca_cert_bundle
 
