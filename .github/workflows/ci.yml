@@ -97,6 +97,13 @@ jobs:
           tenant-id: ${{ vars.MANAGED_ID_TENANT_ID }}
           subscription-id: ${{ vars.SUBSCRIPTION }}
 
+      - name: Install Dependencies
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ./scripts/tools/install-c-aci-testing.sh
+          pip install pytest==8.3.3 pytest-xdist==3.6.1 pycryptodome==3.21.0 ccf==5.0.11
+
       - run: |
           . scripts/ccf/sandbox_local/up.sh
           . scripts/jwt_issuer/aad/up.sh
