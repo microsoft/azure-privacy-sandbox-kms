@@ -25,6 +25,19 @@ decode_jwt() {
 
 }
 
+set_ca_cert_bundle() {
+  set -e
+
+  envsubst < governance/proposals/set_ca_cert_bundle.json \
+    | jq > $WORKSPACE/proposals/set_ca_cert_bundle.json
+
+  # Submit the proposal
+  source $REPO_ROOT/scripts/ccf/propose.sh
+  ccf-propose $WORKSPACE/proposals/set_ca_cert_bundle.json
+
+  set +e
+}
+
 set_jwt_issuer() {
   set -e
 
