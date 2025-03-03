@@ -7,7 +7,8 @@ set -euo pipefail
 # This script will generate an access token for the API and returns the authorization header.
 
 # Get JWT
-jwt_token=$(. jwt_issuers_workspace/default/fetch.sh && jwt_issuer_fetch)
+REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/..")"
+jwt_token=$(. $REPO_ROOT/jwt_issuers_workspace/default/fetch.sh && jwt_issuer_fetch)
 
 # Set the Authorization header content
 auth_header="Bearer $jwt_token"
