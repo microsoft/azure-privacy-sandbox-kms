@@ -2,8 +2,8 @@ import json
 import os
 import pytest
 from subprocess import CalledProcessError
-from endpoints import heartbeat, key, listpubkeys, pubkey, keyReleasePolicy, unwrapKey, refresh, auth
-from utils import get_test_attestation, get_test_public_wrapping_key, apply_kms_constitution, apply_key_release_policy, decrypted_wrapped_key, trust_jwt_issuer, remove_key_release_policy
+from endpoints import heartbeat, key, listpubkeys, pubkey, keyReleasePolicy, unwrapKey, refresh, auth, settingsPolicy
+from utils import get_test_attestation, get_test_public_wrapping_key, apply_kms_constitution, apply_key_release_policy, decrypted_wrapped_key, trust_jwt_issuer, remove_key_release_policy, apply_settings_policy
 
 # These tests run on a single KMS instance in order to be cheaper regarding
 # Azure deployments.
@@ -576,6 +576,46 @@ def test_set_policy_multiple_keys_set_jwt_unset_key_release_policy(setup_kms_ses
 def test_unset_policy_multiple_keys_set_jwt_keyReleasePolicy(setup_kms_session):
     status_code, key_release_json = keyReleasePolicy()
     assert status_code == 200
+
+
+def test_no_settings_settingsPolicy(setup_kms_session):
+    status_code, settings_json = settingsPolicy()
+    assert status_code == 200
+    assert settings_json == {
+        "service": {
+            "name": "azure-privacy-sandbox-kms",
+            "description": "Key Management Service",
+            "version": "1.0.0",
+            "debug": False,
+        }
+    }
+
+
+def test_no_settings_set_settings_policy(setup_kms_session):
+
+    policy = {
+        "service": {
+            "name": "custom-kms",
+            "description": "Custom Key Management Service",
+            "version": "2.0.0",
+            "debug": True,
+        }
+    }
+    apply_settings_policy(policy)
+
+
+def test_with_settings_settingsPolicy(setup_kms_session):
+
+    status_code, settings_json = settingsPolicy()
+    assert status_code == 200
+    assert settings_json == {
+        "service": {
+            "name": "custom-kms",
+            "description": "Custom Key Management Service",
+            "version": "2.0.0",
+            "debug": True,
+        }
+    }
 
 
 if __name__ == "__main__":
