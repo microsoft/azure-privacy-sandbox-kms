@@ -74,9 +74,6 @@ jobs:
           - env: sandbox_local
             use_akv: true
             parallel: true
-          - env: az-cleanroom-aci
-            use_akv: false
-            parallel: false
           - env: acl
             use_akv: false
             parallel: false

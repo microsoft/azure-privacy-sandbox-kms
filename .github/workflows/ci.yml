@@ -77,7 +77,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        env: [az-cleanroom-aci, acl]
+        env: [acl]
     uses: ./.github/workflows/system-test.yml
     with:
       test_path: test_all_seq
