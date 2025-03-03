@@ -12,8 +12,6 @@ from utils import deploy_app_code
 
 REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 TEST_ENVIRONMENT = os.getenv("TEST_ENVIRONMENT", "ccf/sandbox_local")
-JWT_ISSUER_TYPE = os.getenv("JWT_ISSUER_TYPE", "jwt_issuer/aad")
-os.environ["JWT_ISSUER_TYPE"] = JWT_ISSUER_TYPE
 USE_AKV = os.getenv("USE_AKV", 'False').lower() == 'true'
 
 
@@ -49,10 +47,10 @@ def call_script(args, **kwargs):
     except json.JSONDecodeError:
         ...
 
-def _setup_jwt_issuer():
+def _setup_jwt_issuer(jwt_issuer_type="jwt_issuer/demo"):
     try:
         call_script(
-            [f"./scripts/{JWT_ISSUER_TYPE}/up.sh", "--build"],
+            [f"./scripts/{jwt_issuer_type}/up.sh", "--build"],
             env={
                 **os.environ,
                 "JWT_ISSUER_WORKSPACE": f"{REPO_ROOT}/jwt_issuers_workspace/default",
@@ -60,17 +58,27 @@ def _setup_jwt_issuer():
         )
         yield
     finally:
-        call_script(f"./scripts/{JWT_ISSUER_TYPE}/down.sh")
+        call_script(f"./scripts/{jwt_issuer_type}/down.sh")
 
 
 @pytest.fixture()
-def setup_jwt_issuer():
-    yield from _setup_jwt_issuer()
+def setup_demo_jwt_issuer():
+    yield from _setup_jwt_issuer(jwt_issuer_type="jwt_issuer/demo")
 
 
 @pytest.fixture(scope="session")
-def setup_jwt_issuer_session():
-    yield from _setup_jwt_issuer()
+def setup_demo_jwt_issuer_session():
+    yield from _setup_jwt_issuer(jwt_issuer_type="jwt_issuer/demo")
+
+
+@pytest.fixture()
+def setup_aad_jwt_issuer():
+    yield from _setup_jwt_issuer(jwt_issuer_type="jwt_issuer/aad")
+
+
+@pytest.fixture(scope="session")
+def setup_aad_jwt_issuer_session():
+    yield from _setup_jwt_issuer(jwt_issuer_type="jwt_issuer/aad")
 
 
 @pytest.fixture(scope="session")
