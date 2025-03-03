@@ -110,6 +110,21 @@ jobs:
           ./scripts/kms/js_app_set.sh
           ./scripts/kms/constitution_set.sh --actions governance/constitution/actions/kms.js --resolve governance/constitution/resolve/auto_accept.js
           ./scripts/kms/jwt_issuer_trust.sh --aad
+          JWT_B64=$(echo "$JWT" \
+            | cut -d '.' -f2 \
+            | sed 's/-/+/g; s/_/\//g;')
+
+          # Add padding if necessary
+          MOD4=$(( ${#JWT_B64} % 4 ))
+          if [ $MOD4 -eq 2 ]; then
+            JWT_B64="${JWT_B64}=="
+          elif [ $MOD4 -eq 3 ]; then
+            JWT_B64="${JWT_B64}="
+          fi
+
+          # Decode the JWT
+          echo "$JWT_B64" | base64 --decode
+
           (cd workspace/proposals && rm *constitution* && rm set_js_app.json && cat *)
           ./scripts/kms/endpoints/auth.sh
 
