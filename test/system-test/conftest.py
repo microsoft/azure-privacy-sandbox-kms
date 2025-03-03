@@ -12,6 +12,8 @@ from utils import deploy_app_code
 
 REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 TEST_ENVIRONMENT = os.getenv("TEST_ENVIRONMENT", "ccf/sandbox_local")
+JWT_ISSUER_TYPE = os.getenv("JWT_ISSUER_TYPE", "jwt_issuer/demo")
+os.environ["JWT_ISSUER_TYPE"] = JWT_ISSUER_TYPE
 USE_AKV = os.getenv("USE_AKV", 'False').lower() == 'true'
 
 
@@ -50,7 +52,7 @@ def call_script(args, **kwargs):
 def _setup_jwt_issuer():
     try:
         call_script(
-            ["./scripts/jwt_issuer/up.sh", "--build"],
+            [f"./scripts/{JWT_ISSUER_TYPE}/up.sh", "--build"],
             env={
                 **os.environ,
                 "JWT_ISSUER_WORKSPACE": f"{REPO_ROOT}/jwt_issuers_workspace/default",
@@ -58,7 +60,7 @@ def _setup_jwt_issuer():
         )
         yield
     finally:
-        call_script("./scripts/jwt_issuer/down.sh")
+        call_script(f"./scripts/{JWT_ISSUER_TYPE}/down.sh")
 
 
 @pytest.fixture()
