@@ -62,7 +62,7 @@ def test_with_keys_and_policy(setup_kms):
     strict=True,
     reason="Governance operations need to move to user endpoints",
 )
-def test_with_keys_and_policy_jwt_auth(setup_kms, setup_jwt_issuer):
+def test_with_keys_and_policy_jwt_auth(setup_kms, setup_demo_jwt_issuer):
     apply_kms_constitution()
     apply_key_release_policy()
     trust_jwt_issuer("demo")
