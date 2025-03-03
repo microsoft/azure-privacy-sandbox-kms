@@ -182,7 +182,7 @@ jwt-issuer-trust:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	KMS_URL=${KMS_URL} \
 	DEPLOYMENT_ENV=${DEPLOYMENT_ENV} \
-		./scripts/kms/jwt_issuer_trust.sh
+		./scripts/kms/jwt_issuer_trust.sh "demo"
 
 # Manage KMS -------------------------------------------------------------------
 
