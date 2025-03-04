@@ -109,7 +109,6 @@ use_aad_issuer() {
 
   # For set_jwt_validation_policy
   export SUB=$(echo "$DECODED_JWT" | jq -r '.sub')
-  echo "DECODED_JWT = $DECODED_JWT"
   export ID_FIELDS=" \
     \"idtyp\": \"$(echo "$DECODED_JWT" | jq -r '.idtyp')\", \
     \"appid\": \"$(echo "$DECODED_JWT" | jq -r '.appid')\", \
