@@ -395,8 +395,8 @@ def test_set_policy_single_key_no_jwt_auth_jwt(setup_kms_session):
     strict=True,
     reason="Governance operations need to move to user endpoints",
 )
-def test_set_policy_single_key_no_jwt_trust_jwt_issuer(setup_kms_session, setup_demo_jwt_issuer_session):
-    trust_jwt_issuer("demo")
+def test_set_policy_single_key_no_jwt_trust_jwt_issuer(setup_kms_session, setup_aad_jwt_issuer_session):
+    trust_jwt_issuer("aad")
 
 
 @pytest.mark.xfail(
