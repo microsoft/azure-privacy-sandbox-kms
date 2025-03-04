@@ -400,6 +400,11 @@ def test_set_policy_single_key_set_jwt_auth_jwt(setup_kms_session):
     assert auth_json["auth"]["policy"] == "jwt"
 
 
+@pytest.mark.xfail(
+    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
+    strict=True,
+    reason="Governance operations need to move to user endpoints",
+)
 def test_set_policy_single_key_set_jwt_key_jwt_auth(setup_kms_session):
     while True:
         status_code, key_json = key(
