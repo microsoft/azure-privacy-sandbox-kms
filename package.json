@@ -28,7 +28,7 @@
     "@rollup/plugin-commonjs": "28.0.2",
     "@rollup/plugin-node-resolve": "16.0.0",
     "@rollup/plugin-typescript": "12.1.2",
-    "@types/jasmine": "5.1.5",
+    "@types/jasmine": "5.1.7",
     "@types/jest": "29.5.13",
     "@types/node": "22.13.5",
     "axios": "1.8.1",
