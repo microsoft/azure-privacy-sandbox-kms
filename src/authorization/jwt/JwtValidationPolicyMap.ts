@@ -1,7 +1,7 @@
 import { ccf } from "@microsoft/ccf-app/global";
 import { Logger, LogContext } from "../../utils/Logger";
 
-const validationPolicyMapName = "public:ccf.gov.policies.jwt_validation";
+export const validationPolicyMapName = "public:policies.jwt_validation";
 
 export class JwtValidationPolicyMap {
   public static read(issuer: string, logContextIn? : LogContext): { [key: string]: string } | undefined {
