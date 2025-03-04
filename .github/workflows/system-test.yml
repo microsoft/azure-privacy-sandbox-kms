@@ -62,3 +62,6 @@ jobs:
         run: |
           pytest -sv \
             test/system-test/${{ inputs.test_path }}.py
+          cat workspace/proposals/set_ca_cert_bundle.json || true
+          cat workspace/proposals/set_jwt_issuer.json || true
+          cat workspace/proposals/set_jwt_validation_policy.json || true
