@@ -67,7 +67,7 @@ source .venv_ccf_sandbox/bin/activate
 make propose-settings-policy
 
 # Add key release policy
-make propose-add-key-release-policy
+make release-policy-set
 
 # Add key rotation policy
 make propose-key-rotation-policy
