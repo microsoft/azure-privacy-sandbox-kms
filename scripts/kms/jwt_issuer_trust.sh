@@ -115,8 +115,6 @@ use_aad_issuer() {
     \"appidacr\": \"$(echo "$DECODED_JWT" | jq -r '.appidacr')\", \
     \"oid\": \"$(echo "$DECODED_JWT" | jq -r '.oid')\""
 
-  set_ca_cert_bundle
-
   set +e
 }
 
@@ -145,11 +143,21 @@ jwt-issuer-trust() {
 
   if [[ "$issuer" == "demo" ]]; then
     use_demo_issuer
+    set_jwt_issuer
   elif [[ "$issuer" == "aad" ]]; then
     use_aad_issuer
+
+    if [[ "$TEST_ENVIRONMENT" == "ccf/acl" ]]; then
+      # Updating the ACL after creation currently doesn't work, but we can
+      # assume the current user is the user who created it and is therefore admin.
+      echo "Updating the ACL to include the current AAD user"
+      # $REPO_ROOT/scripts/ccf/acl/add_aad_user.sh
+    else
+      set_ca_cert_bundle
+      set_jwt_issuer
+    fi
   fi
 
-  set_jwt_issuer
   set_jwt_validation_policy
 
   set +e
