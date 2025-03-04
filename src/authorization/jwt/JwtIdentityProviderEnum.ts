@@ -6,6 +6,7 @@
  */
 export enum JwtIdentityProviderEnum {
   MS_AAD = "https://login.microsoftonline.com/common/v2.0",
-  TENANT_MS_AAD = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/v2.0",
+  MS_AAD_V2 = "https://login.microsoftonline.com/common/v2.0",
+  TENANT_MS_AAD_V2 = "https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/v2.0",
   Demo = "http://Demo-jwt-issuer",
 }
