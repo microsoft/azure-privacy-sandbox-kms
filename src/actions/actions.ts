@@ -3,8 +3,10 @@
 
 import { Action } from "./default_ccf";
 import { action as settingsPolicyAction } from "./set_settings_policy";
+import { action as keyRotationPolicyAction } from "./set_key_rotation_policy";
 
 
 export const actions = new Map<string, Action>([
     settingsPolicyAction,
+    keyRotationPolicyAction,
 ]);
