@@ -33,7 +33,7 @@ def test_auth_aad_jwt(setup_kms, setup_aad_jwt_issuer):
     status_code, auth_json = auth(auth="jwt")
     assert status_code == 200
     assert auth_json["auth"]["policy"] == "jwt"
-    assert "https://sts.windows.net" in auth_json["auth"]["jwt"]["keyIssuer"]
+    assert "https://login.microsoftonline.com" in auth_json["auth"]["jwt"]["keyIssuer"]
 
 
 
