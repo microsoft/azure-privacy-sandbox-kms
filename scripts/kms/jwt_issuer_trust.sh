@@ -112,8 +112,7 @@ use_aad_issuer() {
   export ID_FIELDS=" \
     \"idtyp\": \"$(echo "$DECODED_JWT" | jq -r '.idtyp')\", \
     \"appid\": \"$(echo "$DECODED_JWT" | jq -r '.appid')\", \
-    \"appidacr\": \"$(echo "$DECODED_JWT" | jq -r '.appidacr')\", \
-    \"oid\": \"$(echo "$DECODED_JWT" | jq -r '.oid')\""
+    \"appidacr\": \"$(echo "$DECODED_JWT" | jq -r '.appidacr')\""
 
   set +e
 }
