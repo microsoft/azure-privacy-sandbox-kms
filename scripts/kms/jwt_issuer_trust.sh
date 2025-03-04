@@ -92,6 +92,7 @@ use_aad_issuer() {
 
   JWT=$(. $JWT_ISSUER_WORKSPACE/fetch.sh && jwt_issuer_fetch)
   DECODED_JWT=$(decode_jwt)
+  TENANT_ID=$(echo "$DECODED_JWT" | jq -r '.tid')
 
   # For set_ca_cert_bundle
   export CA_CERT_BUNDLE_NAME="Microsoft_AAD"
@@ -99,6 +100,12 @@ use_aad_issuer() {
 
   # For set_jwt_issuer
   export ISSUER=$(echo "$DECODED_JWT" | jq -r '.iss')
+  export JWKS=$(\
+    curl https://login.microsoftonline.com/${TENANT_ID}/discovery/v2.0/keys \
+      | jq '{keys: [.keys[] | {kty, kid, n, e, x5c}]}' \
+          | sed -e '1s/^/"jwks": /' -e '$s/$/,/' \
+  )
+
   export CA_CERT_BUNDLE_NAME_FIELD="\"ca_cert_bundle_name\": \"$CA_CERT_BUNDLE_NAME\","
   export AUTO_REFRESH="\"auto_refresh\": true,"
 
