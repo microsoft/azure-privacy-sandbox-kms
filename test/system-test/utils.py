@@ -106,9 +106,12 @@ def apply_key_rotation_policy(policy=None):
         print("stderr:", result.stderr.decode())
         result.check_returncode()  # This will raise the CalledProcessError
 
-def trust_jwt_issuer():
+def trust_jwt_issuer(*args):
     subprocess.run(
-        "scripts/kms/jwt_issuer_trust.sh",
+        [
+            "scripts/kms/jwt_issuer_trust.sh",
+            *["--" + arg for arg in args],
+        ],
         cwd=REPO_ROOT,
         check=True,
     )
