@@ -160,6 +160,10 @@ jwt-issuer-trust() {
 
   set_jwt_validation_policy
 
+  cat $WORKSPACE/proposals/set_ca_cert_bundle.json
+  cat $WORKSPACE/proposals/set_jwt_issuer.json
+  cat $WORKSPACE/proposals/set_jwt_validation_policy.json
+
   set +e
 }
 
