@@ -201,8 +201,7 @@ constitution-set:
 release-policy-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	KMS_URL=${KMS_URL} \
-	RELEASE_POLICY_PROPOSAL=$(release-policy-proposal) \
-		./scripts/kms/release_policy_set.sh
+	./scripts/kms/release_policy_set.sh $(release-policy-proposal)
 
 settings-policy-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
