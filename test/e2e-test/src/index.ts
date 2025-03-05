@@ -106,7 +106,7 @@ class Demo {
     }
 
     this.printTestSectionHeader("🔬 [TEST]: Setup kms");
-    await Demo.executeCommand(`make setup`);
+    await Demo.executeCommand(`make setup >/tmp/make.txt`);
 
     this.printTestSectionHeader("🔬 [TEST]: generate access token");
     const access_token = await Demo.executeCommand(
