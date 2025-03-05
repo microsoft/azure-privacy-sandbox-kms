@@ -12,15 +12,26 @@ export class JwtValidator implements IValidatorService {
   private logContext: LogContext;
 
   /**
-   * Validate the JWT token
-   * @param issuer name of the issuer
-   * @param identity used to validate the JWT token
-   * @returns
+   * Check if caller's access token is valid
+   * @param {JwtAuthnIdentity} identity JwtAuthnIdentity object
+   * @returns {ServiceResult<string>}
    */
-  authorizeJwt(
-    issuer: string,
+  public isValidJwtToken(
     identity: ccfapp.JwtAuthnIdentity,
   ): ServiceResult<string> {
+    const issuer = identity?.jwt?.payload?.iss;
+    if (!issuer) {
+      return ServiceResult.Failed(
+        {
+          errorMessage: "The JWT has no valid iss",
+          errorType: "AuthenticationError",
+        },
+        400,
+        this.logContext
+      );
+    }
+
+
     const policy = JwtValidationPolicyMap.read(issuer, this.logContext);
     if (policy === undefined) {
       const errorMessage = `issuer ${issuer} is not defined in the policy`;
@@ -47,34 +58,6 @@ export class JwtValidator implements IValidatorService {
         401,
         this.logContext
       );
-    }
-
-    return ServiceResult.Succeeded("", this.logContext);
-  }
-
-  /**
-   * Check if caller's access token is valid
-   * @param {JwtAuthnIdentity} identity JwtAuthnIdentity object
-   * @returns {ServiceResult<string>}
-   */
-  public isValidJwtToken(
-    identity: ccfapp.JwtAuthnIdentity,
-  ): ServiceResult<string> {
-    const issuer = identity?.jwt?.payload?.iss;
-    if (!issuer) {
-      return ServiceResult.Failed(
-        {
-          errorMessage: "The JWT has no valid iss",
-          errorType: "AuthenticationError",
-        },
-        400,
-        this.logContext
-      );
-    }
-
-    const isAuthorized = this.authorizeJwt(issuer, identity);
-    if (!isAuthorized.success) {
-      return isAuthorized;
     }
 
     const identityId = identity?.jwt?.payload?.sub;
