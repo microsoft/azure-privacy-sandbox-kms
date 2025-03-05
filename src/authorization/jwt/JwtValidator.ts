@@ -21,36 +21,35 @@ export class JwtValidator implements IValidatorService {
     issuer: string,
     identity: ccfapp.JwtAuthnIdentity,
   ): ServiceResult<string> {
-    const logContext = (this.logContext?.clone() || new LogContext()).appendScope("authorizeJwt");
-    const policy = JwtValidationPolicyMap.read(issuer, logContext);
+    const policy = JwtValidationPolicyMap.read(issuer, this.logContext);
     if (policy === undefined) {
       const errorMessage = `issuer ${issuer} is not defined in the policy`;
-      Logger.error(errorMessage, logContext);
+      Logger.error(errorMessage, this.logContext);
       return ServiceResult.Failed(
         {
           errorMessage,
           errorType: "AuthenticationError",
         },
         500,
-        logContext
+        this.logContext
       );
     }
     Logger.debug(
-      `Validate JWT policy for issuer ${issuer}: ${JSON.stringify(policy)}`, logContext
+      `Validate JWT policy for issuer ${issuer}: ${JSON.stringify(policy)}`, this.logContext
     );
 
     // Check that the JWT payload is a matching superset of the policy
     if (!isMatch(identity.jwt.payload, policy)) {
       const errorMessage = `The JWT ${JSON.stringify(identity.jwt.payload)} doesn't match the policy ${JSON.stringify(policy)}`;
-      Logger.error(errorMessage, logContext);
+      Logger.error(errorMessage, this.logContext);
       return ServiceResult.Failed(
         { errorMessage, errorType: "AuthenticationError" },
         401,
-        logContext
+        this.logContext
       );
     }
 
-    return ServiceResult.Succeeded("", logContext);
+    return ServiceResult.Succeeded("", this.logContext);
   }
 
   /**
