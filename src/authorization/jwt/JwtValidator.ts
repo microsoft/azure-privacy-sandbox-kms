@@ -11,15 +11,17 @@ import isMatch from 'lodash/isMatch';
 export class JwtValidator implements IValidatorService {
   private logContext: LogContext;
 
-  /**
-   * Check if caller's access token is valid
-   * @param {JwtAuthnIdentity} identity JwtAuthnIdentity object
-   * @returns {ServiceResult<string>}
-   */
-  public isValidJwtToken(
-    identity: ccfapp.JwtAuthnIdentity,
-  ): ServiceResult<string> {
-    const issuer = identity?.jwt?.payload?.iss;
+  constructor(logContext?: LogContext) {
+    this.logContext = (logContext?.clone() || new LogContext()).appendScope("JwtValidator");
+  }
+
+  validate(request: ccfapp.Request<any>): ServiceResult<string> {
+    const jwtCaller = request.caller as unknown as ccfapp.JwtAuthnIdentity;
+    Logger.debug(
+      `Authorization: JWT jwtCaller (JwtValidator)-> ${jwtCaller.jwt.keyIssuer}`,
+      this.logContext
+    );
+    const issuer = jwtCaller?.jwt?.payload?.iss;
     if (!issuer) {
       return ServiceResult.Failed(
         {
@@ -50,8 +52,8 @@ export class JwtValidator implements IValidatorService {
     );
 
     // Check that the JWT payload is a matching superset of the policy
-    if (!isMatch(identity.jwt.payload, policy)) {
-      const errorMessage = `The JWT ${JSON.stringify(identity.jwt.payload)} doesn't match the policy ${JSON.stringify(policy)}`;
+    if (!isMatch(jwtCaller.jwt.payload, policy)) {
+      const errorMessage = `The JWT ${JSON.stringify(jwtCaller.jwt.payload)} doesn't match the policy ${JSON.stringify(policy)}`;
       Logger.error(errorMessage, this.logContext);
       return ServiceResult.Failed(
         { errorMessage, errorType: "AuthenticationError" },
@@ -60,25 +62,11 @@ export class JwtValidator implements IValidatorService {
       );
     }
 
-    const identityId = identity?.jwt?.payload?.sub;
+    const identityId = jwtCaller?.jwt?.payload?.sub;
+    Logger.debug(
+      `Authorization: JWT validation result (JwtValidator) for provider ${jwtCaller.jwt.keyIssuer}-> success`,
+      this.logContext
+    );
     return ServiceResult.Succeeded(identityId, this.logContext);
-  }
-
-  constructor(logContext?: LogContext) {
-    this.logContext = (logContext?.clone() || new LogContext()).appendScope("JwtValidator");
-  }
-
-  validate(request: ccfapp.Request<any>): ServiceResult<string> {
-    const jwtCaller = request.caller as unknown as ccfapp.JwtAuthnIdentity;
-    Logger.debug(
-      `Authorization: JWT jwtCaller (JwtValidator)-> ${jwtCaller.jwt.keyIssuer}`,
-      this.logContext
-    );
-    const isValidJwtToken = this.isValidJwtToken(jwtCaller);
-    Logger.debug(
-      `Authorization: JWT validation result (JwtValidator) for provider ${jwtCaller.jwt.keyIssuer}-> ${JSON.stringify(isValidJwtToken)}`,
-      this.logContext
-    );
-    return isValidJwtToken;
   }
 }
