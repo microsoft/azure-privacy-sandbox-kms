@@ -5,17 +5,44 @@ import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../../utils/ServiceResult";
 import { IValidatorService } from "../IValidationService";
 import { JwtIdentityProviderEnum } from "./JwtIdentityProviderEnum";
-import { IJwtIdentityProvider } from "./IJwtIdentityProvider";
-import { MsJwtProvider } from "./JwtProvider";
+import { authorizeJwt } from "./JwtProvider";
 import { Logger, LogContext } from "../../utils/Logger";
 
 export class JwtValidator implements IValidatorService {
-  private readonly identityProvider: IJwtIdentityProvider;
   private logContext: LogContext;
+
+
+  /**
+   * Check if caller's access token is valid
+   * @param {JwtAuthnIdentity} identity JwtAuthnIdentity object
+   * @returns {ServiceResult<string>}
+   */
+  public isValidJwtToken(
+    identity: ccfapp.JwtAuthnIdentity,
+  ): ServiceResult<string> {
+    const issuer = identity?.jwt?.payload?.iss;
+    if (!issuer) {
+      return ServiceResult.Failed(
+        {
+          errorMessage: "The JWT has no valid iss",
+          errorType: "AuthenticationError",
+        },
+        400,
+        this.logContext
+      );
+    }
+
+    const isAuthorized = authorizeJwt(issuer, identity, this.logContext);
+    if (!isAuthorized.success) {
+      return isAuthorized;
+    }
+
+    const identityId = identity?.jwt?.payload?.sub;
+    return ServiceResult.Succeeded(identityId, this.logContext);
+  }
 
   constructor(logContext?: LogContext) {
     this.logContext = (logContext?.clone() || new LogContext()).appendScope("JwtValidator");
-    this.identityProvider = new MsJwtProvider("JwtProvider", this.logContext)
   }
 
   validate(request: ccfapp.Request<any>): ServiceResult<string> {
@@ -24,7 +51,7 @@ export class JwtValidator implements IValidatorService {
       `Authorization: JWT jwtCaller (JwtValidator)-> ${<JwtIdentityProviderEnum>jwtCaller.jwt.keyIssuer}`,
       this.logContext
     );
-    const isValidJwtToken = this.identityProvider.isValidJwtToken(jwtCaller);
+    const isValidJwtToken = this.isValidJwtToken(jwtCaller);
     Logger.debug(
       `Authorization: JWT validation result (JwtValidator) for provider ${jwtCaller.jwt.keyIssuer}-> ${JSON.stringify(isValidJwtToken)}`,
       this.logContext

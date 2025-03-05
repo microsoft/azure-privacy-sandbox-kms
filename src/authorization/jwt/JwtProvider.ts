@@ -84,33 +84,4 @@ export class MsJwtProvider implements IJwtIdentityProvider {
   constructor(public name: string, logContext?: LogContext) {
     this.logContext = (logContext?.clone() || new LogContext()).appendScope("MsJwtProvider");
   }
-
-  /**
-   * Check if caller's access token is valid
-   * @param {JwtAuthnIdentity} identity JwtAuthnIdentity object
-   * @returns {ServiceResult<string>}
-   */
-  public isValidJwtToken(
-    identity: ccfapp.JwtAuthnIdentity,
-  ): ServiceResult<string> {
-    const issuer = identity?.jwt?.payload?.iss;
-    if (!issuer) {
-      return ServiceResult.Failed(
-        {
-          errorMessage: "The JWT has no valid iss",
-          errorType: "AuthenticationError",
-        },
-        400,
-        this.logContext
-      );
-    }
-
-    const isAuthorized = authorizeJwt(issuer, identity, this.logContext);
-    if (!isAuthorized.success) {
-      return isAuthorized;
-    }
-
-    const identityId = identity?.jwt?.payload?.sub;
-    return ServiceResult.Succeeded(identityId, this.logContext);
-  }
 }
