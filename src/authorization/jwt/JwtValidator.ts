@@ -11,22 +11,12 @@ import { MsJwtProvider } from "./MsJwtProvider";
 import { Logger, LogContext } from "../../utils/Logger";
 
 export class JwtValidator implements IValidatorService {
-  private readonly identityProviders = new Map<
-    JwtIdentityProviderEnum,
-    IJwtIdentityProvider
-  >();
+  private readonly identityProvider: IJwtIdentityProvider;
   private logContext: LogContext;
 
   constructor(logContext?: LogContext) {
     this.logContext = (logContext?.clone() || new LogContext()).appendScope("JwtValidator");
-    this.identityProviders.set(
-      JwtIdentityProviderEnum.MS_AAD,
-      new MsJwtProvider("JwtProvider", this.logContext),
-    );
-    this.identityProviders.set(
-      JwtIdentityProviderEnum.Demo,
-      new DemoJwtProvider("DemoJwtProvider"),
-    );
+    this.identityProvider = new MsJwtProvider("JwtProvider", this.logContext)
   }
 
   validate(request: ccfapp.Request<any>): ServiceResult<string> {
@@ -35,22 +25,9 @@ export class JwtValidator implements IValidatorService {
       `Authorization: JWT jwtCaller (JwtValidator)-> ${<JwtIdentityProviderEnum>jwtCaller.jwt.keyIssuer}`,
       this.logContext
     );
-    const provider = this.identityProviders.get(
-      <JwtIdentityProviderEnum>jwtCaller.jwt.keyIssuer,
-    );
-
-    if (!provider) {
-      const error = `Authorization: JWT validation provider is undefined (JwtValidator) for ${<JwtIdentityProviderEnum>jwtCaller.jwt.keyIssuer}`;
-      Logger.error(error, this.logContext);
-      return ServiceResult.Failed(
-        { errorMessage: error, errorType: "caller error" },
-        400,
-        this.logContext
-      );
-    }
-    const isValidJwtToken = provider.isValidJwtToken(jwtCaller);
+    const isValidJwtToken = this.identityProvider.isValidJwtToken(jwtCaller);
     Logger.debug(
-      `Authorization: JWT validation result (JwtValidator) for provider ${provider.name}-> ${JSON.stringify(isValidJwtToken)}`,
+      `Authorization: JWT validation result (JwtValidator) for provider ${jwtCaller.jwt.keyIssuer}-> ${JSON.stringify(isValidJwtToken)}`,
       this.logContext
     );
     return isValidJwtToken;
