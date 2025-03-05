@@ -7,6 +7,7 @@ KEYS_DIR ?= ${KMS_WORKSPACE}/sandbox_common
 RUN_BACK ?= true
 CCF_PLATFORM ?= virtual
 JWT_ISSUER_WORKSPACE ?= ${PWD}/jwt_issuers_workspace/default
+KMS_SERVICE_CERT_PATH ?= ${KEYS_DIR}/service_cert.pem
 
 DEPLOYMENT_ENV ?= $(if $(shell echo $(KMS_URL) | grep -E '127.0.0.1|localhost'),local,cloud)
 
