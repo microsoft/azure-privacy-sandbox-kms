@@ -4,7 +4,6 @@
 import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../../utils/ServiceResult";
 import { IValidatorService } from "../IValidationService";
-import { JwtIdentityProviderEnum } from "./JwtIdentityProviderEnum";
 import { Logger, LogContext } from "../../utils/Logger";
 import { JwtValidationPolicyMap } from "./JwtValidationPolicyMap";
 
@@ -109,7 +108,7 @@ export class JwtValidator implements IValidatorService {
   validate(request: ccfapp.Request<any>): ServiceResult<string> {
     const jwtCaller = request.caller as unknown as ccfapp.JwtAuthnIdentity;
     Logger.debug(
-      `Authorization: JWT jwtCaller (JwtValidator)-> ${<JwtIdentityProviderEnum>jwtCaller.jwt.keyIssuer}`,
+      `Authorization: JWT jwtCaller (JwtValidator)-> ${jwtCaller.jwt.keyIssuer}`,
       this.logContext
     );
     const isValidJwtToken = this.isValidJwtToken(jwtCaller);
