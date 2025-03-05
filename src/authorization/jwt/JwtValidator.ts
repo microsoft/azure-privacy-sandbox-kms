@@ -6,8 +6,7 @@ import { ServiceResult } from "../../utils/ServiceResult";
 import { IValidatorService } from "../IValidationService";
 import { JwtIdentityProviderEnum } from "./JwtIdentityProviderEnum";
 import { IJwtIdentityProvider } from "./IJwtIdentityProvider";
-import { DemoJwtProvider } from "./DemoJwtProvider";
-import { MsJwtProvider } from "./MsJwtProvider";
+import { MsJwtProvider } from "./JwtProvider";
 import { Logger, LogContext } from "../../utils/Logger";
 
 export class JwtValidator implements IValidatorService {
