@@ -5,12 +5,73 @@ import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../../utils/ServiceResult";
 import { IValidatorService } from "../IValidationService";
 import { JwtIdentityProviderEnum } from "./JwtIdentityProviderEnum";
-import { authorizeJwt } from "./JwtProvider";
 import { Logger, LogContext } from "../../utils/Logger";
+import { JwtValidationPolicyMap } from "./JwtValidationPolicyMap";
 
 export class JwtValidator implements IValidatorService {
   private logContext: LogContext;
 
+  /**
+   * Validate the JWT token
+   * @param issuer name of the issuer
+   * @param identity used to validate the JWT token
+   * @returns
+   */
+  authorizeJwt(
+    issuer: string,
+    identity: ccfapp.JwtAuthnIdentity,
+  ): ServiceResult<string> {
+    const logContext = (this.logContext?.clone() || new LogContext()).appendScope("authorizeJwt");
+    const policy = JwtValidationPolicyMap.read(issuer, logContext);
+    if (policy === undefined) {
+      const errorMessage = `issuer ${issuer} is not defined in the policy`;
+      Logger.error(errorMessage, logContext);
+      return ServiceResult.Failed(
+        {
+          errorMessage,
+          errorType: "AuthenticationError",
+        },
+        500,
+        logContext
+      );
+    }
+    Logger.debug(
+      `Validate JWT policy for issuer ${issuer}: ${JSON.stringify(policy)}`, logContext
+    );
+
+    const keys = Object.keys(policy);
+
+    for (let inx = 0; inx < keys.length; inx++) {
+      const key = keys[inx];
+      const jwtProp = identity?.jwt?.payload[key];
+      let compliant = false;
+
+      // Check if policy[key] is an array
+      if (Array.isArray(policy[key])) {
+        // Check if jwtProp is in the array
+        compliant = policy[key].includes(jwtProp);
+      } else {
+        // Perform the existing equality check
+        compliant = jwtProp === policy[key];
+      }
+
+      Logger.debug(
+        `isValidJwtToken: ${key}, expected: ${policy[key]}, found: ${jwtProp}, ${compliant}`, logContext
+      );
+
+      if (!compliant) {
+        const errorMessage = `The JWT has no valid ${key}, expected: ${policy[key]}, found: ${jwtProp}`;
+        Logger.error(errorMessage, logContext);
+        return ServiceResult.Failed(
+          { errorMessage, errorType: "AuthenticationError" },
+          401,
+          logContext
+        );
+      }
+    }
+
+    return ServiceResult.Succeeded("", logContext);
+  }
 
   /**
    * Check if caller's access token is valid
@@ -32,7 +93,7 @@ export class JwtValidator implements IValidatorService {
       );
     }
 
-    const isAuthorized = authorizeJwt(issuer, identity, this.logContext);
+    const isAuthorized = this.authorizeJwt(issuer, identity);
     if (!isAuthorized.success) {
       return isAuthorized;
     }
