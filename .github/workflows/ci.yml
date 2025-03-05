@@ -57,10 +57,7 @@ jobs:
              make demo
 
       - name: Print CCF logs
-        if: always()
-        run: |
-          cat /tmp/make.txt
-          cat workspace/sandbox_0/out
+        run: cat workspace/sandbox_0/out
 
   system-stateless:
     name: system / stateless (${{ inputs.use_akv && 'akv' || 'local' }}_keys)
