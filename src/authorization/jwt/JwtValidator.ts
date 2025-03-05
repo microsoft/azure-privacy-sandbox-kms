@@ -4,43 +4,29 @@
 import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../../utils/ServiceResult";
 import { IValidatorService } from "../IValidationService";
-import { JwtIdentityProviderEnum } from "./JwtIdentityProviderEnum";
-import { IJwtIdentityProvider } from "./IJwtIdentityProvider";
 import { DemoJwtProvider } from "./DemoJwtProvider";
 import { MsJwtProvider } from "./MsJwtProvider";
 import { Logger, LogContext } from "../../utils/Logger";
 
 export class JwtValidator implements IValidatorService {
-  private readonly identityProviders = new Map<
-    JwtIdentityProviderEnum,
-    IJwtIdentityProvider
-  >();
   private logContext: LogContext;
 
   constructor(logContext?: LogContext) {
     this.logContext = (logContext?.clone() || new LogContext()).appendScope("JwtValidator");
-    this.identityProviders.set(
-      JwtIdentityProviderEnum.MS_AAD,
-      new MsJwtProvider("JwtProvider", this.logContext),
-    );
-    this.identityProviders.set(
-      JwtIdentityProviderEnum.Demo,
-      new DemoJwtProvider("DemoJwtProvider"),
-    );
   }
 
   validate(request: ccfapp.Request<any>): ServiceResult<string> {
     const jwtCaller = request.caller as unknown as ccfapp.JwtAuthnIdentity;
     Logger.debug(
-      `Authorization: JWT jwtCaller (JwtValidator)-> ${<JwtIdentityProviderEnum>jwtCaller.jwt.keyIssuer}`,
+      `Authorization: JWT jwtCaller (JwtValidator)-> ${jwtCaller.jwt.keyIssuer}`,
       this.logContext
     );
-    const provider = this.identityProviders.get(
-      <JwtIdentityProviderEnum>jwtCaller.jwt.keyIssuer,
-    );
+    const provider = jwtCaller.jwt.keyIssuer == "http://Demo-jwt-issuer"
+      ? new DemoJwtProvider("DemoJwtProvider")
+      : new MsJwtProvider("JwtProvider", this.logContext);
 
     if (!provider) {
-      const error = `Authorization: JWT validation provider is undefined (JwtValidator) for ${<JwtIdentityProviderEnum>jwtCaller.jwt.keyIssuer}`;
+      const error = `Authorization: JWT validation provider is undefined (JwtValidator) for ${jwtCaller.jwt.keyIssuer}`;
       Logger.error(error, this.logContext);
       return ServiceResult.Failed(
         { errorMessage: error, errorType: "caller error" },
