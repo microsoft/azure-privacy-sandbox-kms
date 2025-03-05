@@ -106,7 +106,7 @@ class Demo {
     }
 
     this.printTestSectionHeader("🔬 [TEST]: Setup kms");
-    await Demo.executeCommand(`make setup >/tmp/make.txt`);
+    await Demo.executeCommand(`make release-policy-set release-policy-proposal="governance/proposals/set_key_release_policy_add.json"`);
 
     this.printTestSectionHeader("🔬 [TEST]: generate access token");
     const access_token = await Demo.executeCommand(
