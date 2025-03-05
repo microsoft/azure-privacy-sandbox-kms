@@ -202,6 +202,7 @@ constitution-set:
 release-policy-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	KMS_URL=${KMS_URL} \
+	KMS_SERVICE_CERT_PATH=${KMS_SERVICE_CERT_PATH} \
 	./scripts/kms/release_policy_set.sh $(release-policy-proposal)
 
 settings-policy-set:
