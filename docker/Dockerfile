@@ -43,7 +43,7 @@ FROM ghcr.io/microsoft/ccf/app/dev/${CCF_PLATFORM}:${CCF_VERSION}
 
 COPY .devcontainer/install_nodejs.sh /src/
 RUN NVM_DIR=/root/.nvm /src/install_nodejs.sh
-RUN pip install pandas==2.0.3
+RUN apt-get update && apt-get install -y python3-pip && pip install pandas==2.0.3
 
 COPY --from=builder /kms /kms
 WORKDIR /kms
