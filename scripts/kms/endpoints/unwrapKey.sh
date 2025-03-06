@@ -5,7 +5,7 @@
 
 unwrap_key() {
     params=()
-    auth="user_cert"
+    auth="member_cert"
     attestation=""
     wrappedKid=""
     wrappingKey=""
