@@ -16,7 +16,7 @@ services:
     healthcheck:
       test: [
         "CMD-SHELL",
-        "curl -k -f https://$(jq -r '.primary_rpc_interface' workspace/$(cat node_id)/0.rpc_addresses)/node/state"
+        "curl -k -f https://$(jq -r '.primary_rpc_interface' workspace/$(cat node_id)/0.rpc_addresses)/node/state && test -f workspace/sandbox_common/user0_cert.pem"
       ]
       interval: 1s
       retries: 1200
