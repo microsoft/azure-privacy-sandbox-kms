@@ -43,9 +43,12 @@ FROM ghcr.io/microsoft/ccf/app/dev/${CCF_PLATFORM}:${CCF_VERSION}
 
 COPY .devcontainer/install_nodejs.sh /src/
 RUN NVM_DIR=/root/.nvm /src/install_nodejs.sh
+RUN pip install pandas==2.0.3
 
 COPY --from=builder /kms /kms
 WORKDIR /kms
+
+RUN pip install -r requirements.txt
 
 ARG CCF_PLATFORM
 ENV CCF_PLATFORM=${CCF_PLATFORM}
