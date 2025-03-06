@@ -11,7 +11,6 @@ def test_no_keys(setup_kms):
         status_code, key_json = key(
             attestation=get_test_attestation(),
             wrapping_key=get_test_public_wrapping_key(),
-            auth="user_cert",
         )
         if status_code != 202:
             break
@@ -30,7 +29,6 @@ def test_no_key_release_policy(setup_kms):
         status_code, key_json = key(
             attestation=get_test_attestation(),
             wrapping_key=get_test_public_wrapping_key(),
-            auth="user_cert",
         )
         if status_code != 202:
             break
@@ -50,7 +48,6 @@ def test_with_keys_and_policy(setup_kms):
         status_code, key_json = key(
             attestation=get_test_attestation(),
             wrapping_key=get_test_public_wrapping_key(),
-            auth="user_cert",
         )
         if status_code != 202:
             break
@@ -99,7 +96,6 @@ def test_key_with_multiple(setup_kms):
         status_code, key_json = key(
             attestation=get_test_attestation(),
             wrapping_key=get_test_public_wrapping_key(),
-            auth="user_cert",
         )
         if status_code != 202:
             break
@@ -129,7 +125,6 @@ def test_key_invalid_wrapping_key(setup_kms):
         status_code, key_json = key(
             attestation=get_test_attestation(),
             wrapping_key='"invalidwrappingkey"',
-            auth="user_cert",
         )
         if status_code != 202:
             break
@@ -157,7 +152,6 @@ def test_key_kid_not_present_with_other_keys(setup_kms):
         status_code, key_json = key(
             attestation=get_test_attestation(),
             wrapping_key=get_test_public_wrapping_key(),
-            auth="user_cert",
             kid="doesntexist"
         )
         if status_code != 202:
@@ -177,7 +171,6 @@ def test_key_kid_not_present_without_other_keys(setup_kms):
         status_code, key_json = key(
             attestation=get_test_attestation(),
             wrapping_key=get_test_public_wrapping_key(),
-            auth="user_cert",
             kid="doesntexist"
         )
         if status_code != 202:
@@ -199,7 +192,6 @@ def test_key_kid_present(setup_kms):
         status_code, key_json = key(
             attestation=get_test_attestation(),
             wrapping_key=get_test_public_wrapping_key(),
-            auth="user_cert",
             kid=refresh_json["kid"]
         )
         if status_code != 202:
@@ -224,7 +216,6 @@ def test_key_fmt_tink(setup_kms):
         status_code, key_json = key(
             attestation=get_test_attestation(),
             wrapping_key=get_test_public_wrapping_key(),
-            auth="user_cert",
             fmt="tink",
         )
         if status_code != 202:
@@ -246,7 +237,6 @@ def test_key_fmt_jwk(setup_kms):
         status_code, key_json = key(
             attestation=get_test_attestation(),
             wrapping_key=get_test_public_wrapping_key(),
-            auth="user_cert",
             fmt="jwk",
         )
         if status_code != 202:
@@ -271,7 +261,6 @@ def test_key_fmt_invalid(setup_kms):
         status_code, key_json = key(
             attestation=get_test_attestation(),
             wrapping_key=get_test_public_wrapping_key(),
-            auth="user_cert",
             fmt="invalid",
         )
         if status_code != 202:
