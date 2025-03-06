@@ -8,7 +8,7 @@ run_ccf() {
         --http2 \
         --initial-member-count 3 \
         --initial-user-count 1 \
-        --http2 -v &
+        --http2 -v "$@" &
 
     export WORKSPACE="$PWD/workspace"
 
@@ -43,7 +43,7 @@ run_jwt_issuer() {
     done
 }
 
-run_ccf
+run_ccf "$@"
 run_jwt_issuer
 
 ./scripts/kms/js_app_set.sh
