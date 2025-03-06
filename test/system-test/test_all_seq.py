@@ -381,6 +381,12 @@ def test_set_policy_single_key_no_jwt_auth_member_cert(setup_kms_session):
     assert auth_json["auth"]["policy"] == "member_cert"
 
 
+def test_set_policy_single_key_no_jwt_auth_user_cert(setup_kms):
+    status_code, auth_json = auth(auth="user_cert")
+    assert status_code == 200
+    assert auth_json["auth"]["policy"] == "user_cert"
+
+
 def test_set_policy_single_key_no_jwt_auth_jwt(setup_kms_session):
     try:
         status_code, auth_json = auth(auth="jwt")
