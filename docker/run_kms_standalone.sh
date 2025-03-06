@@ -8,9 +8,10 @@ run_ccf() {
         --http2 \
         --initial-member-count 3 \
         --initial-user-count 1 \
-        --http2 -v "$@" &
+        "$@" &
 
     export WORKSPACE="$PWD/workspace"
+    mkdir -p $WORKSPACE/proposals
 
     until [ -f $WORKSPACE/sandbox_0/0.rpc_addresses ]; do
         sleep 1
