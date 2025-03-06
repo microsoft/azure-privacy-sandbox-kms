@@ -16,7 +16,7 @@ ccf-sandbox-local-up() {
     sudo chown $USER:$USER -R $WORKSPACE
     mkdir -p $WORKSPACE/proposals
 
-    ls -la $WORKSPACE
+    ls -la $WORKSPACE/sandbox_common
 
     export KMS_URL="https://127.0.0.1:8000"
     export KMS_SERVICE_CERT_PATH="$WORKSPACE/sandbox_common/service_cert.pem"
