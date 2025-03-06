@@ -23,11 +23,6 @@ ccf-sandbox-local-up() {
     export KMS_MEMBER_CERT_PATH="$WORKSPACE/sandbox_common/member0_cert.pem"
     export KMS_MEMBER_PRIVK_PATH="$WORKSPACE/sandbox_common/member0_privk.pem"
 
-    if [ ! -f "$KMS_USER_CERT_PATH" ]; then
-        echo "Error: KMS user certificate not found at $KMS_USER_CERT_PATH"
-        exit 1
-    fi
-
     set +e
 }
 
