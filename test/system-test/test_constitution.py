@@ -7,7 +7,7 @@ from utils import apply_kms_constitution, propose, get_test_action, get_test_pro
 @pytest.mark.xfail(
     os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
     strict=True,
-    reason="Governance operations need to move to user endpoints",
+    reason="ACL doesn't support constitution updates",
 )
 def test_constitution_auto_accept(setup_kms):
     with get_test_action() as action_file:
@@ -21,7 +21,7 @@ def test_constitution_auto_accept(setup_kms):
 @pytest.mark.xfail(
     os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
     strict=True,
-    reason="Governance operations need to move to user endpoints",
+    reason="ACL doesn't support constitution updates",
 )
 def test_constitution_majority_vote(setup_kms):
     with get_test_action() as action_file:
