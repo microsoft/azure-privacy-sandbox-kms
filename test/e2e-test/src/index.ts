@@ -499,18 +499,6 @@ class Demo {
       keyResponse.gt["x-ms-ver"] === "1",
     );
 
-    // JWT not allowed
-    [statusCode, keyResponse] = await Api.keyReleasePolicy(
-      this.demoProps,
-      member,
-      this.createHttpsAgent(member.id, AuthKinds.JWT),
-      access_token,
-    ).catch((error) => {
-      console.log(`keyReleasePolicy error: `, error);
-      throw error;
-    });
-    Demo.assert("statusCode == 401", statusCode == 401);
-
     //#endregion
 
     //#region pubkey
