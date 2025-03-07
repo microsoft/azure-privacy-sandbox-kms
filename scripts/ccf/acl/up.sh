@@ -5,6 +5,45 @@
 
 REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../../..")"
 
+cert-fingerprint() {
+    openssl x509 -in "$1" -noout -fingerprint -sha256 | cut -d "=" -f 2
+}
+
+acl-create-member-role() {
+    curl $KMS_URL/app/roles?api-version=2024-08-22-preview \
+        --cacert $KMS_SERVICE_CERT_PATH \
+        -X PUT \
+        -H "Content-Type: application/json" \
+        --cert $KMS_MEMBER_CERT_PATH \
+        --key $KMS_MEMBER_PRIVK_PATH \
+        -w '\n%{http_code}\n' \
+        -d "$(jq -n '{
+            roles: [
+                {
+                    role_name: "Member",
+                    role_actions: ["/propose"]
+                }
+            ]
+        }')"
+}
+
+acl-assign-member() {
+
+    local member_id=$1
+    local roles=$2
+
+    curl $KMS_URL/app/ledgerUsers/$member_id?api-version=2024-08-22-preview \
+        --cacert $KMS_SERVICE_CERT_PATH \
+        -X PATCH \
+        -H "Content-Type: application/merge-patch+json" \
+        --cert $KMS_MEMBER_CERT_PATH \
+        --key $KMS_MEMBER_PRIVK_PATH \
+        -d "$(jq -n --arg member_id "$member_id" --arg roles "$roles" '{
+            user_id: $member_id,
+            assignedRoles: $roles
+        }')"
+}
+
 acl-up() {
 
     source $REPO_ROOT/services/cacitesting.env
@@ -48,6 +87,18 @@ acl-up() {
     curl https://identity.confidential-ledger.core.azure.com/ledgerIdentity/$DEPLOYMENT_NAME \
         | jq -r '.ledgerTlsCertificate' > $WORKSPACE/service_cert.pem
     export KMS_SERVICE_CERT_PATH="$WORKSPACE/service_cert.pem"
+
+    acl-create-member-role
+
+    acl-assign-member \
+        $(az account show | jq -r '.id') '["Administrator", "Member"]'
+
+    acl-assign-member \
+        $(cert-fingerprint $KMS_MEMBER_CERT_PATH) '["Administrator", "Member"]'
+
+    acl-assign-member \
+        $(cert-fingerprint $KMS_USER_CERT_PATH) '["Reader"]'
+
 }
 
 acl-up "$@"

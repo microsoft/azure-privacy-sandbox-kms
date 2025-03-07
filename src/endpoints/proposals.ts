@@ -105,16 +105,13 @@ export const proposals = (
 
         // For now this code will always return false, I suspect because we can't
         // read the confidential ledger CCF tables.
-        // if (!acl.authz.actionAllowed(
-        //     callerId,
-        //     "Microsoft.ConfidentialLedger/ledger/append",
-        // )) {
-        //     return ServiceResult.Failed<IProposalResult[]>(
-        //         { errorMessage: "Caller doesn't have the ledger/append permission" },
-        //         401,
-        //         logContext,
-        //     );
-        // }
+        if (!acl.authz.actionAllowed(callerId, "/propose")) {
+            return ServiceResult.Failed<IProposalResult[]>(
+                { errorMessage: "Caller doesn't have the /propose permission" },
+                401,
+                logContext,
+            );
+        }
 
     } else if (!isAuthType(request.caller!, "member_cert")) {
         return ServiceResult.Failed<IProposalResult[]>(
