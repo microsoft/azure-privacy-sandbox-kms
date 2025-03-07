@@ -77,7 +77,7 @@ acl-up() {
         --resource-group $RESOURCE_GROUP \
         --location "AustraliaEast" \
         --ledger-type "Public" \
-        --aad-based-security-principals ledger-role-name="Administrator" principal-id="$(az ad signed-in-user show --query id -o tsv)" \
+        --aad-based-security-principals ledger-role-name="Administrator" principal-id="$(az account show | jq -r '.id')" \
         --cert-based-security-principals ledger-role-name="Administrator" cert="$(cat $KMS_MEMBER_CERT_PATH)" \
         --cert-based-security-principals ledger-role-name="Reader" cert="$(cat $KMS_USER_CERT_PATH)"
     export KMS_URL="https://$DEPLOYMENT_NAME.confidential-ledger.azure.com"
@@ -90,7 +90,7 @@ acl-up() {
     acl-create-member-role
 
     acl-assign-member \
-        $(az ad signed-in-user show --query id -o tsv) '["Administrator", "Member"]'
+        $(az account show | jq -r '.id') '["Administrator", "Member"]'
 
     acl-assign-member \
         $(cert-fingerprint $KMS_MEMBER_CERT_PATH) '["Administrator", "Member"]'
