@@ -9,24 +9,6 @@ cert-fingerprint() {
     openssl x509 -in "$1" -noout -fingerprint -sha256 | cut -d "=" -f 2
 }
 
-acl-create-member-role() {
-    curl $KMS_URL/app/roles?api-version=2024-08-22-preview \
-        --cacert $KMS_SERVICE_CERT_PATH \
-        -X PUT \
-        -H "Content-Type: application/json" \
-        --cert $KMS_MEMBER_CERT_PATH \
-        --key $KMS_MEMBER_PRIVK_PATH \
-        -w '\n%{http_code}\n' \
-        -d "$(jq -n '{
-            roles: [
-                {
-                    role_name: "Member",
-                    role_actions: ["/propose"]
-                }
-            ]
-        }')"
-}
-
 acl-assign-member() {
     local member_id=$1
     local roles=$2
@@ -87,13 +69,11 @@ acl-up() {
         | jq -r '.ledgerTlsCertificate' > $WORKSPACE/service_cert.pem
     export KMS_SERVICE_CERT_PATH="$WORKSPACE/service_cert.pem"
 
-    acl-create-member-role
+    acl-assign-member \
+        $(az account show | jq -r '.id') '["Administrator"]'
 
     acl-assign-member \
-        $(az account show | jq -r '.id') '["Administrator", "Member"]'
-
-    acl-assign-member \
-        $(cert-fingerprint $KMS_MEMBER_CERT_PATH) '["Administrator", "Member"]'
+        $(cert-fingerprint $KMS_MEMBER_CERT_PATH) '["Administrator"]'
 
     acl-assign-member \
         $(cert-fingerprint $KMS_USER_CERT_PATH) '["Reader"]'

@@ -103,11 +103,16 @@ export const proposals = (
             logContext,
         );
 
-        // For now this code will always return false, I suspect because we can't
-        // read the confidential ledger CCF tables.
-        if (!acl.authz.actionAllowed(callerId, "/propose")) {
+        const roleMappingTable = ccf.kv["public:confidentialledger.roles.user_roles_mapping"]!;
+
+        // Wrap the callerId in quotes to match the format in the role mapping table
+        const userRoles = roleMappingTable.get(ccf.strToBuf(`\"${callerId}\"`));
+
+        // If the user isn't admin or contibutor, return a 401
+        const roles = userRoles ? ccf.bufToJsonCompatible<Array<string>>(userRoles) : [];
+        if (!(roles.includes("Administrator") || roles.includes("Contributor"))) {
             return ServiceResult.Failed<IProposalResult[]>(
-                { errorMessage: "Caller doesn't have the /propose permission" },
+                { errorMessage: "Caller doesn't have the ledger/append permission" },
                 401,
                 logContext,
             );
