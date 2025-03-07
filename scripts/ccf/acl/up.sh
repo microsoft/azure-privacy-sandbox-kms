@@ -28,13 +28,16 @@ acl-create-member-role() {
 }
 
 acl-assign-member() {
+    local member_id=$1
+    local roles=$2
+
     curl $KMS_URL/app/ledgerUsers/$member_id?api-version=2024-08-22-preview \
         --cacert $KMS_SERVICE_CERT_PATH \
         -X PATCH \
         -H "Content-Type: application/merge-patch+json" \
         --cert $KMS_MEMBER_CERT_PATH \
         --key $KMS_MEMBER_PRIVK_PATH \
-        -d "$(jq -n --arg member_id "$1" --argjson roles "$2" '{
+        -d "$(jq -n --arg member_id "$member_id" --argjson roles "$roles" '{
             user_id: $member_id,
             assignedRoles: $roles
         }')"
