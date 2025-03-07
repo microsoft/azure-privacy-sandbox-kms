@@ -3,7 +3,7 @@
 
 import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../utils/ServiceResult";
-import { LogContext } from "../utils/Logger";
+import { LogContext, Logger } from "../utils/Logger";
 import { actions } from '../actions/actions';
 import { ServiceRequest } from "../utils/ServiceRequest";
 import { ccf } from "@microsoft/ccf-app/global";
@@ -14,6 +14,8 @@ import { ccf } from "@microsoft/ccf-app/global";
 
 // Currently all proposals will be automatically accepted, and regulation comes
 // from which identities can successfully call this endpoint.
+
+declare const acl: any;
 
 function digest(jsonLike) {
     return Array.from(new Uint8Array(
@@ -58,6 +60,15 @@ class IProposalResult {
     }
 }
 
+function isAuthType(identity: ccfapp.AuthnIdentityCommon, auth_type: string): boolean {
+    return (identity.policy == auth_type ||
+        (
+            Array.isArray(identity.policy) &&
+            identity.policy.includes(auth_type)
+        )
+    );
+}
+
 export const proposals = (
   request: ccfapp.Request<IProposalsRequest>,
 ): ServiceResult<string | IProposalResult[]> => {
@@ -68,6 +79,50 @@ export const proposals = (
     // Check caller identity
     const [_, isValidIdentity] = serviceRequest.isAuthenticated();
     if (isValidIdentity.failure) return isValidIdentity;
+
+    // Handle ACL based authentication
+    if (typeof acl === "object") {
+        Logger.info("Checking permissions of ACL identity", logContext);
+
+        let callerId: string;
+
+        if (isAuthType(request.caller!, "user_cert")) {
+            callerId = acl.certUtils.convertToAclFingerprintFormat();
+        } else if (isAuthType(request.caller!, "jwt")) {
+            callerId = (request.caller! as ccfapp.JwtAuthnIdentity).jwt.payload.oid;
+        } else {
+            return ServiceResult.Failed<IProposalResult[]>(
+                { errorMessage: "Unexpected member_cert auth on ACL" },
+                500,
+                logContext,
+            );
+        }
+
+        Logger.info(
+            `ACL identity: ${JSON.stringify(callerId)}`,
+            logContext,
+        );
+
+        // For now this code will always return false, I suspect because we can't
+        // read the confidential ledger CCF tables.
+        // if (!acl.authz.actionAllowed(
+        //     callerId,
+        //     "Microsoft.ConfidentialLedger/ledger/append",
+        // )) {
+        //     return ServiceResult.Failed<IProposalResult[]>(
+        //         { errorMessage: "Caller doesn't have the ledger/append permission" },
+        //         401,
+        //         logContext,
+        //     );
+        // }
+
+    } else if (!isAuthType(request.caller!, "member_cert")) {
+        return ServiceResult.Failed<IProposalResult[]>(
+            { errorMessage: "On raw CCF, we must use member cert authentication" },
+            401,
+            logContext,
+        );
+    }
 
     // Extract settings policy from request
     let proposalActions: IProposalsAction[] = [];

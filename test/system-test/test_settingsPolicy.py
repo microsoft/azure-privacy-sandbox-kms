@@ -1,3 +1,5 @@
+import os
+from subprocess import CalledProcessError
 import pytest
 from utils import (
     apply_settings_policy,
@@ -16,6 +18,20 @@ def test_settingsPolicy_with_no_policy(setup_kms):
             "debug": False,
         }
     }
+
+@pytest.mark.xfail(
+    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
+    strict=True,
+    reason="This will fail until we enforce the role in ACL",
+)
+def test_set_settingsPolicy_with_reader(setup_kms, monkeypatch):
+
+    # Temporarily use the user cert as the member cert
+    monkeypatch.setenv("KMS_MEMBER_CERT_PATH", os.getenv("KMS_USER_CERT_PATH"))
+    monkeypatch.setenv("KMS_MEMBER_PRIVK_PATH", os.getenv("KMS_USER_PRIVK_PATH"))
+
+    with pytest.raises(CalledProcessError):
+        apply_settings_policy()
 
 
 def test_settingsPolicy_with_policy(setup_kms):

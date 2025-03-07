@@ -592,6 +592,21 @@ def test_no_settings_settingsPolicy(setup_kms_session):
     }
 
 
+@pytest.mark.xfail(
+    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
+    strict=True,
+    reason="This will fail until we enforce the role in ACL",
+)
+def test_no_settings_set_settings_policy_with_reader_role(setup_kms_session, monkeypatch):
+
+    # Temporarily use the user cert as the member cert
+    monkeypatch.setenv("KMS_MEMBER_CERT_PATH", os.getenv("KMS_USER_CERT_PATH"))
+    monkeypatch.setenv("KMS_MEMBER_PRIVK_PATH", os.getenv("KMS_USER_PRIVK_PATH"))
+
+    with pytest.raises(CalledProcessError):
+        apply_settings_policy()
+
+
 def test_no_settings_set_settings_policy(setup_kms_session):
 
     policy = {

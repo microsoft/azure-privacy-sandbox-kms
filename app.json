@@ -6,7 +6,7 @@
         "js_function": "proposals",
         "forwarding_required": "always",
         "redirection_strategy": "none",
-        "authn_policies": [],
+        "authn_policies": ["member_cert", "user_cert", "jwt"],
         "mode": "readwrite",
         "openapi": {
           "responses": {
