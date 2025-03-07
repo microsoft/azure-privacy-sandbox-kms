@@ -20,11 +20,6 @@ def test_settingsPolicy_with_no_policy(setup_kms):
     }
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="This will fail until we enforce the role in ACL",
-)
 def test_set_settingsPolicy_with_reader(setup_kms, monkeypatch):
 
     # Temporarily use the user cert as the member cert
