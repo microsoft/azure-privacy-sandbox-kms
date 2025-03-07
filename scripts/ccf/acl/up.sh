@@ -28,17 +28,13 @@ acl-create-member-role() {
 }
 
 acl-assign-member() {
-
-    local member_id=$1
-    local roles=$2
-
     curl $KMS_URL/app/ledgerUsers/$member_id?api-version=2024-08-22-preview \
         --cacert $KMS_SERVICE_CERT_PATH \
         -X PATCH \
         -H "Content-Type: application/merge-patch+json" \
         --cert $KMS_MEMBER_CERT_PATH \
         --key $KMS_MEMBER_PRIVK_PATH \
-        -d "$(jq -n --arg member_id "$member_id" --arg roles "$roles" '{
+        -d "$(jq -n --arg member_id "$1" --argjson roles "$2" '{
             user_id: $member_id,
             assignedRoles: $roles
         }')"
@@ -78,7 +74,7 @@ acl-up() {
         --resource-group $RESOURCE_GROUP \
         --location "AustraliaEast" \
         --ledger-type "Public" \
-        --aad-based-security-principals ledger-role-name="Administrator" principal-id="$(az account show | jq -r '.id')" \
+        --aad-based-security-principals ledger-role-name="Administrator" principal-id="$(az ad signed-in-user show --query id -o tsv)" \
         --cert-based-security-principals ledger-role-name="Administrator" cert="$(cat $KMS_MEMBER_CERT_PATH)" \
         --cert-based-security-principals ledger-role-name="Reader" cert="$(cat $KMS_USER_CERT_PATH)"
     export KMS_URL="https://$DEPLOYMENT_NAME.confidential-ledger.azure.com"
@@ -91,7 +87,7 @@ acl-up() {
     acl-create-member-role
 
     acl-assign-member \
-        $(az account show | jq -r '.id') '["Administrator", "Member"]'
+        $(az ad signed-in-user show --query id -o tsv) '["Administrator", "Member"]'
 
     acl-assign-member \
         $(cert-fingerprint $KMS_MEMBER_CERT_PATH) '["Administrator", "Member"]'
