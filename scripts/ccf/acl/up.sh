@@ -17,7 +17,13 @@ acl-up() {
 
     # Create a workspace for certs
     export WORKSPACE=~/$DEPLOYMENT_NAME.aclworkspace
-    mkdir -p $WORKSPACE
+    mkdir -p $WORKSPACE/proposals
+
+    # Create a member cert
+    export KMS_MEMBER_CERT_PATH="$WORKSPACE/member0_cert.pem"
+    export KMS_MEMBER_PRIVK_PATH="$WORKSPACE/member0_privk.pem"
+    openssl ecparam -out "$KMS_MEMBER_PRIVK_PATH" -name "secp384r1" -genkey
+    openssl req -new -key "$KMS_MEMBER_PRIVK_PATH" -x509 -nodes -days 365 -out "$KMS_MEMBER_CERT_PATH" -"sha384" -subj=/CN="ACL Client Cert"
 
     # Create a user cert
     export KMS_USER_CERT_PATH="$WORKSPACE/user0_cert.pem"
@@ -34,17 +40,14 @@ acl-up() {
         --location "AustraliaEast" \
         --ledger-type "Public" \
         --aad-based-security-principals ledger-role-name="Administrator" principal-id="$(az account show | jq -r '.id')" \
-        --cert-based-security-principals ledger-role-name="Administrator" cert="$(cat $KMS_USER_CERT_PATH)"
+        --cert-based-security-principals ledger-role-name="Administrator" cert="$(cat $KMS_MEMBER_CERT_PATH)" \
+        --cert-based-security-principals ledger-role-name="Reader" cert="$(cat $KMS_USER_CERT_PATH)"
     export KMS_URL="https://$DEPLOYMENT_NAME.confidential-ledger.azure.com"
 
     # Save the service certificate
     curl https://identity.confidential-ledger.core.azure.com/ledgerIdentity/$DEPLOYMENT_NAME \
         | jq -r '.ledgerTlsCertificate' > $WORKSPACE/service_cert.pem
     export KMS_SERVICE_CERT_PATH="$WORKSPACE/service_cert.pem"
-
-    # For ACL we don't have members
-    export KMS_MEMBER_CERT_PATH=""
-    export KMS_MEMBER_PRIVK_PATH=""
 }
 
 acl-up "$@"
