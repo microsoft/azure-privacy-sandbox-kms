@@ -10,11 +10,6 @@ from utils import apply_kms_constitution, apply_key_release_policy, trust_jwt_is
 # Step 3, decrypt the wrapped private key
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_unwrap_key_and_decrypt(setup_kms):
     apply_kms_constitution()
     apply_key_release_policy()
@@ -42,11 +37,6 @@ def test_unwrap_key_and_decrypt(setup_kms):
     assert unwrapped_json["kty"] == "OKP"
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_unwrap_key_missing_attestation(setup_kms):
     apply_kms_constitution()
     apply_key_release_policy()
@@ -70,11 +60,6 @@ def test_unwrap_key_missing_attestation(setup_kms):
     assert status_code == 400
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_unwrap_key_missing_wrapping_key(setup_kms):
     apply_kms_constitution()
     apply_key_release_policy()
@@ -98,11 +83,6 @@ def test_unwrap_key_missing_wrapping_key(setup_kms):
     assert status_code == 400
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_unwrap_key_missing_wrappedKid(setup_kms):
     apply_kms_constitution()
     apply_key_release_policy()
@@ -118,11 +98,6 @@ def test_unwrap_key_missing_wrappedKid(setup_kms):
     assert status_code == 404
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_unwrap_key_without_refresh(setup_kms):
     apply_kms_constitution()
     apply_key_release_policy()
