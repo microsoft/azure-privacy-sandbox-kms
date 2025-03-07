@@ -62,7 +62,7 @@ export class JwtValidator implements IValidatorService {
       );
     }
 
-    const identityId = jwtCaller?.jwt?.payload?.sub;
+    const identityId = jwtCaller?.jwt?.payload?.oid;
     Logger.debug(
       `Authorization: JWT validation result (JwtValidator) for provider ${jwtCaller.jwt.keyIssuer}-> success`,
       this.logContext
