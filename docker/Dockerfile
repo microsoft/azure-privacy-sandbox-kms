@@ -1,5 +1,5 @@
 ARG CCF_PLATFORM
-ARG CCF_VERSION=ccf-5.0.11
+ARG CCF_VERSION=ccf-6.0.0-rc0
 
 # Build Image ------------------------------------------------------------------
 
