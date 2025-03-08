@@ -55,9 +55,6 @@ run_jwt_issuer
 
 ./scripts/kms/jwt_issuer_trust.sh
 
-source ./scripts/ccf/propose.sh
-ccf-propose ./governance/jwt/set_jwt_ms_validation_policy_proposal.json
-
 ./scripts/kms/settings_policy_set.sh
 
 ./scripts/kms/release_policy_set.sh \
