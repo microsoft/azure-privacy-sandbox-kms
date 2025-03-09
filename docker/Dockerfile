@@ -22,7 +22,8 @@ COPY src /kms/src
 COPY scripts /kms/scripts
 COPY governance /kms/governance
 COPY package.json /kms/package.json
-COPY docker/requirements.txt /kms/requirements.txt
+COPY requirements.txt /kms/requirements.txt
+RUN echo pandas==2.0.3 >> /kms/requirements.txt
 COPY rollup.config.js /kms/rollup.config.js
 COPY app.json /kms/app.json
 COPY build_bundle.js /kms/build_bundle.js
