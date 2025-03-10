@@ -347,11 +347,6 @@ def test_set_policy_single_key_no_jwt_key_fmt_jwk(setup_kms_session):
     assert key_json["wrapped"] == ""
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_set_policy_single_key_no_jwt_key_fmt_invalid(setup_kms_session):
     while True:
         status_code, key_json = key(
@@ -379,6 +374,12 @@ def test_set_policy_single_key_no_jwt_auth_member_cert(setup_kms_session):
     status_code, auth_json = auth(auth="member_cert")
     assert status_code == 200
     assert auth_json["auth"]["policy"] == "member_cert"
+
+
+def test_set_policy_single_key_no_jwt_auth_user_cert(setup_kms_session):
+    status_code, auth_json = auth(auth="user_cert")
+    assert status_code == 200
+    assert auth_json["auth"]["policy"] == "user_cert"
 
 
 def test_set_policy_single_key_no_jwt_auth_jwt(setup_kms_session):
