@@ -6,7 +6,6 @@ import { ServiceResult } from "../../utils/ServiceResult";
 import { IValidatorService } from "../IValidationService";
 import { Logger, LogContext } from "../../utils/Logger";
 import { JwtValidationPolicyMap } from "./JwtValidationPolicyMap";
-import isMatch from 'lodash/isMatch';
 
 export class JwtValidator implements IValidatorService {
   private logContext: LogContext;
@@ -51,15 +50,35 @@ export class JwtValidator implements IValidatorService {
       `Validate JWT policy for issuer ${issuer}: ${JSON.stringify(policy)}`, this.logContext
     );
 
-    // Check that the JWT payload is a matching superset of the policy
-    if (!isMatch(jwtCaller.jwt.payload, policy)) {
-      const errorMessage = `The JWT ${JSON.stringify(jwtCaller.jwt.payload)} doesn't match the policy ${JSON.stringify(policy)}`;
-      Logger.error(errorMessage, this.logContext);
-      return ServiceResult.Failed(
-        { errorMessage, errorType: "AuthenticationError" },
-        401,
-        this.logContext
+    const keys = Object.keys(policy);
+
+    for (let inx = 0; inx < keys.length; inx++) {
+      const key = keys[inx];
+      const jwtProp = jwtCaller?.jwt?.payload[key];
+      let compliant = false;
+
+      // Check if policy[key] is an array
+      if (Array.isArray(policy[key])) {
+        // Check if jwtProp is in the array
+        compliant = policy[key].includes(jwtProp);
+      } else {
+        // Perform the existing equality check
+        compliant = jwtProp === policy[key];
+      }
+
+      Logger.debug(
+        `isValidJwtToken: ${key}, expected: ${policy[key]}, found: ${jwtProp}, ${compliant}`, this.logContext
       );
+
+      if (!compliant) {
+        const errorMessage = `The JWT has no valid ${key}, expected: ${policy[key]}, found: ${jwtProp}`;
+        Logger.error(errorMessage, this.logContext);
+        return ServiceResult.Failed(
+          { errorMessage, errorType: "AuthenticationError" },
+          401,
+          this.logContext
+        );
+      }
     }
 
     const identityId = jwtCaller?.jwt?.payload?.oid;
