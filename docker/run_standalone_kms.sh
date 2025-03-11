@@ -22,7 +22,7 @@ run_ccf() {
 
   export KMS_URL="${KMS_URL:-https://$(jq -r '.primary_rpc_interface' $WORKSPACE/sandbox_0/0.rpc_addresses)}"
 
-  until curl -s -k -f $KMS_URL/node/state > /dev/null 2>&1; do
+  until curl -s -k -f "$KMS_URL/node/network" | jq -e 'select(.service_status=="Open")' > /dev/null 2>&1; do
       sleep 1
   done
 
