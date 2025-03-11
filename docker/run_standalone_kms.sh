@@ -3,7 +3,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-mkdir -p workspace
 mkdir -p workspace/proposals
 
 (cd test/utils/jwt && KMS_WORKSPACE=/kms/workspace nohup npm run start > nohup.out 2>&1 &)
@@ -22,8 +21,6 @@ cat <<EOF | jq > ./workspace/proposals/set_jwt_issuer.json
   }
 }
 EOF
-
-./scripts/set_python_env.sh
 
 env -i PATH=${PATH} KMS_WORKSPACE=workspace \
   /opt/ccf_${CCF_PLATFORM}/bin/sandbox.sh \
