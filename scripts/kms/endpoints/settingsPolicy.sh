@@ -31,6 +31,7 @@ settingsPolicy() {
 
     curl $KMS_URL/app/settingsPolicy \
         --cacert $KMS_SERVICE_CERT_PATH \
+        "${auth_arg[@]}" \
         -w '\n%{http_code}\n'
 }
 
