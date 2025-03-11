@@ -36,6 +36,8 @@ env -i PATH=${PATH} KMS_WORKSPACE=workspace \
     --constitution ./governance/constitution/actions/kms.js \
     --jwt-issuer workspace/proposals/set_jwt_issuer.json \
     -v --http2 "$@" &
+export KMS_URL=${KMS_URL:-https://127.0.0.1:8000}
+export KMS_SERVICE_CERT_PATH=${KMS_SERVICE_CERT_PATH:-./workspace/sandbox_common/service_cert.pem}
 
 ./scripts/kms_wait.sh
 
@@ -47,8 +49,6 @@ env -i PATH=${PATH} KMS_WORKSPACE=workspace \
 
 ./scripts/jwt_issuer/aad/up.sh && ./scripts/kms/jwt_issuer_trust.sh
 
-KMS_URL=${KMS_URL:-https://127.0.0.1:8000} \
-KMS_SERVICE_CERT_PATH=${KMS_SERVICE_CERT_PATH:-./workspace/sandbox_common/service_cert.pem} \
-  ./scripts/kms/endpoints/refresh.sh
+./scripts/kms/endpoints/refresh.sh
 
 tail -f /kms/workspace/sandbox_0/out
