@@ -39,6 +39,16 @@ env -i PATH=${PATH} KMS_WORKSPACE=workspace \
 
 ./scripts/kms_wait.sh
 
-make setup
+./scripts/kms/release_policy_set.sh \
+  governance/proposals/set_key_release_policy_add.json
+
+./scripts/kms/key_rotation_policy_set.sh \
+  governance/proposals/set_key_rotation_policy.json
+
+./scripts/jwt_issuer/aad/up.sh && ./scripts/kms/jwt_issuer_trust.sh
+
+KMS_URL=${KMS_URL:-https://127.0.0.1:8000} \
+KMS_SERVICE_CERT_PATH=${KMS_SERVICE_CERT_PATH:-./workspace/sandbox_common/service_cert.pem} \
+  ./scripts/kms/endpoints/refresh.sh
 
 tail -f /kms/workspace/sandbox_0/out
