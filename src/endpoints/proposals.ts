@@ -15,6 +15,7 @@ import { ccf } from "@microsoft/ccf-app/global";
 // Currently all proposals will be automatically accepted, and regulation comes
 // from which identities can successfully call this endpoint.
 
+// This is a module of code provided by ACL.
 declare const acl: any;
 
 function digest(jsonLike) {
