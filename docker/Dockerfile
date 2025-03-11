@@ -32,10 +32,11 @@ COPY buf.gen.yaml /kms/buf.gen.yaml
 COPY loader-register.js /kms/loader-register.js
 COPY test /kms/test
 COPY tsconfig.json /kms/tsconfig.json
-COPY docker/run_standalone_kms.sh /kms/docker/run_standalone_kms.sh
 
 WORKDIR /kms
 RUN make build
+
+COPY docker/run_standalone_kms.sh /kms/docker/run_standalone_kms.sh
 
 # Run Image --------------------------------------------------------------------
 
