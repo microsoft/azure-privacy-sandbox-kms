@@ -13,7 +13,22 @@ run_ccf() {
     --jwt-issuer workspace/proposals/set_jwt_issuer.json \
     -v --http2 "$@" &
 
-  ./scripts/kms_wait.sh
+  export WORKSPACE="$PWD/workspace"
+  mkdir -p $WORKSPACE/proposals
+
+  until [ -f $WORKSPACE/sandbox_0/0.rpc_addresses ]; do
+      sleep 1
+  done
+
+  export KMS_URL="${KMS_URL:-https://$(jq -r '.primary_rpc_interface' $WORKSPACE/sandbox_0/0.rpc_addresses)}"
+
+  until curl -s -k -f $KMS_URL/node/state > /dev/null 2>&1; do
+      sleep 1
+  done
+
+  export KMS_SERVICE_CERT_PATH="$WORKSPACE/sandbox_common/service_cert.pem"
+  export KMS_MEMBER_CERT_PATH="$WORKSPACE/sandbox_common/member0_cert.pem"
+  export KMS_MEMBER_PRIVK_PATH="$WORKSPACE/sandbox_common/member0_privk.pem"
 }
 
 mkdir -p workspace/proposals
