@@ -73,11 +73,11 @@ start-host-idp: stop-host stop-idp build ## 🏃 Start the CCF network && idp us
 	@echo "Executing: $(COMMAND)"
 	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh --build && \
 	source ./scripts/jwt_issuer/demo/up.sh --build && \
+	source scripts/kms/js_app_set.sh && \
 	source ./scripts/kms/constitution_set.sh \
 		--resolve ./governance/constitution/resolve/auto_accept.js \
 		--actions ./governance/constitution/actions/kms.js && \
-	source scripts/kms/jwt_issuer_trust.sh && \
-	source scripts/kms/js_app_set.sh
+	source scripts/kms/jwt_issuer_trust.sh
 
 demo: stop-all start-host-idp ## 🎬 Demo the KMS Application in the Sandbox
 	@echo -e "\e[34m$@\e[0m" || true
