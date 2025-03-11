@@ -10,13 +10,13 @@ services:
       /bin/bash -c '
         echo "sandbox_0" > /node_id &&
         mkdir -p /workspace/sandbox_0/ && touch /workspace/sandbox_0/out && tail -f /workspace/sandbox_0/out &
-        /opt/ccf_${CCF_PLATFORM:-virtual}/bin/sandbox.sh --http2 --initial-member-count ${MEMBER_COUNT:-1}
+        /opt/ccf_${CCF_PLATFORM:-virtual}/bin/sandbox.sh --http2 --initial-member-count ${MEMBER_COUNT:-1} --initial-user-count 1
       '
     network_mode: host
     healthcheck:
       test: [
         "CMD-SHELL",
-        "curl -k -f https://$(jq -r '.primary_rpc_interface' workspace/$(cat node_id)/0.rpc_addresses)/node/state"
+        "curl -k -f https://$(jq -r '.primary_rpc_interface' workspace/$(cat node_id)/0.rpc_addresses)/node/state && test -f workspace/sandbox_common/user0_cert.pem"
       ]
       interval: 1s
       retries: 1200
