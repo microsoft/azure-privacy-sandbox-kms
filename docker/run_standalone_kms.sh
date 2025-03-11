@@ -16,7 +16,6 @@ env -i PATH=${PATH} KMS_WORKSPACE=workspace \
     --initial-member-count 3 \
     --initial-user-count 1 \
     --constitution ./governance/constitution/actions/kms.js \
-    --jwt-issuer workspace/proposals/set_jwt_issuer.json \
     -v --http2 "$@" &
 
 ./scripts/kms_wait.sh
