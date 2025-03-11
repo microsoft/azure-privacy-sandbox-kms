@@ -3,25 +3,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-mkdir -p workspace
 mkdir -p workspace/proposals
-
-(cd test/utils/jwt && KMS_WORKSPACE=/kms/workspace nohup npm run start > nohup.out 2>&1 &)
-./scripts/wait_idp_ready.sh
-
-JWK=$(npx pem-jwk "./workspace/private.pem" | \
-      jq --arg cert "$(cat ./workspace/cert.pem)" '{kty, n, e} + {x5c: [$cert]} + {kid: "Demo IDP kid"}')
-
-cat <<EOF | jq > ./workspace/proposals/set_jwt_issuer.json
-{
-  "issuer": "http://Demo-jwt-issuer",
-  "jwks": {
-    "keys": [
-      $JWK
-    ]
-  }
-}
-EOF
 
 ./scripts/set_python_env.sh
 
