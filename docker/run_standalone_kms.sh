@@ -40,14 +40,10 @@ export KMS_URL=${KMS_URL:-https://127.0.0.1:8000}
 export KMS_SERVICE_CERT_PATH=${KMS_SERVICE_CERT_PATH:-./workspace/sandbox_common/service_cert.pem}
 
 ./scripts/kms_wait.sh
-
-./scripts/kms/release_policy_set.sh \
-  governance/proposals/set_key_release_policy_add.json
-
-./scripts/kms/key_rotation_policy_set.sh \
-  governance/proposals/set_key_rotation_policy.json
-
-./scripts/jwt_issuer/aad/up.sh && ./scripts/kms/jwt_issuer_trust.sh
+make propose-add-key-release-policy
+make propose-key-rotation-policy
+make propose-jwt-demo-validation-policy
+make propose-jwt-ms-validation-policy
 
 ./scripts/kms/endpoints/refresh.sh
 
