@@ -25,9 +25,6 @@ EOF
 
 ./scripts/set_python_env.sh
 
-npm install
-npm run build
-
 env -i PATH=${PATH} KMS_WORKSPACE=workspace \
   /opt/ccf_${CCF_PLATFORM}/bin/sandbox.sh \
     --js-app-bundle ./dist/ \
