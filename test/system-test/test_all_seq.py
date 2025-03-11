@@ -158,11 +158,6 @@ def test_set_policy_single_key_no_jwt_pubkey_with_kid(setup_kms_session):
     assert status_code == 404
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_set_policy_single_key_no_jwt_key(setup_kms_session):
     while True:
         status_code, key_json = key(
@@ -178,11 +173,6 @@ def test_set_policy_single_key_no_jwt_key(setup_kms_session):
     assert key_json["wrapped"] == ""
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_set_policy_single_key_no_jwt_unwrapKey(setup_kms_session):
     while True:
         status_code, key_json = key(
@@ -264,11 +254,6 @@ def test_set_policy_single_key_no_jwt_pubkey_fmt_invalid(setup_kms_session):
     assert status_code == 400
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_set_policy_single_key_no_jwt_key_with_invalid_kid(setup_kms_session):
     while True:
         status_code, key_json = key(
@@ -281,11 +266,6 @@ def test_set_policy_single_key_no_jwt_key_with_invalid_kid(setup_kms_session):
     assert status_code == 404
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_set_policy_single_key_no_jwt_key_with_valid_kid(setup_kms_session):
     while True:
         status_code, key_json = key(
@@ -298,11 +278,6 @@ def test_set_policy_single_key_no_jwt_key_with_valid_kid(setup_kms_session):
     assert status_code == 200
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_set_policy_single_key_no_jwt_key_fmt_tink(setup_kms_session):
     while True:
         status_code, key_json = key(
@@ -316,11 +291,6 @@ def test_set_policy_single_key_no_jwt_key_fmt_tink(setup_kms_session):
     assert key_json["wrappedKid"] != ""
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_set_policy_single_key_no_jwt_key_fmt_jwk(setup_kms_session):
     while True:
         status_code, key_json = key(
@@ -391,11 +361,6 @@ def test_set_policy_single_key_set_jwt_auth_jwt(setup_kms_session):
     assert auth_json["auth"]["policy"] == "jwt"
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_set_policy_single_key_set_jwt_key_jwt_auth(setup_kms_session):
     while True:
         status_code, key_json = key(
@@ -442,11 +407,6 @@ def test_set_policy_multiple_keys_set_jwt_pubkey_first_kid(setup_kms_session):
     assert pubkey_json["kid"].endswith("_1")
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_set_policy_multiple_keys_set_jwt_key_no_kid(setup_kms_session):
     while True:
         status_code, key_json = key(
@@ -459,11 +419,6 @@ def test_set_policy_multiple_keys_set_jwt_key_no_kid(setup_kms_session):
     assert key_json["wrappedKid"].endswith("_2")
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_set_policy_multiple_keys_set_jwt_key_first_kid(setup_kms_session):
     while True:
         status_code, key_json = key(
@@ -477,11 +432,6 @@ def test_set_policy_multiple_keys_set_jwt_key_first_kid(setup_kms_session):
     assert key_json["wrappedKid"].endswith("_1")
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_set_policy_multiple_keys_set_jwt_unwrapKey_no_kid(setup_kms_session):
     while True:
         status_code, key_json = key(
@@ -508,11 +458,6 @@ def test_set_policy_multiple_keys_set_jwt_unwrapKey_no_kid(setup_kms_session):
     assert unwrapped_json["kty"] == "OKP"
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_set_policy_multiple_keys_set_jwt_unwrapKey_first_kid(setup_kms_session):
     while True:
         status_code, key_json = key(
