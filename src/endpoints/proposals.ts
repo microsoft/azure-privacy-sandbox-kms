@@ -83,7 +83,7 @@ export const proposals = (
 
     // Handle ACL based authentication
     if (typeof acl === "object") {
-        Logger.info("Checking permissions of ACL identity", logContext);
+        Logger.debug("Checking permissions of ACL identity", logContext);
 
         let callerId: string;
 
