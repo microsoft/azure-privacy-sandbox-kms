@@ -6,3 +6,7 @@ services:
       dockerfile: docker/Dockerfile
       args:
         - CCF_PLATFORM=${CCF_PLATFORM:-virtual}
+    healthcheck:
+      test: ["CMD", "curl", "-k", "--fail", "https://localhost:8000/app/listpubkeys"]
+      interval: 1s
+      retries: 120
