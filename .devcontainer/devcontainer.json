@@ -27,5 +27,5 @@
       "editor.defaultFormatter": "ms-python.black-formatter"
     }
   },
-  "postCreateCommand": "pre-commit install"
+  "postCreateCommand": "pip install -r requirements.txt && pre-commit install"
 }
