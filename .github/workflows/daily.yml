@@ -28,11 +28,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Dependencies
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: ./scripts/tools/install-deps.sh
-
       - name: Run Unit Tests
         run: npm run test
 
@@ -42,11 +37,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Dependencies
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: ./scripts/tools/install-deps.sh
-
       - name: Build DevContainer and run E2E tests
         uses: devcontainers/ci@v0.3
         env:
@@ -54,9 +44,7 @@ jobs:
         with:
           push: never
           configFile: .devcontainer/devcontainer.json
-          runCmd: |
-             scripts/set_python_env.sh && pip install -r requirements.txt
-             make demo
+          runCmd: make demo
 
       - name: Print CCF logs
         run: cat workspace/sandbox_0/out
