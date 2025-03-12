@@ -5,7 +5,7 @@
 
 mkdir -p workspace/proposals
 
-(cd test/utils/jwt && KMS_WORKSPACE=/kms/workspace npm run start 2>&1 &)
+(cd test/utils/jwt && KMS_WORKSPACE=/kms/workspace nohup npm run start > nohup.out 2>&1 &)
 ./scripts/wait_idp_ready.sh
 
 JWK=$(npx pem-jwk "./workspace/private.pem" | \
