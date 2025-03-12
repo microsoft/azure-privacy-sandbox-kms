@@ -17,11 +17,6 @@ def test_no_keys(setup_kms):
     assert status_code == 404
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_no_key_release_policy(setup_kms):
     apply_kms_constitution()
     refresh()
