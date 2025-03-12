@@ -12,4 +12,5 @@ apt-get update && apt-get install -y \
     lsof \
     sudo \
     tar \
-    default-jre
+    default-jre \
+    gettext

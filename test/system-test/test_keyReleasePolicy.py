@@ -12,11 +12,6 @@ def test_keyReleasePolicy_with_no_policy(setup_kms):
     assert status_code == 200
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_keyReleasePolicy_with_policy_added(setup_kms):
     apply_kms_constitution()
     apply_key_release_policy()
@@ -24,11 +19,6 @@ def test_keyReleasePolicy_with_policy_added(setup_kms):
     assert status_code == 200
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_keyReleasePolicy_with_policy_added_then_removed(setup_kms):
     apply_kms_constitution()
     apply_key_release_policy()
