@@ -64,10 +64,11 @@ signing_key="$certificate_dir/member0_privk.pem"
 
 # Add settings policy
 source .venv_ccf_sandbox/bin/activate
-make propose-settings-policy
+make settings-policy-set
 
 # Add key release policy
-make propose-add-key-release-policy
+make release-policy-set \
+    release-policy-proposal=governance/proposals/set_key_release_policy_add.json
 
 # Add key rotation policy
 make propose-key-rotation-policy

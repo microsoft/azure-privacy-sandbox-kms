@@ -47,7 +47,6 @@ def apply_kms_constitution(resolve="auto_accept", get_logs=False, **kwargs):
         [
             "./scripts/kms/constitution_set.sh",
             "--resolve", f"./governance/constitution/resolve/{resolve}.js",
-            "--actions", "./governance/constitution/actions/kms.js",
             *[arg for k, v in kwargs.items() for arg in [f"--{k}", v]],
         ],
         cwd=REPO_ROOT,

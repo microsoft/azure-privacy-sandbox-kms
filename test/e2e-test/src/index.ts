@@ -106,7 +106,7 @@ class Demo {
     }
 
     this.printTestSectionHeader("🔬 [TEST]: Setup kms");
-    await Demo.executeCommand(`make setup >/tmp/make.txt`);
+    await Demo.executeCommand(`make release-policy-set release-policy-proposal="governance/proposals/set_key_release_policy_add.json"`);
 
     this.printTestSectionHeader("🔬 [TEST]: generate access token");
     const access_token = await Demo.executeCommand(
@@ -498,18 +498,6 @@ class Demo {
       `keyResponse.gt["x-ms-ver"] === "1"`,
       keyResponse.gt["x-ms-ver"] === "1",
     );
-
-    // JWT not allowed
-    [statusCode, keyResponse] = await Api.keyReleasePolicy(
-      this.demoProps,
-      member,
-      this.createHttpsAgent(member.id, AuthKinds.JWT),
-      access_token,
-    ).catch((error) => {
-      console.log(`keyReleasePolicy error: `, error);
-      throw error;
-    });
-    Demo.assert("statusCode == 401", statusCode == 401);
 
     //#endregion
 

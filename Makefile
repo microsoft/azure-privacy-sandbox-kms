@@ -7,6 +7,9 @@ KEYS_DIR ?= ${KMS_WORKSPACE}/sandbox_common
 RUN_BACK ?= true
 CCF_PLATFORM ?= virtual
 JWT_ISSUER_WORKSPACE ?= ${PWD}/jwt_issuers_workspace/default
+KMS_SERVICE_CERT_PATH ?= ${KEYS_DIR}/service_cert.pem
+KMS_MEMBER_CERT_PATH ?= ${KEYS_DIR}/member0_cert.pem
+KMS_MEMBER_PRIVK_PATH ?= ${KEYS_DIR}/member0_privk.pem
 
 DEPLOYMENT_ENV ?= $(if $(shell echo $(KMS_URL) | grep -E '127.0.0.1|localhost'),local,cloud)
 
@@ -64,23 +67,21 @@ start-host: stop-host  ## 🏃 Start the CCF network using Sandbox.sh
 	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh --build && \
 	source ./scripts/kms/js_app_set.sh && \
 	source ./scripts/kms/constitution_set.sh \
-		--resolve ./governance/constitution/resolve/auto_accept.js \
-		--actions ./governance/constitution/actions/kms.js
+		--resolve ./governance/constitution/resolve/auto_accept.js
 
 start-host-idp: stop-host stop-idp build ## 🏃 Start the CCF network && idp using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
 	@echo "Executing: $(COMMAND)"
 	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh --build && \
 	source ./scripts/jwt_issuer/demo/up.sh --build && \
+	source scripts/kms/js_app_set.sh && \
 	source ./scripts/kms/constitution_set.sh \
-		--resolve ./governance/constitution/resolve/auto_accept.js \
-		--actions ./governance/constitution/actions/kms.js && \
-	source scripts/kms/jwt_issuer_trust.sh && \
-	source scripts/kms/js_app_set.sh
+		--resolve ./governance/constitution/resolve/auto_accept.js && \
+	source scripts/kms/jwt_issuer_trust.sh
 
 demo: stop-all start-host-idp ## 🎬 Demo the KMS Application in the Sandbox
 	@echo -e "\e[34m$@\e[0m" || true
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/test_sandbox.sh --nodeAddress 127.0.0.1:8000 --certificate_dir ${KMS_WORKSPACE}/sandbox_common --constitution ./governance/constitution/actions/kms.js
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/test_sandbox.sh --nodeAddress 127.0.0.1:8000 --certificate_dir ${KMS_WORKSPACE}/sandbox_common
 
 # Propose the JWT validation policy
 propose-jwt-demo-validation-policy: ## 🚀 Deploy the JWT validation policy
@@ -127,7 +128,7 @@ set-constitution: start-host-idp ## Set new custom constitution
 		@sleep 5; \
 		cp -r ${KMS_WORKSPACE}/sandbox_common/*.js ${KEYS_DIR}; \
 	fi
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_constitution.sh --network-url "${KMS_URL}" --certificate-dir "${KEYS_DIR}" --custom-constitution ./governance/constitution/actions/kms.js --member-count ${MEMBER_COUNT}
+	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_constitution.sh --network-url "${KMS_URL}" --certificate-dir "${KEYS_DIR}" --member-count ${MEMBER_COUNT}
 
 get-service-cert: # Get the mCCF service cert
 	@echo -e "\e[34m$@\e[0m" || true
@@ -195,14 +196,15 @@ constitution-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	KMS_URL=${KMS_URL} \
 	./scripts/kms/constitution_set.sh \
-		--resolve ./governance/constitution/resolve/auto_accept.js \
-		--actions ./governance/constitution/actions/kms.js
+		--resolve ./governance/constitution/resolve/auto_accept.js
 
 release-policy-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	KMS_URL=${KMS_URL} \
-	RELEASE_POLICY_PROPOSAL=$(release-policy-proposal) \
-		./scripts/kms/release_policy_set.sh
+	KMS_SERVICE_CERT_PATH=${KMS_SERVICE_CERT_PATH} \
+	KMS_MEMBER_CERT_PATH=${KMS_MEMBER_CERT_PATH} \
+	KMS_MEMBER_PRIVK_PATH=${KMS_MEMBER_PRIVK_PATH} \
+	./scripts/kms/release_policy_set.sh $(release-policy-proposal)
 
 settings-policy-set:
 	@WORKSPACE=${KMS_WORKSPACE} \

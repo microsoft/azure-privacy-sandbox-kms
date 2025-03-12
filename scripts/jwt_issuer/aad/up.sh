@@ -7,7 +7,8 @@ THIS_DIR="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")"
 REPO_ROOT="$(realpath "$THIS_DIR/../..")"
 
 jwt_issuer_fetch() {
-    az account get-access-token | jq -r '.accessToken'
+    az account get-access-token --resource https://confidential-ledger.azure.com \
+        | jq -r '.accessToken'
 }
 
 jwt-issuer-up() {

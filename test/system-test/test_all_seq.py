@@ -336,6 +336,12 @@ def test_set_policy_single_key_no_jwt_auth_member_cert(setup_kms_session):
     assert auth_json["auth"]["policy"] == "member_cert"
 
 
+def test_set_policy_single_key_no_jwt_auth_user_cert(setup_kms_session):
+    status_code, auth_json = auth(auth="user_cert")
+    assert status_code == 200
+    assert auth_json["auth"]["policy"] == "user_cert"
+
+
 def test_set_policy_single_key_no_jwt_auth_jwt(setup_kms_session):
     try:
         status_code, auth_json = auth(auth="jwt")
@@ -499,6 +505,16 @@ def test_no_settings_settingsPolicy(setup_kms_session):
             "debug": False,
         }
     }
+
+
+def test_no_settings_set_settings_policy_with_reader_role(setup_kms_session, monkeypatch):
+
+    # Temporarily use the user cert as the member cert
+    monkeypatch.setenv("KMS_MEMBER_CERT_PATH", os.getenv("KMS_USER_CERT_PATH"))
+    monkeypatch.setenv("KMS_MEMBER_PRIVK_PATH", os.getenv("KMS_USER_PRIVK_PATH"))
+
+    with pytest.raises(CalledProcessError):
+        apply_settings_policy()
 
 
 def test_no_settings_set_settings_policy(setup_kms_session):

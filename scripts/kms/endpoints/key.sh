@@ -5,7 +5,7 @@
 
 key() {
     params=()
-    auth="member_cert"
+    auth="user_cert"
     attestation=""
     wrappingKey=""
 
@@ -48,6 +48,8 @@ key() {
     auth_arg=()
     if [[ "$auth" == "member_cert" ]]; then
         auth_arg=(--cert $KMS_MEMBER_CERT_PATH --key $KMS_MEMBER_PRIVK_PATH)
+    elif [[ "$auth" == "user_cert" ]]; then
+        auth_arg=(--cert $KMS_USER_CERT_PATH --key $KMS_USER_PRIVK_PATH)
     elif [[ "$auth" == "jwt" ]]; then
         auth_arg=(-H "Authorization: Bearer $(. $JWT_ISSUER_WORKSPACE/fetch.sh && jwt_issuer_fetch)")
     fi

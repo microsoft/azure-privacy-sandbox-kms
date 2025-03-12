@@ -15,8 +15,8 @@ key_rotation_policy_set() {
     echo "$ROTATION_POLICY" | jq > "$WORKSPACE/proposals/set_key_rotation_policy.json"
 
     # Submit the proposal
-    source "$REPO_ROOT/scripts/ccf/propose.sh"
-    ccf-propose "$WORKSPACE/proposals/set_key_rotation_policy.json"
+    source $REPO_ROOT/scripts/kms/endpoints/proposals.sh \
+        "$WORKSPACE/proposals/set_key_rotation_policy.json"
 
     set +e
 }

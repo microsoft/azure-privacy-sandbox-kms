@@ -58,8 +58,8 @@ set_jwt_validation_policy() {
     | jq > $WORKSPACE/proposals/set_jwt_validation_policy.json
 
   # Submit the proposal
-  source $REPO_ROOT/scripts/ccf/propose.sh
-  ccf-propose $WORKSPACE/proposals/set_jwt_validation_policy.json
+  $REPO_ROOT/scripts/kms/endpoints/proposals.sh \
+    $WORKSPACE/proposals/set_jwt_validation_policy.json
 
   set +e
 }
@@ -92,6 +92,7 @@ use_aad_issuer() {
 
   JWT=$(. $JWT_ISSUER_WORKSPACE/fetch.sh && jwt_issuer_fetch)
   DECODED_JWT=$(decode_jwt)
+  TENANT_ID=$(echo "$DECODED_JWT" | jq -r '.tid')
 
   # For set_ca_cert_bundle
   export CA_CERT_BUNDLE_NAME="Microsoft_AAD"
@@ -101,9 +102,10 @@ use_aad_issuer() {
   export ISSUER=$(echo "$DECODED_JWT" | jq -r '.iss')
   export JWKS=$(\
     curl https://login.microsoftonline.com/${TENANT_ID}/discovery/v2.0/keys \
-      | jq \
+      | jq '{keys: [.keys[] | {kty, kid, n, e, x5c}]}' \
           | sed -e '1s/^/"jwks": /' -e '$s/$/,/' \
   )
+
   export CA_CERT_BUNDLE_NAME_FIELD="\"ca_cert_bundle_name\": \"$CA_CERT_BUNDLE_NAME\","
   export AUTO_REFRESH="\"auto_refresh\": true,"
 
@@ -111,8 +113,6 @@ use_aad_issuer() {
   export SUB=$(echo "$DECODED_JWT" | jq -r '.sub')
   export ID_FIELDS=" \
     \"idtyp\": \"$(echo "$DECODED_JWT" | jq -r '.idtyp')\", \
-    \"appid\": \"$(echo "$DECODED_JWT" | jq -r '.appid')\", \
-    \"appidacr\": \"$(echo "$DECODED_JWT" | jq -r '.appidacr')\", \
     \"oid\": \"$(echo "$DECODED_JWT" | jq -r '.oid')\""
 
   set +e
