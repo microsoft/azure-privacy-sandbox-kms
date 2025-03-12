@@ -7,6 +7,9 @@ KEYS_DIR ?= ${KMS_WORKSPACE}/sandbox_common
 RUN_BACK ?= true
 CCF_PLATFORM ?= virtual
 JWT_ISSUER_WORKSPACE ?= ${PWD}/jwt_issuers_workspace/default
+KMS_SERVICE_CERT_PATH ?= ${KEYS_DIR}/service_cert.pem
+KMS_MEMBER_CERT_PATH ?= ${KEYS_DIR}/member0_cert.pem
+KMS_MEMBER_PRIVK_PATH ?= ${KEYS_DIR}/member0_privk.pem
 
 DEPLOYMENT_ENV ?= $(if $(shell echo $(KMS_URL) | grep -E '127.0.0.1|localhost'),local,cloud)
 
@@ -201,8 +204,10 @@ constitution-set:
 release-policy-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	KMS_URL=${KMS_URL} \
-	RELEASE_POLICY_PROPOSAL=$(release-policy-proposal) \
-		./scripts/kms/release_policy_set.sh
+	KMS_SERVICE_CERT_PATH=${KMS_SERVICE_CERT_PATH} \
+	KMS_MEMBER_CERT_PATH=${KMS_MEMBER_CERT_PATH} \
+	KMS_MEMBER_PRIVK_PATH=${KMS_MEMBER_PRIVK_PATH} \
+	./scripts/kms/release_policy_set.sh $(release-policy-proposal)
 
 settings-policy-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
