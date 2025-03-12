@@ -14,8 +14,6 @@ COPY tsconfig.json .
 COPY app.json .
 COPY rollup.config.js .
 COPY build_bundle.js .
-COPY babel.config.json .
-COPY buf.gen.yaml .
 
 RUN npm install && npm run build
 
@@ -35,10 +33,10 @@ COPY scripts ./scripts
 COPY src ./src
 COPY governance ./governance
 COPY test ./test
-COPY docker/run_standalone_kms.sh ./run_standalone_kms.sh
+COPY docker/run_standalone_kms.sh /run.sh
 COPY --from=builder /kms/dist ./dist
 
 ARG CCF_PLATFORM
 ENV CCF_PLATFORM=${CCF_PLATFORM}
 ENV JWT_ISSUER_PORT=3000
-CMD /bin/bash -c './run_standalone_kms.sh'
+CMD /bin/bash -c '/run.sh'
