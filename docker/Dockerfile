@@ -28,12 +28,7 @@ WORKDIR /kms
 RUN curl -fsSL https://deb.nodesource.com/setup_current.x | bash - && \
     apt-get install -y nodejs
 
-COPY Makefile .
-COPY scripts ./scripts
-COPY src ./src
-COPY governance ./governance
-COPY test ./test
-COPY docker/run_standalone_kms.sh /run.sh
+COPY . .
 COPY --from=builder /kms/dist ./dist
 
 ARG CCF_PLATFORM
