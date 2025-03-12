@@ -8,11 +8,6 @@ from utils import (
 from endpoints import settingsPolicy
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_settingsPolicy_with_no_policy(setup_kms):
     status_code, settings_json = settingsPolicy()
     assert status_code == 200
