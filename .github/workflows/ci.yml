@@ -35,14 +35,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build DevContainer and run E2E tests
-        uses: devcontainers/ci@v0.3
-        env:
-          GH_TOKEN: ${{ github.token }}
-        with:
-          push: never
-          configFile: .devcontainer/devcontainer.json
-          runCmd: make demo
+      - name: E2E tests
+        run: make demo
 
       - name: Print CCF logs
         run: cat workspace/sandbox_0/out
