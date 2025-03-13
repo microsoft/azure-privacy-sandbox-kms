@@ -7,7 +7,7 @@ from utils import apply_kms_constitution, trust_jwt_issuer
 @pytest.mark.xfail(
     os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
     strict=True,
-    reason="Governance operations need to move to user endpoints",
+    reason="ACL doesn't support CCF members",
 )
 def test_auth_member_cert(setup_kms):
     status_code, auth_json = auth(auth="member_cert")
@@ -22,7 +22,7 @@ def test_auth_user_cert(setup_kms):
 @pytest.mark.xfail(
     os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
     strict=True,
-    reason="Governance operations need to move to user endpoints",
+    reason="ACL doesn't support setting custom JWT issuers",
 )
 def test_auth_demo_jwt(setup_kms, setup_demo_jwt_issuer):
     apply_kms_constitution()

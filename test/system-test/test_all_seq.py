@@ -328,7 +328,7 @@ def test_set_policy_single_key_no_jwt_key_fmt_invalid(setup_kms_session):
 @pytest.mark.xfail(
     os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
     strict=True,
-    reason="Governance operations need to move to user endpoints",
+    reason="ACL doesn't support CCF members",
 )
 def test_set_policy_single_key_no_jwt_auth_member_cert(setup_kms_session):
     status_code, auth_json = auth(auth="member_cert")
