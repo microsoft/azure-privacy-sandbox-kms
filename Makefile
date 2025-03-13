@@ -86,32 +86,39 @@ demo: stop-all start-host-idp ## 🎬 Demo the KMS Application in the Sandbox
 # Propose the JWT validation policy
 propose-jwt-demo-validation-policy: ## 🚀 Deploy the JWT validation policy
 	@echo -e "\e[34m$@\e[0m" || true
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/jwt/set_jwt_demo_validation_policy_proposal.json --certificate_dir "${KEYS_DIR}" --member-count ${MEMBER_COUNT}
+	@CCF_PLATFORM=${CCF_PLATFORM} KMS_URL=${KMS_URL} ./scripts/kms/endpoints/proposals.sh \
+		./governance/jwt/set_jwt_demo_validation_policy_proposal.json
 
 # Propose a new idp
 propose-jwt-ms-validation-policy: ## 🚀 Propose the AAD as idp
 	@echo -e "\e[34m$@\e[0m" || true
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/jwt/set_jwt_ms_validation_policy_proposal.json --certificate_dir "${KEYS_DIR}" --member-count ${MEMBER_COUNT}
+	@CCF_PLATFORM=${CCF_PLATFORM} . scripts/ccf/propose.sh && \
+	KMS_URL=${KMS_URL} ccf-propose ./governance/jwt/set_jwt_ms_issuer_proposal.json && \
+	KMS_URL=${KMS_URL} ./scripts/kms/endpoints/proposals.sh \
+		./governance/jwt/set_jwt_ms_validation_policy_proposal.json
 
 # Propose a new settings policy
 propose-settings-policy: ## 🚀 Deploy the settings policy
 	@echo -e "\e[34m$@\e[0m" || true
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/policies/settings-policy.json --certificate_dir "${KEYS_DIR}" --member-count ${MEMBER_COUNT}
+	@KMS_URL=${KMS_URL} ./scripts/kms/endpoints/proposals.sh \
+		./governance/policies/settings-policy.json
 
 # Propose a new key rotation policy
 propose-key-rotation-policy: ## 🚀 Deploy the key rotation policy
 	@echo -e "\e[34m$@\e[0m" || true
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/proposals/set_key_rotation_policy.json --certificate_dir "${KEYS_DIR}" --member-count ${MEMBER_COUNT}
+	@KMS_URL=${KMS_URL} ./scripts/kms/endpoints/proposals.sh \
+		./governance/proposals/set_key_rotation_policy.json
 
 # Propose a new key release policy
 propose-add-key-release-policy: ## 🚀 Deploy the add claim key release policy to the sandbox or mCCF
 	@echo -e "\e[34m$@\e[0m" || true
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/policies/key-release-policy-add.json --certificate_dir "${KEYS_DIR}" --member-count ${MEMBER_COUNT}
+	@KMS_URL=${KMS_URL} ./scripts/kms/endpoints/proposals.sh \
+		./governance/policies/key-release-policy-add.json
 
 propose-rm-key-release-policy: ## 🚀 Deploy the remove claim key release policy to the sandbox or mCCF
 	@echo -e "\e[34m$@\e[0m" || true
-	$(call check_defined, KMS_URL)
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/policies/key-release-policy-remove.json --certificate_dir "${KEYS_DIR}"
+	@KMS_URL=${KMS_URL} ./scripts/kms/endpoints/proposals.sh \
+		./governance/policies/key-release-policy-remove.json
 
 refresh-key: ## 🚀 Refresh a key on the instance
 	@echo -e "\e[34m$@\e[0m" || true
