@@ -29,7 +29,7 @@ EOF
   --jwt-issuer workspace/proposals/set_jwt_issuer.json \
   -v --http2 "$@" &
 
-export KMS_URL=https://127.0.0.1:8000
+export KMS_URL=${KMS_URL:-https://127.0.0.1:8000}
 export KMS_SERVICE_CERT_PATH=./workspace/sandbox_common/service_cert.pem
 export KMS_MEMBER_CERT_PATH=./workspace/sandbox_common/member0_cert.pem
 export KMS_MEMBER_PRIVK_PATH=./workspace/sandbox_common/member0_privk.pem
