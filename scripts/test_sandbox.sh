@@ -7,18 +7,16 @@ set -euo pipefail
 declare app_dir=$PWD                   # application folder for reference
 declare nodeAddress=""
 declare certificate_dir=""
-declare constitution_dir=""
 declare interactive=0
 
 function usage {
     echo ""
     echo "Start a CCF node in docker."
     echo ""
-    echo "usage: ./test_docker.sh --nodeAddress <IPADDRESS:PORT> --certificate_dir <string> --constitution_dir <string> [--interactive]]"
+    echo "usage: ./test_docker.sh --nodeAddress <IPADDRESS:PORT> --certificate_dir <string> [--interactive]]"
     echo ""
     echo "  --nodeAddress       string      The IP and port of the primary CCF node"
     echo "  --certificate_dir   string      The directory where the certificates are"
-    echo "  --constitution_dir  string      The directory where the constitution is"
     echo "  --interactive       boolean     Optional. Run in Demo mode"
     echo ""
 }
@@ -42,7 +40,6 @@ do
     case "--$name" in
         --nodeAddress) nodeAddress="$2"; shift;;
         --certificate_dir) certificate_dir=$2; shift;;
-        --constitution) constitution=$2; shift;;
         --interactive) interactive=1;;
         --help) usage; exit 0;;
         --) shift;;
@@ -59,13 +56,6 @@ if [ -z "$nodeAddress" ]; then
 fi
 if [ -z "$certificate_dir" ]; then
     failed "You must supply --certificate_dir"
-fi
-if [ -z "$constitution" ]; then
-    failed "You must supply --constitution"
-fi
-if [ ! -f "$constitution" ]; then
-    echo "💥📁 Constitution file not found: $constitution"
-    exit 1
 fi
 
 source .venv_ccf_sandbox/bin/activate

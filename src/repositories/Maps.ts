@@ -9,10 +9,10 @@ import { KeyStore } from "./KeyStore";
 // Stores
 export const hpkeKeysMap = new KeyStore("HpkeKeys");
 export const hpkeKeyIdMap = new LastestItemStore<number, string>("HpkeKeyids");
-export const keyReleaseMapName = "public:ccf.gov.policies.key_release";
+export const keyReleaseMapName = "public:policies.key_release";
 export const keyReleasePolicyMap = ccf.kv[keyReleaseMapName];
-export const settingsMapName = "public:ccf.gov.policies.settings";
+export const settingsMapName = "public:policies.settings";
 export const settingsPolicyMap = ccf.kv[settingsMapName];
-export const keyRotationMapName = "public:ccf.gov.policies.key_rotation";
+export const keyRotationMapName = "public:policies.key_rotation";
 export const keyRotationPolicyMap = ccf.kv[keyRotationMapName];
 //#endregion

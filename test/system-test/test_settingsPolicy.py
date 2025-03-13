@@ -1,9 +1,8 @@
 import os
+from subprocess import CalledProcessError
 import pytest
 from utils import (
-    apply_kms_constitution,
     apply_settings_policy,
-    remove_key_release_policy,
 )
 from endpoints import settingsPolicy
 
@@ -21,18 +20,17 @@ def test_settingsPolicy_with_no_policy(setup_kms):
     }
 
 
-def test_settingsPolicy_with_no_auth(setup_kms):
-    status_code, settings_json = settingsPolicy(auth=None)
-    assert status_code == 401
+def test_set_settingsPolicy_with_reader(setup_kms, monkeypatch):
+
+    # Temporarily use the user cert as the member cert
+    monkeypatch.setenv("KMS_MEMBER_CERT_PATH", os.getenv("KMS_USER_CERT_PATH"))
+    monkeypatch.setenv("KMS_MEMBER_PRIVK_PATH", os.getenv("KMS_USER_PRIVK_PATH"))
+
+    with pytest.raises(CalledProcessError):
+        apply_settings_policy()
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_settingsPolicy_with_policy(setup_kms):
-    apply_kms_constitution()
 
     policy = {
         "service": {
@@ -49,13 +47,7 @@ def test_settingsPolicy_with_policy(setup_kms):
     assert settings_json == policy
 
 
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_settingsPolicy_with_multiple_policy_sets(setup_kms):
-    apply_kms_constitution()
 
     policy = {
         "service": {

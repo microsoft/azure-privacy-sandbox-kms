@@ -1,0 +1,11 @@
+{
+    "actions": [
+      {
+        "name": "set_ca_cert_bundle",
+        "args": {
+          "name": "${CA_CERT_BUNDLE_NAME}",
+          "cert_bundle": "${CA_CERT_BUNDLE}"
+        }
+      }
+    ]
+}

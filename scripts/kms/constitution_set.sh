@@ -6,6 +6,11 @@
 constitution-set() {
   set -e
 
+  if [[ "$TEST_ENVIRONMENT" == "ccf/acl" ]]; then
+    echo "We can't set constitution when running on ACL, so skipping..."
+    return 0
+  fi
+
   REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../..")"
   BASE_DIR=$REPO_ROOT/governance/constitution
   OUTPUT="$WORKSPACE/proposals/constitution.js"

@@ -1,5 +1,47 @@
 {
   "endpoints": {
+    "/proposals": {
+      "post": {
+        "js_module": "endpoints/proposals.js",
+        "js_function": "proposals",
+        "forwarding_required": "always",
+        "redirection_strategy": "none",
+        "authn_policies": ["member_cert", "user_cert", "jwt"],
+        "mode": "readwrite",
+        "openapi": {
+          "responses": {
+            "200": {
+              "description": "Submit a proposal",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "properties": {
+                      "ballot_count": {
+                        "type": "number"
+                      },
+                      "proposal_id": {
+                        "type": "string"
+                      },
+                      "proposer_id": {
+                        "type": "string"
+                      },
+                      "state": {
+                        "type": "string"
+                      },
+                      "votes": {
+                        "type": "object"
+                      }
+                    },
+                    "required": ["ballot_count", "proposal_id", "proposer_id", "state", "votes"],
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/keyReleasePolicy": {
       "get": {
         "js_module": "endpoints/keyReleasePolicyEndpoint.js",

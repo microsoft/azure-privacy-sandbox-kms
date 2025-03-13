@@ -8,7 +8,7 @@ from utils import get_node_info, nodes_scale, deploy_app_code
 @pytest.mark.xfail(
     os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
     strict=True,
-    reason="Governance operations need to move to user endpoints",
+    reason="ACL doesn't support node management",
 )
 def test_nodes_scale_up(setup_kms):
     nodes_requested = 2
@@ -30,7 +30,7 @@ def test_nodes_scale_up(setup_kms):
 @pytest.mark.xfail(
     os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
     strict=True,
-    reason="Governance operations need to move to user endpoints",
+    reason="ACL doesn't support node management",
 )
 def test_nodes_scale_down(setup_kms):
     nodes_requested = 3
@@ -57,7 +57,7 @@ def test_nodes_scale_down(setup_kms):
 @pytest.mark.xfail(
     os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
     strict=True,
-    reason="Governance operations need to move to user endpoints",
+    reason="ACL doesn't support node management",
 )
 def test_nodes_non_primary(setup_kms):
     nodes = nodes_scale(2, get_logs=True)["nodes"]
