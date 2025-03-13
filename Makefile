@@ -86,12 +86,16 @@ demo: stop-all start-host-idp ## 🎬 Demo the KMS Application in the Sandbox
 # Propose the JWT validation policy
 propose-jwt-demo-validation-policy: ## 🚀 Deploy the JWT validation policy
 	@echo -e "\e[34m$@\e[0m" || true
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/jwt/set_jwt_demo_validation_policy_proposal.json --certificate_dir "${KEYS_DIR}" --member-count ${MEMBER_COUNT}
+	@CCF_PLATFORM=${CCF_PLATFORM} KMS_URL=${KMS_URL} ./scripts/kms/endpoints/proposals.sh \
+		./governance/jwt/set_jwt_demo_validation_policy_proposal.json
 
 # Propose a new idp
 propose-jwt-ms-validation-policy: ## 🚀 Propose the AAD as idp
 	@echo -e "\e[34m$@\e[0m" || true
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_proposal.sh --network-url "${KMS_URL}" --proposal-file ./governance/jwt/set_jwt_ms_validation_policy_proposal.json --certificate_dir "${KEYS_DIR}" --member-count ${MEMBER_COUNT}
+	@CCF_PLATFORM=${CCF_PLATFORM} . scripts/ccf/propose.sh && \
+	KMS_URL=${KMS_URL} ccf-propose ./governance/jwt/set_jwt_ms_issuer_proposal.json && \
+	KMS_URL=${KMS_URL} ./scripts/kms/endpoints/proposals.sh \
+		./governance/jwt/set_jwt_ms_validation_policy_proposal.json
 
 # Propose a new settings policy
 propose-settings-policy: ## 🚀 Deploy the settings policy
