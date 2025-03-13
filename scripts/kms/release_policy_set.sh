@@ -13,8 +13,8 @@ release-policy-set() {
     cp $REPO_ROOT/$RELEASE_POLICY_PROPOSAL $WORKSPACE/proposals/set_key_release_policy.json
 
     # Submit the proposal
-    source $REPO_ROOT/scripts/ccf/propose.sh
-    ccf-propose $WORKSPACE/proposals/set_key_release_policy.json
+    source $REPO_ROOT/scripts/kms/endpoints/proposals.sh \
+        $WORKSPACE/proposals/set_key_release_policy.json
 
     set +e
 }

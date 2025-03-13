@@ -25,8 +25,15 @@ settings-policy-set() {
     envsubst < $REPO_ROOT/governance/proposals/set_settings_policy.json | jq > $WORKSPACE/proposals/set_settings_policy.json
 
     # Submit the proposal
-    source $REPO_ROOT/scripts/ccf/propose.sh
-    ccf-propose $WORKSPACE/proposals/set_settings_policy.json
+    result=$(mktemp)
+    source $REPO_ROOT/scripts/kms/endpoints/proposals.sh \
+        $WORKSPACE/proposals/set_settings_policy.json | tee $result
+
+    # Check if the last line of result is 200
+    if [ "$(tail -n 1 $result)" -ne 200 ]; then
+        echo "Error: Proposal submission failed."
+        exit 1
+    fi
 
     set +e
 }

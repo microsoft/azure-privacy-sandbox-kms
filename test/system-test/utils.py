@@ -47,7 +47,6 @@ def apply_kms_constitution(resolve="auto_accept", get_logs=False, **kwargs):
         [
             "./scripts/kms/constitution_set.sh",
             "--resolve", f"./governance/constitution/resolve/{resolve}.js",
-            "--actions", "./governance/constitution/actions/kms.js",
             *[arg for k, v in kwargs.items() for arg in [f"--{k}", v]],
         ],
         cwd=REPO_ROOT,
@@ -106,9 +105,12 @@ def apply_key_rotation_policy(policy=None):
         print("stderr:", result.stderr.decode())
         result.check_returncode()  # This will raise the CalledProcessError
 
-def trust_jwt_issuer():
+def trust_jwt_issuer(*args):
     subprocess.run(
-        "scripts/kms/jwt_issuer_trust.sh",
+        [
+            "scripts/kms/jwt_issuer_trust.sh",
+            *["--" + arg for arg in args],
+        ],
         cwd=REPO_ROOT,
         check=True,
     )

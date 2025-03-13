@@ -47,10 +47,10 @@ def call_script(args, **kwargs):
     except json.JSONDecodeError:
         ...
 
-def _setup_jwt_issuer():
+def _setup_jwt_issuer(jwt_issuer_type="jwt_issuer/demo"):
     try:
         call_script(
-            ["./scripts/jwt_issuer/up.sh", "--build"],
+            [f"./scripts/{jwt_issuer_type}/up.sh", "--build"],
             env={
                 **os.environ,
                 "JWT_ISSUER_WORKSPACE": f"{REPO_ROOT}/jwt_issuers_workspace/default",
@@ -58,17 +58,27 @@ def _setup_jwt_issuer():
         )
         yield
     finally:
-        call_script("./scripts/jwt_issuer/down.sh")
+        call_script(f"./scripts/{jwt_issuer_type}/down.sh")
 
 
 @pytest.fixture()
-def setup_jwt_issuer():
-    yield from _setup_jwt_issuer()
+def setup_demo_jwt_issuer():
+    yield from _setup_jwt_issuer(jwt_issuer_type="jwt_issuer/demo")
 
 
 @pytest.fixture(scope="session")
-def setup_jwt_issuer_session():
-    yield from _setup_jwt_issuer()
+def setup_demo_jwt_issuer_session():
+    yield from _setup_jwt_issuer(jwt_issuer_type="jwt_issuer/demo")
+
+
+@pytest.fixture()
+def setup_aad_jwt_issuer():
+    yield from _setup_jwt_issuer(jwt_issuer_type="jwt_issuer/aad")
+
+
+@pytest.fixture(scope="session")
+def setup_aad_jwt_issuer_session():
+    yield from _setup_jwt_issuer(jwt_issuer_type="jwt_issuer/aad")
 
 
 @pytest.fixture(scope="session")

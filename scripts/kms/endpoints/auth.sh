@@ -27,7 +27,7 @@ auth() {
     elif [[ "$auth" == "user_cert" ]]; then
         auth_arg=(--cert $KMS_USER_CERT_PATH --key $KMS_USER_PRIVK_PATH)
     elif [[ "$auth" == "jwt" ]]; then
-        auth_arg=(-H "Authorization: Bearer $(curl -X POST $JWT_ISSUER | jq -r '.access_token')")
+        auth_arg=(-H "Authorization: Bearer $(. $JWT_ISSUER_WORKSPACE/fetch.sh && jwt_issuer_fetch)")
     fi
 
     curl $KMS_URL/app/auth \

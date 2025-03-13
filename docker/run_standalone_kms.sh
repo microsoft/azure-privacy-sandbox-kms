@@ -22,14 +22,17 @@ cat <<EOF | jq > ./workspace/proposals/set_jwt_issuer.json
 }
 EOF
 
-env -i PATH=${PATH} KMS_WORKSPACE=workspace \
-  /opt/ccf_${CCF_PLATFORM}/bin/sandbox.sh \
-    --js-app-bundle ./dist/ \
-    --initial-member-count 3 \
-    --initial-user-count 1 \
-    --constitution ./governance/constitution/actions/kms.js \
-    --jwt-issuer workspace/proposals/set_jwt_issuer.json \
-    -v --http2 "$@" &
+/opt/ccf_${CCF_PLATFORM}/bin/sandbox.sh \
+  --js-app-bundle ./dist/ \
+  --initial-member-count 3 \
+  --initial-user-count 1 \
+  --jwt-issuer workspace/proposals/set_jwt_issuer.json \
+  -v --http2 "$@" &
+
+export KMS_URL=${KMS_URL:-https://127.0.0.1:8000}
+export KMS_SERVICE_CERT_PATH=./workspace/sandbox_common/service_cert.pem
+export KMS_MEMBER_CERT_PATH=./workspace/sandbox_common/member0_cert.pem
+export KMS_MEMBER_PRIVK_PATH=./workspace/sandbox_common/member0_privk.pem
 
 ./scripts/kms_wait.sh
 

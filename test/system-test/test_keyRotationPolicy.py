@@ -15,11 +15,6 @@ from utils import (
 
 
 # Test the key retrieval during the grace period with key rotation policy.
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_key_in_grace_period_with_rotation_policy(setup_kms):
     apply_kms_constitution()
     policy = {
@@ -57,11 +52,6 @@ def test_key_in_grace_period_with_rotation_policy(setup_kms):
     assert unwrapped_json.get("expiry") is not None
 
 # Test the key retrieval during the grace period without key rotation policy.
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_key_in_grace_period_without_rotation_policy(setup_kms):
     apply_kms_constitution()
     apply_key_release_policy()
@@ -89,11 +79,6 @@ def test_key_in_grace_period_without_rotation_policy(setup_kms):
     assert unwrapped_json.get("expiry") is None
 
 # Test the key retrieval during with custom key rotation policy.
-@pytest.mark.xfail(
-    os.getenv("TEST_ENVIRONMENT") == "ccf/acl",
-    strict=True,
-    reason="Governance operations need to move to user endpoints",
-)
 def test_key_in_grace_period_with_custom_rotation_policy(setup_kms):
     apply_kms_constitution()
     apply_settings_policy()
