@@ -14,7 +14,7 @@
   "dependencies": {
     "@bufbuild/buf": "1.50.0",
     "@bufbuild/protobuf": "1.5.0",
-    "@bufbuild/protoc-gen-es":"2.2.3",
+    "@bufbuild/protoc-gen-es": "2.2.3",
     "@microsoft/ccf-app": "5.0.14",
     "js-base64": "3.7.7",
     "node-forge": "1.3.1",
@@ -36,27 +36,10 @@
   },
   "jest": {
     "preset": "ts-jest/presets/default-esm",
-    "collectCoverage": false,
-    "testEnvironment": "node",
-    "extensionsToTreatAsEsm": [
-      ".ts"
-    ],
-    "verbose": true,
-    "testMatch": [
-      "**/test/unit-test/**/*.test.(ts|js|mjs)"
-    ],
-    "roots": [
-      "./"
-    ],
-    "testPathIgnorePatterns": [
-      "/node_modules/",
-      "/lib/"
-    ],
-    "globals": {
-      "ts-jest": {
-        "useESM": true
-      }
+    "transform": {
+      "^.+\\.(ts|tsx)$": ["ts-jest", { "useESM": true }]
     },
+    "verbose": true,
     "moduleNameMapper": {
       "^(\\.{1,2}/.*)\\.js$": "$1"
     }
