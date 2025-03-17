@@ -4,15 +4,14 @@
     "target": "ES2020",
     "module": "ES2020",
     "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "noImplicitAny": false,
-    "removeComments": true,
-    "preserveConstEnums": true,
-    "sourceMap": false,
-    "resolveJsonModule": true,
-    "types": ["@types/node"],
     "strict": true,
-    "noUnusedLocals": true
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "noUnusedLocals": true,
+    "removeComments": true,
+    "noImplicitAny": false,
+    "preserveConstEnums": true,
   },
-  "include": ["src/**/*", "test/**/*"]
+  "include": ["src/**/*"]
 }

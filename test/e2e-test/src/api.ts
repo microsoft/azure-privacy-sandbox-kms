@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 //import { ccf } from "@microsoft/ccf-app/global";
 import { DemoMemberProps, DemoProps } from "./index";
-import axios from "axios";
 import {
   IHeartbeatResponse,
   IKeyItem,
@@ -36,12 +35,11 @@ export const convertUint8ArrayToString = (uInt8array: Uint8Array): string => {
 };
 export class Validator {
   public static async validateRequest(props: ValidationProps) {
-    const result = await axios({
+    const result = await fetch(props.url, {
       method: props.method,
-      url: props.url,
-      data: props.member.data,
-      validateStatus: function (status) {
-        return status < 500; // Resolve only if the status code is less than 500
+      body: props.member.data ? JSON.stringify(props.member.data) : undefined,
+      headers: {
+        "Content-Type": "application/json",
       },
     });
 
