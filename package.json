@@ -25,7 +25,7 @@
     "@rollup/plugin-commonjs": "28.0.3",
     "@rollup/plugin-node-resolve": "16.0.1",
     "@rollup/plugin-typescript": "12.1.2",
-    "@types/jasmine": "5.1.5",
+    "@types/jasmine": "5.1.7",
     "@types/node": "22.13.10",
     "js-crypto-key-utils": "1.0.7",
     "js-crypto-rsa": "1.0.7",
