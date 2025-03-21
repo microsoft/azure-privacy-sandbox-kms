@@ -17,8 +17,7 @@ acl-assign-member() {
         --cacert $KMS_SERVICE_CERT_PATH \
         -X PATCH \
         -H "Content-Type: application/merge-patch+json" \
-        --cert $KMS_MEMBER_CERT_PATH \
-        --key $KMS_MEMBER_PRIVK_PATH \
+        -H "Authorization: Bearer $(az account get-access-token --resource https://confidential-ledger.azure.com --query accessToken -o tsv)" \
         -d "$(jq -n --arg member_id "$member_id" --argjson roles "$roles" '{
             user_id: $member_id,
             assignedRoles: $roles
