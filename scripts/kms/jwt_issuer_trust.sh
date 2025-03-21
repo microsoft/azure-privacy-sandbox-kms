@@ -147,9 +147,7 @@ jwt-issuer-trust() {
   elif [[ "$issuer" == "aad" ]]; then
     use_aad_issuer
 
-    if [[ "$TEST_ENVIRONMENT" == "ccf/acl" ]]; then
-      # Updating the ACL after creation currently doesn't work, but we can
-      # assume the current user is the user who created it and is therefore admin.
+    if [[ "$KMS_URL" == *"confidential-ledger.azure.com" ]]; then
       echo "Updating the ACL to include the current AAD user"
       # $REPO_ROOT/scripts/ccf/acl/add_aad_user.sh
     else
