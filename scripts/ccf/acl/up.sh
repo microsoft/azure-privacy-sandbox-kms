@@ -45,8 +45,7 @@ acl-up() {
         --subscription $SUBSCRIPTION \
         --resource-group $RESOURCE_GROUP \
         --location "AustraliaEast" \
-        --ledger-type "Public" \
-        --aad-based-security-principals ledger-role-name="Administrator" principal-id="$(az account show | jq -r '.id')"
+        --ledger-type "Public"
     export KMS_URL="https://$DEPLOYMENT_NAME.confidential-ledger.azure.com"
 
     # Save the service certificate
