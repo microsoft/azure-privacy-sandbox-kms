@@ -5,28 +5,10 @@
 
 REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../../..")"
 
-cert-fingerprint() {
-    openssl x509 -in "$1" -noout -fingerprint -sha256 | cut -d "=" -f 2
-}
-
-acl-assign-member() {
-    local member_id=$1
-    local roles=$2
-
-    curl $KMS_URL/app/ledgerUsers/$member_id?api-version=2024-08-22-preview \
-        --cacert $KMS_SERVICE_CERT_PATH \
-        -X PATCH \
-        -H "Content-Type: application/merge-patch+json" \
-        -H "Authorization: Bearer $(az account get-access-token --resource https://confidential-ledger.azure.com --query accessToken -o tsv)" \
-        -d "$(jq -n --arg member_id "$member_id" --argjson roles "$roles" '{
-            user_id: $member_id,
-            assignedRoles: $roles
-        }')"
-}
-
 acl-up() {
 
     source $REPO_ROOT/services/cacitesting.env
+    source $REPO_ROOT/scripts/ccf/acl/user_create.sh
 
     DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-$1}
     if [ -z "$DEPLOYMENT_NAME" ]; then
@@ -53,23 +35,21 @@ acl-up() {
         | jq -r '.ledgerTlsCertificate' > $WORKSPACE/service_cert.pem
     export KMS_SERVICE_CERT_PATH="$WORKSPACE/service_cert.pem"
 
-    acl-assign-member \
+    acl-user-create \
         $(az account show | jq -r '.id') '["Administrator"]'
 
     # Create a member cert
     export KMS_MEMBER_CERT_PATH="$WORKSPACE/member0_cert.pem"
     export KMS_MEMBER_PRIVK_PATH="$WORKSPACE/member0_privk.pem"
-    openssl ecparam -out "$KMS_MEMBER_PRIVK_PATH" -name "secp384r1" -genkey
-    openssl req -new -key "$KMS_MEMBER_PRIVK_PATH" -x509 -nodes -days 365 -out "$KMS_MEMBER_CERT_PATH" -"sha384" -subj=/CN="ACL Client Cert"
-    acl-assign-member \
+    acl-user-local-cert-create member0
+    acl-user-create \
         $(cert-fingerprint $KMS_MEMBER_CERT_PATH) '["Administrator"]'
 
     # Create a user cert
     export KMS_USER_CERT_PATH="$WORKSPACE/user0_cert.pem"
     export KMS_USER_PRIVK_PATH="$WORKSPACE/user0_privk.pem"
-    openssl ecparam -out "$KMS_USER_PRIVK_PATH" -name "secp384r1" -genkey
-    openssl req -new -key "$KMS_USER_PRIVK_PATH" -x509 -nodes -days 365 -out "$KMS_USER_CERT_PATH" -"sha384" -subj=/CN="ACL Client Cert"
-    acl-assign-member \
+    acl-user-local-cert-create user0
+    acl-user-create \
         $(cert-fingerprint $KMS_USER_CERT_PATH) '["Reader"]'
 
 }
