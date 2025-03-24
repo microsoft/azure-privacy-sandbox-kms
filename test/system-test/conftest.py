@@ -156,10 +156,10 @@ def _setup_kms():
 
 
 @pytest.fixture()
-def setup_kms(setup_ccf, setup_akv):
+def setup_kms(setup_akv, setup_ccf):
     yield from _setup_kms()
 
 
 @pytest.fixture(scope="session")
-def setup_kms_session(setup_ccf_session, setup_akv):
+def setup_kms_session(setup_akv, setup_ccf_session):
     yield from _setup_kms()
