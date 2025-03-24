@@ -45,7 +45,7 @@ jobs:
         run: cat workspace/sandbox_0/out
 
   system-stateless:
-    name: system / stateless (${{ inputs.use_akv && 'akv' || 'local' }}_keys)
+    name: system / stateless (${{ matrix.use_akv && 'akv' || 'local' }}_keys)
     secrets: inherit # pragma: allowlist secret
     strategy:
       fail-fast: false
@@ -57,16 +57,16 @@ jobs:
       use_akv: ${{ matrix.use_akv }}
 
   system-stateful:
-    name: system / stateful (local_keys)
+    name: system / stateful (${{ matrix.use_akv && 'akv' || 'local' }}_keys)
     secrets: inherit # pragma: allowlist secret
     strategy:
       fail-fast: false
       matrix:
-        env: [acl]
+        use_akv: [false, true]
     uses: ./.github/workflows/system-test.yml
     with:
       test_path: test_all_seq
-      env: ${{ matrix.env }}
+      env: acl
       use_akv: false
 
 
