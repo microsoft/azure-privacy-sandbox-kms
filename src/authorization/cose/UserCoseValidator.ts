@@ -6,7 +6,6 @@ import { ccf } from "@microsoft/ccf-app/global";
 import { IValidatorService } from "../IValidationService";
 import { ServiceResult } from "../../utils/ServiceResult";
 import { LogContext } from "../../utils/Logger";
-import { createHash } from "crypto";
 
 export class UserCoseValidator implements IValidatorService {
   private logContext: LogContext;
