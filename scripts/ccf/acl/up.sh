@@ -41,14 +41,22 @@ acl-up() {
     # Create a member cert
     export KMS_MEMBER_CERT_PATH="$WORKSPACE/member0_cert.pem"
     export KMS_MEMBER_PRIVK_PATH="$WORKSPACE/member0_privk.pem"
-    acl-user-local-cert-create member0
+    if [[ $USE_AKV == false ]]; then
+        acl-user-local-cert-create member0
+    else
+        acl-user-akv-cert-create member0
+    fi
     acl-user-create \
         $(cert-fingerprint $KMS_MEMBER_CERT_PATH) '["Administrator"]'
 
     # Create a user cert
     export KMS_USER_CERT_PATH="$WORKSPACE/user0_cert.pem"
     export KMS_USER_PRIVK_PATH="$WORKSPACE/user0_privk.pem"
-    acl-user-local-cert-create user0
+    if [[ $USE_AKV == false ]]; then
+        acl-user-local-cert-create user0
+    else
+        acl-user-akv-cert-create user0
+    fi
     acl-user-create \
         $(cert-fingerprint $KMS_USER_CERT_PATH) '["Reader"]'
 
