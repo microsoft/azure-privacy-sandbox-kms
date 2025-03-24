@@ -5,7 +5,6 @@
 
 REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../..")"
 source $REPO_ROOT/scripts/ccf/sign.sh
-USE_AKV=${USE_AKV:-false}
 
 decode_jwt() {
 
@@ -60,13 +59,13 @@ set_jwt_validation_policy() {
     | jq > $WORKSPACE/proposals/set_jwt_validation_policy.json
 
   # Submit the proposal
-  if [[ $USE_AKV == false ]]; then
-    $REPO_ROOT/scripts/kms/endpoints/proposals.sh \
-      $WORKSPACE/proposals/set_jwt_validation_policy.json
-  else
-    AKV_KEY_NAME="member0" ccf-sign \
+  if [[ "$KMS_URL" == *"confidential-ledger.azure.com" ]]; then
+    AKV_KEY_NAME="user0" ccf-sign \
       $WORKSPACE/proposals/set_jwt_validation_policy.json \
         | $REPO_ROOT/scripts/kms/endpoints/proposals.sh
+  else
+    $REPO_ROOT/scripts/kms/endpoints/proposals.sh \
+      $WORKSPACE/proposals/set_jwt_validation_policy.json
   fi
 
   set +e

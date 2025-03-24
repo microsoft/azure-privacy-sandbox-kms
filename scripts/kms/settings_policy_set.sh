@@ -8,7 +8,7 @@ settings-policy-set() {
     set -e
 
     REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../..")"
-    USE_AKV=${USE_AKV:-false}
+    source $REPO_ROOT/scripts/ccf/sign.sh
 
     # If settings policy not set, use default
     if [ -z "$SETTINGS_POLICY" ]; then
@@ -27,13 +27,13 @@ settings-policy-set() {
 
     # Submit the proposal
     result=$(mktemp)
-    if [[ $USE_AKV == false ]]; then
-        $REPO_ROOT/scripts/kms/endpoints/proposals.sh \
-            $WORKSPACE/proposals/set_settings_policy.json | tee $result
-    else
-        AKV_KEY_NAME="member0" ccf-sign \
+    if [[ "$KMS_URL" == *"confidential-ledger.azure.com" ]]; then
+        AKV_KEY_NAME="user0" ccf-sign \
             "$WORKSPACE/proposals/set_settings_policy.json" \
                 | $REPO_ROOT/scripts/kms/endpoints/proposals.sh | tee $result
+    else
+        $REPO_ROOT/scripts/kms/endpoints/proposals.sh \
+            $WORKSPACE/proposals/set_settings_policy.json | tee $result
     fi
 
     # Check if the last line of result is 200
