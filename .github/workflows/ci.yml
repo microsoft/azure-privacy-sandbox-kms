@@ -61,13 +61,14 @@ jobs:
     secrets: inherit # pragma: allowlist secret
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         use_akv: [false, true]
     uses: ./.github/workflows/system-test.yml
     with:
       test_path: test_all_seq
       env: acl
-      use_akv: false
+      use_akv: ${{ matrix.use_akv }}
 
 
   standalone-image:
