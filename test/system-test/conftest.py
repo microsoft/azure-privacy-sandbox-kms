@@ -145,7 +145,7 @@ def setup_ccf_session():
 
 
 def _setup_kms():
-    if USE_AKV:
+    if USE_AKV and os.getenv("TEST_ENVIRONMENT") == "ccf/sandbox_local":
         call_script([
             "./scripts/akv/key-import.sh",
             "user0"
