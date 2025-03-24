@@ -13,8 +13,9 @@ release-policy-set() {
     cp $REPO_ROOT/$RELEASE_POLICY_PROPOSAL $WORKSPACE/proposals/set_key_release_policy.json
 
     # Submit the proposal
-    source $REPO_ROOT/scripts/kms/endpoints/proposals.sh \
-        $WORKSPACE/proposals/set_key_release_policy.json
+    AKV_KEY_NAME="member0" ccf-sign \
+        "$WORKSPACE/proposals/set_key_release_policy.json" \
+        | $REPO_ROOT/scripts/kms/endpoints/proposals.sh
 
     set +e
 }
