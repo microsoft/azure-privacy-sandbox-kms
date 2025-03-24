@@ -91,9 +91,23 @@ export const proposals = (
             callerId = acl.certUtils.convertToAclFingerprintFormat();
         } else if (isAuthType(request.caller!, "jwt")) {
             callerId = (request.caller! as ccfapp.JwtAuthnIdentity).jwt.payload.oid;
+        } else if (isAuthType(request.caller!, "user_cose_sign1")) {
+            // Convert from 12ab34cd format to 12:AB:34:CD
+            callerId = (request.caller! as ccfapp.UserCOSESign1AuthnIdentity).id
+                .toUpperCase()
+                .match(/.{1,2}/g)
+                ?.join(":")!;
         } else {
             return ServiceResult.Failed<IProposalResult[]>(
                 { errorMessage: "Unexpected member_cert auth on ACL" },
+                500,
+                logContext,
+            );
+        }
+
+        if (callerId === undefined || callerId == "") {
+            return ServiceResult.Failed<IProposalResult[]>(
+                { errorMessage: "Caller ID is undefined" },
                 500,
                 logContext,
             );
@@ -127,10 +141,18 @@ export const proposals = (
         );
     }
 
+    // Handle a COSE Sign1 payload
+    let requestBody = serviceRequest.body
+    if (request.caller?.policy === "user_cose_sign1") {
+        requestBody = ccf.bufToJsonCompatible(
+            (request.caller as ccfapp.UserCOSESign1AuthnIdentity).cose.content
+        );
+    }
+
     // Extract settings policy from request
     let proposalActions: IProposalsAction[] = [];
-    if (serviceRequest.body && serviceRequest.body["actions"]) {
-        proposalActions = serviceRequest.body["actions"];
+    if (requestBody && requestBody["actions"]) {
+        proposalActions = requestBody["actions"];
     }
 
     let proposalResults: IProposalResult[] = [];
