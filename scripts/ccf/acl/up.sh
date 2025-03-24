@@ -10,6 +10,8 @@ acl-up() {
     source $REPO_ROOT/services/cacitesting.env
     source $REPO_ROOT/scripts/ccf/acl/user_create.sh
 
+    USE_AKV=${USE_AKV:-false}
+
     DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-$1}
     if [ -z "$DEPLOYMENT_NAME" ]; then
         read -p "Enter deployment name: " DEPLOYMENT_NAME
