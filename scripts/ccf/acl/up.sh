@@ -27,6 +27,20 @@ acl-assign-member() {
 
 acl-up() {
 
+    force_recreate=false
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --force-recreate)
+                force_recreate=true
+                shift 2
+                ;;
+            *)
+                echo "Unknown parameter: $1"
+                exit 1
+                ;;
+        esac
+    done
+
     source $REPO_ROOT/services/cacitesting.env
 
     DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-$1}
@@ -42,27 +56,41 @@ acl-up() {
     # Create a member cert
     export KMS_MEMBER_CERT_PATH="$WORKSPACE/member0_cert.pem"
     export KMS_MEMBER_PRIVK_PATH="$WORKSPACE/member0_privk.pem"
-    openssl ecparam -out "$KMS_MEMBER_PRIVK_PATH" -name "secp384r1" -genkey
-    openssl req -new -key "$KMS_MEMBER_PRIVK_PATH" -x509 -nodes -days 365 -out "$KMS_MEMBER_CERT_PATH" -"sha384" -subj=/CN="ACL Client Cert"
+    if [[ "$force_recreate" == true || -z "$KMS_MEMBER_CERT_PATH" || -z "$KMS_MEMBER_PRIVK_PATH" ]]; then
+        openssl ecparam -out "$KMS_MEMBER_PRIVK_PATH" -name "secp384r1" -genkey
+        openssl req -new -key "$KMS_MEMBER_PRIVK_PATH" -x509 -nodes -days 365 -out "$KMS_MEMBER_CERT_PATH" -"sha384" -subj=/CN="ACL Client Cert"
+        force_recreate=true
+    else
+        echo "Member cert already exists, skipping creation."
+    fi
 
     # Create a user cert
     export KMS_USER_CERT_PATH="$WORKSPACE/user0_cert.pem"
     export KMS_USER_PRIVK_PATH="$WORKSPACE/user0_privk.pem"
-    openssl ecparam -out "$KMS_USER_PRIVK_PATH" -name "secp384r1" -genkey
-    openssl req -new -key "$KMS_USER_PRIVK_PATH" -x509 -nodes -days 365 -out "$KMS_USER_CERT_PATH" -"sha384" -subj=/CN="ACL Client Cert"
+    if [[ "$force_recreate" == true || -z "$KMS_USER_CERT_PATH" || -z "$KMS_USER_PRIVK_PATH" ]]; then
+        openssl ecparam -out "$KMS_USER_PRIVK_PATH" -name "secp384r1" -genkey
+        openssl req -new -key "$KMS_USER_PRIVK_PATH" -x509 -nodes -days 365 -out "$KMS_USER_CERT_PATH" -"sha384" -subj=/CN="ACL Client Cert"
+        force_recreate=true
+    else
+        echo "User cert already exists, skipping creation."
+    fi
 
-    # Deploy the confidential ledger
-    # (Must be in Australia East for now to get custom endpoint support)
-    az confidentialledger create \
-        --name $DEPLOYMENT_NAME \
-        --subscription $SUBSCRIPTION \
-        --resource-group $RESOURCE_GROUP \
-        --location "AustraliaEast" \
-        --ledger-type "Public" \
-        --aad-based-security-principals ledger-role-name="Administrator" principal-id="$(az account show | jq -r '.id')" \
-        --cert-based-security-principals ledger-role-name="Administrator" cert="$(cat $KMS_MEMBER_CERT_PATH)" \
-        --cert-based-security-principals ledger-role-name="Reader" cert="$(cat $KMS_USER_CERT_PATH)"
     export KMS_URL="https://$DEPLOYMENT_NAME.confidential-ledger.azure.com"
+    if [ "$force_recreate" = "true" ] || ! $(curl --silent --fail --output /dev/null -k "$KMS_URL/node/state"); then
+        # Deploy the confidential ledger
+        # (Must be in Australia East for now to get custom endpoint support)
+        az confidentialledger create \
+            --name $DEPLOYMENT_NAME \
+            --subscription $SUBSCRIPTION \
+            --resource-group $RESOURCE_GROUP \
+            --location "AustraliaEast" \
+            --ledger-type "Public" \
+            --aad-based-security-principals ledger-role-name="Administrator" principal-id="$(az account show | jq -r '.id')" \
+            --cert-based-security-principals ledger-role-name="Administrator" cert="$(cat $KMS_MEMBER_CERT_PATH)" \
+            --cert-based-security-principals ledger-role-name="Reader" cert="$(cat $KMS_USER_CERT_PATH)"
+    else
+        echo "Ledger already exists, skipping deployment."
+    fi
 
     # Save the service certificate
     curl https://identity.confidential-ledger.core.azure.com/ledgerIdentity/$DEPLOYMENT_NAME \
