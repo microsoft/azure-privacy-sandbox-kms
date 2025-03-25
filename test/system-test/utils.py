@@ -29,26 +29,14 @@ def deploy_app_code(**kwargs):
     )
 
 
-def apply_settings_policy(policy=None):
-    subprocess.run(
+def apply_settings_policy(policy=None, get_logs=False):
+    get_logs_arg = {"stdout": subprocess.PIPE} if get_logs else {}
+    res = subprocess.run(
         "./scripts/kms/settings_policy_set.sh",
         env={
             **os.environ,
             **({"SETTINGS_POLICY": json.dumps(policy)} if policy is not None else {})
         },
-        cwd=REPO_ROOT,
-        check=True,
-    )
-
-
-def apply_kms_constitution(resolve="auto_accept", get_logs=False, **kwargs):
-    get_logs_arg = {"stdout": subprocess.PIPE} if get_logs else {}
-    res = subprocess.run(
-        [
-            "./scripts/kms/constitution_set.sh",
-            "--resolve", f"./governance/constitution/resolve/{resolve}.js",
-            *[arg for k, v in kwargs.items() for arg in [f"--{k}", v]],
-        ],
         cwd=REPO_ROOT,
         check=True,
         **get_logs_arg,
