@@ -82,16 +82,27 @@ export const proposals = (
     if (isValidIdentity.failure) return isValidIdentity;
 
     // Handle ACL based authentication
+    let callerId: string;
+    if (isAuthType(request.caller!, "user_cert")) {
+        callerId = (request.caller! as ccfapp.UserCertAuthnIdentity).id;
+    } else if (isAuthType(request.caller!, "member_cert")) {
+        callerId = (request.caller! as ccfapp.MemberCertAuthnIdentity).id;
+    } else if (isAuthType(request.caller!, "jwt")) {
+        callerId = (request.caller! as ccfapp.JwtAuthnIdentity).jwt.payload.oid;
+    } else {
+        return ServiceResult.Failed<IProposalResult[]>(
+            { errorMessage: "Unexpected auth for endpoint" },
+            401,
+            logContext,
+        );
+    }
+
     if (typeof acl === "object") {
         Logger.debug("Checking permissions of ACL identity", logContext);
 
-        let callerId: string;
-
         if (isAuthType(request.caller!, "user_cert")) {
             callerId = acl.certUtils.convertToAclFingerprintFormat();
-        } else if (isAuthType(request.caller!, "jwt")) {
-            callerId = (request.caller! as ccfapp.JwtAuthnIdentity).jwt.payload.oid;
-        } else {
+        } else if (!isAuthType(request.caller!, "jwt")) {
             return ServiceResult.Failed<IProposalResult[]>(
                 { errorMessage: "Unexpected member_cert auth on ACL" },
                 500,
@@ -153,7 +164,7 @@ export const proposals = (
 
         proposalResults.push(new IProposalResult(
             digest(proposalAction.args),
-            digest(request.caller || {})
+            callerId,
         ));
     }
 
