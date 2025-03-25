@@ -20,6 +20,11 @@ def test_add_member(setup_kms):
     strict=True,
     reason="Governance operations need to move to user endpoints",
 )
+@pytest.mark.xfail(
+    os.getenv("USE_AKV") == "true",
+    strict=True,
+    reason="No application endpoints accept cose signed auth",
+)
 def test_use_member(setup_kms):
     member_name = "test-new-member"
     add_member(member_name)
