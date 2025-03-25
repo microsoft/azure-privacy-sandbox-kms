@@ -44,7 +44,12 @@ def apply_settings_policy(policy=None, get_logs=False):
 
     # Parse out the returned json from the proposal
     if get_logs:
-        return json.loads("{" + res.stdout.decode().split("{", 1)[1])
+        return json.loads(
+            "{" + "}".join(
+                res.stdout.decode().split("{", 1)[1] # first open brace
+                .split("}")[:-1] # last close brace
+            ) + "}"
+        )
 
 
 def apply_key_release_policy():
