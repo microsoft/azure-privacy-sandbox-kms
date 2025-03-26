@@ -124,7 +124,7 @@ def create_member(member_name):
 
 def add_member(member_name):
     subprocess.run(
-        ["scripts/ccf/member/add.sh", member_name],
+        ["scripts/ccf/member/add.sh", f"{os.getenv("WORKSPACE")}/{member_name}_cert.pem"],
         cwd=REPO_ROOT,
         check=True,
     )

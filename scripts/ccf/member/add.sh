@@ -7,8 +7,11 @@ REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../../..")"
 
 ccf-member-add-gov() {
 
+    cert_path=$1
+    export MEMBER_NAME=$(basename "$cert_path" "_cert.pem")
+
     # Propose adding the member to the network
-    MEMBER_CERT=$(jq -Rs . < $WORKSPACE/${MEMBER_NAME}_cert.pem) \
+    MEMBER_CERT=$(jq -Rs . < $cert_path) \
         envsubst < $REPO_ROOT/governance/proposals/set_member.json | jq \
             > $WORKSPACE/proposals/set_member_${MEMBER_NAME}.json
     ccf-propose $WORKSPACE/proposals/set_member_${MEMBER_NAME}.json
@@ -40,7 +43,7 @@ ccf-member-add-gov() {
                 | jq > $state_digest_file
 
         ccf-sign $state_digest_file ack \
-            | curl -s $KMS_URL/gov/members/state-digests/$(ccf-member-id):ack?api-version=2024-07-01 \
+            | curl -s $KMS_URL/gov/members/state-digests/`ccf-member-id`:ack?api-version=2024-07-01 \
                 -H "Content-Type: application/cose" \
                 --data-binary @- \
                 --cacert $KMS_SERVICE_CERT_PATH
@@ -54,12 +57,6 @@ ccf-member-add() {
     source $REPO_ROOT/scripts/ccf/member/info.sh
     source $REPO_ROOT/scripts/ccf/member/id.sh
     source $REPO_ROOT/scripts/ccf/member/use.sh
-
-    MEMBER_NAME=${1:-$MEMBER_NAME}
-    if [ -z "$MEMBER_NAME" ]; then
-        read -p "Enter member name: " MEMBER_NAME
-    fi
-    export MEMBER_NAME
 
     ccf-member-add-gov "$@"
 
