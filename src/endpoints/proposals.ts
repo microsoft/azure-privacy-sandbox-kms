@@ -56,7 +56,7 @@ class IProposalResult {
         this.ballot_count = 0;
         this.proposal_id = proposal_id;
         this.proposer_id = proposer_id;
-        this.state = "state";
+        this.state = "Accepted";
         this.votes = {};
     }
 }

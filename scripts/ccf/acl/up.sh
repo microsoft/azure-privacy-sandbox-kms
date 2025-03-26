@@ -14,6 +14,7 @@ acl-up() {
     source $REPO_ROOT/services/cacitesting.env
     source $REPO_ROOT/scripts/ccf/member/create.sh
     source $REPO_ROOT/scripts/ccf/member/add.sh
+    source $REPO_ROOT/scripts/ccf/member/use.sh
 
     DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-$1}
     if [ -z "$DEPLOYMENT_NAME" ]; then
