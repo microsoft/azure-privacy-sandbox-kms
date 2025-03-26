@@ -33,17 +33,17 @@ ccf-sign() {
             --query accessToken --output tsv \
         )
         signature=$(mktemp)
-        payload=$(ccf_cose_sign1_prepare \
+        ccf_cose_sign1_prepare \
             --ccf-gov-msg-type $msg_type \
             --ccf-gov-msg-created_at $creation_time \
             --content $content \
             --signing-cert ${KMS_MEMBER_CERT_PATH} \
-            $extra_args)
-        curl -X POST -s \
-            -H "Authorization: Bearer $bearer_token" \
-            -H "Content-Type: application/json" \
-            "${AKV_URL}/keys/${AKV_KEY_NAME}/sign?api-version=7.2" \
-            -d $payload > $signature
+            $extra_args \
+            | curl -X POST -s \
+                -H "Authorization: Bearer $bearer_token" \
+                -H "Content-Type: application/json" \
+                "${AKV_URL}/keys/${AKV_KEY_NAME}/sign?api-version=7.2" \
+                -d @- > $signature
         ccf_cose_sign1_finish \
             --ccf-gov-msg-type $msg_type \
             --ccf-gov-msg-created_at $creation_time \
