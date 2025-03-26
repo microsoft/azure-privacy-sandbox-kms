@@ -4,31 +4,16 @@
 # Licensed under the MIT license.
 
 REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../../..")"
-source $REPO_ROOT/scripts/ccf/member/create.sh
 
 cert-fingerprint() {
     openssl x509 -in "$1" -noout -fingerprint -sha256 | cut -d "=" -f 2
 }
 
-acl-assign-member() {
-    local member_id=$1
-    local roles=$2
-
-    curl $KMS_URL/app/ledgerUsers/$member_id?api-version=2024-08-22-preview \
-        --cacert $KMS_SERVICE_CERT_PATH \
-        -X PATCH \
-        -H "Content-Type: application/merge-patch+json" \
-        --cert $KMS_MEMBER_CERT_PATH \
-        --key $KMS_MEMBER_PRIVK_PATH \
-        -d "$(jq -n --arg member_id "$member_id" --argjson roles "$roles" '{
-            user_id: $member_id,
-            assignedRoles: $roles
-        }')"
-}
-
 acl-up() {
 
     source $REPO_ROOT/services/cacitesting.env
+    source $REPO_ROOT/scripts/ccf/member/create.sh
+    source $REPO_ROOT/scripts/ccf/member/add.sh
 
     DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-$1}
     if [ -z "$DEPLOYMENT_NAME" ]; then
@@ -66,13 +51,13 @@ acl-up() {
         | jq -r '.ledgerTlsCertificate' > $WORKSPACE/service_cert.pem
     export KMS_SERVICE_CERT_PATH="$WORKSPACE/service_cert.pem"
 
-    acl-assign-member \
+    ccf-member-add \
         $(az account show | jq -r '.id') '["Administrator"]'
 
-    acl-assign-member \
+    ccf-member-add \
         $(cert-fingerprint $KMS_MEMBER_CERT_PATH) '["Administrator"]'
 
-    acl-assign-member \
+    ccf-member-add \
         $(cert-fingerprint $KMS_USER_CERT_PATH) '["Reader"]'
 
 }

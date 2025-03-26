@@ -50,6 +50,22 @@ ccf-member-add-gov() {
     )
 }
 
+ccf-member-add-acl() {
+    local member_id=$1
+    local roles=$2
+
+    curl $KMS_URL/app/ledgerUsers/$member_id?api-version=2024-08-22-preview \
+        --cacert $KMS_SERVICE_CERT_PATH \
+        -X PATCH \
+        -H "Content-Type: application/merge-patch+json" \
+        --cert $KMS_MEMBER_CERT_PATH \
+        --key $KMS_MEMBER_PRIVK_PATH \
+        -d "$(jq -n --arg member_id "$member_id" --argjson roles "$roles" '{
+            user_id: $member_id,
+            assignedRoles: $roles
+        }')"
+}
+
 ccf-member-add() {
     set -e
 
@@ -58,7 +74,11 @@ ccf-member-add() {
     source $REPO_ROOT/scripts/ccf/member/id.sh
     source $REPO_ROOT/scripts/ccf/member/use.sh
 
-    ccf-member-add-gov "$@"
+    if [[ "$KMS_URL" == *"confidential-ledger.azure.com" ]]; then
+        ccf-member-add-acl "$@"
+    else
+        ccf-member-add-gov "$@"
+    fi
 
     set +e
 }
