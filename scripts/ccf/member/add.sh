@@ -5,22 +5,7 @@
 
 REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../../..")"
 
-ccf-member-add() {
-    set -e
-
-    source $REPO_ROOT/scripts/ccf/propose.sh
-    source $REPO_ROOT/scripts/ccf/member/create.sh
-    source $REPO_ROOT/scripts/ccf/member/info.sh
-    source $REPO_ROOT/scripts/ccf/member/id.sh
-    source $REPO_ROOT/scripts/ccf/member/use.sh
-
-    MEMBER_NAME=${1:-$MEMBER_NAME}
-    if [ -z "$MEMBER_NAME" ]; then
-        read -p "Enter member name: " MEMBER_NAME
-    fi
-    export MEMBER_NAME
-
-    ccf-member-create $MEMBER_NAME
+ccf-member-add-gov() {
 
     # Propose adding the member to the network
     MEMBER_CERT=$(jq -Rs . < $WORKSPACE/${MEMBER_NAME}_cert.pem) \
@@ -60,6 +45,28 @@ ccf-member-add() {
                 --data-binary @- \
                 --cacert $KMS_SERVICE_CERT_PATH
     )
+}
+
+ccf-member-add() {
+    set -e
+
+    source $REPO_ROOT/scripts/ccf/propose.sh
+    source $REPO_ROOT/scripts/ccf/member/create.sh
+    source $REPO_ROOT/scripts/ccf/member/info.sh
+    source $REPO_ROOT/scripts/ccf/member/id.sh
+    source $REPO_ROOT/scripts/ccf/member/use.sh
+
+    MEMBER_NAME=${1:-$MEMBER_NAME}
+    if [ -z "$MEMBER_NAME" ]; then
+        read -p "Enter member name: " MEMBER_NAME
+    fi
+    export MEMBER_NAME
+
+    if [[ ! -f "$WORKSPACE/${MEMBER_NAME}_cert.pem" || ! -f "$WORKSPACE/${MEMBER_NAME}_privk.pem" ]]; then
+        ccf-member-create $MEMBER_NAME
+    fi
+
+    ccf-member-add-gov "$@"
 
     set +e
 }
