@@ -30,3 +30,7 @@ ccf-member-create() {
         ccf-member-create-akv $1
     fi
 }
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    ccf-member-create "$@"
+fi
