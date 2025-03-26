@@ -150,6 +150,7 @@ def _setup_kms():
             "./scripts/akv/key-import.sh",
             "member0",
         ])
+        os.setenv("AKV_KEY_NAME", "member0")
     deploy_app_code()
     trust_jwt_issuer("aad")
     yield {}
