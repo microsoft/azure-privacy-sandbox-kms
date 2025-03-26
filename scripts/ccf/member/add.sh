@@ -51,7 +51,6 @@ ccf-member-add() {
     set -e
 
     source $REPO_ROOT/scripts/ccf/propose.sh
-    source $REPO_ROOT/scripts/ccf/member/create.sh
     source $REPO_ROOT/scripts/ccf/member/info.sh
     source $REPO_ROOT/scripts/ccf/member/id.sh
     source $REPO_ROOT/scripts/ccf/member/use.sh
@@ -61,10 +60,6 @@ ccf-member-add() {
         read -p "Enter member name: " MEMBER_NAME
     fi
     export MEMBER_NAME
-
-    if [[ ! -f "$WORKSPACE/${MEMBER_NAME}_cert.pem" || ! -f "$WORKSPACE/${MEMBER_NAME}_privk.pem" ]]; then
-        ccf-member-create $MEMBER_NAME
-    fi
 
     ccf-member-add-gov "$@"
 

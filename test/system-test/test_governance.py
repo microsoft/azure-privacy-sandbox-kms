@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from utils import add_member, apply_kms_constitution, member_info, use_member, vote
+from utils import add_member, create_member, apply_kms_constitution, member_info, use_member, vote
 
 
 @pytest.mark.xfail(
@@ -11,6 +11,7 @@ from utils import add_member, apply_kms_constitution, member_info, use_member, v
 )
 def test_add_member(setup_kms):
     member_name = "test-new-member"
+    create_member(member_name)
     add_member(member_name)
     member = member_info(member_name)
     assert member['status'] == "Active"
@@ -23,6 +24,7 @@ def test_add_member(setup_kms):
 def test_add_member_with_voting(setup_kms):
     apply_kms_constitution(resolve="majority_vote")
     member_name = "test-new-member"
+    create_member(member_name)
     add_member(member_name)
     assert member_info(member_name)["status"] == "Open"
     vote(member_info(member_name)["proposalId"], "accept")
@@ -35,6 +37,7 @@ def test_add_member_with_voting(setup_kms):
 )
 def test_use_member(setup_kms):
     member_name = "test-new-member"
+    create_member(member_name)
     add_member(member_name)
     use_member(member_name)
     constitution_proposal = apply_kms_constitution(get_logs=True)
