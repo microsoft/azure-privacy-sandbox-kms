@@ -342,15 +342,6 @@ def test_set_policy_single_key_no_jwt_auth_user_cert(setup_kms_session):
     assert auth_json["auth"]["policy"] == "user_cert"
 
 
-def test_set_policy_single_key_no_jwt_auth_jwt(setup_kms_session):
-    try:
-        status_code, auth_json = auth(auth="jwt")
-        assert status_code == 401
-    except CalledProcessError:
-        with pytest.raises(CalledProcessError):
-            raise
-
-
 def test_set_policy_single_key_no_jwt_trust_jwt_issuer(setup_kms_session, setup_aad_jwt_issuer_session):
     trust_jwt_issuer("aad")
 

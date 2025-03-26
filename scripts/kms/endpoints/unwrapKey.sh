@@ -5,7 +5,7 @@
 
 unwrap_key() {
     params=()
-    auth="user_cert"
+    auth="jwt"
     attestation=""
     wrappedKid=""
     wrappingKey=""

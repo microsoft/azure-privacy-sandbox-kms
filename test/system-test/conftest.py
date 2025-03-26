@@ -8,7 +8,7 @@ import uuid
 
 import pytest
 
-from utils import deploy_app_code
+from utils import deploy_app_code, trust_jwt_issuer
 
 REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 TEST_ENVIRONMENT = os.getenv("TEST_ENVIRONMENT", "ccf/sandbox_local")
@@ -151,15 +151,16 @@ def _setup_kms():
             f'{os.getenv("DEPLOYMENT_NAME", "kms")}-private-key'
         ])
     deploy_app_code()
+    trust_jwt_issuer("aad")
     yield {}
     print("") # Prevents cleanup overwriting result
 
 
 @pytest.fixture()
-def setup_kms(setup_ccf, setup_akv):
+def setup_kms(setup_akv, setup_aad_jwt_issuer, setup_ccf):
     yield from _setup_kms()
 
 
 @pytest.fixture(scope="session")
-def setup_kms_session(setup_ccf_session, setup_akv):
+def setup_kms_session(setup_akv, setup_aad_jwt_issuer_session, setup_ccf_session):
     yield from _setup_kms()

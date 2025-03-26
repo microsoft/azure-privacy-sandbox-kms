@@ -5,7 +5,7 @@
 
 key() {
     params=()
-    auth="user_cert"
+    auth="jwt"
     attestation=""
     wrappingKey=""
 
