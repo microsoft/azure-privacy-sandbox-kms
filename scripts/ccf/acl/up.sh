@@ -4,6 +4,7 @@
 # Licensed under the MIT license.
 
 REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../../..")"
+source $REPO_ROOT/scripts/ccf/member/create.sh
 
 cert-fingerprint() {
     openssl x509 -in "$1" -noout -fingerprint -sha256 | cut -d "=" -f 2
