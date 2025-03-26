@@ -60,6 +60,7 @@ acl-up() {
     ccf-member-add \
         $(cert-fingerprint $KMS_USER_CERT_PATH) '["Reader"]'
 
+    ccf-member-use member0
 }
 
 acl-up "$@"
