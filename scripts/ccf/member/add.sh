@@ -8,8 +8,8 @@ REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../../..")"
 ccf-member-add() {
     set -e
 
-    source $REPO_ROOT/scripts/ccf/az-cleanroom-aci/setup.sh && az-cleanroom-aci-setup
     source $REPO_ROOT/scripts/ccf/propose.sh
+    source $REPO_ROOT/scripts/ccf/member/create.sh
     source $REPO_ROOT/scripts/ccf/member/info.sh
     source $REPO_ROOT/scripts/ccf/member/id.sh
     source $REPO_ROOT/scripts/ccf/member/use.sh
@@ -19,26 +19,8 @@ ccf-member-add() {
         read -p "Enter member name: " MEMBER_NAME
     fi
     export MEMBER_NAME
-    USE_AKV=${USE_AKV:-false}
 
-    # Hopefully we will have a single command for this eventually, e.g.
-    #   az cleanroom governance member up $MEMBER_NAME
-
-    if [[ $USE_AKV == false ]]; then
-        # Generate the member identity
-        (cd $WORKSPACE && az cleanroom governance member keygenerator-sh | bash -s -- --name $MEMBER_NAME)
-    else
-        # Create a key in AKV and download the cert for proposing
-        az keyvault certificate create \
-            --vault-name $AKV_VAULT_NAME \
-            --name $MEMBER_NAME \
-            --policy "${AKV_POLICY:-$(cat $REPO_ROOT/scripts/akv/key_policy.json | jq -c .)}"
-        rm -rf $WORKSPACE/${MEMBER_NAME}_cert.pem
-        az keyvault certificate download \
-            --vault-name $AKV_VAULT_NAME \
-            --name $MEMBER_NAME \
-            --file $WORKSPACE/${MEMBER_NAME}_cert.pem
-    fi
+    ccf-member-create $MEMBER_NAME
 
     # Propose adding the member to the network
     MEMBER_CERT=$(jq -Rs . < $WORKSPACE/${MEMBER_NAME}_cert.pem) \

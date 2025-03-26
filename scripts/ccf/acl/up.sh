@@ -42,14 +42,10 @@ acl-up() {
     # Create a member cert
     export KMS_MEMBER_CERT_PATH="$WORKSPACE/member0_cert.pem"
     export KMS_MEMBER_PRIVK_PATH="$WORKSPACE/member0_privk.pem"
-    openssl ecparam -out "$KMS_MEMBER_PRIVK_PATH" -name "secp384r1" -genkey
-    openssl req -new -key "$KMS_MEMBER_PRIVK_PATH" -x509 -nodes -days 365 -out "$KMS_MEMBER_CERT_PATH" -"sha384" -subj=/CN="ACL Client Cert"
-
-    # Create a user cert
     export KMS_USER_CERT_PATH="$WORKSPACE/user0_cert.pem"
     export KMS_USER_PRIVK_PATH="$WORKSPACE/user0_privk.pem"
-    openssl ecparam -out "$KMS_USER_PRIVK_PATH" -name "secp384r1" -genkey
-    openssl req -new -key "$KMS_USER_PRIVK_PATH" -x509 -nodes -days 365 -out "$KMS_USER_CERT_PATH" -"sha384" -subj=/CN="ACL Client Cert"
+    ccf-member-create member0
+    ccf-member-create user0
 
     # Deploy the confidential ledger
     # (Must be in Australia East for now to get custom endpoint support)
