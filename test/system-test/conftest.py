@@ -146,11 +146,20 @@ def setup_ccf_session():
 
 def _setup_kms():
     if USE_AKV and TEST_ENVIRONMENT == "ccf/sandbox_local":
-        call_script([
-            "./scripts/akv/key-import.sh",
-            "member0",
-        ])
-        os.environ["AKV_KEY_NAME"] = "member0"
+        call_script(
+            ["./scripts/akv/key-import.sh"],
+            env= {
+                **os.environ,
+                "AKV_KEY_NAME": "user0",
+            },
+        )
+        call_script(
+            ["./scripts/akv/key-import.sh"],
+            env= {
+                **os.environ,
+                "AKV_KEY_NAME": "member0",
+            },
+        )
     deploy_app_code()
     trust_jwt_issuer("aad")
     yield {}
