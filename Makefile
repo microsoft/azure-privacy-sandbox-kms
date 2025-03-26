@@ -65,9 +65,7 @@ start-idp:  ## 🏃 Start the idp for testing jwt
 start-host: stop-host  ## 🏃 Start the CCF network using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
 	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh --build && \
-	source ./scripts/kms/js_app_set.sh && \
-	source ./scripts/kms/constitution_set.sh \
-		--resolve ./governance/constitution/resolve/auto_accept.js
+	source ./scripts/kms/js_app_set.sh
 
 start-host-idp: stop-host stop-idp build ## 🏃 Start the CCF network && idp using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
@@ -75,8 +73,6 @@ start-host-idp: stop-host stop-idp build ## 🏃 Start the CCF network && idp us
 	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh --build && \
 	source ./scripts/jwt_issuer/demo/up.sh --build && \
 	source scripts/kms/js_app_set.sh && \
-	source ./scripts/kms/constitution_set.sh \
-		--resolve ./governance/constitution/resolve/auto_accept.js && \
 	source scripts/kms/jwt_issuer_trust.sh
 
 demo: stop-all start-host-idp ## 🎬 Demo the KMS Application in the Sandbox
@@ -125,24 +121,12 @@ refresh-key: ## 🚀 Refresh a key on the instance
 	$(call check_defined, KMS_URL)
 	@CCF_PLATFORM=${CCF_PLATFORM};curl "${KMS_URL}"/app/refresh -X POST --cacert "${KEYS_DIR}"/service_cert.pem  -H "Content-Type: application/json" -i  -w '\n'
 
-set-constitution: start-host-idp ## Set new custom constitution
-	@echo -e "\e[34m$@\e[0m" || true
-	$(call check_defined, KMS_URL)
-	$(call check_defined, KEYS_DIR)
-	# Copy the files to the KEYS_DIR to construct the full constitution
-	if [ "${KMS_WORKSPACE}/sandbox_common" != "${KEYS_DIR}" ]; then \
-		echo "Copying files for constitution"; \
-		@sleep 5; \
-		cp -r ${KMS_WORKSPACE}/sandbox_common/*.js ${KEYS_DIR}; \
-	fi
-	@CCF_PLATFORM=${CCF_PLATFORM} ./scripts/submit_constitution.sh --network-url "${KMS_URL}" --certificate-dir "${KEYS_DIR}" --member-count ${MEMBER_COUNT}
-
 get-service-cert: # Get the mCCF service cert
 	@echo -e "\e[34m$@\e[0m" || true
 	$(call check_defined, IDENTITY_URL)
 	curl ${IDENTITY_URL} | jq ' .ledgerTlsCertificate' | xargs echo -e > ${KEYS_DIR}/service_cert.pem
 
-setup-mCCF: set-constitution deploy propose-add-key-release-policy propose-jwt-ms-validation-policy refresh-key  ## 🚀 Prepare an mCCF instance
+setup-mCCF: deploy propose-add-key-release-policy propose-jwt-ms-validation-policy refresh-key  ## 🚀 Prepare an mCCF instance
 	@echo -e "\e[34m$@\e[0m" || true
 
 # The following are here in case you forget to change directory!
@@ -198,12 +182,6 @@ js-app-set:
 	@WORKSPACE=${KMS_WORKSPACE} \
 	KMS_URL=${KMS_URL} \
 		./scripts/kms/js_app_set.sh
-
-constitution-set:
-	@WORKSPACE=${KMS_WORKSPACE} \
-	KMS_URL=${KMS_URL} \
-	./scripts/kms/constitution_set.sh \
-		--resolve ./governance/constitution/resolve/auto_accept.js
 
 release-policy-set:
 	@WORKSPACE=${KMS_WORKSPACE} \

@@ -2,7 +2,7 @@ import json
 import os
 import pytest
 from endpoints import key, refresh, unwrapKey
-from utils import apply_kms_constitution, apply_key_release_policy, trust_jwt_issuer, get_test_attestation, get_test_public_wrapping_key, decrypted_wrapped_key, apply_settings_policy
+from utils import apply_key_release_policy, trust_jwt_issuer, get_test_attestation, get_test_public_wrapping_key, decrypted_wrapped_key, apply_settings_policy
 
 # This test will check the two step google protocol to retrieve a private key
 # Step 1, call the /key endpoint and retrieve the kid
@@ -11,7 +11,6 @@ from utils import apply_kms_constitution, apply_key_release_policy, trust_jwt_is
 
 
 def test_unwrap_key_and_decrypt(setup_kms):
-    apply_kms_constitution()
     apply_key_release_policy()
     apply_settings_policy()
     refresh()
@@ -38,7 +37,6 @@ def test_unwrap_key_and_decrypt(setup_kms):
 
 
 def test_unwrap_key_missing_attestation(setup_kms):
-    apply_kms_constitution()
     apply_key_release_policy()
     apply_settings_policy()
     refresh()
@@ -61,7 +59,6 @@ def test_unwrap_key_missing_attestation(setup_kms):
 
 
 def test_unwrap_key_missing_wrapping_key(setup_kms):
-    apply_kms_constitution()
     apply_key_release_policy()
     apply_settings_policy()
     refresh()
@@ -84,7 +81,6 @@ def test_unwrap_key_missing_wrapping_key(setup_kms):
 
 
 def test_unwrap_key_missing_wrappedKid(setup_kms):
-    apply_kms_constitution()
     apply_key_release_policy()
     apply_settings_policy()
     refresh()
@@ -99,7 +95,6 @@ def test_unwrap_key_missing_wrappedKid(setup_kms):
 
 
 def test_unwrap_key_without_refresh(setup_kms):
-    apply_kms_constitution()
     apply_key_release_policy()
 
     # unwrap key

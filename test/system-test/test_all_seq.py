@@ -3,7 +3,7 @@ import os
 import pytest
 from subprocess import CalledProcessError
 from endpoints import heartbeat, key, listpubkeys, pubkey, keyReleasePolicy, unwrapKey, refresh, auth, settingsPolicy
-from utils import get_test_attestation, get_test_public_wrapping_key, apply_kms_constitution, apply_key_release_policy, decrypted_wrapped_key, trust_jwt_issuer, remove_key_release_policy, apply_settings_policy
+from utils import get_test_attestation, get_test_public_wrapping_key, apply_key_release_policy, decrypted_wrapped_key, trust_jwt_issuer, remove_key_release_policy, apply_settings_policy
 
 # These tests run on a single KMS instance in order to be cheaper regarding
 # Azure deployments.
@@ -78,7 +78,6 @@ def test_no_policy_no_keys_no_jwt_keyReleasePolicy(setup_kms_session):
 
 
 def test_no_policy_no_keys_no_jwt_set_key_release_policy(setup_kms_session):
-    apply_kms_constitution()
     apply_key_release_policy()
 
 
