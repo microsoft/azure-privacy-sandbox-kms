@@ -32,7 +32,7 @@ acl-up() {
         case "$1" in
             --force-recreate)
                 force_recreate=true
-                shift 2
+                shift
                 ;;
             *)
                 echo "Unknown parameter: $1"
