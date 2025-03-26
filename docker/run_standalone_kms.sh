@@ -30,11 +30,19 @@ EOF
   -v --http2 "$@" &
 
 export KMS_URL=${KMS_URL:-https://127.0.0.1:8000}
-export KMS_SERVICE_CERT_PATH=./workspace/sandbox_common/service_cert.pem
-export KMS_MEMBER_CERT_PATH=./workspace/sandbox_common/member0_cert.pem
-export KMS_MEMBER_PRIVK_PATH=./workspace/sandbox_common/member0_privk.pem
+export KMS_SERVICE_CERT_PATH=./workspace/service_cert.pem
+export KMS_MEMBER_CERT_PATH=./workspace/member0_cert.pem
+export KMS_MEMBER_PRIVK_PATH=./workspace/member0_privk.pem
+export KMS_USER_CERT_PATH=./workspace/user0_cert.pem
+export KMS_USER_PRIVK_PATH=./workspace/user0_privk.pem
 
 ./scripts/kms_wait.sh
+
+cp ./workspace/sandbox_common/service_cert.pem $KMS_SERVICE_CERT_PATH
+cp ./workspace/sandbox_common/member0_cert.pem $KMS_MEMBER_CERT_PATH
+cp ./workspace/sandbox_common/member0_privk.pem $KMS_MEMBER_PRIVK_PATH
+cp ./workspace/sandbox_common/user0_cert.pem $KMS_USER_CERT_PATH
+cp ./workspace/sandbox_common/user0_privk.pem $KMS_USER_PRIVK_PATH
 
 make setup
 
