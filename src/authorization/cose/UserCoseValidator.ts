@@ -14,6 +14,8 @@ export class UserCoseValidator implements IValidatorService {
     this.logContext = (logContext?.clone() || new LogContext()).appendScope("UserCoseValidator");
   }
 
+  // This code comes from microsoft/ccf:tests/npm-app/src/endpoints/auth.ts
+  // CCF handles the validation of the COSE document
   validate(request: ccfapp.Request<any>): ServiceResult<string> {
     if (request.caller === null || request.caller === undefined) {
       return ServiceResult.Failed({
