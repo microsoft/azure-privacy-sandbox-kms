@@ -50,7 +50,12 @@ unwrap_key() {
         --cacert $KMS_SERVICE_CERT_PATH \
         "${auth_arg[@]}" \
         -H "Content-Type: application/json" \
-        -d "{\"attestation\":$attestation, \"wrappedKid\":\"$wrappedKid\", \"wrapped\":\"\", \"wrappingKey\":$wrappingKey}" \
+        -d '{
+            "attestation": '"$attestation"',
+            "wrappedKid": "'"$wrappedKid"'",
+            "wrapped": "",
+            "wrappingKey": "'"$wrappingKey"'\n"
+        }' \
         -w '\n%{http_code}\n'
 }
 
