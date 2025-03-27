@@ -4,7 +4,7 @@
 # Licensed under the MIT license.
 
 keyReleasePolicy() {
-    auth="user_cert"
+    auth="jwt"
 
     # Parse command-line arguments
     while [[ $# -gt 0 ]]; do
