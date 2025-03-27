@@ -16,7 +16,6 @@ declare -f jwt_issuer_fetch > $JWT_ISSUER_WORKSPACE/fetch.sh
 ./scripts/wait_idp_ready.sh
 
 /opt/ccf_${CCF_PLATFORM}/bin/sandbox.sh \
-  --js-app-bundle ./dist/ \
   --initial-member-count 3 \
   --initial-user-count 1 \
   -v --http2 "$@" &
@@ -27,9 +26,15 @@ export KMS_SERVICE_CERT_PATH=./workspace/sandbox_common/service_cert.pem
 export KMS_MEMBER_CERT_PATH=./workspace/sandbox_common/member0_cert.pem
 export KMS_MEMBER_PRIVK_PATH=./workspace/sandbox_common/member0_privk.pem
 
-./scripts/kms_wait.sh
+until test -f workspace/sandbox_0/0.rpc_addresses && \
+  curl -k -f https://$(jq -r '.primary_rpc_interface' workspace/sandbox_0/0.rpc_addresses)/node/state && \
+  test -f workspace/sandbox_common/user0_cert.pem; do
+  sleep 1
+done
 
 source .venv_ccf_sandbox/bin/activate
+
+./scripts/kms/js_app_set.sh
 
 ./scripts/kms/release_policy_set.sh governance/proposals/set_key_release_policy_add.json
 
