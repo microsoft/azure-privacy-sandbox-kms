@@ -1,8 +1,7 @@
 import json
-import os
 import pytest
-from endpoints import key, refresh, unwrapKey
-from utils import apply_kms_constitution, apply_key_release_policy, trust_jwt_issuer, get_test_attestation, get_test_public_wrapping_key, decrypted_wrapped_key
+from endpoints import key, refresh
+from utils import apply_kms_constitution, apply_key_release_policy, trust_jwt_issuer, get_test_attestation, get_test_public_wrapping_key, decrypted_wrapped_key, call_endpoint
 
 # This test will check the two step google protocol to retrieve a private key
 # Step 1, call the /key endpoint and retrieve the kid
@@ -24,11 +23,12 @@ def test_unwrap_key_and_decrypt(setup_kms):
     assert status_code == 200
 
     # unwrap key
-    status_code, unwrapped_json = unwrapKey(
-        attestation=get_test_attestation(),
-        wrapping_key=get_test_public_wrapping_key(),
-        wrappedKid=key_json["wrappedKid"]
-    )
+    status_code, unwrapped_json = call_endpoint(fr"""
+        scripts/kms/endpoints/unwrapKey.sh \
+            --attestation "$(cat test/attestation-samples/snp.json)" \
+            --wrapping-key "$(sed ':a;N;$!ba;s/\n/\\n/g' test/data-samples/publicWrapKey.pem)" \
+            --wrappedKid "{key_json["wrappedKid"]}"
+    """)
     assert status_code == 200
     unwrapped = decrypted_wrapped_key(unwrapped_json["wrapped"])
     unwrapped_json = json.loads(unwrapped)
@@ -50,11 +50,12 @@ def test_unwrap_key_missing_attestation(setup_kms):
     assert status_code == 200
 
     # unwrap key
-    status_code, unwrapped_json = unwrapKey(
-        attestation="abc",
-        wrapping_key=get_test_public_wrapping_key(),
-        wrappedKid=key_json["wrappedKid"]
-    )
+    status_code, unwrapped_json = call_endpoint(fr"""
+        scripts/kms/endpoints/unwrapKey.sh \
+            --attestation "abc" \
+            --wrapping-key "$(sed ':a;N;$!ba;s/\n/\\n/g' test/data-samples/publicWrapKey.pem)" \
+            --wrappedKid "{key_json["wrappedKid"]}"
+    """)
     assert status_code == 400
 
 
@@ -72,11 +73,12 @@ def test_unwrap_key_missing_wrapping_key(setup_kms):
     assert status_code == 200
 
     # unwrap key
-    status_code, unwrapped_json = unwrapKey(
-        attestation=get_test_attestation(),
-        wrapping_key="abc",
-        wrappedKid=key_json["wrappedKid"]
-    )
+    status_code, unwrapped_json = call_endpoint(fr"""
+        scripts/kms/endpoints/unwrapKey.sh \
+            --attestation "$(cat test/attestation-samples/snp.json)" \
+            --wrapping-key "abc" \
+            --wrappedKid "{key_json["wrappedKid"]}"
+    """)
     assert status_code == 400
 
 
@@ -86,11 +88,12 @@ def test_unwrap_key_missing_wrappedKid(setup_kms):
     refresh()
 
     # unwrap key
-    status_code, unwrapped_json = unwrapKey(
-        attestation=get_test_attestation(),
-        wrapping_key=get_test_public_wrapping_key(),
-        wrappedKid=""
-    )
+    status_code, unwrapped_json = call_endpoint(fr"""
+        scripts/kms/endpoints/unwrapKey.sh \
+            --attestation "$(cat test/attestation-samples/snp.json)" \
+            --wrapping-key "$(sed ':a;N;$!ba;s/\n/\\n/g' test/data-samples/publicWrapKey.pem)" \
+            --wrappedKid ""
+    """)
     assert status_code == 404
 
 
@@ -99,14 +102,15 @@ def test_unwrap_key_without_refresh(setup_kms):
     apply_key_release_policy()
 
     # unwrap key
-    status_code, unwrapped_json = unwrapKey(
-        attestation=get_test_attestation(),
-        wrapping_key=get_test_public_wrapping_key(),
-        wrappedKid="abcd"
-    )
+    status_code, unwrapped_json = call_endpoint(fr"""
+        scripts/kms/endpoints/unwrapKey.sh \
+            --attestation "$(cat test/attestation-samples/snp.json)" \
+            --wrapping-key "$(sed ':a;N;$!ba;s/\n/\\n/g' test/data-samples/publicWrapKey.pem)" \
+            --wrappedKid "abc"
+    """)
     assert status_code == 404
 
 
 if __name__ == "__main__":
     import pytest
-    pytest.main([__file__, "-s"])
+    pytest.main([f"{__file__}", "-s"])
