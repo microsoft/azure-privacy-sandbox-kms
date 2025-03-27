@@ -133,9 +133,16 @@ def trust_jwt_issuer(*args):
         check=True,
     )
 
+def create_member(member_name):
+    subprocess.run(
+        ["scripts/ccf/member/create.sh", member_name],
+        cwd=REPO_ROOT,
+        check=True,
+    )
+
 def add_member(member_name):
     subprocess.run(
-        ["scripts/ccf/member/add.sh", member_name],
+        ["scripts/ccf/member/add.sh", f"{os.getenv("WORKSPACE")}/{member_name}_cert.pem"],
         cwd=REPO_ROOT,
         check=True,
     )
