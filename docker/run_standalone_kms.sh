@@ -3,14 +3,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+jwt_issuer_fetch() {
+    curl -X POST "$(cat /kms/workspace/jwt_issuer_address)/token" \
+        | jq -r '.access_token'
+}
+
 run_dummy_jwt_issuer() {
 
   (cd test/utils/jwt && KMS_WORKSPACE=/kms/workspace nohup npm run start > nohup.out 2>&1 &)
-
-  jwt_issuer_fetch() {
-      curl -X POST "$(cat /kms/workspace/jwt_issuer_address)/token" \
-          | jq -r '.access_token'
-  }
   declare -f jwt_issuer_fetch > $JWT_ISSUER_WORKSPACE/fetch.sh
 
   ./scripts/wait_idp_ready.sh
