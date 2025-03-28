@@ -3,6 +3,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../..")"
+
 propose_set_js_app() {
   # For plain CCF, application code is set via a governance proposal
 
@@ -45,8 +47,6 @@ call_user_defined_endpoints() {
 js-app-set() {
   set -e
 
-  REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../..")"
-
   # Build the KMS bundle
   npm install && npm run build
 
@@ -59,4 +59,6 @@ js-app-set() {
   set +e
 }
 
-js-app-set "$@"
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  js-app-set "$@"
+fi
