@@ -1,8 +1,16 @@
 ARG CCF_PLATFORM
-FROM ghcr.io/microsoft/ccf/app/dev/${CCF_PLATFORM}:ccf-5.0.11
+ARG CCF_VERSION=ccf-5.0.11
+FROM ghcr.io/microsoft/ccf/app/dev/${CCF_PLATFORM}:${CCF_VERSION}}
 
 # Pre install CCF dependencies to speed up container start (only works in virtual mode)
 ARG CCF_PLATFORM
 SHELL ["/bin/bash", "-c"]
 RUN apt-get install -y uuid-runtime gettext
-RUN (ls /opt/ccf_virtual/bin/sandbox.sh && (/opt/ccf_virtual/bin/sandbox.sh & until [[ $(curl -k -s -o /dev/null -w "%{http_code}" https://127.0.0.1:8000/node/network) =~ ^(200|400)$ ]]; do sleep 1; done)) || true
+
+# Prebuild python venv to speed up start time
+RUN python3 -m venv .venv_ccf_sandbox && \
+    . .venv_ccf_sandbox/bin/activate && \
+    pip install -U -q pip && \
+    VERSION=$(sed 's/^ccf-//' "/opt/ccf_${CCF_PLATFORM}/share/VERSION_LONG") && \
+    pip install -q -U "ccf==$VERSION" && \
+    pip install -q -U -r "/opt/ccf_${CCF_PLATFORM}/bin/requirements.txt"
