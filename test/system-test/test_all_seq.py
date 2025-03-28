@@ -2,8 +2,8 @@ import json
 import os
 import pytest
 from subprocess import CalledProcessError
-from endpoints import heartbeat, key, listpubkeys, pubkey, keyReleasePolicy, unwrapKey, refresh, auth, settingsPolicy
-from utils import get_test_attestation, get_test_public_wrapping_key, apply_kms_constitution, apply_key_release_policy, decrypted_wrapped_key, trust_jwt_issuer, remove_key_release_policy, apply_settings_policy
+from endpoints import heartbeat, key, listpubkeys, pubkey, keyReleasePolicy, refresh, auth, settingsPolicy
+from utils import get_test_attestation, get_test_public_wrapping_key, apply_kms_constitution, apply_key_release_policy, decrypted_wrapped_key, trust_jwt_issuer, remove_key_release_policy, apply_settings_policy, call_endpoint
 
 # These tests run on a single KMS instance in order to be cheaper regarding
 # Azure deployments.
@@ -184,11 +184,12 @@ def test_set_policy_single_key_no_jwt_unwrapKey(setup_kms_session):
     assert status_code == 200
 
     while True:
-        status_code, unwrapped_json = unwrapKey(
-            attestation=get_test_attestation(),
-            wrapping_key=get_test_public_wrapping_key(),
-            wrappedKid=key_json["wrappedKid"],
-        )
+        status_code, unwrapped_json = call_endpoint(fr"""
+            scripts/kms/endpoints/unwrapKey.sh \
+                --attestation "$(cat test/attestation-samples/snp.json)" \
+                --wrapping-key "$(sed ':a;N;$!ba;s/\n/\\n/g' test/data-samples/publicWrapKey.pem)" \
+                --wrappedKid "{key_json["wrappedKid"]}"
+        """)
         if status_code != 202:
             break
     assert status_code == 200
@@ -440,11 +441,12 @@ def test_set_policy_multiple_keys_set_jwt_unwrapKey_no_kid(setup_kms_session):
     assert key_json["wrappedKid"].endswith("_2")
 
     while True:
-        status_code, unwrapped_json = unwrapKey(
-            attestation=get_test_attestation(),
-            wrapping_key=get_test_public_wrapping_key(),
-            wrappedKid=key_json["wrappedKid"],
-        )
+        status_code, unwrapped_json = call_endpoint(fr"""
+            scripts/kms/endpoints/unwrapKey.sh \
+                --attestation "$(cat test/attestation-samples/snp.json)" \
+                --wrapping-key "$(sed ':a;N;$!ba;s/\n/\\n/g' test/data-samples/publicWrapKey.pem)" \
+                --wrappedKid "{key_json["wrappedKid"]}"
+        """)
         if status_code != 202:
             break
     assert status_code == 200
@@ -467,11 +469,12 @@ def test_set_policy_multiple_keys_set_jwt_unwrapKey_first_kid(setup_kms_session)
     assert key_json["wrappedKid"].endswith("_1")
 
     while True:
-        status_code, unwrapped_json = unwrapKey(
-            attestation=get_test_attestation(),
-            wrapping_key=get_test_public_wrapping_key(),
-            wrappedKid=key_json["wrappedKid"],
-        )
+        status_code, unwrapped_json = call_endpoint(fr"""
+            scripts/kms/endpoints/unwrapKey.sh \
+                --attestation "$(cat test/attestation-samples/snp.json)" \
+                --wrapping-key "$(sed ':a;N;$!ba;s/\n/\\n/g' test/data-samples/publicWrapKey.pem)" \
+                --wrappedKid "{key_json["wrappedKid"]}"
+        """)
         if status_code != 202:
             break
     assert status_code == 200

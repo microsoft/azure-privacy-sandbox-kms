@@ -5,6 +5,7 @@
 
 REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../../..")"
 
+# Uses a CCF governance proposal to add a new member to the network
 ccf-member-add-gov() {
 
     cert_path=$1
@@ -50,6 +51,7 @@ ccf-member-add-gov() {
     )
 }
 
+# Uses the ACL Endpoint to add a new member to the network
 ccf-member-add-acl() {
     local member_id=$1
     local roles=$2

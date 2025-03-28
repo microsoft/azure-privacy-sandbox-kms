@@ -11,6 +11,20 @@ cert-fingerprint() {
 
 acl-up() {
 
+    force_recreate=false
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --force-recreate)
+                force_recreate=true
+                shift
+                ;;
+            *)
+                echo "Unknown parameter: $1"
+                exit 1
+                ;;
+        esac
+    done
+
     source $REPO_ROOT/services/cacitesting.env
     source $REPO_ROOT/scripts/ccf/member/create.sh
     source $REPO_ROOT/scripts/ccf/member/add.sh
@@ -26,26 +40,43 @@ acl-up() {
     export WORKSPACE=~/$DEPLOYMENT_NAME.aclworkspace
     mkdir -p $WORKSPACE/proposals
 
-    # Create a member cert
     export KMS_MEMBER_CERT_PATH="$WORKSPACE/member0_cert.pem"
     export KMS_MEMBER_PRIVK_PATH="$WORKSPACE/member0_privk.pem"
     export KMS_USER_CERT_PATH="$WORKSPACE/user0_cert.pem"
     export KMS_USER_PRIVK_PATH="$WORKSPACE/user0_privk.pem"
-    ccf-member-create member0
-    ccf-member-create user0
 
-    # Deploy the confidential ledger
-    # (Must be in Australia East for now to get custom endpoint support)
-    az confidentialledger create \
-        --name $DEPLOYMENT_NAME \
-        --subscription $SUBSCRIPTION \
-        --resource-group $RESOURCE_GROUP \
-        --location "AustraliaEast" \
-        --ledger-type "Public" \
-        --aad-based-security-principals ledger-role-name="Administrator" principal-id="$(az account show | jq -r '.id')" \
-        --cert-based-security-principals ledger-role-name="Administrator" cert="$(cat $KMS_MEMBER_CERT_PATH)" \
-        --cert-based-security-principals ledger-role-name="Reader" cert="$(cat $KMS_USER_CERT_PATH)"
+    # Create a member cert
+    if [[ "$force_recreate" == true || -z "$KMS_MEMBER_CERT_PATH" || -z "$KMS_MEMBER_PRIVK_PATH" ]]; then
+        ccf-member-create member0
+        force_recreate=true
+    else
+        echo "Member cert already exists, skipping creation."
+    fi
+
+    # Create a user cert
+    if [[ "$force_recreate" == true || -z "$KMS_USER_CERT_PATH" || -z "$KMS_USER_PRIVK_PATH" ]]; then
+        ccf-member-create user0
+        force_recreate=true
+    else
+        echo "User cert already exists, skipping creation."
+    fi
+
     export KMS_URL="https://$DEPLOYMENT_NAME.confidential-ledger.azure.com"
+    if [ "$force_recreate" = "true" ] || ! $(curl --silent --fail --output /dev/null -k "$KMS_URL/node/state"); then
+        # Deploy the confidential ledger
+        # (Must be in Australia East for now to get custom endpoint support)
+        az confidentialledger create \
+            --name $DEPLOYMENT_NAME \
+            --subscription $SUBSCRIPTION \
+            --resource-group $RESOURCE_GROUP \
+            --location "AustraliaEast" \
+            --ledger-type "Public" \
+            --aad-based-security-principals ledger-role-name="Administrator" principal-id="$(az account show | jq -r '.id')" \
+            --cert-based-security-principals ledger-role-name="Administrator" cert="$(cat $KMS_MEMBER_CERT_PATH)" \
+            --cert-based-security-principals ledger-role-name="Reader" cert="$(cat $KMS_USER_CERT_PATH)"
+    else
+        echo "Ledger already exists, skipping deployment."
+    fi
 
     # Save the service certificate
     curl https://identity.confidential-ledger.core.azure.com/ledgerIdentity/$DEPLOYMENT_NAME \

@@ -17,10 +17,16 @@ These commands will also see an existing network if there is one and set all env
 export USE_AKV=true
 ```
 
+## Create the member identity
+
+```
+. scripts/ccf/member/create.sh your_member_name
+```
+
 ## Add the member
 
 ```
-. scripts/ccf/member/add.sh your_member_name
+. scripts/ccf/member/add.sh $WORKSPACE/your_member_name_cert.pem
 ```
 
 ## Use the member for future proposals

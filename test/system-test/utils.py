@@ -29,6 +29,24 @@ def deploy_app_code(**kwargs):
     )
 
 
+def call_endpoint(command):
+    *response, status_code = subprocess.run(
+        command,
+        cwd=os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "..")),
+        stdout=subprocess.PIPE,
+        shell=True,
+    ).stdout.decode().splitlines()
+
+    print(f'Called "{" ".join(command)}"')
+    print(f"Response Code: {status_code}")
+    print(f'Response Body: {json.loads("".join(response) or "{}")}')
+
+    return (
+        int(status_code),
+        json.loads("".join(response) or '{}'),
+    )
+
+
 def apply_settings_policy(policy=None):
     subprocess.run(
         "./scripts/kms/settings_policy_set.sh",
