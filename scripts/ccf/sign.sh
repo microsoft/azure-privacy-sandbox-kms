@@ -16,7 +16,7 @@ ccf-sign() {
             --signing-cert ${KMS_MEMBER_CERT_PATH} \
             --signing-key ${KMS_MEMBER_PRIVK_PATH} \
             --ccf-gov-msg-type $msg_type \
-            --ccf-gov-msg-created_at $(date -Is) \
+            --ccf-gov-msg-created_at $(date -u +"%Y-%m-%dT%H:%M:%S") \
             $extra_args
     else
         creation_time=$(date -u +"%Y-%m-%dT%H:%M:%S")
