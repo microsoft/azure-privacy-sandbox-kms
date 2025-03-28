@@ -3,36 +3,47 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-jwt_issuer_fetch() {
-    curl -X POST "$(cat /kms/workspace/jwt_issuer_address)/token" \
-        | jq -r '.access_token'
+run_dummy_jwt_issuer() {
+
+  (cd test/utils/jwt && KMS_WORKSPACE=/kms/workspace nohup npm run start > nohup.out 2>&1 &)
+
+  jwt_issuer_fetch() {
+      curl -X POST "$(cat /kms/workspace/jwt_issuer_address)/token" \
+          | jq -r '.access_token'
+  }
+  declare -f jwt_issuer_fetch > $JWT_ISSUER_WORKSPACE/fetch.sh
+
+  ./scripts/wait_idp_ready.sh
 }
-export JWT_ISSUER_WORKSPACE=/kms/workspace
 
-mkdir -p workspace/proposals
-declare -f jwt_issuer_fetch > $JWT_ISSUER_WORKSPACE/fetch.sh
+run_ccf_network() {
 
-(cd test/utils/jwt && KMS_WORKSPACE=/kms/workspace nohup npm run start > nohup.out 2>&1 &)
-./scripts/wait_idp_ready.sh
+  /opt/ccf_${CCF_PLATFORM}/bin/sandbox.sh \
+    --initial-member-count 3 \
+    --initial-user-count 1 \
+    -v --http2 "$@" &
 
-/opt/ccf_${CCF_PLATFORM}/bin/sandbox.sh \
-  --initial-member-count 3 \
-  --initial-user-count 1 \
-  -v --http2 "$@" &
+  # Wait for the CCF network to start
+  until test -f workspace/sandbox_0/0.rpc_addresses && \
+    curl -k -f https://$(jq -r '.primary_rpc_interface' workspace/sandbox_0/0.rpc_addresses)/node/state && \
+    test -f workspace/sandbox_common/user0_cert.pem; do
+    sleep 1
+  done
+}
 
 export WORKSPACE=/kms/workspace
+export JWT_ISSUER_WORKSPACE=/kms/workspace
 export KMS_URL=${KMS_URL:-https://127.0.0.1:8000}
 export KMS_SERVICE_CERT_PATH=./workspace/sandbox_common/service_cert.pem
 export KMS_MEMBER_CERT_PATH=./workspace/sandbox_common/member0_cert.pem
 export KMS_MEMBER_PRIVK_PATH=./workspace/sandbox_common/member0_privk.pem
+mkdir -p workspace/proposals
 
-until test -f workspace/sandbox_0/0.rpc_addresses && \
-  curl -k -f https://$(jq -r '.primary_rpc_interface' workspace/sandbox_0/0.rpc_addresses)/node/state && \
-  test -f workspace/sandbox_common/user0_cert.pem; do
-  sleep 1
-done
+run_dummy_jwt_issuer
 
-source .venv_ccf_sandbox/bin/activate
+run_ccf_network
+
+. .venv_ccf_sandbox/bin/activate
 
 . ./scripts/kms/js_app_set.sh && propose_set_js_app
 
