@@ -6,11 +6,9 @@
 proposals() {
     curl $KMS_URL/app/proposals \
         -X POST \
-        -H "Content-Type: application/json" \
-        -d @"$@" \
+        -H "Content-Type: application/cose" \
+        --data-binary @- \
         --cacert $KMS_SERVICE_CERT_PATH \
-        --cert $KMS_MEMBER_CERT_PATH \
-        --key $KMS_MEMBER_PRIVK_PATH \
         -w '\n%{http_code}\n'
 }
 

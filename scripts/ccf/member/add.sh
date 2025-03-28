@@ -60,8 +60,7 @@ ccf-member-add-acl() {
         --cacert $KMS_SERVICE_CERT_PATH \
         -X PATCH \
         -H "Content-Type: application/merge-patch+json" \
-        --cert $KMS_MEMBER_CERT_PATH \
-        --key $KMS_MEMBER_PRIVK_PATH \
+        -H "Authorization: Bearer $(. $JWT_ISSUER_WORKSPACE/fetch.sh && jwt_issuer_fetch)" \
         -d "$(jq -n --arg member_id "$member_id" --argjson roles "$roles" '{
             user_id: $member_id,
             assignedRoles: $roles

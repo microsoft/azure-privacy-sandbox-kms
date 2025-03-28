@@ -9,6 +9,7 @@ import { IValidatorService } from "./IValidationService";
 import { UserCertValidator } from "./certs/UserCertValidator";
 import { MemberCertValidator } from "./certs/MemberCertValidator";
 import { Logger, LogContext } from "../utils/Logger";
+import { UserCoseValidator } from "./cose/UserCoseValidator";
 
 /**
  * CCF authentication policies
@@ -18,6 +19,7 @@ export enum CcfAuthenticationPolicyEnum {
   User_signature = "user_signature",
   Member_cert = "member_cert",
   Member_signature = "member_signature",
+  User_cose_sign1 = "user_cose_sign1",
   Jwt = "jwt",
 }
 
@@ -41,6 +43,10 @@ export class AuthenticationService implements IAuthenticationService {
     this.validators.set(
       CcfAuthenticationPolicyEnum.Member_cert,
       new MemberCertValidator(this.logContext),
+    );
+    this.validators.set(
+      CcfAuthenticationPolicyEnum.User_cose_sign1,
+      new UserCoseValidator(this.logContext),
     );
   }
 
