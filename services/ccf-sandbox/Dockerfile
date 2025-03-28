@@ -1,6 +1,6 @@
 ARG CCF_PLATFORM
 ARG CCF_VERSION=ccf-5.0.11
-FROM ghcr.io/microsoft/ccf/app/dev/${CCF_PLATFORM}:${CCF_VERSION}}
+FROM ghcr.io/microsoft/ccf/app/dev/${CCF_PLATFORM}:${CCF_VERSION}
 
 # Pre install CCF dependencies to speed up container start (only works in virtual mode)
 ARG CCF_PLATFORM
