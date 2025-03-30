@@ -97,6 +97,16 @@ jwt-issuer-get-policy-from-mi() {
     }'
 }
 
+jwt-issuer-get-policy-from-mi-v1() {
+    az identity show --ids $1 | jq '{
+        iss: https://sts.windows.net/\( .tenantId )/,
+        sub: .principalId,
+        name: .name,
+        idtyp: "app",
+        oid: .principalId
+    }'
+}
+
 jwt-issuer-get-policy-from-current-user() {
     jwt-issuer-get-policy-from-token ` \
         az account get-access-token \
@@ -142,6 +152,15 @@ jwt-issuer-trust() {
                 JWKS=`jwt-issuer-get-jwks-from-json \
                     $(curl https://login.microsoftonline.com/$(az identity show --ids $2 | jq -r ".tenantId")/discovery/v2.0/keys)`
                 JWT_CLAIMS=`jwt-issuer-get-policy-from-mi $2`
+                shift 2
+                ;;
+            --managed-identity-v1)
+                CA_CERT_BUNDLE_NAME="Microsoft_AAD"
+                CA_CERT_BUNDLE="$(awk '{printf "%s\\n", $0}' $REPO_ROOT/governance/jwt/aad_cert)"
+                CA_CERT_BUNDLE_NAME_FIELD="\"ca_cert_bundle_name\": \"$CA_CERT_BUNDLE_NAME\","
+                JWKS=`jwt-issuer-get-jwks-from-json \
+                    $(curl https://login.microsoftonline.com/$(az identity show --ids $2 | jq -r ".tenantId")/discovery/v2.0/keys)`
+                JWT_CLAIMS=`jwt-issuer-get-policy-from-mi-v1 $2`
                 shift 2
                 ;;
             --current-user|--aad)
