@@ -170,7 +170,7 @@ jwt-issuer-trust() {
     export ISSUER=$(echo $JWT_CLAIMS | jq -r '.iss')
 
     if [[ "$KMS_URL" == *"confidential-ledger.azure.com" ]]; then
-        ccf-member-add `az identity show --ids $2` '["Reader"]'
+        # ccf-member-add `az identity show --ids $2` '["Reader"]'
     else
         if [[ -n "$CA_CERT_BUNDLE_NAME" ]]; then
             set_ca_cert_bundle
