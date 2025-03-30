@@ -109,6 +109,12 @@ jwt-issuer-trust() {
 
     source $REPO_ROOT/scripts/ccf/member/add.sh
 
+    # Default to --demo behaviour
+    if [[ $# -eq 0 ]]; then
+        JWKS=`jwt-issuer-get-jwks-from-file $JWT_ISSUER_WORKSPACE/private.pem`
+        JWT_CLAIMS=`jwt-issuer-get-policy-from-token $(. $JWT_ISSUER_WORKSPACE/fetch.sh && jwt_issuer_fetch)`
+    fi
+
     # Parse command-line arguments
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -153,6 +159,8 @@ jwt-issuer-trust() {
                 ;;
         esac
     done
+
+
 
     export CA_CERT_BUNDLE
     export CA_CERT_BUNDLE_NAME
