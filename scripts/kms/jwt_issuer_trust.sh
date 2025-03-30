@@ -99,7 +99,7 @@ jwt-issuer-get-policy-from-mi() {
 
 jwt-issuer-get-policy-from-mi-v1() {
     az identity show --ids $1 | jq '{
-        iss: https://sts.windows.net/\( .tenantId )/,
+        iss: "https://sts.windows.net/\( .tenantId )/",
         sub: .principalId,
         name: .name,
         idtyp: "app",
