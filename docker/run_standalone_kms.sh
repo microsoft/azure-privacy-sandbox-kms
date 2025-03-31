@@ -41,7 +41,7 @@ mkdir -p workspace/proposals
 
 run_dummy_jwt_issuer
 
-run_ccf_network
+run_ccf_network "$@"
 
 . .venv_ccf_sandbox/bin/activate
 
