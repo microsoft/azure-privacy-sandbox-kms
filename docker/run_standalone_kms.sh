@@ -12,6 +12,11 @@ export JWT_ISSUER_WORKSPACE=/kms/workspace
 mkdir -p workspace/proposals
 declare -f jwt_issuer_fetch > $JWT_ISSUER_WORKSPACE/fetch.sh
 
+if ! az account show > /dev/null 2>&1; then
+  echo "No Azure CLI login detected. Logging in as a managed identity..."
+  az login --identity
+fi
+
 (cd test/utils/jwt && KMS_WORKSPACE=/kms/workspace nohup npm run start > nohup.out 2>&1 &)
 ./scripts/wait_idp_ready.sh
 
@@ -45,11 +50,11 @@ sleep 20
   --private-key-path "$JWT_ISSUER_WORKSPACE/private.pem" \
   --token "`jwt_issuer_fetch`"
 
-./scripts/kms/jwt_issuer_trust.sh --managed-identity-v1 `
+./scripts/kms/jwt_issuer_trust.sh --managed-identity-v1 "` \
   az identity show --query id -o tsv \
     --resource-group privacy-sandbox-dev \
     --name privacysandbox \
-`
+`"
 
 ./scripts/kms/endpoints/refresh.sh
 
