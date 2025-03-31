@@ -28,7 +28,7 @@ run_ccf_network() {
     curl -k -f https://$(jq -r '.primary_rpc_interface' workspace/sandbox_0/0.rpc_addresses)/node/state && \
     test -f workspace/sandbox_common/user0_cert.pem; do
     sleep 1
-  done
+  donez
 }
 
 export WORKSPACE=/kms/workspace
@@ -46,8 +46,11 @@ run_ccf_network "$@"
 . .venv_ccf_sandbox/bin/activate
 
 . ./scripts/kms/js_app_set.sh
-
-timeout 10 bash -c 'until propose_set_js_app; do sleep 1; done'
+retries=10
+until propose_set_js_app; do
+  sleep 1
+  retries=$((retries - 1))
+done
 
 ./scripts/kms/release_policy_set.sh governance/proposals/set_key_release_policy_add.json
 
