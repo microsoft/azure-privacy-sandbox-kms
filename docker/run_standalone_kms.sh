@@ -45,7 +45,9 @@ run_ccf_network "$@"
 
 . .venv_ccf_sandbox/bin/activate
 
-. ./scripts/kms/js_app_set.sh && propose_set_js_app
+. ./scripts/kms/js_app_set.sh
+
+timeout 10 bash -c 'until propose_set_js_app; do sleep 1; done'
 
 ./scripts/kms/release_policy_set.sh governance/proposals/set_key_release_policy_add.json
 
