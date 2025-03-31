@@ -45,7 +45,11 @@ sleep 20
   --private-key-path "$JWT_ISSUER_WORKSPACE/private.pem" \
   --token "`jwt_issuer_fetch`"
 
-make propose-jwt-ms-validation-policy
+./scripts/kms/jwt_issuer_trust.sh --managed-identity-v1 `
+  az identity show --query id -o tsv \
+    --resource-group privacy-sandbox-dev \
+    --name privacysandbox \
+`
 
 ./scripts/kms/endpoints/refresh.sh
 
