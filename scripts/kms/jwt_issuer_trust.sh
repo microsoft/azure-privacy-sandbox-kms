@@ -146,7 +146,7 @@ jwt-issuer-trust() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --private-key-path)
-                JWKS=`jwt-issuer-get-jwks-from-file $(cat $2)`
+                JWKS=`jwt-issuer-get-jwks-from-file "$2"`
                 shift 2
                 ;;
             --private-key-json)
