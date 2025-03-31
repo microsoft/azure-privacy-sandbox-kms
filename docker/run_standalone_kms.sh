@@ -35,6 +35,8 @@ done
 
 source .venv_ccf_sandbox/bin/activate
 
+sleep 20
+
 . ./scripts/kms/js_app_set.sh && propose_set_js_app
 
 ./scripts/kms/release_policy_set.sh governance/proposals/set_key_release_policy_add.json
