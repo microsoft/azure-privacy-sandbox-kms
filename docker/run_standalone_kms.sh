@@ -41,7 +41,9 @@ sleep 20
 
 ./scripts/kms/release_policy_set.sh governance/proposals/set_key_release_policy_add.json
 
-./scripts/kms/jwt_issuer_trust.sh
+./scripts/kms/jwt_issuer_trust.sh \
+  --private-key-path "$JWT_ISSUER_WORKSPACE/private.pem" \
+  --token "`jwt_issuer_fetch`"
 
 make propose-jwt-ms-validation-policy
 
