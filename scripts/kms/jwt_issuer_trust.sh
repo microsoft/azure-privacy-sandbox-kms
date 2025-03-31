@@ -129,7 +129,7 @@ jwt-issuer-trust() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --private-key-path)
-                JWKS=`jwt-issuer-get-jwks $(cat $2)`
+                JWKS=`jwt-issuer-get-jwks-from-file $(cat $2)`
                 shift 2
                 ;;
             --private-key-json)
@@ -198,8 +198,6 @@ jwt-issuer-trust() {
     fi
 
     set_jwt_validation_policy
-
-    set +e
 }
 
 jwt-issuer-trust "$@"
