@@ -30,8 +30,6 @@ RUN curl -fsSL https://deb.nodesource.com/setup_current.x | bash - && \
 
 RUN apt-get update && apt-get install -y gettext
 
-RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
-
 COPY . .
 COPY docker/run_standalone_kms.sh /run.sh
 COPY --from=builder /kms/dist ./dist
