@@ -3,6 +3,23 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+# ------------------------------------------------------------------------------
+#  This script allows you to configure the KMS to accept JWTs according to
+#  rules.
+#
+#  The user should be specify at a high level what to trust, for example:
+#  - Trust tokens similar to an example provided
+#  - Trust tokens corresponding to a managed identity by it's resource ID
+#  - Trust tokens corresponding to the currently logged in azure user
+#
+#  The user shouldn't need to precisely understand which CCF/application
+#  proposals are needed to achieve this, as this is a common source of
+#  confusion.
+#
+#  However equally, it should be easy to see what precisely was done to aid
+#  reproducability and understanding.
+# ------------------------------------------------------------------------------
+
 REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../..")"
 
 decode_jwt() {
@@ -178,8 +195,6 @@ jwt-issuer-trust() {
                 ;;
         esac
     done
-
-
 
     export CA_CERT_BUNDLE
     export CA_CERT_BUNDLE_NAME
