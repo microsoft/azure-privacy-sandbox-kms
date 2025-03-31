@@ -52,7 +52,7 @@ run_ccf_network
 ./scripts/kms/jwt_issuer_trust.sh --demo
 
 ./scripts/kms/jwt_issuer_trust.sh --managed-identity-v1 \
-  $(az identity show --name privacysandbox --resource-group privacy-sandbox-dev --query id -o tsv)
+  "/subscriptions/85c61f94-8912-4e82-900e-6ab44de9bdf8/resourcegroups/privacy-sandbox-dev/providers/Microsoft.ManagedIdentity/userAssignedIdentities/privacysandbox"
 
 ./scripts/kms/endpoints/refresh.sh
 
