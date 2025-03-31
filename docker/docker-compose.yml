@@ -11,4 +11,4 @@ services:
       interval: 1s
       retries: 120
     volumes:
-      - ~/.azure:/root/.azure
+      - ${HOME}/.azure/:/root/.azure/
