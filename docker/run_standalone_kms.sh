@@ -49,10 +49,15 @@ run_ccf_network
 
 ./scripts/kms/release_policy_set.sh governance/proposals/set_key_release_policy_add.json
 
-./scripts/kms/jwt_issuer_trust.sh --demo
+./scripts/kms/jwt_issuer_trust.sh \
+  --private-key-path "$JWT_ISSUER_WORKSPACE/private.pem" \
+  --token "`jwt_issuer_fetch`"
 
-./scripts/kms/jwt_issuer_trust.sh --managed-identity-v1 \
-  "/subscriptions/85c61f94-8912-4e82-900e-6ab44de9bdf8/resourcegroups/privacy-sandbox-dev/providers/Microsoft.ManagedIdentity/userAssignedIdentities/privacysandbox"
+./scripts/kms/jwt_issuer_trust.sh --managed-identity-v1 `
+  az identity show --query id -o tsv \
+    --resource-group privacy-sandbox-dev \
+    --name privacysandbox \
+`
 
 ./scripts/kms/endpoints/refresh.sh
 
