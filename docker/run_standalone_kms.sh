@@ -39,6 +39,11 @@ export KMS_MEMBER_CERT_PATH=./workspace/sandbox_common/member0_cert.pem
 export KMS_MEMBER_PRIVK_PATH=./workspace/sandbox_common/member0_privk.pem
 mkdir -p workspace/proposals
 
+if ! az account show > /dev/null 2>&1; then
+  echo "No Azure CLI login detected. Logging in as a managed identity..."
+  az login --identity
+fi
+
 run_dummy_jwt_issuer
 
 run_ccf_network "$@"
