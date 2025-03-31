@@ -28,7 +28,7 @@ run_ccf_network() {
     curl -k -f https://$(jq -r '.primary_rpc_interface' workspace/sandbox_0/0.rpc_addresses)/node/state && \
     test -f workspace/sandbox_common/user0_cert.pem; do
     sleep 1
-  donez
+  done
 }
 
 export WORKSPACE=/kms/workspace
