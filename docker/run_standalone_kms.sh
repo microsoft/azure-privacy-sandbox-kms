@@ -49,9 +49,10 @@ run_ccf_network
 
 ./scripts/kms/release_policy_set.sh governance/proposals/set_key_release_policy_add.json
 
-./scripts/kms/jwt_issuer_trust.sh
+./scripts/kms/jwt_issuer_trust.sh --demo
 
-make propose-jwt-ms-validation-policy
+./scripts/kms/jwt_issuer_trust.sh --managed-identity-v1 \
+  $(az identity show --name privacysandbox --resource-group privacy-sandbox-dev --query id -o tsv)
 
 ./scripts/kms/endpoints/refresh.sh
 
