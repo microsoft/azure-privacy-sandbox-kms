@@ -45,21 +45,22 @@ acl-up() {
     export KMS_USER_PRIVK_PATH="$WORKSPACE/user0_privk.pem"
 
     # Create a member cert
-    if [[ "$force_recreate" == true || -z "$KMS_MEMBER_CERT_PATH" || -z "$KMS_MEMBER_PRIVK_PATH" ]]; then
+    if [[ "$force_recreate" != true && -f "$KMS_MEMBER_CERT_PATH" && -f "$KMS_MEMBER_PRIVK_PATH" ]]; then
+        echo "Member cert already exists, skipping creation."
+    else
         ccf-member-create member0
         force_recreate=true
-    else
-        echo "Member cert already exists, skipping creation."
     fi
 
     # Create a user cert
-    if [[ "$force_recreate" == true || -z "$KMS_USER_CERT_PATH" || -z "$KMS_USER_PRIVK_PATH" ]]; then
+    if [[ "$force_recreate" != true && -f "$KMS_USER_CERT_PATH" && -f "$KMS_USER_PRIVK_PATH" ]]; then
+        echo "User cert already exists, skipping creation."
+    else
         ccf-member-create user0
         force_recreate=true
-    else
-        echo "User cert already exists, skipping creation."
     fi
 
+    echo "Deployment name: $DEPLOYMENT_NAME" >&2
     export KMS_URL="https://$DEPLOYMENT_NAME.confidential-ledger.azure.com"
     if [ "$force_recreate" = "true" ] || ! $(curl --silent --fail --output /dev/null -k "$KMS_URL/node/state"); then
         # Deploy the confidential ledger

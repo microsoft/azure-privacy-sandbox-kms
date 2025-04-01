@@ -6,7 +6,7 @@
 constitution-set() {
   set -e
 
-  if [[ "$KMS_URL" == *"confidential-ledger.azure.com" ]]; then
+  if [[ "$KMS_URL" == *"confidential-ledger.azure.com" || TEST_ENVIRONMENT == "ccf/acl" ]]; then
     echo "We can't set constitution when running on ACL, so skipping..."
     return 0
   fi

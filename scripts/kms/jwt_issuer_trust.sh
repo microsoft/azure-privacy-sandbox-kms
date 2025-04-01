@@ -201,7 +201,7 @@ jwt-issuer-trust() {
     export JWT_VALIDATION_POLICY="\"validation_policy\": ${JWT_CLAIMS}"
     export ISSUER=$(echo $JWT_CLAIMS | jq -r '.iss')
 
-    if [[ "$KMS_URL" == *"confidential-ledger.azure.com" ]]; then
+    if [[ "$KMS_URL" == *"confidential-ledger.azure.com" || TEST_ENVIRONMENT == "ccf/acl" ]]; then
         ccf-member-add `az account show | jq -r '.id'` '["Reader"]'
     else
         if [[ -n "$CA_CERT_BUNDLE_NAME" ]]; then

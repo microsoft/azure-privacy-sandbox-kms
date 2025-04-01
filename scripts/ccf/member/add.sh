@@ -76,7 +76,7 @@ ccf-member-add() {
     source $REPO_ROOT/scripts/ccf/member/id.sh
     source $REPO_ROOT/scripts/ccf/member/use.sh
 
-    if [[ "$KMS_URL" == *"confidential-ledger.azure.com" ]]; then
+    if [[ "$KMS_URL" == *"confidential-ledger.azure.com" || TEST_ENVIRONMENT == "ccf/acl" ]]; then
         ccf-member-add-acl "$@"
     else
         ccf-member-add-gov "$@"

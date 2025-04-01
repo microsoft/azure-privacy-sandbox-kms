@@ -1,0 +1,84 @@
+diff --git a/docker/Dockerfile b/docker/Dockerfile
+index bcbfd5f..e7d4988 100755
+--- a/docker/Dockerfile
++++ b/docker/Dockerfile
+@@ -19,24 +19,26 @@ RUN npm install && npm run build
+ 
+ # Run Image --------------------------------------------------------------------
+ 
+-# While KMS relies on running on sandbox.sh we need to use dev image
+-# FROM mcr.microsoft.com/ccf/app/run-js/${CCF_PLATFORM}:${CCF_VERSION}
+-FROM ghcr.io/microsoft/ccf/app/dev/${CCF_PLATFORM}:${CCF_VERSION}
++FROM mcr.microsoft.com/mirror/docker/library/ubuntu:22.04
+ WORKDIR /kms
+ 
++RUN apt-get update && apt-get install -y \
++    gettext \
++    python3-pip \
++    jq \
++    curl
++
+ # Install nodejs for running the dummy JWT issuer
+ RUN curl -fsSL https://deb.nodesource.com/setup_current.x | bash - && \
+     apt-get install -y nodejs
+ 
+-RUN apt-get update && apt-get install -y gettext
+-
+ RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+ 
++COPY requirements.txt ./
++RUN pip install -r requirements.txt
++
+ COPY . .
+ COPY docker/run_standalone_kms.sh /run.sh
+ COPY --from=builder /kms/dist ./dist
+ 
+-ARG CCF_PLATFORM
+-ENV CCF_PLATFORM=${CCF_PLATFORM}
+-ENV JWT_ISSUER_PORT=3000
+ CMD /bin/bash -c '/run.sh'
+\ No newline at end of file
+diff --git a/docker/run_standalone_kms.sh b/docker/run_standalone_kms.sh
+index ab628f8..d4ebf5b 100755
+--- a/docker/run_standalone_kms.sh
++++ b/docker/run_standalone_kms.sh
+@@ -17,11 +17,6 @@ if ! az account show > /dev/null 2>&1; then
+   az login --identity
+ fi
+ 
+-/opt/ccf_${CCF_PLATFORM}/bin/sandbox.sh \
+-  --initial-member-count 3 \
+-  --initial-user-count 1 \
+-  -v --http2 "$@" &
+-
+ export WORKSPACE=/kms/workspace
+ export KMS_URL=${KMS_URL:-https://127.0.0.1:8000}
+ export KMS_SERVICE_CERT_PATH=./workspace/sandbox_common/service_cert.pem
+@@ -35,10 +30,6 @@ until test -f workspace/sandbox_0/0.rpc_addresses && \
+   sleep 1
+ done
+ 
+-source .venv_ccf_sandbox/bin/activate
+-
+-sleep 20
+-
+ . ./scripts/kms/js_app_set.sh && propose_set_js_app
+ 
+ ./scripts/kms/release_policy_set.sh governance/proposals/set_key_release_policy_add.json
+diff --git a/services/ccf-sandbox/Dockerfile b/services/ccf-sandbox/Dockerfile
+index f65f1d2..c8ad34a 100644
+--- a/services/ccf-sandbox/Dockerfile
++++ b/services/ccf-sandbox/Dockerfile
+@@ -1,8 +1,8 @@
+-ARG CCF_PLATFORM
+-FROM ghcr.io/microsoft/ccf/app/dev/${CCF_PLATFORM}:ccf-5.0.11
++ARG CCF_PLATFORM=virtual
++FROM ghcr.io/microsoft/ccf/app/dev/virtual:ccf-5.0.11
+ 
+ # Pre install CCF dependencies to speed up container start (only works in virtual mode)
+-ARG CCF_PLATFORM
++ARG CCF_PLATFORM=virtual
+ SHELL ["/bin/bash", "-c"]
+ RUN apt-get install -y uuid-runtime gettext
+-RUN (ls /opt/ccf_virtual/bin/sandbox.sh && (/opt/ccf_virtual/bin/sandbox.sh & until [[ $(curl -k -s -o /dev/null -w "%{http_code}" https://127.0.0.1:8000/node/network) =~ ^(200|400)$ ]]; do sleep 1; done)) || true
++RUN (ls /opt/ccf_${CCF_PLATFORM}/bin/sandbox.sh && (/opt/ccf_${CCF_PLATFORM}/bin/sandbox.sh & until [[ $(curl -k -s -o /dev/null -w "%{http_code}" https://127.0.0.1:8000/node/network) =~ ^(200|400)$ ]]; do sleep 1; done)) || true

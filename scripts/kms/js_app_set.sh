@@ -49,7 +49,7 @@ js-app-set() {
   # Build the KMS bundle
   npm install && npm run build
 
-  if [[ "$KMS_URL" == *"confidential-ledger.azure.com" ]]; then
+  if [[ "$KMS_URL" == *"confidential-ledger.azure.com" || TEST_ENVIRONMENT == "ccf/acl" ]]; then
     call_user_defined_endpoints
   else
     propose_set_js_app
