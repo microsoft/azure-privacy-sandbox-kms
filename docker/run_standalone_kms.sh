@@ -4,7 +4,7 @@
 # Licensed under the MIT license.
 
 jwt_issuer_fetch() {
-    curl -X POST "$(cat /kms/workspace/jwt_issuer_address)/token" \
+    curl -X POST "$(cat $JWT_ISSUER_WORKSPACE/jwt_issuer_address)/token" \
         | jq -r '.access_token'
 }
 export JWT_ISSUER_WORKSPACE=/kms/workspace
@@ -16,9 +16,6 @@ if ! az account show > /dev/null 2>&1; then
   echo "No Azure CLI login detected. Logging in as a managed identity..."
   az login --identity
 fi
-
-(cd test/utils/jwt && KMS_WORKSPACE=/kms/workspace nohup npm run start > nohup.out 2>&1 &)
-./scripts/wait_idp_ready.sh
 
 /opt/ccf_${CCF_PLATFORM}/bin/sandbox.sh \
   --initial-member-count 3 \
@@ -33,7 +30,7 @@ export KMS_MEMBER_PRIVK_PATH=./workspace/sandbox_common/member0_privk.pem
 
 # Wait for the CCF network to start
 until test -f workspace/sandbox_0/0.rpc_addresses && \
-  curl -k -f https://$(jq -r '.primary_rpc_interface' workspace/sandbox_0/0.rpc_addresses)/node/state && \
+  curl -k -f -s https://$(jq -r '.primary_rpc_interface' workspace/sandbox_0/0.rpc_addresses)/node/state && \
   test -f workspace/sandbox_common/user0_cert.pem; do
   sleep 1
 done
