@@ -13,7 +13,12 @@ services:
       /bin/bash -c '
         /opt/ccf_virtual/bin/sandbox.sh --http2 \
           --initial-member-count 1 \
-          --initial-user-count 1
+          --initial-user-count 1 &
+        while [ ! -f /workspace/sandbox_common/user0_cert.pem ]; do
+          sleep 1
+        done
+        cp /workspace/sandbox_common/*.pem /workspace/
+        sleep infinity
       '
     network_mode: host
     healthcheck:
