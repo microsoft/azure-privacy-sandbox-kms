@@ -91,7 +91,6 @@ ccf-sandbox-local-scale-nodes() {
 
     # Scale the CCF node containers
     docker compose \
-        -f $REPO_ROOT/services/docker-compose.yml \
         up ccf-sandbox-joiner \
             --scale ccf-sandbox-joiner=$((node_count - 1)) \
             --wait

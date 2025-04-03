@@ -3,7 +3,7 @@
 set -e
 
 if [ "$DEPLOYMENT_ENV" == "local" ]; then
-    docker compose -f services/docker-compose.yml exec ccf-sandbox /bin/bash -c 'tail -f workspace/sandbox_0/out'
+    docker compose exec ccf-sandbox /bin/bash -c 'tail -f workspace/sandbox_0/out'
 elif [ "$DEPLOYMENT_ENV" == "cloud" ]; then
     echo cloud
 else

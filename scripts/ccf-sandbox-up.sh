@@ -7,7 +7,7 @@ REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/..")"
 mkdir -p $WORKSPACE
 
 if [ "$DEPLOYMENT_ENV" == "local" ]; then
-    docker compose -f services/docker-compose.yml up ccf-sandbox --wait
+    docker compose up ccf-sandbox --wait
 
 elif [ "$DEPLOYMENT_ENV" == "cloud" ]; then
     source $REPO_ROOT/services/cacitesting.env
