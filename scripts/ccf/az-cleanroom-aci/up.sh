@@ -17,7 +17,6 @@ az-cleanroom-aci-get-url() {
 az-cleanroom-aci-up() {
     set -e
 
-    source $REPO_ROOT/services/cacitesting.env
     DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-$1}
     if [ -z "$DEPLOYMENT_NAME" ]; then
         read -p "Enter deployment name: " DEPLOYMENT_NAME

@@ -25,7 +25,6 @@ acl-up() {
         esac
     done
 
-    source $REPO_ROOT/services/cacitesting.env
     source $REPO_ROOT/scripts/ccf/member/create.sh
     source $REPO_ROOT/scripts/ccf/member/add.sh
 
