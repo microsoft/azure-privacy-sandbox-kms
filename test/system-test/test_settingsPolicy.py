@@ -20,6 +20,11 @@ def test_settingsPolicy_with_no_policy(setup_kms):
     }
 
 
+@pytest.mark.xfail(
+    os.getenv("TEST_ENVIRONMENT", "ccf/sandbox_local") == "ccf/sandbox_local",
+    strict=True,
+    reason="We now check ACL role, so user and member certs are both accepted on sandbox local",
+)
 def test_set_settingsPolicy_with_reader(setup_kms, monkeypatch):
 
     # Temporarily use the user cert as the member cert
