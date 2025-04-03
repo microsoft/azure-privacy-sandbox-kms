@@ -9,6 +9,7 @@ REPO_ROOT="$(realpath "$THIS_DIR/../../..")"
 az-cleanroom-aci-down() {
     set -e
 
+    . .env
     DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-$1}
     if [ -z "$DEPLOYMENT_NAME" ]; then
         read -p "Enter deployment name: " DEPLOYMENT_NAME

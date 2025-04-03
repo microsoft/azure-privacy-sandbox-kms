@@ -3,6 +3,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+. .env
+
 persistent_resources=(
     "azurekms:Microsoft.ContainerRegistry/registries"
     "azure-key-management-service-id:Microsoft.ManagedIdentity/userAssignedIdentities"

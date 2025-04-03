@@ -25,6 +25,7 @@ acl-up() {
         esac
     done
 
+    . .env
     source $REPO_ROOT/scripts/ccf/member/create.sh
     source $REPO_ROOT/scripts/ccf/member/add.sh
 

@@ -8,6 +8,7 @@ REPO_ROOT="$(realpath "$THIS_DIR/../../..")"
 
 az-cleanroom-aci-scale-nodes() {
 
+    . .env
     if [ -n "$1" ] && [ "$1" != "-n" ] && [ "$1" != "--node-count" ]; then
         DEPLOYMENT_NAME="$1"
         shift
