@@ -64,20 +64,20 @@ start-idp:  ## 🏃 Start the idp for testing jwt
 # Start hosting the application using `sandbox.sh` and enable custom JWT authentication
 start-host: stop-host  ## 🏃 Start the CCF network using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
-	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh --build && \
-	source ./scripts/kms/js_app_set.sh && \
-	source ./scripts/kms/constitution_set.sh \
+	MEMBER_COUNT=${MEMBER_COUNT} . ./scripts/ccf/sandbox_local/up.sh --build && \
+	./scripts/kms/js_app_set.sh && \
+	./scripts/kms/constitution_set.sh \
 		--resolve ./governance/constitution/resolve/auto_accept.js
 
 start-host-idp: stop-host stop-idp build ## 🏃 Start the CCF network && idp using Sandbox.sh
 	@echo -e "\e[34m$@\e[0m" || true
 	@echo "Executing: $(COMMAND)"
 	MEMBER_COUNT=${MEMBER_COUNT} source ./scripts/ccf/sandbox_local/up.sh --build && \
-	source ./scripts/jwt_issuer/demo/up.sh --build && \
-	source scripts/kms/js_app_set.sh && \
-	source ./scripts/kms/constitution_set.sh \
+	. ./scripts/jwt_issuer/demo/up.sh --build && \
+	./scripts/kms/js_app_set.sh && \
+	./scripts/kms/constitution_set.sh \
 		--resolve ./governance/constitution/resolve/auto_accept.js && \
-	source scripts/kms/jwt_issuer_trust.sh
+	./scripts/kms/jwt_issuer_trust.sh
 
 demo: stop-all start-host-idp ## 🎬 Demo the KMS Application in the Sandbox
 	@echo -e "\e[34m$@\e[0m" || true
