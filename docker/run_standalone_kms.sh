@@ -55,5 +55,4 @@ sleep 20
 
 ./scripts/kms/endpoints/refresh.sh
 
-# tail -f /kms/workspace/sandbox_0/out
-sleep infinity
+tail -f /kms/workspace/sandbox_0/out
