@@ -108,7 +108,6 @@ jwt-issuer-get-policy-from-mi() {
     az identity show --ids $1 | jq '{
         iss: "https://login.microsoftonline.com/\( .tenantId )/v2.0",
         sub: .principalId,
-        name: .name,
         idtyp: "app",
         oid: .principalId
     }'
@@ -118,7 +117,6 @@ jwt-issuer-get-policy-from-mi-v1() {
     az identity show --ids $1 | jq '{
         iss: "https://sts.windows.net/\( .tenantId )/",
         sub: .principalId,
-        name: .name,
         idtyp: "app",
         oid: .principalId
     }'
