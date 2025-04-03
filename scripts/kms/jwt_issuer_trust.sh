@@ -122,7 +122,7 @@ jwt-issuer-get-policy-from-mi-v1() {
     }'
 }
 
-jwt-issuer-get-policy-from-current-user() {
+jwt-issuer-get-policy-from-current-aad-user() {
     jwt-issuer-get-policy-from-token ` \
         az account get-access-token \
             --resource https://confidential-ledger.azure.com \
@@ -178,13 +178,13 @@ jwt-issuer-trust() {
                 JWT_CLAIMS=`jwt-issuer-get-policy-from-mi-v1 $2`
                 shift 2
                 ;;
-            --current-user|--aad)
+            --current-aad-user|--aad)
                 CA_CERT_BUNDLE_NAME="Microsoft_AAD"
                 CA_CERT_BUNDLE="$(awk '{printf "%s\\n", $0}' $REPO_ROOT/governance/jwt/aad_cert)"
                 CA_CERT_BUNDLE_NAME_FIELD="\"ca_cert_bundle_name\": \"$CA_CERT_BUNDLE_NAME\","
                 JWKS=`jwt-issuer-get-jwks-from-json \
                     $(curl https://login.microsoftonline.com/$(az account show | jq -r ".tenantId")/discovery/v2.0/keys)`
-                JWT_CLAIMS=`jwt-issuer-get-policy-from-current-user`
+                JWT_CLAIMS=`jwt-issuer-get-policy-from-current-aad-user`
                 shift 1
                 ;;
             *)
