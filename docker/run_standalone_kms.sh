@@ -41,7 +41,7 @@ source .venv_ccf_sandbox/bin/activate
       | jq -r '.access_token' \
   `"
 
-./scripts/kms/jwt_issuer_trust.sh --managed-identity-v1 "` \
+./scripts/kms/jwt_issuer_trust.sh --managed-identity "` \
   az identity show --query id -o tsv \
     --resource-group privacy-sandbox-dev \
     --name privacysandbox \
