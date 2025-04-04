@@ -3,7 +3,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
-source services/cacitesting.env
+. .env
 
 persistent_resources=(
     "azurekms:Microsoft.ContainerRegistry/registries"
