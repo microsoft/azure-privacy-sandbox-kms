@@ -11,6 +11,7 @@ services:
           pip install -q -U -r "/opt/ccf_virtual/bin/requirements.txt"
     command: |
       /bin/bash -c '
+        rm -rf /workspace/sandbox*
         /opt/ccf_virtual/bin/sandbox.sh --http2 \
           --initial-member-count 1 \
           --initial-user-count 1 &
