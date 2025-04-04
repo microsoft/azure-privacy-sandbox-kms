@@ -30,7 +30,7 @@ services:
       interval: 1s
       retries: 120
     volumes:
-      - ./workspace:/workspace
+      - ${KMS_WORKSPACE}:/workspace
 
   jwt-issuer:
     build:
