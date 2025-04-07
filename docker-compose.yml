@@ -1,32 +1,55 @@
-version: "3"
-
 services:
-  ccf-kms:
-    image: ccf-kms
-    container_name: ccf-kms
+
+  ccf-sandbox:
     build:
-      context: .
-      dockerfile: .devcontainer/Dockerfile.devcontainer
-    command: /opt/ccf_${CCF_PLATFORM:-"virtual"}/bin/sandbox.sh -v --js-app-bundle ./dist/ -n local://0.0.0.0:8000 -n local://0.0.0.0:8001
-    #command: tail -f /dev/null
+      dockerfile_inline: |
+        FROM ghcr.io/microsoft/ccf/app/dev/virtual:${CCF_VERSION}
+        RUN python3 -m venv .venv_ccf_sandbox && \
+          . .venv_ccf_sandbox/bin/activate && \
+          pip install -U -q pip && \
+          pip install -q -U "ccf==$(sed 's/^ccf-//' "/opt/ccf_virtual/share/VERSION_LONG")" && \
+          pip install -q -U -r "/opt/ccf_virtual/bin/requirements.txt"
+    command: |
+      /bin/bash -c '
+        rm -rf /workspace/sandbox*
+        /opt/ccf_virtual/bin/sandbox.sh --http2 \
+          --initial-member-count 1 \
+          --initial-user-count 1 &
+        while [ ! -f /workspace/sandbox_common/user0_cert.pem ]; do
+          sleep 1
+        done
+        cp /workspace/sandbox_common/*.pem /workspace/
+        sleep infinity
+      '
+    network_mode: host
+    healthcheck:
+      test: [
+        "CMD-SHELL",
+        "curl -k -s -f https://localhost:8000/node/state && test -f /workspace/sandbox_common/user0_cert.pem"
+      ]
+      interval: 1s
+      retries: 120
     volumes:
-      - ./vol/workspace:/app/workspace
-    ports:
-      - 8000:8000
-      - 8001:8001
-    extra_hosts:
-      host.docker.internal: host-gateway
-    networks:
-      chainnet:
-        ipv4_address: ${CCF1_IP}
-networks:
-  chainnet:
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-        - subnet: ${DOCKER_SUBNET}
-#volumes:
-#  debug:
-#  pgdata-audit:
-#  pgdata-build:
+      - ${KMS_WORKSPACE}:/workspace
+
+  jwt-issuer:
+    build:
+      context: test/utils/jwt
+      dockerfile_inline: |
+        FROM node:18-alpine3.16
+        RUN apk add curl # for healthcheck
+        COPY package*.json ./
+        RUN npm install
+        COPY . .
+        RUN npm run build
+    command: node dist/index.js
+    network_mode: host
+    environment:
+      - KMS_WORKSPACE=/workspace
+      - JWT_ISSUER_PORT=${JWT_ISSUER_PORT:-}
+    healthcheck:
+      test: "curl -k --fail -X POST $(cat /workspace/jwt_issuer_address)/token"
+      interval: 1s
+      retries: 120
+    volumes:
+      - ${JWT_ISSUER_WORKSPACE}:/workspace

@@ -22,6 +22,7 @@ RUN npm install && npm run build
 # While KMS relies on running on sandbox.sh we need to use dev image
 # FROM mcr.microsoft.com/ccf/app/run-js/${CCF_PLATFORM}:${CCF_VERSION}
 FROM ghcr.io/microsoft/ccf/app/dev/${CCF_PLATFORM}:${CCF_VERSION}
+ARG CCF_PLATFORM
 WORKDIR /kms
 
 # Install nodejs for running the dummy JWT issuer
@@ -29,6 +30,16 @@ RUN curl -fsSL https://deb.nodesource.com/setup_current.x | bash - && \
     apt-get install -y nodejs
 
 RUN apt-get update && apt-get install -y gettext
+
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
+# Prebuild python venv to speed up start time
+RUN python3 -m venv .venv_ccf_sandbox && \
+    . .venv_ccf_sandbox/bin/activate && \
+    pip install -U -q pip && \
+    VERSION=$(sed 's/^ccf-//' "/opt/ccf_${CCF_PLATFORM}/share/VERSION_LONG") && \
+    pip install -q -U "ccf==$VERSION" && \
+    pip install -q -U -r "/opt/ccf_${CCF_PLATFORM}/bin/requirements.txt"
 
 COPY . .
 COPY docker/run_standalone_kms.sh /run.sh
