@@ -12,11 +12,8 @@ ccf-propose() {
     proposal=$1
     USE_AKV=${USE_AKV:-false}
 
-    source $REPO_ROOT/scripts/ccf/get-primary.sh
-    KMS_PRIMARY=$(ccf-get-primary $KMS_URL)
-
     echo "Proposing: $proposal" >&2
-    echo "  to $KMS_PRIMARY" >&2
+    echo "  to $KMS_URL" >&2
     echo "    cert: $KMS_SERVICE_CERT_PATH" >&2
 
     echo "  as $KMS_MEMBER_CERT_PATH" >&2
@@ -28,7 +25,7 @@ ccf-propose() {
 
     resp=$(mktemp)
     ccf-sign $proposal \
-        | curl $KMS_PRIMARY/gov/proposals \
+        | curl $KMS_URL/gov/proposals \
             --cacert $KMS_SERVICE_CERT_PATH \
             --data-binary @- \
             -H "Content-Type: application/cose" \
