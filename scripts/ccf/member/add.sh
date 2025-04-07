@@ -60,7 +60,7 @@ ccf-member-add-acl() {
         --cacert $KMS_SERVICE_CERT_PATH \
         -X PATCH \
         -H "Content-Type: application/merge-patch+json" \
-        -H "Authorization: Bearer $(. $JWT_ISSUER_WORKSPACE/fetch.sh && jwt_issuer_fetch)" \
+        -H "Authorization: Bearer $(az account get-access-token --resource https://confidential-ledger.azure.com | jq -r '.accessToken')" \
         -d "$(jq -n --arg member_id "$member_id" --argjson roles "$roles" '{
             user_id: $member_id,
             assignedRoles: $roles
