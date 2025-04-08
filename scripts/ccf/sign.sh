@@ -3,6 +3,13 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+# This script outputs a COSE Sign1 document, switching on the env variable
+# `USE_AKV`.
+#  - In the local key case, doing a simple one step signing.
+#  - In the AKV key case, using the two step process which prepares the document
+#    given the payload and signing cert, then uses AKV to sign the JSON output, and
+#    then finally calling finish to output the final COSE Sign1 document.
+
 ccf-sign() {
 
     content=$1
