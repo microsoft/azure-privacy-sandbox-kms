@@ -4,6 +4,8 @@
 
 The Google Privacy Sandbox initiative aims to establish web standards that allow user data access while preserving privacy. It seeks to eliminate third-party cookies and reduce covert tracking, replacing them with privacy-centric tools for online advertising and analytics. Developed collaboratively in public forums with industry stakeholders, these proposals undergo rigorous testing and refinement based on community feedback.
 
+This implementation is designed to run on a CCF network via Azure Confidential Ledger, running on other CCF platforms may behave differently.
+
 ## Key Management System (KMS)
 
 Central to the Privacy Sandbox is robust encryption, ensuring that browsers no longer rely on third-party cookies or share user information directly. Instead, browsers join 'interest groups' during web navigation. These groups, devoid of personal data, tag interests for privacy-conscious ad targeting.
