@@ -15,7 +15,8 @@ export class UserCoseValidator implements IValidatorService {
   }
 
   // This code comes from microsoft/ccf:tests/npm-app/src/endpoints/auth.ts
-  // CCF handles the validation of the COSE document
+  // CCF handles the validation of the COSE document via
+  // UserCOSESign1AuthnPolicy::_authenticate
   validate(request: ccfapp.Request<any>): ServiceResult<string> {
     if (request.caller === null || request.caller === undefined) {
       return ServiceResult.Failed({
