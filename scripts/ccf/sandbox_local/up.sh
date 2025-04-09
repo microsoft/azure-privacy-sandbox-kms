@@ -17,11 +17,17 @@ ccf-sandbox-local-up() {
     mkdir -p $WORKSPACE/proposals
 
     export KMS_URL="https://127.0.0.1:8000"
-    export KMS_SERVICE_CERT_PATH="$WORKSPACE/sandbox_common/service_cert.pem"
-    export KMS_USER_CERT_PATH="$WORKSPACE/sandbox_common/user0_cert.pem"
-    export KMS_USER_PRIVK_PATH="$WORKSPACE/sandbox_common/user0_privk.pem"
-    export KMS_MEMBER_CERT_PATH="$WORKSPACE/sandbox_common/member0_cert.pem"
-    export KMS_MEMBER_PRIVK_PATH="$WORKSPACE/sandbox_common/member0_privk.pem"
+    export KMS_SERVICE_CERT_PATH="$WORKSPACE/service_cert.pem"
+    export KMS_USER_CERT_PATH="$WORKSPACE/user0_cert.pem"
+    export KMS_USER_PRIVK_PATH="$WORKSPACE/user0_privk.pem"
+    export KMS_MEMBER_CERT_PATH="$WORKSPACE/member0_cert.pem"
+    export KMS_MEMBER_PRIVK_PATH="$WORKSPACE/member0_privk.pem"
+
+    cp $WORKSPACE/sandbox_common/service_cert.pem $KMS_SERVICE_CERT_PATH
+    cp $WORKSPACE/sandbox_common/user0_cert.pem $KMS_USER_CERT_PATH
+    cp $WORKSPACE/sandbox_common/user0_privk.pem $KMS_USER_PRIVK_PATH
+    cp $WORKSPACE/sandbox_common/member0_cert.pem $KMS_MEMBER_CERT_PATH
+    cp $WORKSPACE/sandbox_common/member0_privk.pem $KMS_MEMBER_PRIVK_PATH
 
     set +e
 }

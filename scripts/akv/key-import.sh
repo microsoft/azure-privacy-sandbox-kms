@@ -21,7 +21,7 @@ akv-key-import() {
     az keyvault key import \
         --vault-name $AKV_VAULT_NAME \
         --name $AKV_KEY_NAME \
-        --pem-file $KMS_MEMBER_PRIVK_PATH
+        --pem-file $WORKSPACE/${AKV_KEY_NAME}_privk.pem
 
     set +e
 }

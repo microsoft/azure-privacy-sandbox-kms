@@ -21,7 +21,7 @@ fi
   --initial-member-count 3 \
   --initial-user-count 1 \
   -v --http2 "$@" &
-
+  
 # Wait for the CCF network to start
 until curl -k -f -s $KMS_URL/node/state && \
   test -f workspace/sandbox_common/user0_cert.pem; do
@@ -46,7 +46,6 @@ source .venv_ccf_sandbox/bin/activate
     --resource-group privacy-sandbox-dev \
     --name privacysandbox \
 `"
-
 ./scripts/kms/endpoints/refresh.sh
 
 sleep infinity

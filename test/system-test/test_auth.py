@@ -14,6 +14,11 @@ def test_auth_member_cert(setup_kms):
     assert status_code == 200
     assert auth_json["auth"]["policy"] == "member_cert"
 
+@pytest.mark.xfail(
+    os.getenv("TEST_ENVIRONMENT") == "ccf/acl" and os.getenv("USE_AKV") == "true",
+    strict=True,
+    reason="On ACL, we don't ever store local keys in AKV",
+)
 def test_auth_user_cert(setup_kms):
     status_code, auth_json = auth(auth="user_cert")
     assert status_code == 200

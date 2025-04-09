@@ -28,6 +28,7 @@ acl-up() {
     . .env
     source $REPO_ROOT/scripts/ccf/member/create.sh
     source $REPO_ROOT/scripts/ccf/member/add.sh
+    source $REPO_ROOT/scripts/ccf/member/use.sh
 
     DEPLOYMENT_NAME=${DEPLOYMENT_NAME:-$1}
     if [ -z "$DEPLOYMENT_NAME" ]; then
@@ -91,6 +92,7 @@ acl-up() {
     ccf-member-add \
         $(cert-fingerprint $KMS_USER_CERT_PATH) '["Reader"]'
 
+    ccf-member-use member0
 }
 
 acl-up "$@"
@@ -103,5 +105,6 @@ jq -n '{
     KMS_MEMBER_CERT_PATH: env.KMS_MEMBER_CERT_PATH,
     KMS_MEMBER_PRIVK_PATH: env.KMS_MEMBER_PRIVK_PATH,
     KMS_USER_CERT_PATH: env.KMS_USER_CERT_PATH,
-    KMS_USER_PRIVK_PATH: env.KMS_USER_PRIVK_PATH
+    KMS_USER_PRIVK_PATH: env.KMS_USER_PRIVK_PATH,
+    AKV_KEY_NAME: env.AKV_KEY_NAME
 }'

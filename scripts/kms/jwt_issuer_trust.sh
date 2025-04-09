@@ -21,6 +21,8 @@
 # ------------------------------------------------------------------------------
 
 REPO_ROOT="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../..")"
+source $REPO_ROOT/scripts/ccf/sign.sh
+source $REPO_ROOT/scripts/ccf/member/use.sh
 
 decode_jwt() {
 
@@ -67,9 +69,17 @@ set_jwt_validation_policy() {
   envsubst < $REPO_ROOT/governance/proposals/set_jwt_validation_policy.json \
     | jq > $WORKSPACE/proposals/set_jwt_validation_policy.json
 
-  # Submit the proposal
-  $REPO_ROOT/scripts/kms/endpoints/proposals.sh \
-    $WORKSPACE/proposals/set_jwt_validation_policy.json
+  (
+    # If running on sandbox_local, use the user cert because KMS can only
+    # authenticate user COSE signature
+    if [[ "$KMS_URL" == "https://127.0.0.1:8000" ]]; then
+      ccf-member-use user0
+    fi
+
+    # Submit the proposal
+    ccf-sign $WORKSPACE/proposals/set_jwt_validation_policy.json \
+      | $REPO_ROOT/scripts/kms/endpoints/proposals.sh
+  )
 }
 
 jwt-issuer-get-jwks-from-file() {
