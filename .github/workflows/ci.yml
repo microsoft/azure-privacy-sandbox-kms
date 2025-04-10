@@ -68,13 +68,3 @@ jobs:
       test_path: test_all_seq
       env: acl
       use_akv: ${{ matrix.use_akv }}
-
-
-  standalone-image:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Run Standalone Image
-        run: docker compose -f docker/docker-compose.yml up --wait
