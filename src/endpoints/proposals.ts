@@ -4,6 +4,7 @@
 import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../utils/ServiceResult";
 import { LogContext, Logger } from "../utils/Logger";
+import { getCoseProtectedHeader } from "../utils/cose";
 import { actions } from '../actions/actions';
 import { ServiceRequest } from "../utils/ServiceRequest";
 import { ccf } from "@microsoft/ccf-app/global";
@@ -135,6 +136,21 @@ export const proposals = (
     const cosePayload = (request.caller as ccfapp.UserCOSESign1AuthnIdentity).cose.content
     let requestBody = ccf.bufToJsonCompatible(cosePayload);
 
+    // Ensure the proposal was created after the last accepted proposal
+    const currentProposalCreatedAt = getCoseProtectedHeader(request.body.arrayBuffer())["ccf.gov.msg.created_at"];
+    proposalsPolicyMap.forEach((proposal, proposalId) => {
+        const previousProposalCreatedAt = getCoseProtectedHeader(proposal)["ccf.gov.msg.created_at"]
+        if (currentProposalCreatedAt < previousProposalCreatedAt) {
+            const errorMessage = `Proposal created before (${currentProposalCreatedAt}) last accepted proposal (${previousProposalCreatedAt})`;
+            Logger.error(errorMessage, logContext);
+            return ServiceResult.Failed<IProposalResult[]>(
+                { errorMessage: errorMessage },
+                400,
+                logContext,
+            );
+        }
+    });
+
     // Extract the proposal from request
     let proposalActions: IProposalsAction[] = [];
     if (requestBody && requestBody["actions"]) {
@@ -166,7 +182,7 @@ export const proposals = (
     }
 
     // Save the proposal to the table
-    proposalsPolicyMap.set(ccf.strToBuf(digest(requestBody)), cosePayload);
+    proposalsPolicyMap.set(ccf.strToBuf(digest(requestBody)), request.body.arrayBuffer());
 
     return ServiceResult.Succeeded<IProposalResult[]>(proposalResults, logContext);
 }
