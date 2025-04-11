@@ -139,24 +139,27 @@ export const proposals = (
         (request.caller as ccfapp.UserCOSESign1AuthnIdentity).cose.content
     );
 
-    // Create a map from created time to proposal ID
+    // Create a map from created time to proposal ID for historical proposals
     const createdTimeToProposalIdMap = new Map<number, ArrayBuffer>();
+    proposalsPolicyMap.forEach((proposal, proposalId) => {
+        createdTimeToProposalIdMap.set(
+            getCoseProtectedHeader(proposal)["ccf.gov.msg.created_at"],
+            proposalId
+        );
+    });
 
     // Ensure the proposal was created after the last accepted proposal
     const currentProposalCreatedAt = getCoseProtectedHeader(request.body.arrayBuffer())["ccf.gov.msg.created_at"];
-    proposalsPolicyMap.forEach((proposal, proposalId) => {
-        const previousProposalCreatedAt = getCoseProtectedHeader(proposal)["ccf.gov.msg.created_at"]
-        createdTimeToProposalIdMap.set(previousProposalCreatedAt, proposalId);
-        if (currentProposalCreatedAt <= previousProposalCreatedAt) {
-            const errorMessage = `Proposal created before (${currentProposalCreatedAt}) last accepted proposal (${previousProposalCreatedAt})`;
+    const lastAcceptedProposalCreatedAt = Math.max(...Array.from(createdTimeToProposalIdMap.keys()));
+    if (currentProposalCreatedAt <= lastAcceptedProposalCreatedAt) {
+        const errorMessage = `Proposal created before (${currentProposalCreatedAt}) last accepted proposal (${lastAcceptedProposalCreatedAt})`;
             Logger.error(errorMessage, logContext);
             return ServiceResult.Failed<IProposalResult[]>(
                 { errorMessage: errorMessage },
                 400,
                 logContext,
             );
-        }
-    });
+    }
 
     // Extract the proposal from request
     let proposalActions: IProposalsAction[] = [];
