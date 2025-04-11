@@ -135,15 +135,15 @@ export const proposals = (
     }
 
     // Handle a COSE Sign1 payload
-    const cosePayload = (request.caller as ccfapp.UserCOSESign1AuthnIdentity).cose.content
-    let requestBody = ccf.bufToJsonCompatible(cosePayload);
-
-    // Ensure the proposal was created after the last accepted proposal
-    const currentProposalCreatedAt = getCoseProtectedHeader(request.body.arrayBuffer())["ccf.gov.msg.created_at"];
+    let requestBody = ccf.bufToJsonCompatible(
+        (request.caller as ccfapp.UserCOSESign1AuthnIdentity).cose.content
+    );
 
     // Create a map from created time to proposal ID
     const createdTimeToProposalIdMap = new Map<number, ArrayBuffer>();
 
+    // Ensure the proposal was created after the last accepted proposal
+    const currentProposalCreatedAt = getCoseProtectedHeader(request.body.arrayBuffer())["ccf.gov.msg.created_at"];
     proposalsPolicyMap.forEach((proposal, proposalId) => {
         const previousProposalCreatedAt = getCoseProtectedHeader(proposal)["ccf.gov.msg.created_at"]
         createdTimeToProposalIdMap.set(previousProposalCreatedAt, proposalId);
@@ -196,6 +196,7 @@ export const proposals = (
     );
     createdTimeToProposalIdMap.set(currentProposalCreatedAt, proposalId);
 
+    // Keep the last N proposals
     const sortedCreatedTimes = Array.from(createdTimeToProposalIdMap.keys()).sort((a, b) => a - b);
     for (let i = 0; i < sortedCreatedTimes.length - proposalsToKeep; i++) {
         proposalsPolicyMap.delete(createdTimeToProposalIdMap.get(sortedCreatedTimes[i])!);

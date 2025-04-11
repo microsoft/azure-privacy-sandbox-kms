@@ -22,7 +22,6 @@ function parseCoseDocument(coseArrayBuffer: ArrayBuffer): any[] {
         Logger.error(`Failed to decode COSE document: ${error}`, logContext);
         throw error;
     }
-    Logger.info("Decoded COSE document", logContext);
 
     return decodedCose.value;
 }
