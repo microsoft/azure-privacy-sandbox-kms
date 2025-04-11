@@ -20,6 +20,8 @@ import { proposalsPolicyMap } from "../repositories/Maps";
 // This is a module of code provided by ACL.
 declare const acl: any;
 
+const proposalsToKeep = 5;
+
 function digest(jsonLike) {
     return Array.from(new Uint8Array(
         ccf.crypto.digest("SHA-256", ccf.jsonCompatibleToBuf(jsonLike))
@@ -138,8 +140,13 @@ export const proposals = (
 
     // Ensure the proposal was created after the last accepted proposal
     const currentProposalCreatedAt = getCoseProtectedHeader(request.body.arrayBuffer())["ccf.gov.msg.created_at"];
+
+    // Create a map from created time to proposal ID
+    const createdTimeToProposalIdMap = new Map<number, ArrayBuffer>();
+
     proposalsPolicyMap.forEach((proposal, proposalId) => {
         const previousProposalCreatedAt = getCoseProtectedHeader(proposal)["ccf.gov.msg.created_at"]
+        createdTimeToProposalIdMap.set(previousProposalCreatedAt, proposalId);
         if (currentProposalCreatedAt <= previousProposalCreatedAt) {
             const errorMessage = `Proposal created before (${currentProposalCreatedAt}) last accepted proposal (${previousProposalCreatedAt})`;
             Logger.error(errorMessage, logContext);
@@ -182,7 +189,17 @@ export const proposals = (
     }
 
     // Save the proposal to the table
-    proposalsPolicyMap.set(ccf.strToBuf(digest(requestBody)), request.body.arrayBuffer());
+    const proposalId = ccf.crypto.digest("SHA-256", request.body.arrayBuffer());
+    proposalsPolicyMap.set(
+        proposalId,
+        request.body.arrayBuffer()
+    );
+    createdTimeToProposalIdMap.set(currentProposalCreatedAt, proposalId);
+
+    const sortedCreatedTimes = Array.from(createdTimeToProposalIdMap.keys()).sort((a, b) => a - b);
+    for (let i = 0; i < sortedCreatedTimes.length - proposalsToKeep; i++) {
+        proposalsPolicyMap.delete(createdTimeToProposalIdMap.get(sortedCreatedTimes[i])!);
+    }
 
     return ServiceResult.Succeeded<IProposalResult[]>(proposalResults, logContext);
 }
