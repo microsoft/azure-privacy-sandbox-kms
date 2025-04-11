@@ -140,7 +140,7 @@ export const proposals = (
     const currentProposalCreatedAt = getCoseProtectedHeader(request.body.arrayBuffer())["ccf.gov.msg.created_at"];
     proposalsPolicyMap.forEach((proposal, proposalId) => {
         const previousProposalCreatedAt = getCoseProtectedHeader(proposal)["ccf.gov.msg.created_at"]
-        if (currentProposalCreatedAt < previousProposalCreatedAt) {
+        if (currentProposalCreatedAt <= previousProposalCreatedAt) {
             const errorMessage = `Proposal created before (${currentProposalCreatedAt}) last accepted proposal (${previousProposalCreatedAt})`;
             Logger.error(errorMessage, logContext);
             return ServiceResult.Failed<IProposalResult[]>(
