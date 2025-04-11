@@ -151,7 +151,7 @@ export const proposals = (
     // Ensure the proposal was created after the last accepted proposal
     const currentProposalCreatedAt = getCoseProtectedHeader(request.body.arrayBuffer())["ccf.gov.msg.created_at"];
     const lastAcceptedProposalCreatedAt = Math.max(...Array.from(createdTimeToProposalIdMap.keys()));
-    if (currentProposalCreatedAt <= lastAcceptedProposalCreatedAt) {
+    if (currentProposalCreatedAt < lastAcceptedProposalCreatedAt) {
         const errorMessage = `Proposal created before (${currentProposalCreatedAt}) last accepted proposal (${lastAcceptedProposalCreatedAt})`;
             Logger.error(errorMessage, logContext);
             return ServiceResult.Failed<IProposalResult[]>(
