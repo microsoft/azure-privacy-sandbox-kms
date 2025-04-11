@@ -7,6 +7,7 @@ import { LogContext, Logger } from "../utils/Logger";
 import { actions } from '../actions/actions';
 import { ServiceRequest } from "../utils/ServiceRequest";
 import { ccf } from "@microsoft/ccf-app/global";
+import { proposalsPolicyMap } from "../repositories/Maps";
 
 // This file serves to emulate a simplified version CCF's governance mechanism.
 // This allows governance type operations on CCF platforms which don't expose
@@ -131,11 +132,10 @@ export const proposals = (
     }
 
     // Handle a COSE Sign1 payload
-    let requestBody = ccf.bufToJsonCompatible(
-        (request.caller as ccfapp.UserCOSESign1AuthnIdentity).cose.content
-    );
+    const cosePayload = (request.caller as ccfapp.UserCOSESign1AuthnIdentity).cose.content
+    let requestBody = ccf.bufToJsonCompatible(cosePayload);
 
-    // Extract settings policy from request
+    // Extract the proposal from request
     let proposalActions: IProposalsAction[] = [];
     if (requestBody && requestBody["actions"]) {
         proposalActions = requestBody["actions"];
@@ -164,6 +164,9 @@ export const proposals = (
             digest(request.caller || {})
         ));
     }
+
+    // Save the proposal to the table
+    proposalsPolicyMap.set(ccf.strToBuf(digest(requestBody)), cosePayload);
 
     return ServiceResult.Succeeded<IProposalResult[]>(proposalResults, logContext);
 }
