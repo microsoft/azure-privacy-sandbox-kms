@@ -72,7 +72,7 @@ acl-up() {
             --location "AustraliaEast" \
             --ledger-type "Public" \
             --aad-based-security-principals "[{ledger-role-name:Administrator,principal-id:$(az account show | jq -r '.id')}]" \
-            --cert-based-security-principals "[{ledger-role-name:Administrator,cert:$(cat $KMS_MEMBER_CERT_PAH),{ledger-role-name:Reader,cert:$(cat $KMS_USER_CERT_PATH)}]"
+            --cert-based-security-principals "[{ledger-role-name:Administrator,cert:'$(cat $KMS_MEMBER_CERT_PATH)',{ledger-role-name:Reader,cert:'$(cat $KMS_USER_CERT_PATH)'}]"
     else
         echo "Ledger already exists, skipping deployment."
     fi
