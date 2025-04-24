@@ -17,6 +17,14 @@ import { proposalsPolicyMap } from "../repositories/Maps";
 // Currently all proposals will be automatically accepted, and regulation comes
 // from which identities can successfully call this endpoint.
 
+// Like the CCF Governance endpoint, raw COSE_Sign1 proposals are saved into an
+// application table for to allow auditing of who made certain changes.
+
+// This also means we need mechanisms to protect against those historical 
+// proposals being replayed, while CCF takes the median of the last n proposal 
+// timestamps, we are happy with a stricter and simpler check that new proposals 
+// must be signed more recently than the last accepted proposal.
+
 // This is a module of code provided by ACL.
 declare const acl: any;
 
