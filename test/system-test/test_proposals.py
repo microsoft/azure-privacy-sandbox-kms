@@ -1,6 +1,6 @@
 import json
 from endpoints import proposalsGet
-from utils import apply_key_release_policy
+from utils import apply_settings_policy
 from cose.messages import CoseMessage
 
 
@@ -21,7 +21,7 @@ def test_proposals_multiple(setup_kms):
     assert len(proposals_json) == 1
 
     # Make a second proposal
-    apply_key_release_policy()
+    apply_settings_policy()
 
     # Check we recieve the expected proposal
     status_code, proposals_json = proposalsGet()
