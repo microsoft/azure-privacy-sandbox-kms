@@ -20,9 +20,9 @@ import { proposalsPolicyMap } from "../repositories/Maps";
 // Like the CCF Governance endpoint, raw COSE_Sign1 proposals are saved into an
 // application table for to allow auditing of who made certain changes.
 
-// This also means we need mechanisms to protect against those historical 
-// proposals being replayed, while CCF takes the median of the last n proposal 
-// timestamps, we are happy with a stricter and simpler check that new proposals 
+// This also means we need mechanisms to protect against those historical
+// proposals being replayed, while CCF takes the median of the last n proposal
+// timestamps, we are happy with a stricter and simpler check that new proposals
 // must be signed more recently than the last accepted proposal.
 
 // This is a module of code provided by ACL.
@@ -82,7 +82,7 @@ function isAuthType(identity: ccfapp.AuthnIdentityCommon, auth_type: string): bo
     );
 }
 
-export const proposals = (
+export const postProposals = (
   request: ccfapp.Request<IProposalsRequest>,
 ): ServiceResult<string | IProposalResult[]> => {
 
@@ -214,4 +214,33 @@ export const proposals = (
     }
 
     return ServiceResult.Succeeded<IProposalResult[]>(proposalResults, logContext);
+}
+
+export const getProposals = (
+    request: ccfapp.Request<IProposalsRequest>,
+  ): ServiceResult<string[]> => {
+    const logContext = new LogContext().appendScope("proposals");
+    let proposals: string[] = [];
+
+    // Sort the proposals by created time
+    const createdTimeToProposalIdMap = new Map<number, ArrayBuffer>();
+    proposalsPolicyMap.forEach((proposal, proposalId) => {
+        createdTimeToProposalIdMap.set(
+            getCoseProtectedHeader(proposal)["ccf.gov.msg.created_at"],
+            proposalId
+        );
+    });
+    const sortedCreatedTimes = Array.from(createdTimeToProposalIdMap.keys()).sort((a, b) => a - b);
+
+    // Build an array of proposals
+    sortedCreatedTimes.forEach((createdTime) => {
+        const proposalId = createdTimeToProposalIdMap.get(createdTime)!;
+        const proposal = proposalsPolicyMap.get(proposalId)!;
+        const bytes = new Uint8Array(proposal);
+        proposals.push(Array.from(bytes)
+            .map((byte) => byte.toString(16).padStart(2, "0"))
+            .join(""));
+    });
+
+    return ServiceResult.Succeeded(proposals, logContext)
 }
