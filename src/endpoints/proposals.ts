@@ -25,6 +25,9 @@ import { proposalsPolicyMap } from "../repositories/Maps";
 // timestamps, we are happy with a stricter and simpler check that new proposals
 // must be signed more recently than the last accepted proposal.
 
+// When calling this endpoint with GET, the last $proposalsToKeep proposals are
+// returned in ascending creation order/
+
 // This is a module of code provided by ACL.
 declare const acl: any;
 
