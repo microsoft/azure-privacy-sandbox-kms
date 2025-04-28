@@ -1,6 +1,6 @@
 import json
 from endpoints import proposalsGet
-from utils import apply_settings_policy
+from utils import apply_key_release_policy
 from cose.messages import CoseMessage
 
 
@@ -21,15 +21,15 @@ def test_proposals_multiple(setup_kms):
     assert len(proposals_json) == 1
 
     # Make a second proposal
-    apply_settings_policy()
+    apply_key_release_policy()
 
     # Check we recieve the expected proposal
     status_code, proposals_json = proposalsGet()
     assert status_code == 200
     assert len(proposals_json) == 2
-    settings_policy_cose = CoseMessage.decode(bytes.fromhex(proposals_json[1]))
-    settings_policy_json = json.loads(settings_policy_cose.payload)
-    assert settings_policy_json["actions"][0]["name"] == "set_settings_policy"
+    key_release_policy_cose = CoseMessage.decode(bytes.fromhex(proposals_json[1]))
+    key_release_policy_json = json.loads(key_release_policy_cose.payload)
+    assert key_release_policy_json["actions"][0]["name"] == "set_key_release_policy"
 
 
 if __name__ == "__main__":

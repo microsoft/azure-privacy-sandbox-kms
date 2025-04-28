@@ -223,18 +223,17 @@ export const getProposals = (
     let proposals: string[] = [];
 
     // Sort the proposals by created time
-    const createdTimeToProposalIdMap = new Map<number, ArrayBuffer>();
+    const createdTimeToProposalIdMap = new Map<ArrayBuffer, number>();
     proposalsPolicyMap.forEach((proposal, proposalId) => {
         createdTimeToProposalIdMap.set(
-            getCoseProtectedHeader(proposal)["ccf.gov.msg.created_at"],
-            proposalId
+            proposalId,
+            getCoseProtectedHeader(proposal)["ccf.gov.msg.created_at"]
         );
     });
-    const sortedCreatedTimes = Array.from(createdTimeToProposalIdMap.keys()).sort((a, b) => a - b);
+    const sortedProposals = Array.from(createdTimeToProposalIdMap.entries()).sort((a, b) => a[1] - b[1]);
 
     // Build an array of proposals
-    sortedCreatedTimes.forEach((createdTime) => {
-        const proposalId = createdTimeToProposalIdMap.get(createdTime)!;
+    sortedProposals.forEach(([proposalId, createdTime]) => {
         const proposal = proposalsPolicyMap.get(proposalId)!;
         const bytes = new Uint8Array(proposal);
         proposals.push(Array.from(bytes)
