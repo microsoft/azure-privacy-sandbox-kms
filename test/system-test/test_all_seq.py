@@ -1,8 +1,9 @@
 import json
 import os
 import pytest
+from cose.messages import CoseMessage
 from subprocess import CalledProcessError
-from endpoints import heartbeat, key, listpubkeys, pubkey, keyReleasePolicy, refresh, auth, settingsPolicy
+from endpoints import heartbeat, key, listpubkeys, pubkey, keyReleasePolicy, refresh, auth, settingsPolicy, proposalsGet
 from utils import get_test_attestation, get_test_public_wrapping_key, apply_kms_constitution, apply_key_release_policy, decrypted_wrapped_key, trust_jwt_issuer, remove_key_release_policy, apply_settings_policy, call_endpoint
 
 # These tests run on a single KMS instance in order to be cheaper regarding
@@ -77,9 +78,29 @@ def test_no_policy_no_keys_no_jwt_keyReleasePolicy(setup_kms_session):
     assert status_code == 200
 
 
+def test_no_policy_no_keys_no_jwt_proposals(setup_kms_session):
+    status_code, proposals_json = proposalsGet()
+    assert status_code == 200
+
+    assert len(proposals_json) == 1
+    jwt_validation_proposal_cose = CoseMessage.decode(bytes.fromhex(proposals_json[0]))
+    jwt_validation_proposal_json = json.loads(jwt_validation_proposal_cose.payload)
+    assert jwt_validation_proposal_json["actions"][0]["name"] == "set_jwt_validation_policy"
+
+
 def test_no_policy_no_keys_no_jwt_set_key_release_policy(setup_kms_session):
     apply_kms_constitution()
     apply_key_release_policy()
+
+
+def test_set_policy_no_keys_no_jwt_proposals(setup_kms_session):
+    status_code, proposals_json = proposalsGet()
+    assert status_code == 200
+
+    assert len(proposals_json) == 2
+    jwt_validation_proposal_cose = CoseMessage.decode(bytes.fromhex(proposals_json[1]))
+    jwt_validation_proposal_json = json.loads(jwt_validation_proposal_cose.payload)
+    assert jwt_validation_proposal_json["actions"][0]["name"] == "set_key_release_policy"
 
 
 def test_set_policy_no_keys_no_jwt_keyReleasePolicy(setup_kms_session):
@@ -551,4 +572,4 @@ def test_with_settings_settingsPolicy(setup_kms_session):
 
 if __name__ == "__main__":
     import pytest
-    pytest.main([__file__, '-s'])
+    pytest.main([__file__])

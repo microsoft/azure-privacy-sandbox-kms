@@ -4,9 +4,11 @@
 import * as ccfapp from "@microsoft/ccf-app";
 import { ServiceResult } from "../utils/ServiceResult";
 import { LogContext, Logger } from "../utils/Logger";
+import { getCoseProtectedHeader } from "../utils/cose";
 import { actions } from '../actions/actions';
 import { ServiceRequest } from "../utils/ServiceRequest";
 import { ccf } from "@microsoft/ccf-app/global";
+import { proposalsPolicyMap } from "../repositories/Maps";
 
 // This file serves to emulate a simplified version CCF's governance mechanism.
 // This allows governance type operations on CCF platforms which don't expose
@@ -15,8 +17,21 @@ import { ccf } from "@microsoft/ccf-app/global";
 // Currently all proposals will be automatically accepted, and regulation comes
 // from which identities can successfully call this endpoint.
 
+// Like the CCF Governance endpoint, raw COSE_Sign1 proposals are saved into an
+// application table for to allow auditing of who made certain changes.
+
+// This also means we need mechanisms to protect against those historical
+// proposals being replayed, while CCF takes the median of the last n proposal
+// timestamps, we are happy with a stricter and simpler check that new proposals
+// must be signed more recently than the last accepted proposal.
+
+// When calling this endpoint with GET, the last $proposalsToKeep proposals are
+// returned in ascending creation order/
+
 // This is a module of code provided by ACL.
 declare const acl: any;
+
+const proposalsToKeep = 5;
 
 function digest(jsonLike) {
     return Array.from(new Uint8Array(
@@ -70,7 +85,7 @@ function isAuthType(identity: ccfapp.AuthnIdentityCommon, auth_type: string): bo
     );
 }
 
-export const proposals = (
+export const postProposals = (
   request: ccfapp.Request<IProposalsRequest>,
 ): ServiceResult<string | IProposalResult[]> => {
 
@@ -135,7 +150,29 @@ export const proposals = (
         (request.caller as ccfapp.UserCOSESign1AuthnIdentity).cose.content
     );
 
-    // Extract settings policy from request
+    // Create a map from created time to proposal ID for historical proposals
+    const createdTimeToProposalIdMap = new Map<number, ArrayBuffer>();
+    proposalsPolicyMap.forEach((proposal, proposalId) => {
+        createdTimeToProposalIdMap.set(
+            getCoseProtectedHeader(proposal)["ccf.gov.msg.created_at"],
+            proposalId
+        );
+    });
+
+    // Ensure the proposal was created after the last accepted proposal
+    const currentProposalCreatedAt = getCoseProtectedHeader(request.body.arrayBuffer())["ccf.gov.msg.created_at"];
+    const lastAcceptedProposalCreatedAt = Math.max(...Array.from(createdTimeToProposalIdMap.keys()));
+    if (currentProposalCreatedAt < lastAcceptedProposalCreatedAt) {
+        const errorMessage = `Proposal created before (${currentProposalCreatedAt}) last accepted proposal (${lastAcceptedProposalCreatedAt})`;
+            Logger.error(errorMessage, logContext);
+            return ServiceResult.Failed<IProposalResult[]>(
+                { errorMessage: errorMessage },
+                400,
+                logContext,
+            );
+    }
+
+    // Extract the proposal from request
     let proposalActions: IProposalsAction[] = [];
     if (requestBody && requestBody["actions"]) {
         proposalActions = requestBody["actions"];
@@ -165,5 +202,47 @@ export const proposals = (
         ));
     }
 
+    // Save the proposal to the table
+    const proposalId = ccf.crypto.digest("SHA-256", request.body.arrayBuffer());
+    proposalsPolicyMap.set(
+        proposalId,
+        request.body.arrayBuffer()
+    );
+    createdTimeToProposalIdMap.set(currentProposalCreatedAt, proposalId);
+
+    // Keep the last N proposals
+    const sortedCreatedTimes = Array.from(createdTimeToProposalIdMap.keys()).sort((a, b) => a - b);
+    for (let i = 0; i < sortedCreatedTimes.length - proposalsToKeep; i++) {
+        proposalsPolicyMap.delete(createdTimeToProposalIdMap.get(sortedCreatedTimes[i])!);
+    }
+
     return ServiceResult.Succeeded<IProposalResult[]>(proposalResults, logContext);
+}
+
+export const getProposals = (
+    request: ccfapp.Request<IProposalsRequest>,
+  ): ServiceResult<string[]> => {
+    const logContext = new LogContext().appendScope("proposals");
+    let proposals: string[] = [];
+
+    // Sort the proposals by created time
+    const createdTimeToProposalIdMap = new Map<ArrayBuffer, number>();
+    proposalsPolicyMap.forEach((proposal, proposalId) => {
+        createdTimeToProposalIdMap.set(
+            proposalId,
+            getCoseProtectedHeader(proposal)["ccf.gov.msg.created_at"]
+        );
+    });
+    const sortedProposals = Array.from(createdTimeToProposalIdMap.entries()).sort((a, b) => a[1] - b[1]);
+
+    // Build an array of proposals
+    sortedProposals.forEach(([proposalId, createdTime]) => {
+        const proposal = proposalsPolicyMap.get(proposalId)!;
+        const bytes = new Uint8Array(proposal);
+        proposals.push(Array.from(bytes)
+            .map((byte) => byte.toString(16).padStart(2, "0"))
+            .join(""));
+    });
+
+    return ServiceResult.Succeeded(proposals, logContext)
 }

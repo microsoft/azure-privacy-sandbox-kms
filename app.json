@@ -3,7 +3,7 @@
     "/proposals": {
       "post": {
         "js_module": "endpoints/proposals.js",
-        "js_function": "proposals",
+        "js_function": "postProposals",
         "forwarding_required": "always",
         "redirection_strategy": "none",
         "authn_policies": ["user_cose_sign1"],
@@ -34,6 +34,30 @@
                     },
                     "required": ["ballot_count", "proposal_id", "proposer_id", "state", "votes"],
                     "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "js_module": "endpoints/proposals.js",
+        "js_function": "getProposals",
+        "forwarding_required": "sometimes",
+        "redirection_strategy": "none",
+        "authn_policies": [],
+        "mode": "readonly",
+        "openapi": {
+          "responses": {
+            "200": {
+              "description": "Get accepted proposals",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "properties": {
+                      "type": "object"
+                    }
                   }
                 }
               }

@@ -1,3 +1,4 @@
 ccf==6.0.1
 pytest==8.3.5
 pycryptodome==3.22.0
+cose==0.9.dev8
