@@ -27,11 +27,9 @@ def test_proposals_multiple(setup_kms):
     status_code, proposals_json = proposalsGet()
     assert status_code == 200
     assert len(proposals_json) == 2
-    key_release_policy_cose = CoseMessage.decode(bytes.fromhex(proposals_json[1]))
-    key_release_policy_json = json.loads(key_release_policy_cose.payload)
-    assert key_release_policy_json["actions"][0]["name"] == "set_key_release_policy"
-
-
+    settings_policy_cose = CoseMessage.decode(bytes.fromhex(proposals_json[1]))
+    settings_policy_json = json.loads(settings_policy_cose.payload)
+    assert settings_policy_json["actions"][0]["name"] == "set_settings_policy"
 
 
 if __name__ == "__main__":
