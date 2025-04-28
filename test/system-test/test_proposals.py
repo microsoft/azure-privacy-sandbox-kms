@@ -40,7 +40,7 @@ def test_proposals_caps_to_five(setup_kms):
 
     # Make a five more proposals, taking the total to six
     for i in range(5):
-        sleep(1) # Ensures the proposal timestamps are different
+        sleep(2) # Ensures the proposal timestamps are different
         apply_settings_policy({
             "service": {
                 "name": "test-kms",
