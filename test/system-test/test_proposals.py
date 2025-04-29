@@ -21,6 +21,9 @@ def test_proposals_multiple(setup_kms):
     assert status_code == 200
     assert len(proposals_json) == 1
 
+    # Sleep to ensure that the proposal timestamps are different so they're ordered correctly
+    sleep(2)
+
     # Make a second proposal
     apply_key_release_policy()
 
