@@ -198,7 +198,7 @@ export const postProposals = (
 
         proposalResults.push(new IProposalResult(
             digest(proposalAction.args),
-            digest(request.caller || {})
+            (request.caller! as ccfapp.UserCOSESign1AuthnIdentity).id
         ));
     }
 

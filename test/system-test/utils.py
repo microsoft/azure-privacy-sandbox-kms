@@ -47,8 +47,9 @@ def call_endpoint(command):
     )
 
 
-def apply_settings_policy(policy=None):
-    subprocess.run(
+def apply_settings_policy(policy=None, get_logs=False):
+    get_logs_arg = {"stdout": subprocess.PIPE} if get_logs else {}
+    res = subprocess.run(
         "./scripts/kms/settings_policy_set.sh",
         env={
             **os.environ,
@@ -56,25 +57,17 @@ def apply_settings_policy(policy=None):
         },
         cwd=REPO_ROOT,
         check=True,
-    )
-
-
-def apply_kms_constitution(resolve="auto_accept", get_logs=False, **kwargs):
-    get_logs_arg = {"stdout": subprocess.PIPE} if get_logs else {}
-    res = subprocess.run(
-        [
-            "./scripts/kms/constitution_set.sh",
-            "--resolve", f"./governance/constitution/resolve/{resolve}.js",
-            *[arg for k, v in kwargs.items() for arg in [f"--{k}", v]],
-        ],
-        cwd=REPO_ROOT,
-        check=True,
         **get_logs_arg,
     )
 
     # Parse out the returned json from the proposal
     if get_logs:
-        return json.loads("{" + res.stdout.decode().split("{", 1)[1])
+        return json.loads(
+            "{" + "}".join(
+                res.stdout.decode().split("{", 1)[1] # first open brace
+                .split("}")[:-1] # last close brace
+            ) + "}"
+        )
 
 
 def apply_key_release_policy():
@@ -197,6 +190,8 @@ def get_node_info(node_url):
         int(status_code),
         json.loads("".join(response).strip("\'") or "{}"),
     )
+
+
 def propose(proposal, get_logs=False):
     get_logs_arg = {"stdout": subprocess.PIPE} if get_logs else {}
     res = subprocess.run(

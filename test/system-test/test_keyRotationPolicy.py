@@ -4,7 +4,6 @@ import pytest
 import time
 from endpoints import key, refresh
 from utils import (
-    apply_kms_constitution,
     apply_settings_policy,
     apply_key_release_policy,
     apply_key_rotation_policy,
@@ -17,7 +16,6 @@ from utils import (
 
 # Test the key retrieval during the grace period with key rotation policy.
 def test_key_in_grace_period_with_rotation_policy(setup_kms):
-    apply_kms_constitution()
     policy = {
         "service": {
             "name": "custom-kms",
@@ -55,7 +53,6 @@ def test_key_in_grace_period_with_rotation_policy(setup_kms):
 
 # Test the key retrieval during the grace period without key rotation policy.
 def test_key_in_grace_period_without_rotation_policy(setup_kms):
-    apply_kms_constitution()
     apply_key_release_policy()
     refresh()
     while True:
@@ -83,7 +80,6 @@ def test_key_in_grace_period_without_rotation_policy(setup_kms):
 
 # Test the key retrieval during with custom key rotation policy.
 def test_key_in_grace_period_with_custom_rotation_policy(setup_kms):
-    apply_kms_constitution()
     apply_settings_policy()
     apply_key_release_policy()
     apply_key_rotation_policy()
