@@ -196,7 +196,7 @@
         "js_function": "unwrapKey",
         "forwarding_required": "sometimes",
         "redirection_strategy": "none",
-        "authn_policies": ["jwt", "member_cert", "user_cert"],
+        "authn_policies": [],
         "mode": "readonly",
         "openapi": {
           "requestBody": {
@@ -264,7 +264,7 @@
         "js_function": "key",
         "forwarding_required": "sometimes",
         "redirection_strategy": "none",
-        "authn_policies": ["jwt", "member_cert", "user_cert"],
+        "authn_policies": [],
         "mode": "readonly",
         "parameters": [
           {
