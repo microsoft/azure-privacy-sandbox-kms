@@ -22,7 +22,7 @@
     "pem-jwk": "2.0.0"
   },
   "devDependencies": {
-    "@jest/globals": "29.7.0",
+    "@jest/globals": "30.0.2",
     "@rollup/plugin-commonjs": "28.0.3",
     "@rollup/plugin-node-resolve": "16.0.1",
     "@rollup/plugin-typescript": "12.1.2",
