@@ -18,3 +18,12 @@ updates:
       prefix: "dependabot"
     open-pull-requests-limit: 10
     rebase-strategy: "auto"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    groups:
+      github-actions:
+        patterns: ["*"]
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
